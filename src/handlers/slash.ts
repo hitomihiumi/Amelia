@@ -13,8 +13,8 @@ module.exports = async (client: Client) => {
             const rest = new REST({ version: '10' }).setToken(client.token);
             try {
                 console.log('Started refreshing application (/) commands.'.yellow);
-                client.guilds.cache.forEach( (guild) => {
-                    let copyCMDS = changeDefaultPermission(commands, guild, client);;
+                client.guilds.cache.forEach(async (guild) => {
+                    let copyCMDS = await changeDefaultPermission(commands, guild, client);;
                     if (!client.user) return;
                     rest.put(Routes.applicationGuildCommands(client.user.id, guild.id), { body: [] }).then(() => {
                         if (!client.user) return;
@@ -45,16 +45,16 @@ module.exports = async (client: Client) => {
     }
 }
 
-function changeDefaultPermission(cmds: any[], djsguild: DJSGUILD, client: Client) {
+async function changeDefaultPermission(cmds: any[], djsguild: DJSGUILD, client: Client) {
     const guild = new Guild(client, djsguild);
-    const permissions = guild.get('permissions.commands');
+    const permissions = await guild.get('permissions.commands');
     let copyCMDS = cmds;
-    copyCMDS.forEach(async (cmd) => {
+    for (const cmd of copyCMDS) {
         if (permissions[cmd.name]) {
             if (permissions[cmd.name].permission) {
                 cmd.default_member_permissions = String(permissions[cmd.name].permission);
             }
         }
-    });
+    }
     return copyCMDS;
 }

@@ -2,12 +2,11 @@ import {Client, GatewayIntentBits, Partials, Collection, ColorResolvable} from '
 import 'dotenv/config'
 import '@hitomihiumi/colors.ts';
 import './global';
-import Enmap from 'enmap';
-import path from "path";
 import { fastEmbed, foldersCheck, reVar } from "./handlers/functions";
 import { FileWatcher } from "@hitomihiumi/filewatcher";
 import { commandLoader } from "./handlers/cmdLoaders";
 import { initializeI18n } from "./i18n/locales";
+import { prisma, DatabaseService } from "./database";
 
 foldersCheck();
 
@@ -46,11 +45,7 @@ client.holder = {
         aliases: new Collection(),
         cooldowns: new Collection()
     },
-    dbs: {
-        guilds: new Enmap({ name: 'guilds', dataDir: path.resolve(__dirname, "./../dbs/guilds") }),
-        users: new Enmap({ name: 'users', dataDir: path.resolve(__dirname, "./../dbs/users") }),
-        history: new Enmap({ name: 'history', dataDir: path.resolve(__dirname, "./../dbs/history") }),
-    },
+    db: prisma,
     components: {
         buttons: new Collection(),
         modals: new Collection(),
@@ -87,10 +82,15 @@ client.holder = {
     emojis: {}
 };
 
-["antiCrash", "events", "emojis", "commands", "components", "slash", "joinToCreate"].filter(Boolean)
-    .forEach((handler: any) => {
-    require(`./handlers/${handler}`)(client);
-});
+// Connect to database before loading handlers
+(async () => {
+    await DatabaseService.connect();
+
+    ["antiCrash", "events", "emojis", "commands", "components", "slash", "joinToCreate"].filter(Boolean)
+        .forEach((handler: any) => {
+            require(`./handlers/${handler}`)(client);
+        });
+})();
 
 const watcher = new FileWatcher()
     .setAllowedExtensions('.js', '.json');

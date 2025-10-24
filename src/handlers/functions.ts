@@ -184,8 +184,8 @@ export function permissionComponent(client: Client, interaction: any, lang: stri
     return true;
 }
 
-export function extendedPermissionCommand(guild: Guild, interaction: any, lang: string, cmd_name: string) {
-    let perm = guild.get(`permissions.commands.${cmd_name}`);
+export async function extendedPermissionCommand(guild: Guild, interaction: any, lang: string, cmd_name: string) {
+    let perm = await guild.get(`permissions.commands.${cmd_name}`);
 
     if (perm) {
         if (perm.roles.length || perm.permission) {

@@ -14,7 +14,7 @@ module.exports = {
         if (!interaction.member.voice) return;
         if (!interaction.member.voice.channel) return;
         let guild = new Guild(client, interaction.guild);
-        const lang = guild.get("settings.language");
+        const lang = await guild.get("settings.language");
 
         let member = interaction.values[0];
 
@@ -25,7 +25,7 @@ module.exports = {
             ephemeral: true
         });
 
-        let map = guild.get("temp.join_to_create.map");
+        let map = await guild.get("temp.join_to_create.map");
 
         await channel.permissionOverwrites.delete(interaction.user.id);
 

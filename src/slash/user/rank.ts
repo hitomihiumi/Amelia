@@ -32,9 +32,9 @@ module.exports = {
 
         const member = guild.getUser(user.id);
 
-        const levelData = member.get('level') as Level;
+        const levelData = await member.get('level') as Level;
 
-        const displayOptions = member.get('custom.rank') as RankCardDisplayOptions;
+        const displayOptions = await member.get('custom.rank') as RankCardDisplayOptions;
 
         const rank = new RankCard({
             avatar: user.displayAvatarURL({ size: 512, extension: "png" }),

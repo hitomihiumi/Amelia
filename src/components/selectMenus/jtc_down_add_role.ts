@@ -28,7 +28,7 @@ module.exports = {
         }
 
         await interaction.reply({
-            content: t(client, guild.get("settings.language"), 'functions.join_to_create.msg.add.role', roles.map(r => `<@&${r}>`).join(", ")),
+            content: t(client, await guild.get("settings.language"), 'functions.join_to_create.msg.add.role', roles.map(r => `<@&${r}>`).join(", ")),
             ephemeral: true
         })
     }

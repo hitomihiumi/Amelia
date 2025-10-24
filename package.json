@@ -4,15 +4,17 @@
     "@hitomihiumi/filewatcher": "^0.1.1",
     "@napi-rs/canvas": "^0.1.77",
     "@nmmty/lazycanvas": "^0.6.0-dev.1d5786",
+    "@prisma/client": "^6.18.0",
     "body-parser": "^1.20.3",
     "chokidar": "^4.0.3",
     "cors": "^2.8.5",
     "discord.js": "^14.21.0",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "enmap": "^5.9.10",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
-    "fuse.js": "^7.1.0"
+    "fuse.js": "^7.1.0",
+    "prisma": "^6.18.0"
   },
   "name": "kyoko",
   "version": "0.1.1",
@@ -27,7 +29,11 @@
   "scripts": {
     "test": "tsc && node --trace-warnings ./dist/bot.js",
     "start": "node ./dist/bot.js",
-    "build": "tsc --watch"
+    "build": "tsc --watch",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio"
   },
   "type": "commonjs",
   "author": "hitomihiumi",

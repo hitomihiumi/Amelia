@@ -1,0 +1,207 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Guild (Server) model
+model Guild {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Settings
+  prefix   String @default("k.")
+  language String @default("ru")
+
+  // Join to Create settings
+  jtcEnabled     Boolean @default(false)
+  jtcChannel     String?
+  jtcCategory    String?
+  jtcDefaultName String  @default("%{VAR}% channel")
+
+  // Counter settings
+  counterEnabled  Boolean @default(false)
+  counterCategory String?
+  counterChannels Json    @default("{}")
+
+  // Levels settings
+  levelsEnabled        Boolean  @default(false)
+  levelsIgnoreChannels String[] @default([])
+  levelsIgnoreRoles    String[] @default([])
+  levelsRoles          Json     @default("{}")
+  levelsMessageEnabled Boolean  @default(false)
+  levelsMessageChannel String?
+  levelsMessageContent Json     @default("{}")
+  levelsMessageDelete  Int      @default(15)
+
+  // Find Team settings
+  findTeamEnabled     Boolean @default(false)
+  findTeamChannel     String?
+  findTeamSendChannel String?
+  findTeamGames       Json    @default("[]")
+
+  // Custom Components
+  customModals  Json @default("[]")
+  customEmbeds  Json @default("[]")
+  customButtons Json @default("[]")
+
+  // Giveaways
+  giveaways Json @default("[]")
+
+  // Economy settings
+  currencyEmoji String?
+  currencyId    String?
+  shopRoles     Json    @default("[]")
+
+  // Economy income settings
+  workEnabled    Boolean @default(false)
+  workCooldown   Int     @default(1800)
+  workMin        Int     @default(100)
+  workMax        Int     @default(500)
+  timelyEnabled  Boolean @default(false)
+  timelyAmount   Int     @default(400)
+  dailyEnabled   Boolean @default(false)
+  dailyAmount    Int     @default(800)
+  weeklyEnabled  Boolean @default(false)
+  weeklyAmount   Int     @default(3000)
+  levelUpEnabled Boolean @default(false)
+  levelUpAmount  Int     @default(250)
+  bumpEnabled    Boolean @default(false)
+  bumpAmount     Int     @default(350)
+  robEnabled     Boolean @default(false)
+  robCooldown    Int     @default(3600)
+  robIncome      Json    @default("{\"min\":100,\"max\":500,\"type\":\"fixed\"}")
+  robPunishment  Json    @default("{\"min\":10,\"max\":50,\"type\":\"fixed\",\"fail_chance\":0.5}")
+
+  // Moderation settings
+  moderationRoles String[] @default([])
+
+  // Auto moderation - Invites
+  inviteEnabled          Boolean  @default(false)
+  inviteIgnoreChannels   String[] @default([])
+  inviteIgnoreRoles      String[] @default([])
+  inviteDeleteMessage    Boolean  @default(false)
+  inviteModerationImmune Boolean  @default(false)
+  invitePunishment       Json     @default("{\"type\":\"warn\",\"time\":0,\"reason\":\"Auto moderation\"}")
+
+  // Auto moderation - Links
+  linksEnabled          Boolean  @default(false)
+  linksIgnoreChannels   String[] @default([])
+  linksIgnoreRoles      String[] @default([])
+  linksIgnoreLinks      String[] @default([])
+  linksDeleteMessage    Boolean  @default(false)
+  linksModerationImmune Boolean  @default(false)
+  linksPunishment       Json     @default("{\"type\":\"warn\",\"time\":0,\"reason\":\"Auto moderation\"}")
+
+  // Permissions
+  commandPermissions Json @default("{}")
+
+  // Relationships
+  users       User[]
+  histories   History[]
+  jtcChannels JoinToCreateChannel[]
+
+  @@index([id])
+}
+
+// User model
+model User {
+  id        String   @id @default(cuid())
+  userId    String
+  guildId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Level system
+  xp           Int @default(0)
+  totalXp      Int @default(0)
+  level        Int @default(1)
+  voiceTime    Int @default(0)
+  messageCount Int @default(0)
+
+  // Economy
+  wallet Int @default(0)
+  bank   Int @default(0)
+
+  customRoles Json @default("[]")
+  customItems Json @default("[]")
+
+  // Timeouts
+  workTimeout   DateTime?
+  timelyTimeout DateTime?
+  dailyTimeout  DateTime?
+  weeklyTimeout DateTime?
+  robTimeout    DateTime?
+
+  // Custom card settings
+  balanceNumber String
+  balanceMode   Boolean @default(false)
+  balanceSolid  Json    @default("{\"bg_color\":\"#000000\",\"text_color\":\"#ffffff\",\"text\":\"Kyoko\"}")
+  balanceUrl    String?
+
+  profileBio   String  @default("")
+  profileMode  Boolean @default(false)
+  profileSolid Json    @default("{\"bg_color\":\"#000000\",\"text_color\":\"#ffffff\",\"text\":\"Kyoko\"}")
+  profileUrl   String?
+  profileColor String?
+
+  rankMode  Boolean @default(false)
+  rankSolid Json    @default("{\"bg_color\":\"#000000\",\"text_color\":\"#ffffff\",\"text\":\"Kyoko\"}")
+  rankUrl   String?
+  rankColor String?
+
+  customBadges Json @default("[]")
+
+  // Temp data
+  tempGames Json @default("{}")
+
+  // Presets
+  jtcPresets Json @default("[]")
+
+  // Relationships
+  guild     Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  histories History[]
+
+  @@unique([userId, guildId])
+  @@index([userId, guildId])
+}
+
+// History model for tracking actions
+model History {
+  id        String   @id @default(cuid())
+  guildId   String
+  userId    String?
+  createdAt DateTime @default(now())
+
+  type   String
+  action String
+  data   Json
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([guildId])
+  @@index([userId])
+  @@index([type])
+}
+
+// Join to Create temporary channels
+model JoinToCreateChannel {
+  id        String   @id @default(cuid())
+  channelId String   @unique
+  guildId   String
+  ownerId   String
+  createdAt DateTime @default(now())
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([channelId])
+  @@index([guildId])
+}

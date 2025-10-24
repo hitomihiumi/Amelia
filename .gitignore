@@ -9,3 +9,5 @@ Kyoko.iml
 .env
 .tsbuildinfo
 /dbs/
+
+/src/generated/prisma

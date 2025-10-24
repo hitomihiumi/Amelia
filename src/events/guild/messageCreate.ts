@@ -13,7 +13,9 @@ module.exports = async (client: Client, message: Message) => {
 
     const guild = new Guild(client, message.guild);
 
-    const prefix = guild.get("settings.prefix");
+    const lang = await guild.get("settings.language");
+
+    const prefix = await guild.get("settings.prefix");
     const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`);
     if (!prefixRegex.test(message.content)) return;
 
@@ -24,7 +26,7 @@ module.exports = async (client: Client, message: Message) => {
 
     if (!commandName || commandName.length === 0) {
         if (matchedPrefix.includes(client.user.id)) {
-            return message.reply(t(client, guild.get(`settings.language`), 'events.message_create.prefix', prefix));
+            return message.reply(t(client, lang, 'events.message_create.prefix', prefix));
         }
     }
 
@@ -34,7 +36,7 @@ module.exports = async (client: Client, message: Message) => {
     if (command) {
         if (onCoolDown(message, command, client)) {
             return message.reply({
-                embeds: [client.holder.embed.error(guild.get(`settings.language`), t(client, guild.get(`settings.language`), 'events.message_create.cooldown', onCoolDown(message, command, client), command.name))]
+                embeds: [client.holder.embed.error(lang, t(client, lang, 'events.message_create.cooldown', onCoolDown(message, command, client), command.name))]
             });
         }
         if (command.allowedUsers.length > 0 && !command.allowedUsers.includes(message.author.id)) {

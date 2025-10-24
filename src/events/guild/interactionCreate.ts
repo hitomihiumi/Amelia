@@ -6,7 +6,7 @@ import { t } from "../../i18n/helpers";
 
 module.exports = async (client: Client, interaction: any) => {
     let guild = interaction.guild ? new Guild(client, interaction.guild) : undefined;
-    let lang = guild ? guild.get(`settings.language`) : 'en';
+    let lang = guild ? await guild.get(`settings.language`) : 'en';
     if (interaction.isCommand()) {
         guild = guild as Guild;
         if (interaction.acknowledged) {

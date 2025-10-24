@@ -1,129 +1,82 @@
-import {JTCPreset, UserSchema} from '../types/helpers';
+import { JTCPreset, UserSchema } from '../types/helpers';
 import { Client, Guild, User as DiscordUser } from "discord.js";
-import { History } from "./History";
+import { DBHistory } from "../database/DBHistory";
+import { DBUser } from "../database/DBUser";
 
+/**
+ * User helper class - wrapper around DBUser with backward compatibility
+ *
+ * WARNING: This class provides async methods. Make sure to use await when calling get/set/etc.
+ * The old synchronous API is deprecated.
+ */
 export class User {
     public user: DiscordUser;
     public guild: Guild;
     public client: Client;
-    public history: History;
+    public history: DBHistory;
+    private db: DBUser;
 
     constructor(client: Client, user: DiscordUser, guild: Guild) {
         this.client = client;
         this.user = user;
         this.guild = guild;
-        this.history = new History(client, guild);
-
-        if (this.user) {
-            this.client.holder.dbs.users.ensure(this.user.id, {
-                user_id: this.user.id,
-                guild_id: this.guild.id,
-                level: {
-                    xp: 0,
-                    total_xp: 0,
-                    level: 1,
-                    voice_time: 0,
-                    message_count: 0,
-                },
-                economy: {
-                    balance: {
-                        wallet: 0,
-                        bank: 0,
-                    },
-                    inventory: {
-                        custom: {
-                            roles: [],
-                            items: [],
-                        }
-                    },
-                    timeout: {
-                        work: 0,
-                        timely: 0,
-                        daily: 0,
-                        weekly: 0,
-                        rob: 0,
-                    }
-                },
-                custom: {
-                    balance: {
-                        number: `${this.guild.id.slice(0, 5)} ${this.user.id.slice(0, 5)} ${Math.floor(Math.random() * 1000)} ${Math.floor(Math.random() * 1000)}`,
-                        mode: false,
-                        solid: {
-                            bg_color: "#000000",
-                            text_color: "#ffffff",
-                            text: "Kyoko",
-                        },
-                        url: null,
-                    },
-                    profile: {
-                        bio: "",
-                        mode: false,
-                        solid: {
-                            bg_color: "#000000",
-                            text_color: "#ffffff",
-                            text: "Kyoko",
-                        },
-                        url: null,
-                        color: null
-                    },
-                    rank: {
-                        mode: false,
-                        solid: {
-                            bg_color: "#000000",
-                            text_color: "#ffffff",
-                            text: "Kyoko",
-                        },
-                        url: null,
-                        color: null
-                    },
-                    badges: []
-                },
-                temp: {
-                    games: {
-                        tiles: null
-                    }
-                },
-                presets: {
-                    jtc: []
-                }
-            } as UserSchema);
-        }
+        this.db = new DBUser(client, user, guild);
+        this.history = this.db.history;
     }
 
-    public get(path: string): any {
-        let data = this.client.holder.dbs.users.get(this.user.id) as UserSchema;
-
-        return path.split(".").reduce((o, i) => {
-            // @ts-ignore
-            return o[i];
-        }, data);
+    /**
+     * Get value by path (ASYNC - must use await)
+     */
+    public async get(path: string): Promise<any> {
+        return await this.db.get(path as any);
     }
 
-    public set(path: string, value: any) {
-        return this.client.holder.dbs.users.set(this.user.id, value, `${path}`);
+    /**
+     * Set value by path (ASYNC - must use await)
+     */
+    public async set(path: string, value: any): Promise<void> {
+        return await this.db.set(path as any, value);
     }
 
-    public add(path: string, value: any) {
-        return this.client.holder.dbs.users.math(this.user.id, "add", value, `${path}`);
+    /**
+     * Add to numeric value (ASYNC - must use await)
+     */
+    public async add(path: string, value: any): Promise<void> {
+        return await this.db.add(path, value);
     }
 
-    public sub(path: string, value: any) {
-        return this.client.holder.dbs.users.math(this.user.id, "sub", value, `${path}`);
+    /**
+     * Subtract from numeric value (ASYNC - must use await)
+     */
+    public async sub(path: string, value: any): Promise<void> {
+        return await this.db.sub(path, value);
     }
 
-    public push(path: string, value: any) {
-        return this.client.holder.dbs.users.push(this.user.id, value, `${path}`);
+    /**
+     * Push to array (ASYNC - must use await)
+     */
+    public async push(path: string, value: any): Promise<void> {
+        return await this.db.push(path, value);
     }
 
-    public delete(path: string) {
-        return this.client.holder.dbs.users.delete(this.user.id, `${path}`);
+    /**
+     * Delete field (ASYNC - must use await)
+     */
+    public async delete(path: string): Promise<void> {
+        return await this.db.delete(path);
     }
 
-    public has(path: string) {
-        return this.client.holder.dbs.users.has(this.user.id, `${path}`);
+    /**
+     * Check if path exists (ASYNC - must use await)
+     */
+    public async has(path: string): Promise<boolean> {
+        return await this.db.has(path);
     }
 
-    public all(): UserSchema {
-        return this.client.holder.dbs.users.get(this.user.id);
+    /**
+     * Get all user data (ASYNC - must use await)
+     */
+    public async all(): Promise<any> {
+        return await this.db.all();
     }
 }

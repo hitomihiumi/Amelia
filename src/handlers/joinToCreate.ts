@@ -19,10 +19,10 @@ module.exports = async (client: Client) => {
     client.on("voiceStateUpdate", async (oldState, newState) => {
         if (!newState.guild) return;
         let guild = new Guild(client, newState.guild);
-        let map = guild.get("temp.join_to_create.map");
+        let map = await guild.get("temp.join_to_create.map");
         let oldID = oldState.channelId || 'undefined';
         let newID = newState.channelId || 'undefined';
-        if (newID === guild.get("utils.join_to_create.channel")) {
+        if (newID === await guild.get("utils.join_to_create.channel")) {
             if (oldID) {
                 if (!newState.member) return;
                 if (map.has(oldID) && map.get(oldID).owner === newState.member.id) {
@@ -34,30 +34,30 @@ module.exports = async (client: Client) => {
         else if (oldID !== newID) {
             if (!oldID) return;
             if (!oldState.member) return;
-            if (map.has(oldID)) deleteChannel(guild, oldID);
+            if (map.has(oldID)) await deleteChannel(guild, oldID);
         }
     });
 };
 
-function deleteChannel(guild: Guild, channelId: string) {
-    let map = guild.get("temp.join_to_create.map");
+async function deleteChannel(guild: Guild, channelId: string) {
+    let map = await guild.get("temp.join_to_create.map");
     let channel = guild.guild.channels.cache.get(map.get(channelId).channel) as BaseGuildVoiceChannel;
     if (!channel) return;
     if (channel.members.size === 0) {
-        channel.delete();
+        await channel.delete();
         map.delete(channelId);
-        guild.set("temp.join_to_create.map", map);
+        await guild.set("temp.join_to_create.map", map);
     }
 }
 
 async function createChannel(client: Client, guild: Guild, newState: VoiceState) {
     if (!newState.member) return;
-    const lang = guild.get("settings.language");
-    let map = guild.get("temp.join_to_create.map");
+    const lang = await guild.get("settings.language");
+    let map = await guild.get("temp.join_to_create.map");
     let channel = await newState.guild.channels.create({
         name: client.holder.utils.reVar(guild.get("utils.join_to_create.default_name"), newState.member.displayName),
         type: ChannelType.GuildVoice,
-        parent: guild.get("utils.join_to_create.category"),
+        parent: await guild.get("utils.join_to_create.category"),
         permissionOverwrites: [
             {
                 id: newState.member.id,
@@ -70,7 +70,7 @@ async function createChannel(client: Client, guild: Guild, newState: VoiceState)
 
     const user = new User(client, newState.member.user, guild.guild);
 
-    const presets = user.get("presets.jtc") as JTCPreset[];
+    const presets = await user.get("presets.jtc") as JTCPreset[];
 
     const select = new StringSelectMenuBuilder()
         .setCustomId("I_jtc:preset")
@@ -183,5 +183,5 @@ async function createChannel(client: Client, guild: Guild, newState: VoiceState)
         owner: newState.member.id
     });
 
-    guild.set("temp.join_to_create.map", map);
+    await guild.set("temp.join_to_create.map", map);
 }

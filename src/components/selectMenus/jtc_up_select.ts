@@ -24,9 +24,9 @@ module.exports = {
         if (!interaction.member.voice) return;
         if (!interaction.member.voice.channel) return;
         let guild = new Guild(client, interaction.guild);
-        const lang = guild.get("settings.language");
+        const lang = await guild.get("settings.language");
 
-        let map = guild.get("temp.join_to_create.map");
+        let map = await guild.get("temp.join_to_create.map");
 
         if (map.has(interaction.member.voice.channelId) && map.get(interaction.member.voice.channelId).owner === interaction.user.id) {
             let modal = new ModalBuilder()

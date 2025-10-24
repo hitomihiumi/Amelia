@@ -25,7 +25,7 @@ module.exports = {
         }
 
         await interaction.reply({
-            content: t(client, guild.get("settings.language"), 'functions.join_to_create.msg.remove.user', members.map(m => `<@${m}>`).join(", ")),
+            content: t(client, await guild.get("settings.language"), 'functions.join_to_create.msg.remove.user', members.map(m => `<@${m}>`).join(", ")),
             ephemeral: true
         })
      }

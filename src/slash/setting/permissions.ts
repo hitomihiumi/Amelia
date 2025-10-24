@@ -51,7 +51,7 @@ module.exports = {
         if (!interaction.guild) return;
         let guild = new Guild(client, interaction.guild);
 
-        const lang = guild.get(`settings.language`) as string;
+        const lang = await guild.get(`settings.language`) as string;
         let page = 0;
         let permission = {} as CommandPermission;
         let temp = {} as { id: string, type: "deny" | "allow" }
@@ -73,7 +73,7 @@ module.exports = {
             )
         let rolesSelect = permissionRoles(client, guild, lang, permission);
         let permissionsSelect = permissionsList(client, lang, permission);
-        let commandsSelect = commandsList(client, guild, lang, page);
+        let commandsSelect = await commandsList(client, guild, lang, page);
         let pageControl = new ActionRowBuilder<MessageActionRowComponentBuilder>()
             .setComponents(
                 new ButtonBuilder()
@@ -102,7 +102,7 @@ module.exports = {
                     page--;
                     if (page < 0) page = 0;
 
-                    commandsSelect = commandsList(client, guild, lang, page);
+                    commandsSelect = await commandsList(client, guild, lang, page);
                     // @ts-ignore
                     pageControl.components[1].setLabel(`${page + 1}/${Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)}`);
 
@@ -111,7 +111,7 @@ module.exports = {
                     page++;
                     if (page > Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)) page = Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25) - 1;
 
-                    commandsSelect = commandsList(client, guild, lang, page);
+                    commandsSelect = await commandsList(client, guild, lang, page);
                     // @ts-ignore
                     pageControl.components[1].setLabel(`${page + 1}/${Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)}`);
 
@@ -139,7 +139,7 @@ module.exports = {
 
                     page = jump < 0 ? 0 : (jump > Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25) ? Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25) : jump);
 
-                    commandsSelect = commandsList(client, guild, lang, page);
+                    commandsSelect = await commandsList(client, guild, lang, page);
                     // @ts-ignore
                     pageControl.components[1].setLabel(`${page + 1}/${Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)}`);
 
@@ -151,7 +151,7 @@ module.exports = {
                             .setDescription(t(client, lang, 'commands.permissions.embeds.base.description'))
                             .setColor(client.holder.colors.default)
 
-                        commandsSelect = commandsList(client, guild, lang, page);
+                        commandsSelect = await commandsList(client, guild, lang, page);
 
                         await i.update({ components: [pageControl, commandsSelect], embeds: [embed] });
                     } else if (back === 'command') {
@@ -268,7 +268,7 @@ module.exports = {
 
                     command = client.holder.cmds.slashCommands.get(i.values[0]) as AnySlash;
 
-                    permission = (guild.get(`permissions.commands.${command.name}`) || { name: command.name, roles: [], permission: command.permissions?.user }) as CommandPermission;
+                    permission = (await guild.get(`permissions.commands.${command.name}`) || { name: command.name, roles: [], permission: command.permissions?.user }) as CommandPermission;
 
                     permissionsSelect = permissionsList(client, lang, permission);
                     rolesSelect = permissionRoles(client, guild, lang, permission);
@@ -386,15 +386,15 @@ module.exports = {
     }
 } as SlashCommand;
 
-function commandsList(client: Client, guild: Guild, lang: string, page: number) {
+async function commandsList(client: Client, guild: Guild, lang: string, page: number) {
     let commands = client.holder.cmds.slashCommands.toJSON().slice(page * 10, page * 10 + 25);
     let commandsSelect = new StringSelectMenuBuilder()
         .setCustomId("NI_permissions:commands")
         .setPlaceholder(t(client, lang, 'commands.permissions.select_menus.commands.placeholder'))
         .setMaxValues(1)
 
-    commands.forEach((cmd) => {
-        let perm = guild.get(`permissions.commands.${cmd.name}`) as CommandPermission | undefined;
+    commands.forEach(async (cmd) => {
+        let perm = await guild.get(`permissions.commands.${cmd.name}`) as CommandPermission | undefined;
         commandsSelect.addOptions(
             new StringSelectMenuOptionBuilder()
                 .setLabel(cmd.name)

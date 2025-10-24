@@ -38,7 +38,7 @@ module.exports = {
         if (!interaction.guild) return;
         let guild = new Guild(client, interaction.guild);
 
-        let lang = guild.get(`settings.language`) as string;
+        let lang = await guild.get(`settings.language`) as string;
         let page = 0;
         let _schema = schema();
         _schema.id = generateID(guild.guild.id, 'modal');
@@ -71,7 +71,7 @@ module.exports = {
                     )
             )
 
-        let searchrow = modalList(client, lang, guild);
+        let searchrow = await modalList(client, lang, guild);
 
         let editrow = [
             new ActionRowBuilder<MessageActionRowComponentBuilder>()
@@ -176,7 +176,7 @@ module.exports = {
                         _back = i.values[0];
                         break;
                     case 'NI_modal:select':
-                        _schema = schema(guild.get('utils.components.modals').find((m: ModalCustom) => m.id === i.values[0].split(':')[2]));
+                        _schema = schema((await guild.get('utils.components.modals')).find((m: ModalCustom) => m.id === i.values[0].split(':')[2]));
                         embed.setTitle(t(client, lang, 'commands.modal.embeds.edit.title'))
                             .setDescription(t(client, lang, 'commands.modal.embeds.edit.description'))
                             .addFields({
@@ -227,22 +227,22 @@ module.exports = {
             } else if (i instanceof ButtonInteraction) {
                 if (i.customId === 'NI_modal:page:prev') {
                     page--;
-                    if (page > Math.ceil(guild.get('utils.components.modals').length / 25)) page = Math.ceil(guild.get('utils.components.modals').length / 25) - 1;
+                    if (page > Math.ceil((await guild.get('utils.components.modals')).length / 25)) page = Math.ceil((await guild.get('utils.components.modals')).length / 25) - 1;
 
-                    searchrow = modalList(client, lang, guild, page);
+                    searchrow = await modalList(client, lang, guild, page);
                     // @ts-ignore
                     searchrow[1].components[1].setLabel(`${page + 1}/${Math.ceil(guild.get('utils.components.modals').length / 25)}`);
 
-                    msg.edit({embeds: [embed], components: [searchrow[0], searchrow[1]]});
+                    msg.edit({embeds: [embed], components: searchrow});
                 } else if (i.customId === 'NI_modal:page:next') {
                     page++;
-                    if (page > Math.ceil(guild.get('utils.components.modals').length / 25)) page = Math.ceil(guild.get('utils.components.modals').length / 25) - 1;
+                    if (page > Math.ceil((await guild.get('utils.components.modals')).length / 25)) page = Math.ceil((await guild.get('utils.components.modals')).length / 25) - 1;
 
-                    searchrow = modalList(client, lang, guild, page);
+                    searchrow = await modalList(client, lang, guild, page);
                     // @ts-ignore
                     searchrow[1].components[1].setLabel(`${page + 1}/${Math.ceil(guild.get('utils.components.modals').length / 25) || 1}`);
 
-                    msg.edit({embeds: [embed], components: [searchrow[0], searchrow[1]]});
+                    msg.edit({embeds: [embed], components: searchrow});
                 } else if (i.customId === 'NI_modal:page:jump') {
                     let modal = new ModalBuilder()
                         .setTitle(t(client, lang, 'commands.modal.modals.jump.title'))
@@ -253,7 +253,7 @@ module.exports = {
                                     new TextInputBuilder()
                                         .setCustomId("NI_modal:text:jump")
                                         .setLabel(t(client, lang, 'commands.modal.modals.jump.label'))
-                                        .setPlaceholder(`1-${Math.ceil(guild.get('utils.components.modals').length / 25) || 1}`)
+                                        .setPlaceholder(`1-${Math.ceil((await guild.get('utils.components.modals')).length / 25) || 1}`)
                                         .setStyle(TextInputStyle.Short)
                                 )
                         )
@@ -267,9 +267,9 @@ module.exports = {
 
                     let jump = parseInt(submit.fields.getTextInputValue("NI_modal:text:jump")) - 1;
 
-                    page = jump < 0 ? 0 : (jump > Math.ceil(guild.get('utils.components.modals').length / 25) ? Math.ceil(guild.get('utils.components.modals').length / 25) : jump);
+                    page = jump < 0 ? 0 : (jump > Math.ceil((await guild.get('utils.components.modals')).length / 25) ? Math.ceil((await guild.get('utils.components.modals')).length / 25) : jump);
 
-                    searchrow = modalList(client, lang, guild, page);
+                    searchrow = await modalList(client, lang, guild, page);
                     // @ts-ignore
                     searchrow[1].components[1].setLabel(`${page + 1}/${Math.ceil(guild.get('utils.components.modals').length / 25) || 1}`);
 
@@ -300,7 +300,7 @@ module.exports = {
 
                     page = 0;
 
-                    searchrow = modalList(client, lang, guild, page, _search);
+                    searchrow = await modalList(client, lang, guild, page, _search);
 
                     _back = i.customId;
 
@@ -358,7 +358,7 @@ module.exports = {
                 } else if (i.customId === 'NI_modal:edit:preview') {
                     await i.showModal(new customUtil.CustomModal(_schema).getModal());
                 } else if (i.customId === 'NI_modal:edit:save') {
-                    let modals = guild.get('utils.components.modals') as Array<ModalCustom>;
+                    let modals = await guild.get('utils.components.modals') as Array<ModalCustom>;
 
                     if (modals.findIndex((m) => m.id === _schema.id) === -1) {
                         modals.push(_schema);
@@ -376,7 +376,7 @@ module.exports = {
                         .setDescription(t(client, lang, 'commands.modal.embeds.base.description'))
                     msg.edit({embeds: [embed], components: [base]});
                 } else if (i.customId === 'NI_modal:edit:delete') {
-                    let modals = guild.get('utils.components.modals') as Array<ModalCustom>;
+                    let modals = await guild.get('utils.components.modals') as Array<ModalCustom>;
 
                     modals = modals.filter((m) => m.id !== _schema.id);
 
@@ -408,7 +408,7 @@ module.exports = {
                         case 'NI_modal:page:search':
                             _back = '';
 
-                            searchrow = modalList(client, lang, guild, page, _search);
+                            searchrow = await modalList(client, lang, guild, page, _search);
 
                             // @ts-ignore
                             searchrow[1].components[1].setLabel(`${page + 1}/${Math.ceil(guild.get('utils.components.modals').length / 25) || 1}`);
@@ -429,7 +429,7 @@ module.exports = {
                         case 'NI_modal:select':
                             _back = '';
 
-                            searchrow = modalList(client, lang, guild, page);
+                            searchrow = await modalList(client, lang, guild, page);
 
                             // @ts-ignore
                             searchrow[1].components[1].setLabel(`${page + 1}/${Math.ceil(guild.get('utils.components.modals').length / 25) || 1}`);
@@ -638,8 +638,8 @@ module.exports = {
     }
 } as SlashCommand;
 
-function modalList(client: Client, lang: string, guild: Guild, page: number = 0, search?: string) {
-   let arr = guild.get('utils.components.modals') as Array<ModalCustom>;
+async function modalList(client: Client, lang: string, guild: Guild, page: number = 0, search?: string) {
+   let arr = await guild.get('utils.components.modals') as Array<ModalCustom>;
 
    if (search) {
          let fuseSearch = new fuse(arr, {
@@ -685,7 +685,7 @@ function modalList(client: Client, lang: string, guild: Guild, page: number = 0,
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
                     .setCustomId("NI_modal:page:jump")
-                    .setLabel(`${page + 1}/${Math.ceil(guild.get('utils.components.modals').length / 25) || 1}`)
+                    .setLabel(`${page + 1}/${Math.ceil((await guild.get('utils.components.modals')).length / 25) || 1}`)
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
                     .setCustomId("NI_modal:page:search")

@@ -1,8 +1,7 @@
 import { Collection, ColorResolvable } from "discord.js";
-import { Command, Manifest, SlashCommand } from "./types/helpers/Command";
-import Enmap from "enmap";
-import { Autocomplete, Button, Modal, SelectMenu } from "./types/helpers/Components";
+import { Command, Manifest, SlashComman, Autocomplete, Button, Modal, SelectMenu } from "./types/helpers";
 import { I18nManager } from "./i18n/I18n";
+import { PrismaClient } from "@prisma/client";
 
 declare module "discord.js" {
     export interface Client {
@@ -20,11 +19,7 @@ export interface Holder {
         aliases: Collection<string, string>;
         cooldowns: Collection<string, any>;
     };
-    dbs: {
-        guilds: Enmap;
-        users: Enmap;
-        history: Enmap;
-    };
+    db: PrismaClient;
     components: {
         buttons: Collection<any, Button>
         modals: Collection<any, Modal>
@@ -51,6 +46,3 @@ export interface Holder {
         [key: string]: string;
     }
 }
-
-
-

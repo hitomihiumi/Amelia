@@ -1,214 +1,95 @@
 import { GuildSchema } from "../types/helpers";
 import { Client, Guild as DiscordGuild, User as DiscordUser } from "discord.js";
-import { History } from "./History";
-import { User } from "./User";
+import { DBHistory } from "../database/DBHistory";
+import { DBUser } from "../database/DBUser";
+import { DBGuild } from "../database/DBGuild";
 
+/**
+ * Guild helper class - wrapper around DBGuild with backward compatibility
+ *
+ * WARNING: This class provides async methods. Make sure to use await when calling get/set/etc.
+ * The old synchronous API is deprecated.
+ */
 export class Guild {
     public client: Client;
     public guild: DiscordGuild;
-    public history: History;
+    public history: DBHistory;
+    private db: DBGuild;
 
     constructor(client: Client, guild: DiscordGuild) {
         this.client = client;
         this.guild = guild;
-        this.history = new History(client, guild);
-
-        if (this.guild) {
-            this.client.holder.dbs.guilds.ensure(this.guild.id, {
-                id: this.guild.id,
-                settings: {
-                    prefix: "k.",
-                    language: "ru",
-                },
-                utils: {
-                    join_to_create: {
-                        enabled: false,
-                        channel: null,
-                        category: null,
-                        default_name: "%{VAR}% channel",
-                    },
-                    counter: {
-                        enabled: false,
-                        category: null,
-                        channel: {},
-                    },
-                    levels: {
-                        enabled: false,
-                        ignore_channels: [],
-                        ignore_roles: [],
-                        level_roles: {},
-                        message: {
-                            enabled: false,
-                            channel: null,
-                            content: {
-                                text: null,
-                                embed: {
-                                    title: null,
-                                    description: null,
-                                    color: null,
-                                    thumbnail: null,
-                                    footer: null,
-                                },
-                            },
-                            delete: 15,
-                        },
-                    },
-                    find_team: {
-                        enabled: false,
-                        channel: null,
-                        send_channel: null,
-                        games: []
-                    },
-                    components: {
-                        modals: [],
-                        embed: [],
-                        buttons: []
-                    },
-                    giveaways: [],
-                },
-                economy: {
-                    currency: {
-                        emoji: null,
-                        id: null,
-                    },
-                    shop: {
-                        roles: [],
-                    },
-                    income: {
-                        work: {
-                            enabled: false,
-                            cooldown: 30 * 60,
-                            min: 100,
-                            max: 500,
-                        },
-                        timely: {
-                            enabled: false,
-                            amount: 400,
-                        },
-                        daily: {
-                            enabled: false,
-                            amount: 800,
-                        },
-                        weekly: {
-                            enabled: false,
-                            amount: 3000,
-                        },
-                        level_up: {
-                            enabled: false,
-                            amount: 250,
-                        },
-                        bump: {
-                            enabled: false,
-                            amount: 350,
-                        },
-                        rob: {
-                            enabled: false,
-                            cooldown: 60 * 60,
-                            income: {
-                                min: 100,
-                                max: 500,
-                                type: "fixed",
-                            },
-                            punishment: {
-                                min: 10,
-                                max: 50,
-                                type: "fixed",
-                                fail_chance: 0.5,
-                            },
-                        },
-                    },
-                },
-                moderation: {
-                    moderation_roles: [],
-                    auto_moderation: {
-                        invite: {
-                            enabled: false,
-                            ignore_channels: [],
-                            ignore_roles: [],
-                            delete_message: false,
-                            moderation_immune: false,
-                            punishment: {
-                                type: "warn",
-                                time: 0,
-                                reason: "Auto moderation",
-                            },
-                        },
-                        links: {
-                            enabled: false,
-                            ignore_channels: [],
-                            ignore_roles: [],
-                            ignore_links: [],
-                            delete_message: false,
-                            moderation_immune: false,
-                            punishment: {
-                                type: "warn",
-                                time: 0,
-                                reason: "Auto moderation",
-                            },
-                        },
-                    },
-                },
-                permissions: {
-                    commands: {},
-                },
-                temp: {
-                    join_to_create: {
-                        map: new Map(),
-                    }
-                }
-            } as GuildSchema);
-        }
+        this.db = new DBGuild(client, guild);
+        this.history = this.db.history;
     }
 
-    public get(path: string): any {
-        let data = this.client.holder.dbs.guilds.get(this.guild.id) as GuildSchema;
-
-        if (path === '') return data;
-
-        return path.split(".").reduce((o, i) => {
-            // @ts-ignore
-            return o[i];
-        }, data);
+    /**
+     * Get value by path (ASYNC - must use await)
+     */
+    public async get(path: string): Promise<any> {
+        return await this.db.get(path as any);
     }
 
-    public set(path: string, value: any) {
-
-        if (path === '') {
-            return this.client.holder.dbs.guilds.set(this.guild.id, value);
-        }
-
-        return this.client.holder.dbs.guilds.set(this.guild.id, value, `${path}`);
+    /**
+     * Set value by path (ASYNC - must use await)
+     */
+    public async set(path: string, value: any): Promise<void> {
+        return await this.db.set(path as any, value);
     }
 
-    public add(path: string, value: any) {
-        return this.client.holder.dbs.guilds.math(this.guild.id, "add", value, `${path}`);
+    /**
+     * Add to numeric value (ASYNC - must use await)
+     */
+    public async add(path: string, value: any): Promise<void> {
+        return await this.db.add(path, value);
     }
 
-    public sub(path: string, value: any) {
-        return this.client.holder.dbs.guilds.math(this.guild.id, "sub", value, `${path}`);
+    /**
+     * Subtract from numeric value (ASYNC - must use await)
+     */
+    public async sub(path: string, value: any): Promise<void> {
+        return await this.db.sub(path, value);
     }
 
-    public push(path: string, value: any) {
-        return this.client.holder.dbs.guilds.push(this.guild.id, value, `${path}`);
+    /**
+     * Push to array (ASYNC - must use await)
+     */
+    public async push(path: string, value: any): Promise<void> {
+        return await this.db.push(path, value);
     }
 
-    public delete(path: string) {
-        return this.client.holder.dbs.guilds.delete(this.guild.id, `${path}`);
+    /**
+     * Delete field (ASYNC - must use await)
+     */
+    public async delete(path: string): Promise<void> {
+        return await this.db.delete(path);
     }
 
-    public has(path: string) {
-        return this.client.holder.dbs.guilds.has(this.guild.id, `${path}`);
+    /**
+     * Check if path exists (ASYNC - must use await)
+     */
+    public async has(path: string): Promise<boolean> {
+        return await this.db.has(path);
     }
 
-    public all(): GuildSchema {
-        return this.client.holder.dbs.guilds.get(this.guild.id);
+    /**
+     * Get all guild data (ASYNC - must use await)
+     */
+    public async all(): Promise<any> {
+        return await this.db.all();
     }
 
-    public getUser(id: string) {
+    /**
+     * Get user instance
+     */
+    public getUser(id: string): User {
         if (!this.guild.members.cache.get(id)?.user) {
             throw Error(`Member with ID ${id} not found in guild ${this.guild.name}.`);
         }
         return new User(this.client, this.guild.members.cache.get(id)?.user as DiscordUser, this.guild);
     }
-
 }
+
+// Re-export User from the same file to maintain compatibility
+import { User } from "./User";
+
