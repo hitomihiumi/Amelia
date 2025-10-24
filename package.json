@@ -1,0 +1,36 @@
+{
+  "dependencies": {
+    "@hitomihiumi/colors.ts": "^1.0.3",
+    "@hitomihiumi/filewatcher": "^0.1.1",
+    "@napi-rs/canvas": "^0.1.77",
+    "@nmmty/lazycanvas": "^0.6.0-dev.1d5786",
+    "body-parser": "^1.20.3",
+    "chokidar": "^4.0.3",
+    "cors": "^2.8.5",
+    "discord.js": "^14.21.0",
+    "dotenv": "^16.4.5",
+    "enmap": "^5.9.10",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "fuse.js": "^7.1.0"
+  },
+  "name": "kyoko",
+  "version": "0.1.1",
+  "main": "/dist/index.js",
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "i": "^0.3.7",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "test": "tsc && node --trace-warnings ./dist/bot.js",
+    "start": "node ./dist/bot.js",
+    "build": "tsc --watch"
+  },
+  "type": "commonjs",
+  "author": "hitomihiumi",
+  "license": "MIT",
+  "description": ""
+}

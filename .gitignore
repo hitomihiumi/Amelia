@@ -1,0 +1,11 @@
+/.idea
+/dist
+/node_modules
+/locale
+/gitignore
+
+Kyoko.iml
+/package-lock.json
+.env
+.tsbuildinfo
+/dbs/

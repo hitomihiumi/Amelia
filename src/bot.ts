@@ -1,0 +1,105 @@
+import {Client, GatewayIntentBits, Partials, Collection, ColorResolvable} from 'discord.js';
+import 'dotenv/config'
+import '@hitomihiumi/colors.ts';
+import * as __helpers from './types/helpers'
+import Enmap from 'enmap';
+import path from "path";
+import { fastEmbed, foldersCheck, reVar } from "./handlers/functions";
+import { ModifiedClient } from "./types/helpers";
+import { FileWatcher } from "@hitomihiumi/filewatcher";
+import { commandLoader } from "./handlers/cmdLoaders";
+
+foldersCheck();
+
+const client: __helpers.ModifiedClient = {
+    client: new Client({
+        shards: "auto",
+        allowedMentions: {
+            parse: ['users', 'roles'],
+            repliedUser: false,
+        },
+        partials: [
+            Partials.Message,
+            Partials.Channel,
+            Partials.Reaction
+        ],
+        intents: [
+            GatewayIntentBits.Guilds,
+            GatewayIntentBits.GuildMembers,
+            GatewayIntentBits.GuildBans,
+            GatewayIntentBits.GuildEmojisAndStickers,
+            GatewayIntentBits.GuildVoiceStates,
+            GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.MessageContent,
+            GatewayIntentBits.GuildMessageReactions,
+            GatewayIntentBits.GuildMessageTyping
+        ]
+    }),
+    holder: {
+        cooldowns: new Collection(),
+        cmds: {
+            commands: new Collection(),
+            slashCommands: new Collection(),
+            aliases: new Collection(),
+            cooldowns: new Collection()
+        },
+        dbs: {
+            guilds: new Enmap({ name: 'guilds', dataDir: path.resolve(__dirname, "./../dbs/guilds") }),
+            users: new Enmap({ name: 'users', dataDir: path.resolve(__dirname, "./../dbs/users") }),
+            history: new Enmap({ name: 'history', dataDir: path.resolve(__dirname, "./../dbs/history") }),
+        },
+        components: {
+            buttons: new Collection(),
+            modals: new Collection(),
+            selectMenus: new Collection(),
+            autocompletes: new Collection()
+        },
+        languages: {},
+        embed: {
+            error: (client: ModifiedClient, lang: string, desc: string) => {
+                return fastEmbed(client.holder.colors.error, client.holder.languages[`${lang}`].getText('error.title'), desc);
+            },
+            success: (client: ModifiedClient, lang: string, desc: string) => {
+                return fastEmbed(client.holder.colors.success, client.holder.languages[`${lang}`].getText('success.title'), desc);
+            },
+            info: (client: ModifiedClient, lang: string, desc: string) => {
+                return fastEmbed(client.holder.colors.info, client.holder.languages[`${lang}`].getText('info.title'), desc);
+            },
+            fast: (color: ColorResolvable, title: string, desc: string) => {
+                return fastEmbed(color, title, desc);
+            }
+        },
+        utils: {
+            reVar
+        },
+        colors: {
+            default: "#4a3f66",
+            error: "#ff6b7f",
+            success: "#6bff97",
+            info: "#7dd8ff"
+        },
+        emojis: {}
+    }
+};
+
+["antiCrash", "events", "languages", "emojis", "commands", "components", "slash", "joinToCreate"].filter(Boolean)
+    .forEach((handler: any) => {
+    require(`./handlers/${handler}`)(client);
+});
+
+const watcher = new FileWatcher()
+    .setAllowedExtensions('.js', '.json');
+
+watcher.setHandler("./dist/slash", 'change', (dir, file, relativePath) => {
+    const loader = commandLoader(client);
+    loader.reload(relativePath, file);
+    console.log(`Reloaded ${file} in ${dir}`.green);
+});
+
+watcher.setMonitoredDirectories('./dist', './locale');
+
+watcher.startWatching();
+
+client.client.on('interactionCreate', async (interaction) => {})
+
+client.client.login(process.env.PRODACTION ? process.env.TOKEN : process.env.DEV_TOKEN);
