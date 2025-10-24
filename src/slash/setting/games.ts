@@ -1,5 +1,5 @@
-import { ModifiedClient, SlashCommand } from "../../types/helpers";
-import { CommandInteraction, PermissionsBitField } from "discord.js";
+import { SlashCommand } from "../../types/helpers";
+import { Client, CommandInteraction, PermissionsBitField } from "discord.js";
 import { Guild } from "../../helpers";
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
         bot: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.EmbedLinks]
     },
     key: null,
-    run: async (client: ModifiedClient, interaction: CommandInteraction) => {
+    run: async (client: Client, interaction: CommandInteraction) => {
         if (!interaction.guild) return;
         let guild = new Guild(client, interaction.guild);
 

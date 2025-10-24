@@ -1,5 +1,5 @@
-import {ModifiedClient} from "../../types/helpers";
+import { Client } from "discord.js";
 
-module.exports = (client: ModifiedClient, event: any, id: number) => {
+module.exports = (client: Client, event: any, id: number) => {
     console.log(` || <==> || [${String(new Date).split(" ", 5).join(" ")}] || <==> || Shard #${id} Disconnected || <==> ||`)
 }

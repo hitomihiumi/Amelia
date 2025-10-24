@@ -1,9 +1,9 @@
 import { Button, Autocomplete, Modal, SelectMenu } from "../types/helpers";
-import { ModifiedClient } from "../types/helpers";
+import { Client } from "discord.js";
 import { readdirSync } from "fs";
 import path from "path";
 
-module.exports = (client: ModifiedClient) => {
+module.exports = (client: Client) => {
     try {
         readdirSync(path.resolve(__dirname, "./../components/")).forEach((dir) => {
             const components = readdirSync(path.resolve(__dirname, `./../components/${dir}/`)).filter((file) => file.endsWith(".js"));

@@ -1,7 +1,6 @@
-import { ModifiedClient } from "../../types/helpers";
-import { VoiceState, ChannelType } from "discord.js";
+import { Client, VoiceState, ChannelType } from "discord.js";
 
-module.exports = async (client: ModifiedClient, oldState: VoiceState, newState: VoiceState) => {
+module.exports = async (client: Client, oldState: VoiceState, newState: VoiceState) => {
 
     if (!newState.guild) return;
     if (!newState.member) return;

@@ -1,14 +1,14 @@
-import { ModifiedClient, GuildSchema } from "../types/helpers";
-import { Guild as DiscordGuild, User as DiscordUser } from "discord.js";
+import { GuildSchema } from "../types/helpers";
+import { Client, Guild as DiscordGuild, User as DiscordUser } from "discord.js";
 import { History } from "./History";
 import { User } from "./User";
 
 export class Guild {
-    public client: ModifiedClient;
+    public client: Client;
     public guild: DiscordGuild;
     public history: History;
 
-    constructor(client: ModifiedClient, guild: DiscordGuild) {
+    constructor(client: Client, guild: DiscordGuild) {
         this.client = client;
         this.guild = guild;
         this.history = new History(client, guild);

@@ -1,11 +1,11 @@
-import { Command, ModifiedClient } from "../../types/helpers";
-import { ChannelType, Message } from "discord.js";
+import { Command } from "../../types/helpers";
+import { Client, ChannelType, Message } from "discord.js";
 import { Guild } from "../../helpers";
 import { onCoolDown, escapeRegex } from "../../handlers/functions";
 
-module.exports = async (client: ModifiedClient, message: Message) => {
+module.exports = async (client: Client, message: Message) => {
     if (message.author.bot) return;
-    if (!client.client.user) return;
+    if (!client.user) return;
     if (message.channel.type === ChannelType.DM) return;
     if (message.partial) await message.fetch();
     if (!message.guild) return;
@@ -13,7 +13,7 @@ module.exports = async (client: ModifiedClient, message: Message) => {
     const guild = new Guild(client, message.guild);
 
     const prefix = guild.get("settings.prefix");
-    const prefixRegex = new RegExp(`^(<@!?${client.client.user.id}>|${escapeRegex(prefix)})\\s*`);
+    const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`);
     if (!prefixRegex.test(message.content)) return;
 
     // @ts-ignore
@@ -22,7 +22,7 @@ module.exports = async (client: ModifiedClient, message: Message) => {
     const commandName = args.shift()?.toLowerCase() as string;
 
     if (!commandName || commandName.length === 0) {
-        if (matchedPrefix.includes(client.client.user.id)) {
+        if (matchedPrefix.includes(client.user.id)) {
             return message.reply(`${client.holder.languages[`${guild.get(`settings.language`)}`].getText('events.message_create.prefix', prefix)}`);
         }
     }
@@ -33,7 +33,7 @@ module.exports = async (client: ModifiedClient, message: Message) => {
     if (command) {
         if (onCoolDown(message, command, client)) {
             return message.reply({
-                embeds: [client.holder.embed.error(client, guild, client.holder.languages[`${guild.get(`settings.language`)}`].getText('events.message_create.cooldown', onCoolDown(message, command, client), command.name))]
+                embeds: [client.holder.embed.error(guild.get(`settings.language`), client.holder.languages[`${guild.get(`settings.language`)}`].getText('events.message_create.cooldown', onCoolDown(message, command, client), command.name))]
             });
         }
         if (command.allowedUsers.length > 0 && !command.allowedUsers.includes(message.author.id)) {

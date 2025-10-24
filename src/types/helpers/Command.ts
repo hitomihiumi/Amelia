@@ -1,6 +1,5 @@
-import { ModifiedClient } from "./ModifiedClient";
+import { Client, ChatInputCommandInteraction, Message, InteractionContextType } from "discord.js";
 import * as _options from "./Options";
-import { ChatInputCommandInteraction, Message, InteractionContextType } from "discord.js";
 import { LocalizationMap } from 'discord-api-types/v10';
 
 export interface Command {
@@ -16,7 +15,7 @@ export interface Command {
     allowedUsers: string[];
     minArgs?: number;
     maxArgs?: number;
-    run: (client: ModifiedClient, message: Message, args: string[]) => void;
+    run: (client: Client, message: Message, args: string[]) => void;
 };
 
 export interface SlashCommand {
@@ -38,7 +37,7 @@ export interface SlashCommand {
         _options.RoleOption |
         _options.UserOption>;
     context?: InteractionContextType[];
-    run: (client: ModifiedClient, interaction: ChatInputCommandInteraction) => void;
+    run: (client: Client, interaction: ChatInputCommandInteraction) => void;
 }
 
 export interface Manifest {

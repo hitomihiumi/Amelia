@@ -1,8 +1,9 @@
 import * as fs from 'fs';
-import { Command, ModifiedClient } from "../types/helpers";
+import { Client } from "discord.js";
+import { Command } from "../types/helpers";
 import path from "path";
 
-module.exports = (client: ModifiedClient) => {
+module.exports = (client: Client) => {
     try {
         let amount = 0;
         fs.readdirSync(path.resolve(__dirname, "./../commands")).forEach((dir) => {

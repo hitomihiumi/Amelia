@@ -1,6 +1,6 @@
-import { ModifiedClient } from "../types/helpers";
+import { Client } from "discord.js";
 
-module.exports = (client: ModifiedClient) => {
+module.exports = (client: Client) => {
     process.on('unhandledRejection', (reason, p) => {
         console.log(' [antiCrash] :: Unhandled Rejection/Catch');
         console.log(reason, p);

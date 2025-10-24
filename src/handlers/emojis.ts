@@ -1,6 +1,6 @@
-import {ModifiedClient} from "../types/helpers";
+import { Client } from "discord.js";
 
-module.exports = async (client: ModifiedClient) => {
+module.exports = async (client: Client) => {
     let emojis = require('../../emojis.json');
 
     for (const emoji in emojis) {

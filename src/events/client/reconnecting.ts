@@ -1,5 +1,5 @@
-import { ModifiedClient } from "../../types/helpers";
+import { Client } from "discord.js";
 
-module.exports = (client: ModifiedClient) => {
+module.exports = (client: Client) => {
     console.log(`Reconnceting at ${new Date()}.`.bgYellow.black)
 }

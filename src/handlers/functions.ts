@@ -1,8 +1,9 @@
 import fs from "fs";
 import path from "path";
 import { Guild, Language } from "../helpers";
-import { Command, Component, ModifiedClient, SlashCommand } from "../types/helpers";
+import { Command, Component, SlashCommand } from "../types/helpers";
 import {
+    Client,
     Collection,
     Message,
     EmbedBuilder,
@@ -64,7 +65,7 @@ export function foldersCheck() {
     });
 }
 
-export async function localeUpdate(client: ModifiedClient) {
+export async function localeUpdate(client: Client) {
     let locale = path.resolve(__dirname, "./../../locale/");
 
     fs.readdirSync(locale).forEach(file => {
@@ -84,7 +85,7 @@ export async function localeFetch() {
     })
 }
 
-export function onCoolDown(message: Message, command: Command | SlashCommand, client: ModifiedClient) {
+export function onCoolDown(message: Message, command: Command | SlashCommand, client: Client) {
     if (!client.holder.cooldowns.has(command.name)) {
         client.holder.cooldowns.set(command.name, new Collection());
     }
@@ -134,7 +135,7 @@ export function reVar(str: string, ...args: any[]) {
     return str;
 }
 
-export function permissionCommand(client: ModifiedClient, message: any, lang: string, command: Command | SlashCommand) {
+export function permissionCommand(client: Client, message: any, lang: string, command: Command | SlashCommand) {
     if (command.permissions) {
         if (command.permissions.bot) {
             let arr = [];
@@ -145,7 +146,7 @@ export function permissionCommand(client: ModifiedClient, message: any, lang: st
             }
             if (arr.length) {
                 message.reply({
-                    embeds: [client.holder.embed.error(client, lang, client.holder.languages[`${lang}`].getText('functions.permission_check.commands.bot_permission', command.name, arr.map(p => `${translatePermission(client, lang, p)}`)))],
+                    embeds: [client.holder.embed.error(lang, client.holder.languages[`${lang}`].getText('functions.permission_check.commands.bot_permission', command.name, arr.map(p => `${translatePermission(client, lang, p)}`)))],
                     ephemeral: true
                 });
                 return false;
@@ -156,7 +157,7 @@ export function permissionCommand(client: ModifiedClient, message: any, lang: st
         if (command.permissions.user) {
             if (!message.member.permissions.has(command.permissions.user)) {
                 message.reply({
-                    embeds: [client.holder.embed.error(client, lang, client.holder.languages[`${lang}`].getText('functions.permission_check.commands.user_permission', command.name, translatePermission(client, lang, command.permissions.user)))],
+                    embeds: [client.holder.embed.error(lang, client.holder.languages[`${lang}`].getText('functions.permission_check.commands.user_permission', command.name, translatePermission(client, lang, command.permissions.user)))],
                     ephemeral: true
                 });
                 return false;
@@ -168,7 +169,7 @@ export function permissionCommand(client: ModifiedClient, message: any, lang: st
     return true;
 }
 
-export function permissionComponent(client: ModifiedClient, interaction: any, lang: string, component: Component) {
+export function permissionComponent(client: Client, interaction: any, lang: string, component: Component) {
     if (component.permissions) {
         if (component.permissions.bot) {
             let arr = [];
@@ -179,7 +180,7 @@ export function permissionComponent(client: ModifiedClient, interaction: any, la
             }
             if (arr.length) {
                 interaction.reply({
-                    embeds: [client.holder.embed.error(client, lang, client.holder.languages[`${lang}`].getText('functions.permission_check.components.bot_permission', arr.map(p => `${translatePermission(client, lang, p)}`)))],
+                    embeds: [client.holder.embed.error(lang, client.holder.languages[`${lang}`].getText('functions.permission_check.components.bot_permission', arr.map(p => `${translatePermission(client, lang, p)}`)))],
                     ephemeral: true
                 });
                 return false;
@@ -190,7 +191,7 @@ export function permissionComponent(client: ModifiedClient, interaction: any, la
         if (component.permissions.user) {
             if (!interaction.member.permissions.has(component.permissions.user)) {
                 interaction.reply({
-                    embeds: [client.holder.embed.error(client, lang, client.holder.languages[`${lang}`].getText('functions.permission_check.component.user_permission', translatePermission(client, lang, component.permissions.user)))],
+                    embeds: [client.holder.embed.error(lang, client.holder.languages[`${lang}`].getText('functions.permission_check.component.user_permission', translatePermission(client, lang, component.permissions.user)))],
                     ephemeral: true
                 });
                 return false;
@@ -221,14 +222,14 @@ export function extendedPermissionCommand(guild: Guild, interaction: any, lang: 
                         return true;
                     } else {
                         interaction.reply({
-                            embeds: [guild.client.holder.embed.error(guild.client, lang, guild.client.holder.languages[`${lang}`].getText('functions.permission_check.commands.extended_permission.role.denied', tempArr.filter(r => r.type === "deny").map(r => `<@&${r.id}> `)))],
+                            embeds: [guild.client.holder.embed.error(lang, guild.client.holder.languages[`${lang}`].getText('functions.permission_check.commands.extended_permission.role.denied', tempArr.filter(r => r.type === "deny").map(r => `<@&${r.id}> `)))],
                             ephemeral: true
                         });
                         return false;
                     }
                 } else {
                     interaction.reply({
-                        embeds: [guild.client.holder.embed.error(guild.client, lang, guild.client.holder.languages[`${lang}`].getText('functions.permission_check.commands.extended_permission.role.any_role', perm.roles.filter((r: { id: string, type: string }) => r.type === "allow").map((r: { id: string, type: string }) => `<@&${r.id}> `)))],
+                        embeds: [guild.client.holder.embed.error(lang, guild.client.holder.languages[`${lang}`].getText('functions.permission_check.commands.extended_permission.role.any_role', perm.roles.filter((r: { id: string, type: string }) => r.type === "allow").map((r: { id: string, type: string }) => `<@&${r.id}> `)))],
                         ephemeral: true
                     });
                     return false;
@@ -237,7 +238,7 @@ export function extendedPermissionCommand(guild: Guild, interaction: any, lang: 
             if (perm.permission) {
                 if (!interaction.member.permissions.has(perm.permission)) {
                     interaction.reply({
-                        embeds: [guild.client.holder.embed.error(guild.client, lang, guild.client.holder.languages[`${lang}`].getText('functions.permission_check.commands.user_permission', cmd_name, translatePermission(guild.client, lang, perm.permissions)))],
+                        embeds: [guild.client.holder.embed.error(lang, guild.client.holder.languages[`${lang}`].getText('functions.permission_check.commands.user_permission', cmd_name, translatePermission(guild.client, lang, perm.permissions)))],
                         ephemeral: true
                     });
                     return false;
@@ -251,7 +252,7 @@ export function extendedPermissionCommand(guild: Guild, interaction: any, lang: 
 }
 
 
-export function translatePermission(client: ModifiedClient, lang: string, permission: bigint) {
+export function translatePermission(client: Client, lang: string, permission: bigint) {
     let str = "";
     switch (permission) {
         case PermissionsBitField.Flags.AddReactions:

@@ -1,5 +1,5 @@
-import { ModifiedClient } from "../../types/helpers";
+import { Client } from "discord.js";
 
-module.exports = (client: ModifiedClient, info: any) => {
+module.exports = (client: Client, info: any) => {
     console.log(String(info).grey);
 }

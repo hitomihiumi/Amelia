@@ -1,5 +1,5 @@
-import { Manifest, ModifiedClient, SlashCommand } from "../types/helpers";
-import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from "discord.js";
+import { Manifest, SlashCommand } from "../types/helpers";
+import { Client, SlashCommandBuilder, SlashCommandSubcommandBuilder } from "discord.js";
 import { lstatSync, readdirSync } from "fs";
 import path from "path";
 
@@ -103,7 +103,7 @@ function optionsLoad(pull: SlashCommand, slashCommand: SlashCommandBuilder | Sla
     }
 }
 
-export function commandLoader(client: ModifiedClient) {
+export function commandLoader(client: Client) {
     return {
         load(commands: any[]) {
             readdirSync(path.resolve(__dirname, "./../slash")).forEach((dir) => {

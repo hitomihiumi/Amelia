@@ -1,5 +1,6 @@
-import { ModalCustom, ModifiedClient, SlashCommand } from "../../types/helpers";
+import { ModalCustom, SlashCommand } from "../../types/helpers";
 import {
+    Client,
     CommandInteraction,
     PermissionsBitField,
     EmbedBuilder,
@@ -32,7 +33,7 @@ module.exports = {
         bot: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks]
     },
     key: null,
-    run: async (client: ModifiedClient, interaction: CommandInteraction) => {
+    run: async (client: Client, interaction: CommandInteraction) => {
         if (!interaction.guild) return;
         let guild = new Guild(client, interaction.guild);
 
@@ -636,7 +637,7 @@ module.exports = {
     }
 } as SlashCommand;
 
-function modalList(client: ModifiedClient, lang: string, guild: Guild, page: number = 0, search?: string) {
+function modalList(client: Client, lang: string, guild: Guild, page: number = 0, search?: string) {
    let arr = guild.get('utils.components.modals') as Array<ModalCustom>;
 
    if (search) {
@@ -703,7 +704,7 @@ function modalList(client: ModifiedClient, lang: string, guild: Guild, page: num
     ];
 }
 
-function fieldList(client: ModifiedClient, lang: string, modal: ModalCustom) {
+function fieldList(client: Client, lang: string, modal: ModalCustom) {
     let select = new StringSelectMenuBuilder()
         .setCustomId('NI_modal:select_field')
         .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.select_field.placeholder'))
@@ -749,7 +750,7 @@ function schema(data?: ModalCustom): ModalCustom {
     }
 }
 
-async function modalFieldEmbed(embed: EmbedBuilder, client: ModifiedClient, lang: string, _schema: ModalCustom, field: number) {
+async function modalFieldEmbed(embed: EmbedBuilder, client: Client, lang: string, _schema: ModalCustom, field: number) {
     delete embed.data.fields;
     delete embed.data.image;
 

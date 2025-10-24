@@ -1,14 +1,14 @@
-import {JTCPreset, ModifiedClient, UserSchema} from '../types/helpers';
-import { Guild, User as DiscordUser } from "discord.js";
+import {JTCPreset, UserSchema} from '../types/helpers';
+import { Client, Guild, User as DiscordUser } from "discord.js";
 import { History } from "./History";
 
 export class User {
     public user: DiscordUser;
     public guild: Guild;
-    public client: ModifiedClient;
+    public client: Client;
     public history: History;
 
-    constructor(client: ModifiedClient, user: DiscordUser, guild: Guild) {
+    constructor(client: Client, user: DiscordUser, guild: Guild) {
         this.client = client;
         this.user = user;
         this.guild = guild;

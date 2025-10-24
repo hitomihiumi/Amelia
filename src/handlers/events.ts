@@ -1,8 +1,8 @@
-import { ModifiedClient } from "../types/helpers";
+import { Client } from "discord.js";
 import fs from "fs";
 import path from "path";
 
-module.exports = async (client: ModifiedClient) => {
+module.exports = async (client: Client) => {
     try {
         let amount = 0;
         const load_dir = (dir: any) => {
@@ -11,7 +11,7 @@ module.exports = async (client: ModifiedClient) => {
                 try {
                     const event = require(path.resolve(__dirname, `./../events/${dir}/${file}`))
                     let eventName = file.split(".")[0];
-                    client.client.on(eventName, event.bind(null, client));
+                    client.on(eventName, event.bind(null, client));
                     amount++;
                     console.log(`Event Loaded: `.green + `${eventName}`.cyan);
                 } catch (e) {

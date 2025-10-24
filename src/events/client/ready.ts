@@ -1,8 +1,7 @@
-import { ActivityType } from 'discord.js';
+import { ActivityType, Client } from 'discord.js';
 import { resolve } from 'path';
-import { ModifiedClient } from '../../types/helpers';
 
-module.exports = async (client: ModifiedClient) => {
+module.exports = async (client: Client) => {
     try{
         try {
             const stringlength = 69;
@@ -10,7 +9,7 @@ module.exports = async (client: ModifiedClient) => {
             console.log(`     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓`.brightGreen.bold)
             console.log(`     ┃ `.brightGreen.bold + " ".repeat(-1+stringlength-` ┃ `.length)+ "┃".brightGreen.bold)
             console.log(`     ┃ Discord Bot is online!`.brightGreen.bold + " ".repeat(-1+stringlength-` ┃ `.length-`Discord Bot is online!`.length)+ "┃".brightGreen.bold)
-            console.log(`     ┃  /--/ ${client.client.user?.tag} /--/ `.brightGreen.bold + " ".repeat(-1+stringlength-` ┃ `.length-` /--/ ${client.client.user?.tag} /--/ `.length)+ "┃".brightGreen.bold)
+            console.log(`     ┃  /--/ ${client.user?.tag} /--/ `.brightGreen.bold + " ".repeat(-1+stringlength-` ┃ `.length-` /--/ ${client.user?.tag} /--/ `.length)+ "┃".brightGreen.bold)
             console.log(`     ┃ `.brightGreen.bold + " ".repeat(-1+stringlength-` ┃ `.length)+ "┃".brightGreen.bold)
             console.log(`     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛`.brightGreen.bold)
         } catch (e: any){
@@ -28,7 +27,7 @@ module.exports = async (client: ModifiedClient) => {
                 `Open Beta Test | v${require(resolve('./package.json')).version}`
             ];
             index = (index + 1) % activities_list.length;
-            client.client.user?.setActivity(activities_list[index], {
+            client.user?.setActivity(activities_list[index], {
                 type: ActivityType.Streaming,
                 url: "https://www.twitch.tv/darkleroy_ua"
             });

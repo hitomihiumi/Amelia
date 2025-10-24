@@ -1,9 +1,10 @@
-import { ModifiedClient, ILanguage } from "../types/helpers";
+import { Client } from "discord.js";
+import { ILanguage } from "../types/helpers";
 import { Language } from "../helpers";
 import fs from "fs";
 import path from "path";
 
-module.exports = async (client: ModifiedClient) => {
+module.exports = async (client: Client) => {
     let langs = fs.readdirSync(path.resolve(__dirname, `./../../locale/`)).filter((file) => file.endsWith(".json"));
 
     for (const file of langs) {

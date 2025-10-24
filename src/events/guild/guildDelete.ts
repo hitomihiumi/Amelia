@@ -1,5 +1,4 @@
-import { ModifiedClient } from "../../types/helpers";
-import { Guild } from "discord.js";
+import { Client, Guild } from "discord.js";
 
-module.exports = async (client: ModifiedClient, guild: Guild) => {
+module.exports = async (client: Client, guild: Guild) => {
 }

@@ -1,5 +1,5 @@
-import { ModifiedClient } from "../../types/helpers";
+import { Client } from "discord.js";
 
-module.exports = (client: ModifiedClient, error: any) => {
+module.exports = (client: Client, error: any) => {
     console.log(String(error).red.dim);
 }

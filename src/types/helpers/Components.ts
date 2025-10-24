@@ -1,5 +1,4 @@
-import { ModifiedClient } from "./ModifiedClient";
-import { ButtonInteraction, ModalSubmitInteraction, AutocompleteInteraction, AnySelectMenuInteraction } from "discord.js";
+import { Client, ButtonInteraction, ModalSubmitInteraction, AutocompleteInteraction, AnySelectMenuInteraction } from "discord.js";
 
 export interface Component {
     customId: string;
@@ -10,21 +9,21 @@ export interface Component {
         user?: bigint;
         bot: bigint[];
     }
-    run: (client: ModifiedClient, interaction: any) => void;
+    run: (client: Client, interaction: any) => void;
 }
 
 export interface Button extends Component {
-    run: (client: ModifiedClient, interaction: ButtonInteraction) => void;
+    run: (client: Client, interaction: ButtonInteraction) => void;
 }
 
 export interface Modal extends Component {
-    run: (client: ModifiedClient, interaction: ModalSubmitInteraction) => void;
+    run: (client: Client, interaction: ModalSubmitInteraction) => void;
 }
 
 export interface SelectMenu extends Component {
-    run: (client: ModifiedClient, interaction: AnySelectMenuInteraction) => void;
+    run: (client: Client, interaction: AnySelectMenuInteraction) => void;
 }
 
 export interface Autocomplete extends Component {
-    run: (client: ModifiedClient, interaction: AutocompleteInteraction) => void;
+    run: (client: Client, interaction: AutocompleteInteraction) => void;
 }

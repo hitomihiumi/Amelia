@@ -1,5 +1,6 @@
-import {AnySlash, ModifiedClient, SlashCommand} from "../../types/helpers";
+import {AnySlash, SlashCommand} from "../../types/helpers";
 import {
+    Client,
     CommandInteraction,
     EmbedBuilder,
     PermissionsBitField,
@@ -18,6 +19,7 @@ import {
     StringSelectMenuInteraction,
     Collection,
     RoleSelectMenuInteraction,
+    Guild as DJSGuild
 } from "discord.js";
 import { Guild } from "../../helpers";
 import { CommandPermission } from "../../types/helpers";
@@ -44,7 +46,7 @@ module.exports = {
     permissions: {
         bot: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks]
     },
-    run: async (client: ModifiedClient, interaction: CommandInteraction) => {
+    run: async (client: Client, interaction: CommandInteraction) => {
         if (!interaction.guild) return;
         let guild = new Guild(client, interaction.guild);
 
@@ -383,7 +385,7 @@ module.exports = {
     }
 } as SlashCommand;
 
-function commandsList(client: ModifiedClient, guild: Guild, lang: string, page: number) {
+function commandsList(client: Client, guild: Guild, lang: string, page: number) {
     let commands = client.holder.cmds.slashCommands.toJSON().slice(page * 10, page * 10 + 25);
     let commandsSelect = new StringSelectMenuBuilder()
         .setCustomId("NI_permissions:commands")
@@ -406,7 +408,7 @@ function commandsList(client: ModifiedClient, guild: Guild, lang: string, page: 
     return new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(commandsSelect);
 }
 
-function permissionsList(client: ModifiedClient, lang: string, permission: CommandPermission) {
+function permissionsList(client: Client, lang: string, permission: CommandPermission) {
     let permissionsSelect = new StringSelectMenuBuilder()
         .setCustomId("NI_permissions:permissions")
         .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.permissions.placeholder'))
@@ -424,7 +426,7 @@ function permissionsList(client: ModifiedClient, lang: string, permission: Comma
     return new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(permissionsSelect);
 }
 
-function permissionRoles(client: ModifiedClient, guild: Guild, lang: string, permission: CommandPermission) {
+function permissionRoles(client: Client, guild: Guild, lang: string, permission: CommandPermission) {
     let rolesSelect = new StringSelectMenuBuilder()
         .setCustomId("NI_permissions:roles")
         .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.roles.placeholder'))

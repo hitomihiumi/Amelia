@@ -1,5 +1,6 @@
-import { JTCPreset, ModifiedClient } from "../types/helpers";
+import { JTCPreset } from "../types/helpers";
 import {
+    Client,
     BaseGuildVoiceChannel,
     ChannelType,
     PermissionFlagsBits,
@@ -13,8 +14,8 @@ import {
 import { Guild } from "../helpers";
 import { User } from "../helpers";
 
-module.exports = async (client: ModifiedClient) => {
-    client.client.on("voiceStateUpdate", async (oldState, newState) => {
+module.exports = async (client: Client) => {
+    client.on("voiceStateUpdate", async (oldState, newState) => {
         if (!newState.guild) return;
         let guild = new Guild(client, newState.guild);
         let map = guild.get("temp.join_to_create.map");
@@ -48,7 +49,7 @@ function deleteChannel(guild: Guild, channelId: string) {
     }
 }
 
-async function createChannel(client: ModifiedClient, guild: Guild, newState: VoiceState) {
+async function createChannel(client: Client, guild: Guild, newState: VoiceState) {
     if (!newState.member) return;
     let map = guild.get("temp.join_to_create.map");
     let channel = await newState.guild.channels.create({

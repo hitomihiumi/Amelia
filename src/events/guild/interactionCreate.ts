@@ -1,8 +1,9 @@
-import { ModifiedClient, Component, SlashCommand, Manifest } from "../../types/helpers";
+import { Client } from "discord.js";
+import { Component, SlashCommand, Manifest } from "../../types/helpers";
 import { extendedPermissionCommand, onCoolDown, permissionCommand, permissionComponent } from "../../handlers/functions";
 import { Guild } from "../../helpers";
 
-module.exports = async (client: ModifiedClient, interaction: any) => {
+module.exports = async (client: Client, interaction: any) => {
     let guild = interaction.guild ? new Guild(client, interaction.guild) : undefined;
     let lang = guild ? guild.get(`settings.language`) : 'en';
     if (interaction.isCommand()) {
@@ -31,7 +32,7 @@ module.exports = async (client: ModifiedClient, interaction: any) => {
                 if (!(extendedPermissionCommand(guild, interaction, lang, command.name))) return;
             } else if (onCoolDown(interaction, command, client)) {
                 return interaction.reply({ephemeral: true,
-                    embeds: [client.holder.embed.info(client, lang, client.holder.languages[`${lang}`].getText('events.interaction_create.cooldown', onCoolDown(interaction, command, client), command.name))]
+                    embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.cooldown', onCoolDown(interaction, command, client), command.name))]
                 });
             }
             await command.run(client, interaction);
@@ -43,7 +44,7 @@ module.exports = async (client: ModifiedClient, interaction: any) => {
         const componentPermission = async (component: Component) => {
             if (component.options?.public === false && interaction.user.id !== interaction.message.interaction.user.id) {
                 await interaction.reply({
-                    embeds: [client.holder.embed.info(client, lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_permission'))],
+                    embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_permission'))],
                     ephemeral: true
                 });
                 return false;
@@ -58,7 +59,7 @@ module.exports = async (client: ModifiedClient, interaction: any) => {
             const component = client.holder.components.buttons.get(interaction.customId);
 
             if (!component) return interaction.reply({
-                    embeds: [client.holder.embed.info(client, lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
+                    embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
                 ephemeral: true
             });
 
@@ -77,7 +78,7 @@ module.exports = async (client: ModifiedClient, interaction: any) => {
             const component = client.holder.components.selectMenus.get(interaction.customId);
 
             if (!component) return interaction.reply({
-                embeds: [client.holder.embed.info(client, lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
+                embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
                 ephemeral: true
             });
 
@@ -96,7 +97,7 @@ module.exports = async (client: ModifiedClient, interaction: any) => {
             const component = client.holder.components.modals.get(interaction.customId);
 
             if (!component) return interaction.reply({
-                embeds: [client.holder.embed.info(client, lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
+                embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
                 ephemeral: true
             });
 
@@ -113,7 +114,7 @@ module.exports = async (client: ModifiedClient, interaction: any) => {
             const component = client.holder.components.autocompletes.get(interaction.commandName);
 
             if (!component) return interaction.reply({
-                embeds: [client.holder.embed.info(client, lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
+                embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
                 ephemeral: true
             });
 

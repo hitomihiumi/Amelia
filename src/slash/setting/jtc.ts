@@ -1,5 +1,6 @@
-import { ModifiedClient, SlashCommand } from "../../types/helpers";
+import { SlashCommand } from "../../types/helpers";
 import {
+    Client,
     CommandInteraction,
     EmbedBuilder,
     ButtonBuilder,
@@ -27,7 +28,7 @@ module.exports = {
         bot: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.EmbedLinks]
     },
     options: [],
-    run: async (client: ModifiedClient, interaction: CommandInteraction) => {
+    run: async (client: Client, interaction: CommandInteraction) => {
         if (!interaction.guild) return;
         let guild = new Guild(client, interaction.guild);
 

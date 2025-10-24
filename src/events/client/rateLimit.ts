@@ -1,5 +1,5 @@
-import { ModifiedClient } from "../../types/helpers";
+import { Client } from "discord.js";
 
-module.exports = (client: ModifiedClient, rateLimitData: any) => {
+module.exports = (client: Client, rateLimitData: any) => {
     console.log(JSON.stringify(rateLimitData).grey.italic.dim);
 }

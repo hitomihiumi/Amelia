@@ -24,10 +24,10 @@ module.exports = {
 
             let string = inspect(evaled);
 
-            if (string.includes(client.client.token as string)) return console.log(`ERROR NO TOKEN GRABBING ;)`.red);
+            if (string.includes(client.token as string)) return console.log(`ERROR NO TOKEN GRABBING ;)`.red);
 
             let evalEmbed = new DJS.EmbedBuilder()
-                .setTitle(`${client.client?.user?.username}`)
+                .setTitle(`${client?.user?.username}`)
                 .setColor(client.holder.colors.default);
 
             const splitDescription = splitMessage(string, {

@@ -1,11 +1,11 @@
-import { HistorySchema, ModifiedClient } from "../types/helpers";
-import { Guild } from "discord.js";
+import { HistorySchema } from "../types/helpers";
+import { Client, Guild } from "discord.js";
 
 export class History {
-    public client: ModifiedClient;
+    public client: Client;
     public guild: Guild;
 
-    constructor(client: ModifiedClient, guild: Guild) {
+    constructor(client: Client, guild: Guild) {
         this.client = client;
         this.guild = guild;
 
