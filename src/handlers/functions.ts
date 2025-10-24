@@ -10,6 +10,7 @@ import {
     PermissionsBitField,
     ColorResolvable
 } from "discord.js";
+import { t } from "../i18n/helpers";
 
 export function foldersCheck() {
     let folders = [
@@ -63,26 +64,6 @@ export function foldersCheck() {
             fs.mkdirSync(path.resolve(__dirname, folder.path, folder.name));
         }
     });
-}
-
-export async function localeUpdate(client: Client) {
-    let locale = path.resolve(__dirname, "./../../locale/");
-
-    fs.readdirSync(locale).forEach(file => {
-        let name = file.endsWith('.json') ? file.slice(0, -5) : file;
-        let lang = require(path.resolve(locale, file));
-        client.holder.languages[name] = new Language(lang);
-    });
-}
-
-export async function localeFetch() {
-    await fetch("https://raw.githubusercontent.com/hitomihiumi/language-holder/master/languages.json").then(async (res: { json: () => any; }) => {
-        let langs = await res.json();
-
-        langs.forEach((lang: any) => {
-            fs.writeFileSync(path.resolve(__dirname, "./../../locale/" + lang.code + ".json"), JSON.stringify(lang), { encoding: 'utf8' });
-        });
-    })
 }
 
 export function onCoolDown(message: Message, command: Command | SlashCommand, client: Client) {
@@ -146,7 +127,7 @@ export function permissionCommand(client: Client, message: any, lang: string, co
             }
             if (arr.length) {
                 message.reply({
-                    embeds: [client.holder.embed.error(lang, client.holder.languages[`${lang}`].getText('functions.permission_check.commands.bot_permission', command.name, arr.map(p => `${translatePermission(client, lang, p)}`)))],
+                    embeds: [client.holder.embed.error(lang, t(client, lang, 'functions.permission_check.commands.bot_permission', command.name, arr.map(p => `${translatePermission(client, lang, p)}`).join(', ')))],
                     ephemeral: true
                 });
                 return false;
@@ -157,7 +138,7 @@ export function permissionCommand(client: Client, message: any, lang: string, co
         if (command.permissions.user) {
             if (!message.member.permissions.has(command.permissions.user)) {
                 message.reply({
-                    embeds: [client.holder.embed.error(lang, client.holder.languages[`${lang}`].getText('functions.permission_check.commands.user_permission', command.name, translatePermission(client, lang, command.permissions.user)))],
+                    embeds: [client.holder.embed.error(lang, t(client, lang, 'functions.permission_check.commands.user_permission', command.name, translatePermission(client, lang, command.permissions.user)))],
                     ephemeral: true
                 });
                 return false;
@@ -180,7 +161,7 @@ export function permissionComponent(client: Client, interaction: any, lang: stri
             }
             if (arr.length) {
                 interaction.reply({
-                    embeds: [client.holder.embed.error(lang, client.holder.languages[`${lang}`].getText('functions.permission_check.components.bot_permission', arr.map(p => `${translatePermission(client, lang, p)}`)))],
+                    embeds: [client.holder.embed.error(lang, t(client, lang, 'functions.permission_check.components.bot_permission', arr.map(p => `${translatePermission(client, lang, p)}`).join(', ')))],
                     ephemeral: true
                 });
                 return false;
@@ -191,7 +172,7 @@ export function permissionComponent(client: Client, interaction: any, lang: stri
         if (component.permissions.user) {
             if (!interaction.member.permissions.has(component.permissions.user)) {
                 interaction.reply({
-                    embeds: [client.holder.embed.error(lang, client.holder.languages[`${lang}`].getText('functions.permission_check.component.user_permission', translatePermission(client, lang, component.permissions.user)))],
+                    embeds: [client.holder.embed.error(lang, t(client, lang, 'functions.permission_check.component.user_permission', translatePermission(client, lang, component.permissions.user)))],
                     ephemeral: true
                 });
                 return false;
@@ -222,14 +203,14 @@ export function extendedPermissionCommand(guild: Guild, interaction: any, lang: 
                         return true;
                     } else {
                         interaction.reply({
-                            embeds: [guild.client.holder.embed.error(lang, guild.client.holder.languages[`${lang}`].getText('functions.permission_check.commands.extended_permission.role.denied', tempArr.filter(r => r.type === "deny").map(r => `<@&${r.id}> `)))],
+                            embeds: [guild.client.holder.embed.error(lang, t(guild.client, lang, 'functions.permission_check.commands.extended_permission.role.denied', tempArr.filter(r => r.type === "deny").map(r => `<@&${r.id}>`).join(' ')))],
                             ephemeral: true
                         });
                         return false;
                     }
                 } else {
                     interaction.reply({
-                        embeds: [guild.client.holder.embed.error(lang, guild.client.holder.languages[`${lang}`].getText('functions.permission_check.commands.extended_permission.role.any_role', perm.roles.filter((r: { id: string, type: string }) => r.type === "allow").map((r: { id: string, type: string }) => `<@&${r.id}> `)))],
+                        embeds: [guild.client.holder.embed.error(lang, t(guild.client, lang, 'functions.permission_check.commands.extended_permission.role.any_role', perm.roles.filter((r: { id: string, type: string }) => r.type === "allow").map((r: { id: string, type: string }) => `<@&${r.id}>`).join(' ')))],
                         ephemeral: true
                     });
                     return false;
@@ -238,7 +219,7 @@ export function extendedPermissionCommand(guild: Guild, interaction: any, lang: 
             if (perm.permission) {
                 if (!interaction.member.permissions.has(perm.permission)) {
                     interaction.reply({
-                        embeds: [guild.client.holder.embed.error(lang, guild.client.holder.languages[`${lang}`].getText('functions.permission_check.commands.user_permission', cmd_name, translatePermission(guild.client, lang, perm.permissions)))],
+                        embeds: [guild.client.holder.embed.error(lang, t(guild.client, lang, 'functions.permission_check.commands.user_permission', cmd_name, translatePermission(guild.client, lang, perm.permissions)))],
                         ephemeral: true
                     });
                     return false;
@@ -252,8 +233,9 @@ export function extendedPermissionCommand(guild: Guild, interaction: any, lang: 
 }
 
 
-export function translatePermission(client: Client, lang: string, permission: bigint) {
-    let str = "";
+export function translatePermission(client: Client, lang: string, permission: bigint): string {
+    let str = "administrator";
+
     switch (permission) {
         case PermissionsBitField.Flags.AddReactions:
             str = "add_reactions";
@@ -289,7 +271,7 @@ export function translatePermission(client: Client, lang: string, permission: bi
             str = "manage_channels";
             break;
         case PermissionsBitField.Flags.ManageEmojisAndStickers:
-            str = "manage_emojis";
+            str = "manage_emojis_and_stickers";
             break;
         case PermissionsBitField.Flags.ManageGuild:
             str = "manage_guild";
@@ -354,20 +336,26 @@ export function translatePermission(client: Client, lang: string, permission: bi
         case PermissionsBitField.Flags.SendMessagesInThreads:
             str = "send_messages_in_threads";
             break;
-        case PermissionsBitField.Flags.CreatePublicThreads:
-            str = "start_public_threads";
-            break;
-        case PermissionsBitField.Flags.CreatePrivateThreads:
-            str = "start_private_threads";
-            break;
         case PermissionsBitField.Flags.RequestToSpeak:
             str = "request_to_speak";
             break;
-        default:
-            str = "unknown";
+        case PermissionsBitField.Flags.ModerateMembers:
+            str = "moderate_members";
             break;
+        case PermissionsBitField.Flags.UseApplicationCommands:
+            str = "use_application_commands";
+            break;
+        case PermissionsBitField.Flags.ManageEvents:
+            str = "manage_events";
+            break;
+        case PermissionsBitField.Flags.UseEmbeddedActivities:
+            str = "use_embedded_activities";
+            break;
+        default:
+            return "Unknown Permission";
     }
-    return client.holder.languages[`${lang}`].getText(`permissions.${str}`);
+
+    return t(client, lang, `permissions.${str}` as any);
 }
 
 export function generateID(id?: string, type?: string) {

@@ -2,7 +2,7 @@ import { Collection, ColorResolvable } from "discord.js";
 import { Command, Manifest, SlashCommand } from "./types/helpers/Command";
 import Enmap from "enmap";
 import { Autocomplete, Button, Modal, SelectMenu } from "./types/helpers/Components";
-import { Language } from "./helpers";
+import { I18nManager } from "./i18n/I18n";
 
 declare module "discord.js" {
     export interface Client {
@@ -31,9 +31,7 @@ export interface Holder {
         selectMenus: Collection<any, SelectMenu>
         autocompletes: Collection<any, Autocomplete>
     };
-    languages: {
-        [key: string]: Language
-    };
+    i18n: I18nManager;
     embed: {
         error: (lang: string, desc: string) => any;
         info: (lang: string, desc: string) => any;
@@ -53,4 +51,6 @@ export interface Holder {
         [key: string]: string;
     }
 }
+
+
 

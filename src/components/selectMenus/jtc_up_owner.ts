@@ -1,6 +1,7 @@
 import { SelectMenu } from "../../types/helpers";
 import { Guild } from "../../helpers";
 import {GuildMember, PermissionsBitField, UserSelectMenuInteraction} from "discord.js";
+import { t } from "../../i18n/helpers";
 
 module.exports = {
     customId: "I_jtc:owner_select",
@@ -13,13 +14,14 @@ module.exports = {
         if (!interaction.member.voice) return;
         if (!interaction.member.voice.channel) return;
         let guild = new Guild(client, interaction.guild);
+        const lang = guild.get("settings.language");
 
         let member = interaction.values[0];
 
         let channel = interaction.member.voice.channel;
 
         if (member === interaction.user.id) return interaction.reply({
-            content: client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.errors.yourself'),
+            content: t(client, lang, 'functions.join_to_create.errors.yourself'),
             ephemeral: true
         });
 
@@ -41,7 +43,7 @@ module.exports = {
         guild.set("temp.join_to_create.map", map);
 
         await interaction.reply({
-            content: client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.msg.owner', member),
+            content: t(client, lang, 'functions.join_to_create.msg.owner', `<@${member}>`),
             ephemeral: true
         })
     }

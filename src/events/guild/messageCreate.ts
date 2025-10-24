@@ -2,6 +2,7 @@ import { Command } from "../../types/helpers";
 import { Client, ChannelType, Message } from "discord.js";
 import { Guild } from "../../helpers";
 import { onCoolDown, escapeRegex } from "../../handlers/functions";
+import { t } from "../../i18n/helpers";
 
 module.exports = async (client: Client, message: Message) => {
     if (message.author.bot) return;
@@ -23,7 +24,7 @@ module.exports = async (client: Client, message: Message) => {
 
     if (!commandName || commandName.length === 0) {
         if (matchedPrefix.includes(client.user.id)) {
-            return message.reply(`${client.holder.languages[`${guild.get(`settings.language`)}`].getText('events.message_create.prefix', prefix)}`);
+            return message.reply(t(client, guild.get(`settings.language`), 'events.message_create.prefix', prefix));
         }
     }
 
@@ -33,7 +34,7 @@ module.exports = async (client: Client, message: Message) => {
     if (command) {
         if (onCoolDown(message, command, client)) {
             return message.reply({
-                embeds: [client.holder.embed.error(guild.get(`settings.language`), client.holder.languages[`${guild.get(`settings.language`)}`].getText('events.message_create.cooldown', onCoolDown(message, command, client), command.name))]
+                embeds: [client.holder.embed.error(guild.get(`settings.language`), t(client, guild.get(`settings.language`), 'events.message_create.cooldown', onCoolDown(message, command, client), command.name))]
             });
         }
         if (command.allowedUsers.length > 0 && !command.allowedUsers.includes(message.author.id)) {

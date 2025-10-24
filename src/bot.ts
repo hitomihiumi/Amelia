@@ -7,6 +7,7 @@ import path from "path";
 import { fastEmbed, foldersCheck, reVar } from "./handlers/functions";
 import { FileWatcher } from "@hitomihiumi/filewatcher";
 import { commandLoader } from "./handlers/cmdLoaders";
+import { initializeI18n } from "./i18n/locales";
 
 foldersCheck();
 
@@ -34,6 +35,9 @@ const client = new Client({
     ]
 });
 
+// Инициализируем систему переводов
+const i18nManager = initializeI18n();
+
 client.holder = {
     cooldowns: new Collection(),
     cmds: {
@@ -53,16 +57,19 @@ client.holder = {
         selectMenus: new Collection(),
         autocompletes: new Collection()
     },
-    languages: {},
+    i18n: i18nManager,
     embed: {
         error: (lang: string, desc: string) => {
-            return fastEmbed(client.holder.colors.error, client.holder.languages[`${lang}`].getText('error.title'), desc);
+            const i18n = i18nManager.get(lang) || i18nManager.getDefault();
+            return fastEmbed(client.holder.colors.error, i18n.t('common.error.title'), desc);
         },
         success: (lang: string, desc: string) => {
-            return fastEmbed(client.holder.colors.success, client.holder.languages[`${lang}`].getText('success.title'), desc);
+            const i18n = i18nManager.get(lang) || i18nManager.getDefault();
+            return fastEmbed(client.holder.colors.success, i18n.t('common.success.title'), desc);
         },
         info: (lang: string, desc: string) => {
-            return fastEmbed(client.holder.colors.info, client.holder.languages[`${lang}`].getText('info.title'), desc);
+            const i18n = i18nManager.get(lang) || i18nManager.getDefault();
+            return fastEmbed(client.holder.colors.info, i18n.t('common.info.title'), desc);
         },
         fast: (color: ColorResolvable, title: string, desc: string) => {
             return fastEmbed(color, title, desc);
@@ -80,7 +87,7 @@ client.holder = {
     emojis: {}
 };
 
-["antiCrash", "events", "languages", "emojis", "commands", "components", "slash", "joinToCreate"].filter(Boolean)
+["antiCrash", "events", "emojis", "commands", "components", "slash", "joinToCreate"].filter(Boolean)
     .forEach((handler: any) => {
     require(`./handlers/${handler}`)(client);
 });

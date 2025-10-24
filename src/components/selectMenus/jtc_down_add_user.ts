@@ -1,6 +1,7 @@
 import { SelectMenu } from "../../types/helpers";
 import { Guild } from "../../helpers";
 import {GuildMember, PermissionsBitField, UserSelectMenuInteraction} from "discord.js";
+import { t } from "../../i18n/helpers";
 
 module.exports = {
     customId: "I_jtc:add_select_user",
@@ -27,7 +28,7 @@ module.exports = {
         }
 
         await interaction.reply({
-            content: client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.msg.add.user', members.map(m => `<@${m}>`).join(", ")),
+            content: t(client, guild.get("settings.language"), 'functions.join_to_create.msg.add.user', members.map(m => `<@${m}>`).join(", ")),
             ephemeral: true
         })
     }

@@ -16,6 +16,7 @@ import {
     PermissionsBitField
 } from "discord.js";
 import { Guild } from "../../helpers";
+import { t } from "../../i18n/helpers";
 
 module.exports = {
     name: "jtc",
@@ -38,29 +39,29 @@ module.exports = {
             .setComponents(
                 new ButtonBuilder()
                     .setCustomId("NI_jtc:toggle")
-                    .setLabel(`${ guild.get("utils.join_to_create.enabled") ? client.holder.languages[lang].getText("commands.jtc.buttons.disable") : client.holder.languages[lang].getText("commands.jtc.buttons.enable") }`)
+                    .setLabel(`${ guild.get("utils.join_to_create.enabled") ? t(client, lang, "commands.jtc.buttons.disable") : t(client, lang, "commands.jtc.buttons.enable") }`)
                     .setStyle( guild.get("utils.join_to_create.enabled") ? ButtonStyle.Danger : ButtonStyle.Success )
             )
 
         let embed = new EmbedBuilder()
-            .setTitle(`${client.holder.languages[lang].getText("commands.jtc.embeds.title")}`)
+            .setTitle(`${t(client, lang, "commands.jtc.embeds.title")}`)
             .setColor(client.holder.colors.default)
-            .setDescription(`${client.holder.languages[lang].getText("commands.jtc.embeds.description")}`)
+            .setDescription(`${t(client, lang, "commands.jtc.embeds.description")}`)
             .addFields(
-                { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.status")}`, value: `${guild.get("utils.join_to_create.enabled") ? client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.enabled") : client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.disabled") }`, inline: true }
+                { name: `${t(client, lang, "commands.jtc.embeds.fields.status.status")}`, value: `${guild.get("utils.join_to_create.enabled") ? t(client, lang, "commands.jtc.embeds.fields.status.enabled") : t(client, lang, "commands.jtc.embeds.fields.status.disabled") }`, inline: true }
             );
 
         if (guild.get("utils.join_to_create.enabled")) {
             embed.addFields(
-                { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.category")}`, value: `<#${guild.get("utils.join_to_create.category")}>`, inline: true },
-                { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.channel")}`, value: `<#${guild.get("utils.join_to_create.channel")}>`, inline: true },
-                { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.default_name")}`, value: `${client.holder.utils.reVar(guild.get("utils.join_to_create.default_name"), interaction.user.displayName)}`, inline: true }
+                { name: `${t(client, lang, "commands.jtc.embeds.fields.category")}`, value: `<#${guild.get("utils.join_to_create.category")}>`, inline: true },
+                { name: `${t(client, lang, "commands.jtc.embeds.fields.channel")}`, value: `<#${guild.get("utils.join_to_create.channel")}>`, inline: true },
+                { name: `${t(client, lang, "commands.jtc.embeds.fields.default_name")}`, value: `${client.holder.utils.reVar(guild.get("utils.join_to_create.default_name"), interaction.user.displayName)}`, inline: true }
             )
 
             row.addComponents(
                 new ButtonBuilder()
                     .setCustomId("NI_jtc:change")
-                    .setLabel(`${client.holder.languages[lang].getText("commands.jtc.buttons.change_name")}`)
+                    .setLabel(`${t(client, lang, "commands.jtc.buttons.change_name")}`)
                     .setStyle(ButtonStyle.Primary)
             )
         }
@@ -80,13 +81,13 @@ module.exports = {
                         .setComponents(
                             new ButtonBuilder()
                                 .setCustomId("NI_jtc:toggle")
-                                .setLabel(`${ guild.get("utils.join_to_create.enabled") ? client.holder.languages[lang].getText("commands.jtc.buttons.disable") : client.holder.languages[lang].getText("commands.jtc.buttons.enable") }`)
+                                .setLabel(`${ guild.get("utils.join_to_create.enabled") ? t(client, lang, "commands.jtc.buttons.disable") : t(client, lang, "commands.jtc.buttons.enable") }`)
                                 .setStyle( guild.get("utils.join_to_create.enabled") ? ButtonStyle.Danger : ButtonStyle.Success )
                         )
 
                     delete embed.data.fields;
                     embed.addFields(
-                        { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.status")}`, value: `${guild.get("utils.join_to_create.enabled") ? client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.enabled") : client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.disabled") }`, inline: true }
+                        { name: `${t(client, lang, "commands.jtc.embeds.fields.status.status")}`, value: `${guild.get("utils.join_to_create.enabled") ? t(client, lang, "commands.jtc.embeds.fields.status.enabled") : t(client, lang, "commands.jtc.embeds.fields.status.disabled") }`, inline: true }
                     )
 
                     let category = guild.guild.channels.cache.get(guild.get("utils.join_to_create.category"));
@@ -105,7 +106,7 @@ module.exports = {
                         .setComponents(
                             new ButtonBuilder()
                                 .setCustomId("NI_jtc:toggle")
-                                .setLabel(`${ guild.get("utils.join_to_create.enabled") ? client.holder.languages[lang].getText("commands.jtc.buttons.disable") : client.holder.languages[lang].getText("commands.jtc.buttons.enable") }`)
+                                .setLabel(`${ guild.get("utils.join_to_create.enabled") ? t(client, lang, "commands.jtc.buttons.disable") : t(client, lang, "commands.jtc.buttons.enable") }`)
                                 .setStyle( guild.get("utils.join_to_create.enabled") ? ButtonStyle.Danger : ButtonStyle.Success )
                         )
 
@@ -137,16 +138,16 @@ module.exports = {
 
                     delete embed.data.fields;
                     embed.addFields(
-                        { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.status")}`, value: `${guild.get("utils.join_to_create.enabled") ? client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.enabled") : client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.disabled") }`, inline: true },
-                        { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.category")}`, value: `<#${guild.get("utils.join_to_create.category")}>`, inline: true },
-                        { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.channel")}`, value: `<#${guild.get("utils.join_to_create.channel")}>`, inline: true },
-                        { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.default_name")}`, value: `${client.holder.utils.reVar(guild.get("utils.join_to_create.default_name"), interaction.user.displayName)}`, inline: true }
+                        { name: `${t(client, lang, "commands.jtc.embeds.fields.status.status")}`, value: `${guild.get("utils.join_to_create.enabled") ? t(client, lang, "commands.jtc.embeds.fields.status.enabled") : t(client, lang, "commands.jtc.embeds.fields.status.disabled") }`, inline: true },
+                        { name: `${t(client, lang, "commands.jtc.embeds.fields.category")}`, value: `<#${guild.get("utils.join_to_create.category")}>`, inline: true },
+                        { name: `${t(client, lang, "commands.jtc.embeds.fields.channel")}`, value: `<#${guild.get("utils.join_to_create.channel")}>`, inline: true },
+                        { name: `${t(client, lang, "commands.jtc.embeds.fields.default_name")}`, value: `${client.holder.utils.reVar(guild.get("utils.join_to_create.default_name"), interaction.user.displayName)}`, inline: true }
                     );
 
                     row.addComponents(
                         new ButtonBuilder()
                             .setCustomId("NI_jtc:change")
-                            .setLabel(`${client.holder.languages[lang].getText("commands.jtc.buttons.change_name")}`)
+                            .setLabel(`${t(client, lang, "commands.jtc.buttons.change_name")}`)
                             .setStyle(ButtonStyle.Primary)
                     )
                 }
@@ -154,7 +155,7 @@ module.exports = {
                 i.update({ embeds: [embed], components: [row] });
             } else if (i.customId === "NI_jtc:change") {
                 let modal = new ModalBuilder()
-                    .setTitle(`${client.holder.languages[lang].getText("commands.jtc.modals.change_name.title")}`)
+                    .setTitle(`${t(client, lang, "commands.jtc.modals.change_name.title")}`)
                     .setCustomId("NI_jtc:change_modal")
                     .setComponents(
                         new ActionRowBuilder<ModalActionRowComponentBuilder>()
@@ -165,8 +166,8 @@ module.exports = {
                                     .setMaxLength(56)
                                     .setStyle(TextInputStyle.Short)
                                     .setCustomId("NI_jtc:change_name")
-                                    .setLabel(`${client.holder.languages[lang].getText("commands.jtc.modals.change_name.label")}`)
-                                    .setPlaceholder(`${client.holder.languages[lang].getText("commands.jtc.modals.change_name.placeholder")}`)
+                                    .setLabel(`${t(client, lang, "commands.jtc.modals.change_name.label")}`)
+                                    .setPlaceholder(`${t(client, lang, "commands.jtc.modals.change_name.placeholder")}`)
                             )
                     )
 
@@ -181,10 +182,10 @@ module.exports = {
                 delete embed.data.fields;
 
                 embed.addFields(
-                    { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.status")}`, value: `${guild.get("utils.join_to_create.enabled") ? client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.enabled") : client.holder.languages[lang].getText("commands.jtc.embeds.fields.status.disabled") }`, inline: true },
-                    { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.category")}`, value: `<#${guild.get("utils.join_to_create.category")}>`, inline: true },
-                    { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.channel")}`, value: `<#${guild.get("utils.join_to_create.channel")}>`, inline: true },
-                    { name: `${client.holder.languages[lang].getText("commands.jtc.embeds.fields.default_name")}`, value: `${client.holder.utils.reVar(guild.get("utils.join_to_create.default_name"), interaction.user.displayName)}`, inline: true }
+                    { name: `${t(client, lang, "commands.jtc.embeds.fields.status.status")}`, value: `${guild.get("utils.join_to_create.enabled") ? t(client, lang, "commands.jtc.embeds.fields.status.enabled") : t(client, lang, "commands.jtc.embeds.fields.status.disabled") }`, inline: true },
+                    { name: `${t(client, lang, "commands.jtc.embeds.fields.category")}`, value: `<#${guild.get("utils.join_to_create.category")}>`, inline: true },
+                    { name: `${t(client, lang, "commands.jtc.embeds.fields.channel")}`, value: `<#${guild.get("utils.join_to_create.channel")}>`, inline: true },
+                    { name: `${t(client, lang, "commands.jtc.embeds.fields.default_name")}`, value: `${client.holder.utils.reVar(guild.get("utils.join_to_create.default_name"), interaction.user.displayName)}`, inline: true }
                 );
 
                 // @ts-ignore
@@ -194,3 +195,5 @@ module.exports = {
 
     }
 } as SlashCommand;
+
+

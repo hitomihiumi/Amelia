@@ -2,6 +2,7 @@ import { Client } from "discord.js";
 import { Component, SlashCommand, Manifest } from "../../types/helpers";
 import { extendedPermissionCommand, onCoolDown, permissionCommand, permissionComponent } from "../../handlers/functions";
 import { Guild } from "../../helpers";
+import { t } from "../../i18n/helpers";
 
 module.exports = async (client: Client, interaction: any) => {
     let guild = interaction.guild ? new Guild(client, interaction.guild) : undefined;
@@ -32,7 +33,7 @@ module.exports = async (client: Client, interaction: any) => {
                 if (!(extendedPermissionCommand(guild, interaction, lang, command.name))) return;
             } else if (onCoolDown(interaction, command, client)) {
                 return interaction.reply({ephemeral: true,
-                    embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.cooldown', onCoolDown(interaction, command, client), command.name))]
+                    embeds: [client.holder.embed.info(lang, t(client, lang, 'events.interaction_create.cooldown', onCoolDown(interaction, command, client), command.name))]
                 });
             }
             await command.run(client, interaction);
@@ -44,7 +45,7 @@ module.exports = async (client: Client, interaction: any) => {
         const componentPermission = async (component: Component) => {
             if (component.options?.public === false && interaction.user.id !== interaction.message.interaction.user.id) {
                 await interaction.reply({
-                    embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_permission'))],
+                    embeds: [client.holder.embed.info(lang, t(client, lang, 'events.interaction_create.component_permission'))],
                     ephemeral: true
                 });
                 return false;
@@ -59,7 +60,7 @@ module.exports = async (client: Client, interaction: any) => {
             const component = client.holder.components.buttons.get(interaction.customId);
 
             if (!component) return interaction.reply({
-                    embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
+                    embeds: [client.holder.embed.info(lang, t(client, lang, 'events.interaction_create.component_not_active'))],
                 ephemeral: true
             });
 
@@ -78,7 +79,7 @@ module.exports = async (client: Client, interaction: any) => {
             const component = client.holder.components.selectMenus.get(interaction.customId);
 
             if (!component) return interaction.reply({
-                embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
+                embeds: [client.holder.embed.info(lang, t(client, lang, 'events.interaction_create.component_not_active'))],
                 ephemeral: true
             });
 
@@ -97,7 +98,7 @@ module.exports = async (client: Client, interaction: any) => {
             const component = client.holder.components.modals.get(interaction.customId);
 
             if (!component) return interaction.reply({
-                embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
+                embeds: [client.holder.embed.info(lang, t(client, lang, 'events.interaction_create.component_not_active'))],
                 ephemeral: true
             });
 
@@ -114,7 +115,7 @@ module.exports = async (client: Client, interaction: any) => {
             const component = client.holder.components.autocompletes.get(interaction.commandName);
 
             if (!component) return interaction.reply({
-                embeds: [client.holder.embed.info(lang, client.holder.languages[`${lang}`].getText('events.interaction_create.component_not_active'))],
+                embeds: [client.holder.embed.info(lang, t(client, lang, 'events.interaction_create.component_not_active'))],
                 ephemeral: true
             });
 

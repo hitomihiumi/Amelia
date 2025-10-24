@@ -24,6 +24,7 @@ import {
 import { Guild } from "../../helpers";
 import { CommandPermission } from "../../types/helpers";
 import { translatePermission } from "../../handlers/functions";
+import { t } from "../../i18n/helpers";
 
 const defaultPermissions = [
     PermissionsBitField.Flags.Administrator,
@@ -58,15 +59,15 @@ module.exports = {
         let back = 'main';
 
         let embed = new EmbedBuilder()
-            .setTitle(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.base.title'))
-            .setDescription(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.base.description'))
+            .setTitle(t(client, lang, 'commands.permissions.embeds.base.title'))
+            .setDescription(t(client, lang, 'commands.permissions.embeds.base.description'))
             .setColor(client.holder.colors.default)
 
         let backButton = new ActionRowBuilder<MessageActionRowComponentBuilder>()
             .setComponents(
                 new ButtonBuilder()
                     .setCustomId("NI_permissions:back")
-                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.back'))
+                    .setLabel(t(client, lang, 'commands.permissions.buttons.back'))
                     .setEmoji("🔙")
                     .setStyle(ButtonStyle.Secondary)
             )
@@ -117,14 +118,14 @@ module.exports = {
                     await i.update({ components: [pageControl, commandsSelect] });
                 } else if (i.customId === "NI_permissions:page:jump") {
                     let modal = new ModalBuilder()
-                        .setTitle(client.holder.languages[`${lang}`].getText('commands.permissions.modals.jump.title'))
+                        .setTitle(t(client, lang, 'commands.permissions.modals.jump.title'))
                         .setCustomId("NI_permissions:modal:jump")
                         .setComponents(
                             new ActionRowBuilder<ModalActionRowComponentBuilder>()
                                 .setComponents(
                                     new TextInputBuilder()
                                         .setCustomId("NI_permissions:text:jump")
-                                        .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.modals.jump.label'))
+                                        .setLabel(t(client, lang, 'commands.permissions.modals.jump.label'))
                                         .setPlaceholder(`1-${Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)}`)
                                         .setStyle(TextInputStyle.Short)
                                 )
@@ -146,8 +147,8 @@ module.exports = {
                     submit.update({ components: [pageControl, commandsSelect] });
                 } else if (i.customId === "NI_permissions:back") {
                     if (back === 'main') {
-                        embed.setTitle(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.base.title'))
-                            .setDescription(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.base.description'))
+                        embed.setTitle(t(client, lang, 'commands.permissions.embeds.base.title'))
+                            .setDescription(t(client, lang, 'commands.permissions.embeds.base.description'))
                             .setColor(client.holder.colors.default)
 
                         commandsSelect = commandsList(client, guild, lang, page);
@@ -159,9 +160,9 @@ module.exports = {
                         permissionsSelect = permissionsList(client, lang, permission);
                         rolesSelect = permissionRoles(client, guild, lang, permission);
 
-                        embed.setTitle(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.command.title', command.name))
+                        embed.setTitle(t(client, lang, 'commands.permissions.embeds.command.title', command.name))
                             // @ts-ignore
-                            .setDescription(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.command.description', command.name, command.locale[lang] ? command.locale[lang] : command.description))
+                            .setDescription(t(client, lang, 'commands.permissions.embeds.command.description', command.name, command.locale[lang] ? command.locale[lang] : command.description))
                             .setColor(client.holder.colors.default)
 
                         await i.update({ components: [permissionsSelect, rolesSelect, backButton], embeds: [embed] });
@@ -177,7 +178,7 @@ module.exports = {
                             new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:submit")
-                                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.submit'))
+                                    .setLabel(t(client, lang, 'commands.permissions.buttons.submit'))
                                     .setEmoji("✔️")
                                     .setStyle(ButtonStyle.Success)
                             ),
@@ -191,12 +192,12 @@ module.exports = {
 
                     let roleSelect = new RoleSelectMenuBuilder()
                         .setCustomId("NI_permissions:role")
-                        .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.role.placeholder'))
+                        .setPlaceholder(t(client, lang, 'commands.permissions.select_menus.role.placeholder'))
                         .setMaxValues(1)
                     if (temp.id.length > 0) roleSelect.setDefaultRoles([temp.id])
 
-                    embed.setTitle(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.role.title', command.name))
-                        .setDescription(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.role.description', command.name, temp.type === "allow" ? client.holder.languages[`${lang}`].getText('commands.permissions.buttons.deny') : client.holder.languages[`${lang}`].getText('commands.permissions.buttons.allow')))
+                    embed.setTitle(t(client, lang, 'commands.permissions.embeds.role.title', command.name))
+                        .setDescription(t(client, lang, 'commands.permissions.embeds.role.description', command.name, temp.type === "allow" ? t(client, lang, 'commands.permissions.buttons.deny') : t(client, lang, 'commands.permissions.buttons.allow')))
                         .setColor(client.holder.colors.default)
 
                     await i.update({ embeds: [embed], components: [
@@ -204,17 +205,17 @@ module.exports = {
                             new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:delete")
-                                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.delete'))
+                                    .setLabel(t(client, lang, 'commands.permissions.buttons.delete'))
                                     .setEmoji("🗑️")
                                     .setStyle(ButtonStyle.Danger),
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:type")
-                                    .setLabel(temp.type === "allow" ? client.holder.languages[`${lang}`].getText('commands.permissions.buttons.deny') : client.holder.languages[`${lang}`].getText('commands.permissions.buttons.allow'))
+                                    .setLabel(temp.type === "allow" ? t(client, lang, 'commands.permissions.buttons.deny') : t(client, lang, 'commands.permissions.buttons.allow'))
                                     .setEmoji("🔘")
                                     .setStyle(ButtonStyle.Primary),
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:submit")
-                                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.submit'))
+                                    .setLabel(t(client, lang, 'commands.permissions.buttons.submit'))
                                     .setEmoji("✔️")
                                     .setStyle(ButtonStyle.Success)
                             ),
@@ -230,7 +231,7 @@ module.exports = {
                                 permission.roles.push(temp);
                             }
                         } else {
-                            return i.followUp({ content: client.holder.languages[`${lang}`].getText('commands.permissions.messages.role.error'), ephemeral: true });
+                            return i.followUp({ content: t(client, lang, 'commands.permissions.messages.role.error'), ephemeral: true });
                         }
                     }
 
@@ -246,16 +247,16 @@ module.exports = {
 
                     back = 'main';
 
-                    embed.setTitle(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.command.title', command.name))
+                    embed.setTitle(t(client, lang, 'commands.permissions.embeds.command.title', command.name))
                         // @ts-ignore
-                        .setDescription(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.command.description', command.name, command.locale[lang] ? command.locale[lang] : command.description))
+                        .setDescription(t(client, lang, 'commands.permissions.embeds.command.description', command.name, command.locale[lang] ? command.locale[lang] : command.description))
                         .setColor(client.holder.colors.default)
 
                     await i.update({ embeds: [embed], components: [permissionsSelect, rolesSelect,
                             new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:submit")
-                                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.submit'))
+                                    .setLabel(t(client, lang, 'commands.permissions.buttons.submit'))
                                     .setEmoji("✔️")
                                     .setStyle(ButtonStyle.Success)
                             ),
@@ -274,16 +275,16 @@ module.exports = {
 
                     console.log(permission);
 
-                    embed.setTitle(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.command.title', command.name))
+                    embed.setTitle(t(client, lang, 'commands.permissions.embeds.command.title', command.name))
                         // @ts-ignore
-                        .setDescription(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.command.description', command.name, command.locale[lang] ? command.locale[lang] : command.description))
+                        .setDescription(t(client, lang, 'commands.permissions.embeds.command.description', command.name, command.locale[lang] ? command.locale[lang] : command.description))
                         .setColor(client.holder.colors.default)
 
                     await i.update({ embeds: [embed], components: [permissionsSelect, rolesSelect,
                             new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:submit")
-                                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.submit'))
+                                    .setLabel(t(client, lang, 'commands.permissions.buttons.submit'))
                                     .setEmoji("✔️")
                                     .setStyle(ButtonStyle.Success)
                             ),
@@ -299,7 +300,7 @@ module.exports = {
                             new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:submit")
-                                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.submit'))
+                                    .setLabel(t(client, lang, 'commands.permissions.buttons.submit'))
                                     .setEmoji("✔️")
                                     .setStyle(ButtonStyle.Success)
                             ),
@@ -314,12 +315,12 @@ module.exports = {
                     }
                     let roleSelect = new RoleSelectMenuBuilder()
                         .setCustomId("NI_permissions:role")
-                        .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.role.placeholder'))
+                        .setPlaceholder(t(client, lang, 'commands.permissions.select_menus.role.placeholder'))
                         .setMaxValues(1)
                         if (temp.id.length > 0) roleSelect.setDefaultRoles([temp.id])
 
-                    embed.setTitle(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.role.title', command.name))
-                        .setDescription(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.role.description', command.name, (temp.type === "allow" ? client.holder.languages[`${lang}`].getText('commands.permissions.buttons.deny') : client.holder.languages[`${lang}`].getText('commands.permissions.buttons.allow'))))
+                    embed.setTitle(t(client, lang, 'commands.permissions.embeds.role.title', command.name))
+                        .setDescription(t(client, lang, 'commands.permissions.embeds.role.description', command.name, (temp.type === "allow" ? t(client, lang, 'commands.permissions.buttons.deny') : t(client, lang, 'commands.permissions.buttons.allow'))))
                         .setColor(client.holder.colors.default)
 
                     await i.update({ embeds: [embed], components: [
@@ -327,17 +328,17 @@ module.exports = {
                             new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:delete")
-                                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.delete'))
+                                    .setLabel(t(client, lang, 'commands.permissions.buttons.delete'))
                                     .setEmoji("🗑️")
                                     .setStyle(ButtonStyle.Danger),
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:type")
-                                    .setLabel(temp.type === "allow" ? client.holder.languages[`${lang}`].getText('commands.permissions.buttons.deny') : client.holder.languages[`${lang}`].getText('commands.permissions.buttons.allow'))
+                                    .setLabel(temp.type === "allow" ? t(client, lang, 'commands.permissions.buttons.deny') : t(client, lang, 'commands.permissions.buttons.allow'))
                                     .setEmoji("🔘")
                                     .setStyle(ButtonStyle.Primary),
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:submit")
-                                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.submit'))
+                                    .setLabel(t(client, lang, 'commands.permissions.buttons.submit'))
                                     .setEmoji("✔️")
                                     .setStyle(ButtonStyle.Success)
                             ),
@@ -350,12 +351,12 @@ module.exports = {
 
                     let roleSelect = new RoleSelectMenuBuilder()
                         .setCustomId("NI_permissions:role")
-                        .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.role.placeholder'))
+                        .setPlaceholder(t(client, lang, 'commands.permissions.select_menus.role.placeholder'))
                         .setMaxValues(1)
                         .setDefaultRoles([temp.id])
 
-                    embed.setTitle(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.role.title', command.name))
-                        .setDescription(client.holder.languages[`${lang}`].getText('commands.permissions.embeds.role.description', command.name, temp.type === "allow" ? client.holder.languages[`${lang}`].getText('commands.permissions.buttons.deny') : client.holder.languages[`${lang}`].getText('commands.permissions.buttons.allow')))
+                    embed.setTitle(t(client, lang, 'commands.permissions.embeds.role.title', command.name))
+                        .setDescription(t(client, lang, 'commands.permissions.embeds.role.description', command.name, temp.type === "allow" ? t(client, lang, 'commands.permissions.buttons.deny') : t(client, lang, 'commands.permissions.buttons.allow')))
                         .setColor(client.holder.colors.default)
 
                     await i.update({ embeds: [embed], components: [
@@ -363,17 +364,17 @@ module.exports = {
                             new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:delete")
-                                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.delete'))
+                                    .setLabel(t(client, lang, 'commands.permissions.buttons.delete'))
                                     .setEmoji("🗑️")
                                     .setStyle(ButtonStyle.Danger),
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:type")
-                                    .setLabel(temp.type === "allow" ? client.holder.languages[`${lang}`].getText('commands.permissions.buttons.deny') : client.holder.languages[`${lang}`].getText('commands.permissions.buttons.allow'))
+                                    .setLabel(temp.type === "allow" ? t(client, lang, 'commands.permissions.buttons.deny') : t(client, lang, 'commands.permissions.buttons.allow'))
                                     .setEmoji("🔘")
                                     .setStyle(ButtonStyle.Primary),
                                 new ButtonBuilder()
                                     .setCustomId("NI_permissions:role:submit")
-                                    .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.buttons.submit'))
+                                    .setLabel(t(client, lang, 'commands.permissions.buttons.submit'))
                                     .setEmoji("✔️")
                                     .setStyle(ButtonStyle.Success)
                             ),
@@ -389,7 +390,7 @@ function commandsList(client: Client, guild: Guild, lang: string, page: number) 
     let commands = client.holder.cmds.slashCommands.toJSON().slice(page * 10, page * 10 + 25);
     let commandsSelect = new StringSelectMenuBuilder()
         .setCustomId("NI_permissions:commands")
-        .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.commands.placeholder'))
+        .setPlaceholder(t(client, lang, 'commands.permissions.select_menus.commands.placeholder'))
         .setMaxValues(1)
 
     commands.forEach((cmd) => {
@@ -400,7 +401,7 @@ function commandsList(client: Client, guild: Guild, lang: string, page: number) 
                 .setValue(`${cmd.name}`)
                 .setEmoji(perm !== undefined ? client.holder.emojis['on'] : client.holder.emojis['none'])
                 // @ts-ignore
-                .setDescription(perm !== undefined ? client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.commands.description') : cmd.locale ? cmd.locale[lang] : cmd.description)
+                .setDescription(perm !== undefined ? t(client, lang, 'commands.permissions.select_menus.commands.description') : cmd.locale ? cmd.locale[lang] : cmd.description)
 
         )
     })
@@ -411,7 +412,7 @@ function commandsList(client: Client, guild: Guild, lang: string, page: number) 
 function permissionsList(client: Client, lang: string, permission: CommandPermission) {
     let permissionsSelect = new StringSelectMenuBuilder()
         .setCustomId("NI_permissions:permissions")
-        .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.permissions.placeholder'))
+        .setPlaceholder(t(client, lang, 'commands.permissions.select_menus.permissions.placeholder'))
         .setMaxValues(1)
 
     defaultPermissions.forEach((perm) => {
@@ -429,7 +430,7 @@ function permissionsList(client: Client, lang: string, permission: CommandPermis
 function permissionRoles(client: Client, guild: Guild, lang: string, permission: CommandPermission) {
     let rolesSelect = new StringSelectMenuBuilder()
         .setCustomId("NI_permissions:roles")
-        .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.roles.placeholder'))
+        .setPlaceholder(t(client, lang, 'commands.permissions.select_menus.roles.placeholder'))
         .setMaxValues(1)
 
     if (permission?.roles?.length > 0) {
@@ -438,7 +439,7 @@ function permissionRoles(client: Client, guild: Guild, lang: string, permission:
                 new StringSelectMenuOptionBuilder()
                     .setLabel(`${guild.guild.roles.cache.get(role.id)?.name}`)
                     .setEmoji(role.type === "allow" ? client.holder.emojis['on'] : client.holder.emojis['off'])
-                    .setDescription(role.type === "allow" ? client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.roles.allow') : client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.roles.deny'))
+                    .setDescription(role.type === "allow" ? t(client, lang, 'commands.permissions.select_menus.roles.allow') : t(client, lang, 'commands.permissions.select_menus.roles.deny'))
                     .setValue(role.id)
             )
         })
@@ -447,7 +448,7 @@ function permissionRoles(client: Client, guild: Guild, lang: string, permission:
     if (rolesSelect.options.length < 25) {
         rolesSelect.addOptions(
             new StringSelectMenuOptionBuilder()
-                .setLabel(client.holder.languages[`${lang}`].getText('commands.permissions.select_menus.roles.add'))
+                .setLabel(t(client, lang, 'commands.permissions.select_menus.roles.add'))
                 .setEmoji("➕")
                 .setValue("add")
         )
@@ -455,3 +456,5 @@ function permissionRoles(client: Client, guild: Guild, lang: string, permission:
 
     return new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(rolesSelect);
 }
+
+

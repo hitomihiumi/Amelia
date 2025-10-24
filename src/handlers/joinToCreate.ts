@@ -13,6 +13,7 @@ import {
 } from "discord.js";
 import { Guild } from "../helpers";
 import { User } from "../helpers";
+import { t } from "../i18n/helpers";
 
 module.exports = async (client: Client) => {
     client.on("voiceStateUpdate", async (oldState, newState) => {
@@ -51,6 +52,7 @@ function deleteChannel(guild: Guild, channelId: string) {
 
 async function createChannel(client: Client, guild: Guild, newState: VoiceState) {
     if (!newState.member) return;
+    const lang = guild.get("settings.language");
     let map = guild.get("temp.join_to_create.map");
     let channel = await newState.guild.channels.create({
         name: client.holder.utils.reVar(guild.get("utils.join_to_create.default_name"), newState.member.displayName),
@@ -72,7 +74,7 @@ async function createChannel(client: Client, guild: Guild, newState: VoiceState)
 
     const select = new StringSelectMenuBuilder()
         .setCustomId("I_jtc:preset")
-        .setPlaceholder(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.preset.placeholder"))
+        .setPlaceholder(t(client, lang, "functions.join_to_create.preset.placeholder"))
         .setMaxValues(1)
 
     if (presets.length > 0) {
@@ -81,15 +83,15 @@ async function createChannel(client: Client, guild: Guild, newState: VoiceState)
                 new StringSelectMenuOptionBuilder()
                     .setLabel(preset.name)
                     .setValue(preset.id)
-                    .setDescription(preset.description || client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.preset.default_description"))
+                    .setDescription(preset.description || t(client, lang, "functions.join_to_create.preset.default_description"))
             )
         }
     } else {
         select.addOptions(
             new StringSelectMenuOptionBuilder()
-                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.preset.add"))
+                .setLabel(t(client, lang, "functions.join_to_create.preset.add"))
                 .setValue("new")
-                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.preset.add_description"))
+                .setDescription(t(client, lang, "functions.join_to_create.preset.add_description"))
         )
     }
 
@@ -97,76 +99,76 @@ async function createChannel(client: Client, guild: Guild, newState: VoiceState)
         embeds: [
             new EmbedBuilder()
                 .setColor(client.holder.colors.default)
-                .setTitle(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.embed.title"))
-                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.embed.description"))
+                .setTitle(t(client, lang, "functions.join_to_create.embed.title"))
+                .setDescription(t(client, lang, "functions.join_to_create.embed.description"))
         ],
         components: [
             new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .setComponents(
                     new StringSelectMenuBuilder()
                         .setCustomId("I_jtc:up_select")
-                        .setPlaceholder(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.up_select.placeholder"))
+                        .setPlaceholder(t(client, lang, "functions.join_to_create.up_select.placeholder"))
                         .setMaxValues(1)
                         .setOptions(
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji("1194738398347407540")
                                 .setValue("rename")
-                                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.up_select.options.rename.label"))
-                                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.up_select.options.rename.description")),
+                                .setLabel(t(client, lang, "functions.join_to_create.up_select.options.rename.label"))
+                                .setDescription(t(client, lang, "functions.join_to_create.up_select.options.rename.description")),
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji("1194738390948663306")
                                 .setValue("bitrate")
-                                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.up_select.options.bitrate.label"))
-                                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.up_select.options.bitrate.description")),
+                                .setLabel(t(client, lang, "functions.join_to_create.up_select.options.bitrate.label"))
+                                .setDescription(t(client, lang, "functions.join_to_create.up_select.options.bitrate.description")),
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji("1194738394513801327")
                                 .setValue("limit")
-                                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.up_select.options.limit.label"))
-                                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.up_select.options.limit.description")),
+                                .setLabel(t(client, lang, "functions.join_to_create.up_select.options.limit.label"))
+                                .setDescription(t(client, lang, "functions.join_to_create.up_select.options.limit.description")),
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji("1194738393591066724")
                                 .setValue("owner")
-                                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.up_select.options.owner.label"))
-                                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.up_select.options.owner.description"))
+                                .setLabel(t(client, lang, "functions.join_to_create.up_select.options.owner.label"))
+                                .setDescription(t(client, lang, "functions.join_to_create.up_select.options.owner.description"))
                         )
                 ),
             new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .setComponents(
                     new StringSelectMenuBuilder()
                         .setCustomId("I_jtc:down_select")
-                        .setPlaceholder(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.placeholder"))
+                        .setPlaceholder(t(client, lang, "functions.join_to_create.down_select.placeholder"))
                         .setMaxValues(1)
                         .setOptions(
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji("1194738399828000879")
                                 .setValue("open")
-                                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.open.label"))
-                                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.open.description")),
+                                .setLabel(t(client, lang, "functions.join_to_create.down_select.options.open.label"))
+                                .setDescription(t(client, lang, "functions.join_to_create.down_select.options.open.description")),
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji("1194738396061503548")
                                 .setValue("close")
-                                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.close.label"))
-                                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.close.description")),
+                                .setLabel(t(client, lang, "functions.join_to_create.down_select.options.close.label"))
+                                .setDescription(t(client, lang, "functions.join_to_create.down_select.options.close.description")),
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji("1194738402130677910")
                                 .setValue("add")
-                                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.add.label"))
-                                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.add.description")),
+                                .setLabel(t(client, lang, "functions.join_to_create.down_select.options.add.label"))
+                                .setDescription(t(client, lang, "functions.join_to_create.down_select.options.add.description")),
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji("1194738403409932328")
                                 .setValue("remove")
-                                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.remove.label"))
-                                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.remove.description")),
+                                .setLabel(t(client, lang, "functions.join_to_create.down_select.options.remove.label"))
+                                .setDescription(t(client, lang, "functions.join_to_create.down_select.options.remove.description")),
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji("1194761795760554074")
                                 .setValue("show")
-                                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.show.label"))
-                                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.show.description")),
+                                .setLabel(t(client, lang, "functions.join_to_create.down_select.options.show.label"))
+                                .setDescription(t(client, lang, "functions.join_to_create.down_select.options.show.description")),
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji("1194761783043440720")
                                 .setValue("hide")
-                                .setLabel(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.hide.label"))
-                                .setDescription(client.holder.languages[guild.get("settings.language")].getText("functions.join_to_create.down_select.options.hide.description"))
+                                .setLabel(t(client, lang, "functions.join_to_create.down_select.options.hide.label"))
+                                .setDescription(t(client, lang, "functions.join_to_create.down_select.options.hide.description"))
                         )
                 ),
             new ActionRowBuilder<MessageActionRowComponentBuilder>()

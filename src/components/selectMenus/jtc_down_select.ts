@@ -8,6 +8,7 @@ import {
     UserSelectMenuBuilder,
     RoleSelectMenuBuilder, PermissionsBitField,
 } from "discord.js";
+import { t } from "../../i18n/helpers";
 
 module.exports = {
     customId: "I_jtc:down_select",
@@ -20,6 +21,7 @@ module.exports = {
         if (!interaction.member.voice) return;
         if (!interaction.member.voice.channel) return;
         let guild = new Guild(client, interaction.guild);
+        const lang = guild.get("settings.language");
 
         let map = guild.get("temp.join_to_create.map");
 
@@ -32,7 +34,7 @@ module.exports = {
                     })
 
                     await interaction.reply({
-                        content: client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.msg.open'),
+                        content: t(client, lang, 'functions.join_to_create.msg.open'),
                         ephemeral: true
                     })
                     break;
@@ -42,25 +44,25 @@ module.exports = {
                     })
 
                     await interaction.reply({
-                        content: client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.msg.close'),
+                        content: t(client, lang, 'functions.join_to_create.msg.close'),
                         ephemeral: true
                     })
                     break;
                 case "add":
                      await interaction.reply({
-                        content: `${client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.select_menus.add.msg')}`,
+                        content: t(client, lang, 'functions.join_to_create.select_menus.add.msg'),
                         components: [
                             new ActionRowBuilder<MessageActionRowComponentBuilder>()
                                 .setComponents(
                                     new UserSelectMenuBuilder()
                                         .setCustomId("I_jtc:add_select_user")
-                                        .setPlaceholder(client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.select_menus.add.placeholder.user')),
+                                        .setPlaceholder(t(client, lang, 'functions.join_to_create.select_menus.add.placeholder.user')),
                                 ),
                             new ActionRowBuilder<MessageActionRowComponentBuilder>()
                                 .setComponents(
                                     new RoleSelectMenuBuilder()
                                         .setCustomId("I_jtc:add_select_role")
-                                        .setPlaceholder(client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.select_menus.add.placeholder.role'))
+                                        .setPlaceholder(t(client, lang, 'functions.join_to_create.select_menus.add.placeholder.role'))
                                 )
                         ],
                         ephemeral: true
@@ -68,19 +70,19 @@ module.exports = {
                     break;
                 case "remove":
                     await interaction.reply({
-                        content: `${client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.select_menus.remove.msg')}`,
+                        content: t(client, lang, 'functions.join_to_create.select_menus.remove.msg'),
                         components: [
                             new ActionRowBuilder<MessageActionRowComponentBuilder>()
                                 .setComponents(
                                     new UserSelectMenuBuilder()
                                         .setCustomId("I_jtc:remove_select_user")
-                                        .setPlaceholder(client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.select_menus.remove.placeholder.user')),
+                                        .setPlaceholder(t(client, lang, 'functions.join_to_create.select_menus.remove.placeholder.user')),
                                 ),
                             new ActionRowBuilder<MessageActionRowComponentBuilder>()
                                 .setComponents(
                                     new RoleSelectMenuBuilder()
                                         .setCustomId("I_jtc:remove_select_role")
-                                        .setPlaceholder(client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.select_menus.remove.placeholder.role'))
+                                        .setPlaceholder(t(client, lang, 'functions.join_to_create.select_menus.remove.placeholder.role'))
                                 )
                         ],
                         ephemeral: true
@@ -92,7 +94,7 @@ module.exports = {
                     })
 
                     await interaction.reply({
-                        content: client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.msg.show'),
+                        content: t(client, lang, 'functions.join_to_create.msg.show'),
                         ephemeral: true
                     })
                     break;
@@ -102,14 +104,14 @@ module.exports = {
                     })
 
                     await interaction.reply({
-                        content: client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.msg.hide'),
+                        content: t(client, lang, 'functions.join_to_create.msg.hide'),
                         ephemeral: true
                     })
                     break;
             }
         } else {
             await interaction.reply({
-                content: client.holder.languages[`${guild.get("settings.language")}`].getText('functions.join_to_create.errors.not_owner'),
+                content: t(client, lang, 'functions.join_to_create.errors.not_owner'),
                 ephemeral: true
             })
         }

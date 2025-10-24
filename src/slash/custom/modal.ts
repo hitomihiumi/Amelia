@@ -20,6 +20,7 @@ import {
 import { Guild, canvasUtil, customUtil } from "../../helpers";
 import { generateID } from "../../handlers/functions";
 import fuse from "fuse.js";
+import { t } from "../../i18n/helpers";
 
 module.exports = {
     name: "modal",
@@ -46,27 +47,27 @@ module.exports = {
         let _search = '';
 
         let embed = new EmbedBuilder()
-            .setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.title'))
-            .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.description'))
+            .setTitle(t(client, lang, 'commands.modal.embeds.base.title'))
+            .setDescription(t(client, lang, 'commands.modal.embeds.base.description'))
             .setColor(client.holder.colors.default)
 
         let base = new ActionRowBuilder<MessageActionRowComponentBuilder>()
             .setComponents(
                 new StringSelectMenuBuilder()
                     .setCustomId('NI_modal:base')
-                    .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.base.placeholder'))
+                    .setPlaceholder(t(client, lang, 'commands.modal.select_menus.base.placeholder'))
                     .setMaxValues(1)
                     .setOptions(
                         new StringSelectMenuOptionBuilder()
                             .setValue('NI_modal:base:add')
-                            .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.base.options.create.label'))
+                            .setLabel(t(client, lang, 'commands.modal.select_menus.base.options.create.label'))
                             .setEmoji('➕')
-                            .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.base.options.create.description')),
+                            .setDescription(t(client, lang, 'commands.modal.select_menus.base.options.create.description')),
                         new StringSelectMenuOptionBuilder()
                             .setValue('NI_modal:base:edit')
-                            .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.base.options.edit.label'))
+                            .setLabel(t(client, lang, 'commands.modal.select_menus.base.options.edit.label'))
                             .setEmoji('📝')
-                            .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.base.options.edit.description'))
+                            .setDescription(t(client, lang, 'commands.modal.select_menus.base.options.edit.description'))
                     )
             )
 
@@ -77,17 +78,17 @@ module.exports = {
                 .setComponents(
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:title')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_modal.title'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_modal.title'))
                         .setStyle(ButtonStyle.Secondary)
                         .setEmoji('📝'),
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:preview')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_modal.preview'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_modal.preview'))
                         .setStyle(ButtonStyle.Primary)
                         .setEmoji('👁️'),
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:back')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_modal.back'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_modal.back'))
                         .setStyle(ButtonStyle.Secondary)
                         .setEmoji('🔙')
                 ),
@@ -95,12 +96,12 @@ module.exports = {
                 .setComponents(
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:delete')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_modal.delete'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_modal.delete'))
                         .setStyle(ButtonStyle.Danger)
                         .setEmoji('🗑️'),
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:save')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_modal.save'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_modal.save'))
                         .setStyle(ButtonStyle.Success)
                         .setEmoji('💾'),
                 )
@@ -111,17 +112,17 @@ module.exports = {
                 .setComponents(
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:label')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_field.label'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_field.label'))
                         .setStyle(ButtonStyle.Secondary)
                         .setEmoji('📝'),
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:placeholder')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_field.placeholder'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_field.placeholder'))
                         .setStyle(ButtonStyle.Secondary)
                         .setEmoji('💭'),
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:style')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_field.style'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_field.style'))
                         .setStyle(ButtonStyle.Secondary)
                         .setEmoji('🎨')
                 ),
@@ -129,17 +130,17 @@ module.exports = {
                 .setComponents(
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:sizes')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_field.sizes'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_field.sizes'))
                         .setStyle(ButtonStyle.Secondary)
                         .setEmoji('📏'),
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:required')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_field.required'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_field.required'))
                         .setStyle(ButtonStyle.Secondary)
                         .setEmoji('*️⃣'),
                     new ButtonBuilder()
                         .setCustomId('NI_modal:edit:field_delete')
-                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_field.delete'))
+                        .setLabel(t(client, lang, 'commands.modal.buttons.edit_field.delete'))
                         .setStyle(ButtonStyle.Danger)
                         .setEmoji('🗑️')
                 )
@@ -158,17 +159,17 @@ module.exports = {
                     case 'NI_modal:base':
                         switch (i.values[0]) {
                             case 'NI_modal:base:add':
-                                embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.title'))
-                                    .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.description'))
+                                embed.setTitle(t(client, lang, 'commands.modal.embeds.edit.title'))
+                                    .setDescription(t(client, lang, 'commands.modal.embeds.edit.description'))
                                     .addFields({
-                                        name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.field.name'),
-                                        value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.field.value', _schema.title)
+                                        name: t(client, lang, 'commands.modal.embeds.edit.field.name'),
+                                        value: t(client, lang, 'commands.modal.embeds.edit.field.value', _schema.title)
                                     })
                                 msg.edit({ embeds: [embed], components: [...editrow, fieldList(client, lang, _schema)] });
                                 break;
                             case 'NI_modal:base:edit':
-                                embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.search.title'))
-                                    .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.search.description'))
+                                embed.setTitle(t(client, lang, 'commands.modal.embeds.search.title'))
+                                    .setDescription(t(client, lang, 'commands.modal.embeds.search.description'))
                                 msg.edit({ embeds: [embed], components: searchrow });
                                 break;
                         }
@@ -176,11 +177,11 @@ module.exports = {
                         break;
                     case 'NI_modal:select':
                         _schema = schema(guild.get('utils.components.modals').find((m: ModalCustom) => m.id === i.values[0].split(':')[2]));
-                        embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.title'))
-                            .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.description'))
+                        embed.setTitle(t(client, lang, 'commands.modal.embeds.edit.title'))
+                            .setDescription(t(client, lang, 'commands.modal.embeds.edit.description'))
                             .addFields({
-                                name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.field.name'),
-                                value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.field.value', _schema.title)
+                                name: t(client, lang, 'commands.modal.embeds.edit.field.name'),
+                                value: t(client, lang, 'commands.modal.embeds.edit.field.value', _schema.title)
                             })
                         msg.edit({ embeds: [embed], components: [...editrow, fieldList(client, lang, _schema)] });
                         _back = i.customId
@@ -190,11 +191,11 @@ module.exports = {
                             delete embed.data.fields;
                             delete embed.data.image;
 
-                            embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.title'))
-                                .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.description'))
+                            embed.setTitle(t(client, lang, 'commands.modal.embeds.edit.title'))
+                                .setDescription(t(client, lang, 'commands.modal.embeds.edit.description'))
                                 .addFields({
-                                    name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.field.name'),
-                                    value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.field.value', _schema.title)
+                                    name: t(client, lang, 'commands.modal.embeds.edit.field.name'),
+                                    value: t(client, lang, 'commands.modal.embeds.edit.field.value', _schema.title)
                                 })
                             msg.edit({embeds: [embed], components: [...editrow, fieldList(client, lang, _schema)], files: []});
                         } else {
@@ -244,14 +245,14 @@ module.exports = {
                     msg.edit({embeds: [embed], components: [searchrow[0], searchrow[1]]});
                 } else if (i.customId === 'NI_modal:page:jump') {
                     let modal = new ModalBuilder()
-                        .setTitle(client.holder.languages[`${lang}`].getText('commands.modal.modals.jump.title'))
+                        .setTitle(t(client, lang, 'commands.modal.modals.jump.title'))
                         .setCustomId("NI_modal:modal:jump")
                         .setComponents(
                             new ActionRowBuilder<ModalActionRowComponentBuilder>()
                                 .setComponents(
                                     new TextInputBuilder()
                                         .setCustomId("NI_modal:text:jump")
-                                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.modals.jump.label'))
+                                        .setLabel(t(client, lang, 'commands.modal.modals.jump.label'))
                                         .setPlaceholder(`1-${Math.ceil(guild.get('utils.components.modals').length / 25) || 1}`)
                                         .setStyle(TextInputStyle.Short)
                                 )
@@ -276,14 +277,14 @@ module.exports = {
                     submit.update({components: searchrow});
                 } else if (i.customId === 'NI_modal:page:search') {
                     let modal = new ModalBuilder()
-                        .setTitle(client.holder.languages[`${lang}`].getText('commands.modal.modals.search.title'))
+                        .setTitle(t(client, lang, 'commands.modal.modals.search.title'))
                         .setCustomId("NI_modal:modal:search")
                         .setComponents(
                             new ActionRowBuilder<ModalActionRowComponentBuilder>()
                                 .setComponents(
                                     new TextInputBuilder()
                                         .setCustomId("NI_modal:text:search")
-                                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.modals.search.label'))
+                                        .setLabel(t(client, lang, 'commands.modal.modals.search.label'))
                                         .setStyle(TextInputStyle.Short)
                                 )
                         )
@@ -310,22 +311,22 @@ module.exports = {
 
                     embed.addFields(
                         {
-                            name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.search.field.name'),
-                            value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.search.field.value', _search)
+                            name: t(client, lang, 'commands.modal.embeds.search.field.name'),
+                            value: t(client, lang, 'commands.modal.embeds.search.field.value', _search)
                         }
                     )
                     // @ts-ignore
                     submit.update({embeds: [embed], components: searchrow});
                 } else if (i.customId === 'NI_modal:edit:title') {
                     let modal = new ModalBuilder()
-                        .setTitle(client.holder.languages[`${lang}`].getText('commands.modal.modals.edit.title'))
+                        .setTitle(t(client, lang, 'commands.modal.modals.edit.title'))
                         .setCustomId("NI_modal:modal:title")
                         .setComponents(
                             new ActionRowBuilder<ModalActionRowComponentBuilder>()
                                 .setComponents(
                                     new TextInputBuilder()
                                         .setCustomId("NI_modal:text:title")
-                                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.modals.edit.label'))
+                                        .setLabel(t(client, lang, 'commands.modal.modals.edit.label'))
                                         .setPlaceholder(_schema.title)
                                         .setStyle(TextInputStyle.Short)
                                         .setRequired(true)
@@ -347,8 +348,8 @@ module.exports = {
 
                     embed.addFields(
                         {
-                            name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.field.name'),
-                            value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.field.value', _schema.title)
+                            name: t(client, lang, 'commands.modal.embeds.edit.field.name'),
+                            value: t(client, lang, 'commands.modal.embeds.edit.field.value', _schema.title)
                         }
                     )
 
@@ -371,8 +372,8 @@ module.exports = {
 
                     delete embed.data.fields;
 
-                    embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.title'))
-                        .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.description'))
+                    embed.setTitle(t(client, lang, 'commands.modal.embeds.base.title'))
+                        .setDescription(t(client, lang, 'commands.modal.embeds.base.description'))
                     msg.edit({embeds: [embed], components: [base]});
                 } else if (i.customId === 'NI_modal:edit:delete') {
                     let modals = guild.get('utils.components.modals') as Array<ModalCustom>;
@@ -385,23 +386,23 @@ module.exports = {
 
                     delete embed.data.fields;
 
-                    embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.title'))
-                        .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.description'))
+                    embed.setTitle(t(client, lang, 'commands.modal.embeds.base.title'))
+                        .setDescription(t(client, lang, 'commands.modal.embeds.base.description'))
                     msg.edit({embeds: [embed], components: [base]});
                 } else if (i.customId === 'NI_modal:edit:back') {
                     switch (_back) {
                         case 'NI_modal:base:add':
                             _back = '';
                             delete embed.data.fields;
-                            embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.title'))
-                                .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.description'))
+                            embed.setTitle(t(client, lang, 'commands.modal.embeds.base.title'))
+                                .setDescription(t(client, lang, 'commands.modal.embeds.base.description'))
                                 .setColor(client.holder.colors.default)
                             msg.edit({embeds: [embed], components: [base]});
                             break;
                         case 'NI_modal:base:edit':
                             _back = '';
-                            embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.title'))
-                                .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.description'))
+                            embed.setTitle(t(client, lang, 'commands.modal.embeds.base.title'))
+                                .setDescription(t(client, lang, 'commands.modal.embeds.base.description'))
                             msg.edit({embeds: [embed], components: [base]});
                             break;
                         case 'NI_modal:page:search':
@@ -414,12 +415,12 @@ module.exports = {
 
                             delete embed.data.fields;
 
-                            embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.search.title'))
-                                .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.search.description'))
+                            embed.setTitle(t(client, lang, 'commands.modal.embeds.search.title'))
+                                .setDescription(t(client, lang, 'commands.modal.embeds.search.description'))
                                 .addFields(
                                 {
-                                    name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.search.field.name'),
-                                    value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.search.field.value', _search)
+                                    name: t(client, lang, 'commands.modal.embeds.search.field.name'),
+                                    value: t(client, lang, 'commands.modal.embeds.search.field.value', _search)
                                 })
 
                             // @ts-ignore
@@ -435,30 +436,30 @@ module.exports = {
 
                             delete embed.data.fields;
 
-                            embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.search.title'))
-                                .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.search.description'))
+                            embed.setTitle(t(client, lang, 'commands.modal.embeds.search.title'))
+                                .setDescription(t(client, lang, 'commands.modal.embeds.search.description'))
 
                             msg.edit({embeds: [embed], components: searchrow});
                             break;
                         default:
                             _back = '';
                             delete embed.data.fields;
-                            embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.title'))
-                                .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.base.description'))
+                            embed.setTitle(t(client, lang, 'commands.modal.embeds.base.title'))
+                                .setDescription(t(client, lang, 'commands.modal.embeds.base.description'))
                                 .setColor(client.holder.colors.default)
                             msg.edit({embeds: [embed], components: [base]});
                             break;
                     }
                 } else if (i.customId === 'NI_modal:edit:label') {
                     let modal = new ModalBuilder()
-                        .setTitle(client.holder.languages[`${lang}`].getText('commands.modal.modals.edit_field.label.title'))
+                        .setTitle(t(client, lang, 'commands.modal.modals.edit_field.label.title'))
                         .setCustomId("NI_modal:modal:label")
                         .setComponents(
                             new ActionRowBuilder<ModalActionRowComponentBuilder>()
                                 .setComponents(
                                     new TextInputBuilder()
                                         .setCustomId("NI_modal:text:label")
-                                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.modals.edit_field.label.label'))
+                                        .setLabel(t(client, lang, 'commands.modal.modals.edit_field.label.label'))
                                         .setPlaceholder(_schema.fields[field].name)
                                         .setStyle(TextInputStyle.Short)
                                         .setRequired(true)
@@ -487,14 +488,14 @@ module.exports = {
                     });
                 } else if (i.customId === 'NI_modal:edit:placeholder') {
                     let modal = new ModalBuilder()
-                        .setTitle(client.holder.languages[`${lang}`].getText('commands.modal.modals.edit_field.placeholder.title'))
+                        .setTitle(t(client, lang, 'commands.modal.modals.edit_field.placeholder.title'))
                         .setCustomId("NI_modal:modal:placeholder")
                         .setComponents(
                             new ActionRowBuilder<ModalActionRowComponentBuilder>()
                                 .setComponents(
                                     new TextInputBuilder()
                                         .setCustomId("NI_modal:text:placeholder")
-                                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.modals.edit_field.placeholder.label'))
+                                        .setLabel(t(client, lang, 'commands.modal.modals.edit_field.placeholder.label'))
                                         .setPlaceholder(_schema.fields[field].placeholder || '')
                                         .setStyle(TextInputStyle.Short)
                                         .setRequired(true)
@@ -539,14 +540,14 @@ module.exports = {
                     });
                 } else if (i.customId === 'NI_modal:edit:sizes') {
                     let modal = new ModalBuilder()
-                        .setTitle(client.holder.languages[`${lang}`].getText('commands.modal.modals.edit_field.sizes.title'))
+                        .setTitle(t(client, lang, 'commands.modal.modals.edit_field.sizes.title'))
                         .setCustomId("NI_modal:modal:sizes")
                         .setComponents(
                             new ActionRowBuilder<ModalActionRowComponentBuilder>()
                                 .setComponents(
                                     new TextInputBuilder()
                                         .setCustomId("NI_modal:text:min")
-                                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.modals.edit_field.sizes.min'))
+                                        .setLabel(t(client, lang, 'commands.modal.modals.edit_field.sizes.min'))
                                         .setPlaceholder(`${_schema.fields[field].min}` || '0')
                                         .setStyle(TextInputStyle.Short)
                                         .setRequired(true)
@@ -557,7 +558,7 @@ module.exports = {
                                 .setComponents(
                                     new TextInputBuilder()
                                         .setCustomId("NI_modal:text:max")
-                                        .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.modals.edit_field.sizes.max'))
+                                        .setLabel(t(client, lang, 'commands.modal.modals.edit_field.sizes.max'))
                                         .setPlaceholder(`${_schema.fields[field].max}` || '0')
                                         .setStyle(TextInputStyle.Short)
                                         .setRequired(true)
@@ -620,11 +621,11 @@ module.exports = {
                     delete embed.data.fields;
                     delete embed.data.image;
 
-                    embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.title'))
-                        .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.description'))
+                    embed.setTitle(t(client, lang, 'commands.modal.embeds.edit.title'))
+                        .setDescription(t(client, lang, 'commands.modal.embeds.edit.description'))
                         .addFields({
-                            name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.field.name'),
-                            value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit.field.value', _schema.title)
+                            name: t(client, lang, 'commands.modal.embeds.edit.field.name'),
+                            value: t(client, lang, 'commands.modal.embeds.edit.field.value', _schema.title)
                         })
                     msg.edit({
                         embeds: [embed],
@@ -650,7 +651,7 @@ function modalList(client: Client, lang: string, guild: Guild, page: number = 0,
 
    let select = new StringSelectMenuBuilder()
        .setCustomId('NI_modal:select')
-       .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.select.placeholder'))
+       .setPlaceholder(t(client, lang, 'commands.modal.select_menus.select.placeholder'))
        .setMaxValues(1)
 
     if (arr.length) {
@@ -697,7 +698,7 @@ function modalList(client: Client, lang: string, guild: Guild, page: number = 0,
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
                     .setCustomId('NI_modal:edit:back')
-                    .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.buttons.edit_modal.back'))
+                    .setLabel(t(client, lang, 'commands.modal.buttons.edit_modal.back'))
                     .setStyle(ButtonStyle.Secondary)
                     .setEmoji('🔙')
             )
@@ -707,13 +708,13 @@ function modalList(client: Client, lang: string, guild: Guild, page: number = 0,
 function fieldList(client: Client, lang: string, modal: ModalCustom) {
     let select = new StringSelectMenuBuilder()
         .setCustomId('NI_modal:select_field')
-        .setPlaceholder(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.select_field.placeholder'))
+        .setPlaceholder(t(client, lang, 'commands.modal.select_menus.select_field.placeholder'))
         .setMaxValues(1)
         .addOptions(
             new StringSelectMenuOptionBuilder()
                 .setValue(`NI_modal:select_field:main`)
-                .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.select_field.options.main.label'))
-                .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.select_field.options.main.description'))
+                .setLabel(t(client, lang, 'commands.modal.select_menus.select_field.options.main.label'))
+                .setDescription(t(client, lang, 'commands.modal.select_menus.select_field.options.main.description'))
                 .setEmoji('🏠')
         )
 
@@ -732,9 +733,9 @@ function fieldList(client: Client, lang: string, modal: ModalCustom) {
         select.addOptions(
             new StringSelectMenuOptionBuilder()
                 .setValue(`NI_modal:select_field:add`)
-                .setLabel(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.select_field.options.add.label'))
+                .setLabel(t(client, lang, 'commands.modal.select_menus.select_field.options.add.label'))
                 .setEmoji('➕')
-                .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.select_menus.select_field.options.add.description'))
+                .setDescription(t(client, lang, 'commands.modal.select_menus.select_field.options.add.description'))
         )
     }
 
@@ -758,30 +759,30 @@ async function modalFieldEmbed(embed: EmbedBuilder, client: Client, lang: string
         name: 'field.png'
     })
 
-    embed.setTitle(client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.title'))
-        .setDescription(client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.description'))
+    embed.setTitle(t(client, lang, 'commands.modal.embeds.edit_field.title'))
+        .setDescription(t(client, lang, 'commands.modal.embeds.edit_field.description'))
         .addFields({
-                name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.fields.name.name'),
-                value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.fields.name.value', _schema.fields[field].name),
+                name: t(client, lang, 'commands.modal.embeds.edit_field.fields.name.name'),
+                value: t(client, lang, 'commands.modal.embeds.edit_field.fields.name.value', _schema.fields[field].name),
                 inline: true
             },
             {
-                name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.fields.placeholder.name'),
-                value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.fields.placeholder.value', _schema.fields[field].placeholder),
+                name: t(client, lang, 'commands.modal.embeds.edit_field.fields.placeholder.name'),
+                value: t(client, lang, 'commands.modal.embeds.edit_field.fields.placeholder.value', _schema.fields[field].placeholder),
                 inline: true
             },
             {
-                name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.fields.style.name'),
-                value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.fields.style.value', _schema.fields[field].type)
+                name: t(client, lang, 'commands.modal.embeds.edit_field.fields.style.name'),
+                value: t(client, lang, 'commands.modal.embeds.edit_field.fields.style.value', _schema.fields[field].type)
             },
             {
-                name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.fields.sizes.name'),
-                value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.fields.sizes.value', _schema.fields[field].min, _schema.fields[field].max),
+                name: t(client, lang, 'commands.modal.embeds.edit_field.fields.sizes.name'),
+                value: t(client, lang, 'commands.modal.embeds.edit_field.fields.sizes.value', _schema.fields[field].min, _schema.fields[field].max),
                 inline: true
             },
             {
-                name: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.fields.required.name'),
-                value: client.holder.languages[`${lang}`].getText('commands.modal.embeds.edit_field.fields.required.value', _schema.fields[field].required),
+                name: t(client, lang, 'commands.modal.embeds.edit_field.fields.required.name'),
+                value: t(client, lang, 'commands.modal.embeds.edit_field.fields.required.value', _schema.fields[field].required),
                 inline: true
             }
         )
