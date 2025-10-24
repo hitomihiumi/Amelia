@@ -1,46 +1,56 @@
-import { User as PrismaUser } from '@prisma/client';
-import { User as DiscordUser, Guild, Client } from 'discord.js';
-import { prisma } from '../database/prisma';
-import { DBHistory } from './DBHistory';
+import { User as PrismaUser } from "@prisma/client";
+import { User as DiscordUser, Guild, Client } from "discord.js";
+import { prisma } from "../database/prisma";
+import { DBHistory } from "./DBHistory";
 
 /**
  * Type-safe paths for User data access
  */
 type UserPath =
-  | 'level.xp'
-  | 'level.total_xp'
-  | 'level.level'
-  | 'level.voice_time'
-  | 'level.message_count'
-  | 'economy.balance.wallet'
-  | 'economy.balance.bank'
-  | 'economy.timeout.work'
-  | 'economy.timeout.daily'
-  | 'economy.timeout.weekly'
-  | 'economy.timeout.rob'
-  | 'custom.balance.number'
-  | 'custom.balance.mode'
-  | 'custom.profile.bio'
-  | 'custom.badges'
-  | 'presets.jtc'
+  | "level.xp"
+  | "level.total_xp"
+  | "level.level"
+  | "level.voice_time"
+  | "level.message_count"
+  | "economy.balance.wallet"
+  | "economy.balance.bank"
+  | "economy.timeout.work"
+  | "economy.timeout.daily"
+  | "economy.timeout.weekly"
+  | "economy.timeout.rob"
+  | "custom.balance.number"
+  | "custom.balance.mode"
+  | "custom.profile.bio"
+  | "custom.badges"
+  | "presets.jtc"
   | string;
 
 /**
  * Type inference for User paths
  */
-type UserPathValue<T extends UserPath> =
-  T extends 'level.xp' ? number :
-  T extends 'level.total_xp' ? number :
-  T extends 'level.level' ? number :
-  T extends 'economy.balance.wallet' ? number :
-  T extends 'economy.balance.bank' ? number :
-  T extends 'economy.timeout.work' ? number :
-  T extends 'custom.balance.number' ? string :
-  T extends 'custom.balance.mode' ? boolean :
-  T extends 'custom.profile.bio' ? string :
-  T extends 'custom.badges' ? any[] :
-  T extends 'presets.jtc' ? any[] :
-  any;
+type UserPathValue<T extends UserPath> = T extends "level.xp"
+  ? number
+  : T extends "level.total_xp"
+    ? number
+    : T extends "level.level"
+      ? number
+      : T extends "economy.balance.wallet"
+        ? number
+        : T extends "economy.balance.bank"
+          ? number
+          : T extends "economy.timeout.work"
+            ? number
+            : T extends "custom.balance.number"
+              ? string
+              : T extends "custom.balance.mode"
+                ? boolean
+                : T extends "custom.profile.bio"
+                  ? string
+                  : T extends "custom.badges"
+                    ? any[]
+                    : T extends "presets.jtc"
+                      ? any[]
+                      : any;
 
 /**
  * Database User wrapper with type-safe access
@@ -89,7 +99,7 @@ export class DBUser {
   public async get<T extends UserPath>(path: T): Promise<UserPathValue<T>> {
     await this.ensureUser();
 
-    const keys = path.split('.');
+    const keys = path.split(".");
     const field = this.mapPathToField(keys);
 
     const data = await prisma.user.findUnique({
@@ -113,7 +123,7 @@ export class DBUser {
   public async set<T extends UserPath>(path: T, value: UserPathValue<T>): Promise<void> {
     await this.ensureUser();
 
-    const keys = path.split('.');
+    const keys = path.split(".");
     const field = this.mapPathToField(keys);
     const updateValue = this.buildUpdateValue(keys.slice(1), value);
 
@@ -184,39 +194,39 @@ export class DBUser {
    */
   private mapPathToField(keys: string[]): string {
     const mapping: Record<string, string> = {
-      'level.xp': 'xp',
-      'level.total_xp': 'totalXp',
-      'level.level': 'level',
-      'level.voice_time': 'voiceTime',
-      'level.message_count': 'messageCount',
-      'economy.balance.wallet': 'wallet',
-      'economy.balance.bank': 'bank',
-      'economy.inventory.custom.roles': 'customRoles',
-      'economy.inventory.custom.items': 'customItems',
-      'economy.timeout.work': 'workTimeout',
-      'economy.timeout.timely': 'timelyTimeout',
-      'economy.timeout.daily': 'dailyTimeout',
-      'economy.timeout.weekly': 'weeklyTimeout',
-      'economy.timeout.rob': 'robTimeout',
-      'custom.balance.number': 'balanceNumber',
-      'custom.balance.mode': 'balanceMode',
-      'custom.balance.solid': 'balanceSolid',
-      'custom.balance.url': 'balanceUrl',
-      'custom.profile.bio': 'profileBio',
-      'custom.profile.mode': 'profileMode',
-      'custom.profile.solid': 'profileSolid',
-      'custom.profile.url': 'profileUrl',
-      'custom.profile.color': 'profileColor',
-      'custom.rank.mode': 'rankMode',
-      'custom.rank.solid': 'rankSolid',
-      'custom.rank.url': 'rankUrl',
-      'custom.rank.color': 'rankColor',
-      'custom.badges': 'customBadges',
-      'temp.games': 'tempGames',
-      'presets.jtc': 'jtcPresets',
+      "level.xp": "xp",
+      "level.total_xp": "totalXp",
+      "level.level": "level",
+      "level.voice_time": "voiceTime",
+      "level.message_count": "messageCount",
+      "economy.balance.wallet": "wallet",
+      "economy.balance.bank": "bank",
+      "economy.inventory.custom.roles": "customRoles",
+      "economy.inventory.custom.items": "customItems",
+      "economy.timeout.work": "workTimeout",
+      "economy.timeout.timely": "timelyTimeout",
+      "economy.timeout.daily": "dailyTimeout",
+      "economy.timeout.weekly": "weeklyTimeout",
+      "economy.timeout.rob": "robTimeout",
+      "custom.balance.number": "balanceNumber",
+      "custom.balance.mode": "balanceMode",
+      "custom.balance.solid": "balanceSolid",
+      "custom.balance.url": "balanceUrl",
+      "custom.profile.bio": "profileBio",
+      "custom.profile.mode": "profileMode",
+      "custom.profile.solid": "profileSolid",
+      "custom.profile.url": "profileUrl",
+      "custom.profile.color": "profileColor",
+      "custom.rank.mode": "rankMode",
+      "custom.rank.solid": "rankSolid",
+      "custom.rank.url": "rankUrl",
+      "custom.rank.color": "rankColor",
+      "custom.badges": "customBadges",
+      "temp.games": "tempGames",
+      "presets.jtc": "jtcPresets",
     };
 
-    const fullPath = keys.join('.');
+    const fullPath = keys.join(".");
     return mapping[fullPath] || keys[0];
   }
 
@@ -226,7 +236,7 @@ export class DBUser {
   private extractValue(obj: any, keys: string[]): any {
     if (keys.length === 0 || !obj) return obj;
 
-    if (typeof obj === 'object' && keys.length > 0) {
+    if (typeof obj === "object" && keys.length > 0) {
       return keys.reduce((acc, key) => acc?.[key], obj);
     }
 
@@ -239,7 +249,7 @@ export class DBUser {
   private buildUpdateValue(keys: string[], value: any): any {
     if (keys.length === 0) return value;
 
-    if (keys.length === 1 && typeof value !== 'object') {
+    if (keys.length === 1 && typeof value !== "object") {
       return value;
     }
 
@@ -255,4 +265,3 @@ export class DBUser {
     return result;
   }
 }
-

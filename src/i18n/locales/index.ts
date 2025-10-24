@@ -16,7 +16,7 @@ export function initializeI18n(): I18nManager {
       flag: "🇬🇧",
       nativeName: "English",
     },
-    en
+    en,
   );
 
   // Создаем русский язык с fallback на английский
@@ -28,7 +28,7 @@ export function initializeI18n(): I18nManager {
       nativeName: "Русский",
     },
     ru,
-    enLang // Fallback на английский
+    enLang, // Fallback на английский
   );
 
   // Регистрируем языки
@@ -43,4 +43,3 @@ export function initializeI18n(): I18nManager {
 
 // Экспортируем языки для прямого использования (если нужно)
 export { en, ru };
-

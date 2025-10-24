@@ -1,16 +1,16 @@
-import { History as PrismaHistory } from '@prisma/client';
-import { Guild, Client } from 'discord.js';
-import { prisma } from '../database/prisma';
+import { History as PrismaHistory } from "@prisma/client";
+import { Guild, Client } from "discord.js";
+import { prisma } from "../database/prisma";
 
 /**
  * History action types
  */
 export enum HistoryType {
-  ECONOMY = 'economy',
-  MODERATION = 'moderation',
-  LEVELS = 'levels',
-  SETTINGS = 'settings',
-  CUSTOM = 'custom',
+  ECONOMY = "economy",
+  MODERATION = "moderation",
+  LEVELS = "levels",
+  SETTINGS = "settings",
+  CUSTOM = "custom",
 }
 
 /**
@@ -60,7 +60,7 @@ export class DBHistory {
         type,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
       take: limit,
     });
@@ -76,7 +76,7 @@ export class DBHistory {
         userId,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
       take: limit,
     });
@@ -91,7 +91,7 @@ export class DBHistory {
         guildId: this.guild.id,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
       take: limit,
     });
@@ -129,4 +129,3 @@ export class DBHistory {
     return result.count;
   }
 }
-

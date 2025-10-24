@@ -428,4 +428,3 @@ export const en: TranslationSchema = {
     view_guild_insights: "View Server Insights",
   },
 };
-

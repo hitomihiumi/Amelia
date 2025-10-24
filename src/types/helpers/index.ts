@@ -8,4 +8,3 @@ export * from "./UserSchema";
 export * from "./Action";
 
 export type AnySlash = import("./Command").SlashCommand | import("./Command").Manifest;
-

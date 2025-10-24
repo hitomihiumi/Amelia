@@ -428,4 +428,3 @@ export const ru: TranslationSchema = {
     view_guild_insights: "Просматривать аналитику сервера",
   },
 };
-

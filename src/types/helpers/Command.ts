@@ -1,54 +1,56 @@
 import { Client, ChatInputCommandInteraction, Message, InteractionContextType } from "discord.js";
 import * as _options from "./Options";
-import { LocalizationMap } from 'discord-api-types/v10';
+import { LocalizationMap } from "discord-api-types/v10";
 
 export interface Command {
-    name: string;
-    category: string;
-    aliases: string[];
-    cooldown: number;
-    description: string;
-    permissions?: {
-        user?: bigint;
-        bot: bigint[];
-    };
-    allowedUsers: string[];
-    minArgs?: number;
-    maxArgs?: number;
-    run: (client: Client, message: Message, args: string[]) => void;
-};
+  name: string;
+  category: string;
+  aliases: string[];
+  cooldown: number;
+  description: string;
+  permissions?: {
+    user?: bigint;
+    bot: bigint[];
+  };
+  allowedUsers: string[];
+  minArgs?: number;
+  maxArgs?: number;
+  run: (client: Client, message: Message, args: string[]) => void;
+}
 
 export interface SlashCommand {
-    name: string;
-    description: string;
-    cooldown: number;
-    permissions: {
-        user?: bigint;
-        bot: bigint[];
-    };
-    locale?: LocalizationMap;
-    options: Array<_options.IntegerOption |
-        _options.StringChoiceOption |
-        _options.MemberOption |
-        _options.StringOption |
-        _options.ChannelOption |
-        _options.NumberOption |
-        _options.BooleanOption |
-        _options.RoleOption |
-        _options.UserOption>;
-    context?: InteractionContextType[];
-    run: (client: Client, interaction: ChatInputCommandInteraction) => void;
+  name: string;
+  description: string;
+  cooldown: number;
+  permissions: {
+    user?: bigint;
+    bot: bigint[];
+  };
+  locale?: LocalizationMap;
+  options: Array<
+    | _options.IntegerOption
+    | _options.StringChoiceOption
+    | _options.MemberOption
+    | _options.StringOption
+    | _options.ChannelOption
+    | _options.NumberOption
+    | _options.BooleanOption
+    | _options.RoleOption
+    | _options.UserOption
+  >;
+  context?: InteractionContextType[];
+  run: (client: Client, interaction: ChatInputCommandInteraction) => void;
 }
 
 export interface Manifest {
-    name: string;
-    description: string;
-    locale?: LocalizationMap;
-    permissions: {
-        user?: bigint;
-    };
-    commands: {
-        [key: string]: SlashCommand;
-    };
-    context: InteractionContextType[];
+  name: string;
+  description: string;
+  locale?: LocalizationMap;
+  permissions: {
+    user?: bigint;
+  };
+  commands: {
+    [key: string]: SlashCommand;
+  };
+  context: InteractionContextType[];
 }

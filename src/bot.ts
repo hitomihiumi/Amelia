@@ -1,7 +1,7 @@
-import {Client, GatewayIntentBits, Partials, Collection, ColorResolvable} from 'discord.js';
-import 'dotenv/config'
-import '@hitomihiumi/colors.ts';
-import './global';
+import { Client, GatewayIntentBits, Partials, Collection, ColorResolvable } from "discord.js";
+import "dotenv/config";
+import "@hitomihiumi/colors.ts";
+import "./global";
 import { fastEmbed, foldersCheck, reVar } from "./handlers/functions";
 import { FileWatcher } from "@hitomihiumi/filewatcher";
 import { commandLoader } from "./handlers/cmdLoaders";
@@ -11,100 +11,96 @@ import { prisma, DatabaseService } from "./database";
 foldersCheck();
 
 const client = new Client({
-    shards: "auto",
-    allowedMentions: {
-        parse: ['users', 'roles'],
-        repliedUser: false,
-    },
-    partials: [
-        Partials.Message,
-        Partials.Channel,
-        Partials.Reaction
-    ],
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildBans,
-        GatewayIntentBits.GuildEmojisAndStickers,
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMessageReactions,
-        GatewayIntentBits.GuildMessageTyping
-    ]
+  shards: "auto",
+  allowedMentions: {
+    parse: ["users", "roles"],
+    repliedUser: false,
+  },
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildBans,
+    GatewayIntentBits.GuildEmojisAndStickers,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildMessageTyping,
+  ],
 });
 
 // Инициализируем систему переводов
 const i18nManager = initializeI18n();
 
 client.holder = {
+  cooldowns: new Collection(),
+  cmds: {
+    commands: new Collection(),
+    slashCommands: new Collection(),
+    aliases: new Collection(),
     cooldowns: new Collection(),
-    cmds: {
-        commands: new Collection(),
-        slashCommands: new Collection(),
-        aliases: new Collection(),
-        cooldowns: new Collection()
+  },
+  db: prisma,
+  components: {
+    buttons: new Collection(),
+    modals: new Collection(),
+    selectMenus: new Collection(),
+    autocompletes: new Collection(),
+  },
+  i18n: i18nManager,
+  embed: {
+    error: (lang: string, desc: string) => {
+      const i18n = i18nManager.get(lang) || i18nManager.getDefault();
+      return fastEmbed(client.holder.colors.error, i18n.t("common.error.title"), desc);
     },
-    db: prisma,
-    components: {
-        buttons: new Collection(),
-        modals: new Collection(),
-        selectMenus: new Collection(),
-        autocompletes: new Collection()
+    success: (lang: string, desc: string) => {
+      const i18n = i18nManager.get(lang) || i18nManager.getDefault();
+      return fastEmbed(client.holder.colors.success, i18n.t("common.success.title"), desc);
     },
-    i18n: i18nManager,
-    embed: {
-        error: (lang: string, desc: string) => {
-            const i18n = i18nManager.get(lang) || i18nManager.getDefault();
-            return fastEmbed(client.holder.colors.error, i18n.t('common.error.title'), desc);
-        },
-        success: (lang: string, desc: string) => {
-            const i18n = i18nManager.get(lang) || i18nManager.getDefault();
-            return fastEmbed(client.holder.colors.success, i18n.t('common.success.title'), desc);
-        },
-        info: (lang: string, desc: string) => {
-            const i18n = i18nManager.get(lang) || i18nManager.getDefault();
-            return fastEmbed(client.holder.colors.info, i18n.t('common.info.title'), desc);
-        },
-        fast: (color: ColorResolvable, title: string, desc: string) => {
-            return fastEmbed(color, title, desc);
-        }
+    info: (lang: string, desc: string) => {
+      const i18n = i18nManager.get(lang) || i18nManager.getDefault();
+      return fastEmbed(client.holder.colors.info, i18n.t("common.info.title"), desc);
     },
-    utils: {
-        reVar
+    fast: (color: ColorResolvable, title: string, desc: string) => {
+      return fastEmbed(color, title, desc);
     },
-    colors: {
-        default: "#4a3f66",
-        error: "#ff6b7f",
-        success: "#6bff97",
-        info: "#7dd8ff"
-    },
-    emojis: {}
+  },
+  utils: {
+    reVar,
+  },
+  colors: {
+    default: "#4a3f66",
+    error: "#ff6b7f",
+    success: "#6bff97",
+    info: "#7dd8ff",
+  },
+  emojis: {},
 };
 
 // Connect to database before loading handlers
 (async () => {
-    await DatabaseService.connect();
+  await DatabaseService.connect();
 
-    ["antiCrash", "events", "emojis", "commands", "components", "slash", "joinToCreate"].filter(Boolean)
-        .forEach((handler: any) => {
-            require(`./handlers/${handler}`)(client);
-        });
+  ["antiCrash", "events", "emojis", "commands", "components", "slash", "joinToCreate"]
+    .filter(Boolean)
+    .forEach((handler: any) => {
+      require(`./handlers/${handler}`)(client);
+    });
 })();
 
-const watcher = new FileWatcher()
-    .setAllowedExtensions('.js', '.json');
+const watcher = new FileWatcher().setAllowedExtensions(".js", ".json");
 
-watcher.setHandler("./dist/slash", 'change', (dir, file, relativePath) => {
-    const loader = commandLoader(client);
-    loader.reload(relativePath, file);
-    console.log(`Reloaded ${file} in ${dir}`.green);
+watcher.setHandler("./dist/slash", "change", (dir, file, relativePath) => {
+  const loader = commandLoader(client);
+  loader.reload(relativePath, file);
+  console.log(`Reloaded ${file} in ${dir}`.green);
 });
 
-watcher.setMonitoredDirectories('./dist', './locale');
+watcher.setMonitoredDirectories("./dist", "./locale");
 
 watcher.startWatching();
 
-client.on('interactionCreate', async (interaction) => {})
+client.on("interactionCreate", async (interaction) => {});
 
 client.login(process.env.PRODACTION ? process.env.TOKEN : process.env.DEV_TOKEN);

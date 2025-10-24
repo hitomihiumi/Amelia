@@ -448,15 +448,14 @@ export type PathsToStringProps<T> = T extends string
 export type Join<T extends string[], D extends string> = T extends []
   ? never
   : T extends [infer F]
-  ? F
-  : T extends [infer F, ...infer R]
-  ? F extends string
-    ? `${F}${D}${Join<Extract<R, string[]>, D>}`
-    : never
-  : string;
+    ? F
+    : T extends [infer F, ...infer R]
+      ? F extends string
+        ? `${F}${D}${Join<Extract<R, string[]>, D>}`
+        : never
+      : string;
 
 /**
  * Типобезопасный путь к переводу
  */
-export type TranslationKey = Join<PathsToStringProps<TranslationSchema>, '.'>;
-
+export type TranslationKey = Join<PathsToStringProps<TranslationSchema>, ".">;

@@ -28,4 +28,3 @@ export function t(client: Client, lang: string, key: TranslationKey, ...args: an
 export function getI18n(client: Client, lang: string) {
   return client.holder.i18n.get(lang) || client.holder.i18n.getDefault();
 }
-

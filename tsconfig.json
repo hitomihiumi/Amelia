@@ -12,15 +12,6 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "test",
-    "_example",
-    "locale",
-    "dbs"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "_example", "locale", "dbs"]
 }

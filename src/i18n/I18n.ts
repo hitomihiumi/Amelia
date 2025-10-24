@@ -75,18 +75,18 @@ export class I18n {
    * Получить значение по пути (например, "common.error.title")
    */
   private getByPath(path: string): string | undefined {
-    const keys = path.split('.');
+    const keys = path.split(".");
     let current: any = this.translations;
 
     for (const key of keys) {
-      if (current && typeof current === 'object' && key in current) {
+      if (current && typeof current === "object" && key in current) {
         current = current[key];
       } else {
         return undefined;
       }
     }
 
-    return typeof current === 'string' ? current : undefined;
+    return typeof current === "string" ? current : undefined;
   }
 
   /**
@@ -98,7 +98,7 @@ export class I18n {
 
     // Замена {0}, {1}, {2} и т.д.
     args.forEach((arg, index) => {
-      result = result.replace(new RegExp(`\\{${index}\\}`, 'g'), String(arg));
+      result = result.replace(new RegExp(`\\{${index}\\}`, "g"), String(arg));
     });
 
     // Замена %{VAR}% (обратная совместимость)
@@ -116,7 +116,7 @@ export class I18n {
     const output = { ...target };
 
     if (this.isObject(target) && this.isObject(source)) {
-      Object.keys(source).forEach(key => {
+      Object.keys(source).forEach((key) => {
         if (this.isObject(source[key])) {
           if (!(key in target)) {
             output[key] = source[key];
@@ -136,7 +136,7 @@ export class I18n {
    * Проверка является ли значение объектом
    */
   private isObject(item: any): boolean {
-    return item && typeof item === 'object' && !Array.isArray(item);
+    return item && typeof item === "object" && !Array.isArray(item);
   }
 }
 
@@ -145,7 +145,7 @@ export class I18n {
  */
 export class I18nManager {
   private languages: Map<string, I18n> = new Map();
-  private defaultLanguage: string = 'en';
+  private defaultLanguage: string = "en";
 
   /**
    * Зарегистрировать язык
@@ -203,4 +203,3 @@ export class I18nManager {
     return Array.from(this.languages.keys());
   }
 }
-

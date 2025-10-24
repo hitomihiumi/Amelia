@@ -1,7 +1,7 @@
 export interface ILanguage {
-    name: string;
-    code: string;
-    flag: string;
-    version: string;
-    translations: any;
+  name: string;
+  code: string;
+  flag: string;
+  version: string;
+  translations: any;
 }
