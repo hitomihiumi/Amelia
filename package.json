@@ -1,4 +1,30 @@
 {
+  "name": "amelia",
+  "version": "0.1.1",
+  "main": "/dist/index.js",
+  "scripts": {
+    "test": "tsc && tsx ./scripts/post-build.ts && node --trace-warnings ./dist/bot.js",
+    "start": "node ./dist/bot.js",
+    "build": "tsc && tsx ./scripts/post-build.ts",
+    "biome-write": "npx @biomejs/biome format --write .",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio"
+  },
+  "type": "commonjs",
+  "author": "hitomihiumi",
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "i": "^0.3.7",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.2",
+    "@biomejs/biome": "1.9.4",
+    "tsx": "^4.19.2"
+  },
   "dependencies": {
     "@hitomihiumi/colors.ts": "^1.0.3",
     "@hitomihiumi/filewatcher": "^0.1.1",
@@ -14,30 +40,5 @@
     "express": "^4.21.2",
     "fuse.js": "^7.1.0",
     "prisma": "^6.18.0"
-  },
-  "name": "amelia",
-  "version": "0.1.1",
-  "main": "/dist/index.js",
-  "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
-    "i": "^0.3.7",
-    "tslib": "^2.8.1",
-    "typescript": "^5.7.2",
-    "@biomejs/biome": "1.9.4"
-  },
-  "scripts": {
-    "test": "tsc && node --trace-warnings ./dist/bot.js",
-    "start": "node ./dist/bot.js",
-    "build": "tsc --watch",
-    "biome-write": "npx @biomejs/biome format --write .",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:deploy": "prisma migrate deploy",
-    "prisma:studio": "prisma studio"
-  },
-  "type": "commonjs",
-  "author": "hitomihiumi",
-  "license": "MIT",
-  "description": ""
+  }
 }

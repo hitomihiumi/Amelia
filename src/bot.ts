@@ -1,7 +1,6 @@
 import { Client, GatewayIntentBits, Partials, Collection, ColorResolvable } from "discord.js";
 import "dotenv/config";
 import "@hitomihiumi/colors.ts";
-import "./global";
 import { fastEmbed, foldersCheck, fullEmbed, reVar } from "./handlers/functions";
 import { FileWatcher } from "@hitomihiumi/filewatcher";
 import { commandLoader } from "./handlers/cmdLoaders";
@@ -84,7 +83,7 @@ client.holder = {
 (async () => {
   await DatabaseService.connect();
 
-  ["antiCrash", "events", "emojis", "commands", "components", "slash", "joinToCreate"]
+  ["antiCrash", "events", "commands", "components", "slash", "joinToCreate"]
     .filter(Boolean)
     .forEach((handler: any) => {
       require(`./handlers/${handler}`)(client);
@@ -99,10 +98,8 @@ watcher.setHandler("./dist/slash", "change", (dir, file, relativePath) => {
   console.log(`Reloaded ${file} in ${dir}`.green);
 });
 
-watcher.setMonitoredDirectories("./dist", "./locale");
+watcher.setMonitoredDirectories("./dist");
 
 watcher.startWatching();
-
-client.on("interactionCreate", async (interaction) => {});
 
 client.login(process.env.PRODACTION ? process.env.TOKEN : process.env.DEV_TOKEN);
