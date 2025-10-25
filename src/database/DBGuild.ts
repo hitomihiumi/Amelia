@@ -1,6 +1,6 @@
-import { Guild as PrismaGuild, Prisma } from "@prisma/client";
+import { Guild as PrismaGuild } from "@prisma/client";
 import { Guild as DiscordGuild } from "discord.js";
-import { prisma } from "../database/prisma";
+import { prisma } from "./prisma";
 import { Client } from "discord.js";
 import { DBUser } from "./DBUser";
 import { DBHistory } from "./DBHistory";
@@ -118,7 +118,37 @@ export class DBGuild {
 
     if (!data) return null as any;
 
-    return this.extractValue(data[field as keyof typeof data], keys.slice(1)) as PathValue<T>;
+    // Determine how many keys were consumed by the field mapping
+    const fieldPath = Object.entries({
+      "settings.prefix": "prefix",
+      "settings.language": "language",
+      "utils.join_to_create.enabled": "jtcEnabled",
+      "utils.join_to_create.channel": "jtcChannel",
+      "utils.join_to_create.category": "jtcCategory",
+      "utils.join_to_create.default_name": "jtcDefaultName",
+      "utils.counter.enabled": "counterEnabled",
+      "utils.counter.category": "counterCategory",
+      "utils.counter.channels": "counterChannels",
+      "utils.levels.enabled": "levelsEnabled",
+      "utils.levels.ignore_channels": "levelsIgnoreChannels",
+      "utils.levels.ignore_roles": "levelsIgnoreRoles",
+      "utils.levels.level_roles": "levelsRoles",
+      "utils.components.modals": "customModals",
+      "utils.components.embed": "customEmbeds",
+      "utils.components.buttons": "customButtons",
+      "economy.currency.emoji": "currencyEmoji",
+      "economy.currency.id": "currencyId",
+      "moderation.moderation_roles": "moderationRoles",
+      "permissions.commands": "commandPermissions",
+    }).find(([_, v]) => v === field)?.[0];
+
+    let remainingKeys: string[] = [];
+    if (fieldPath) {
+      const fieldKeys = fieldPath.split(".");
+      remainingKeys = keys.slice(fieldKeys.length);
+    }
+
+    return this.extractValue(data[field as keyof typeof data], remainingKeys) as PathValue<T>;
   }
 
   /**
@@ -135,15 +165,81 @@ export class DBGuild {
 
     const keys = path.split(".");
     const field = this.mapPathToField(keys);
-    const updateValue = this.buildUpdateValue(keys.slice(1), value);
 
-    await prisma.guild.update({
-      where: { id: this.guild.id },
-      data: { [field]: updateValue },
-    });
+    // Determine how many keys were consumed by the field mapping
+    const mapping: Record<string, string> = {
+      "settings.prefix": "prefix",
+      "settings.language": "language",
+      "utils.join_to_create.enabled": "jtcEnabled",
+      "utils.join_to_create.channel": "jtcChannel",
+      "utils.join_to_create.category": "jtcCategory",
+      "utils.join_to_create.default_name": "jtcDefaultName",
+      "utils.counter.enabled": "counterEnabled",
+      "utils.counter.category": "counterCategory",
+      "utils.counter.channels": "counterChannels",
+      "utils.levels.enabled": "levelsEnabled",
+      "utils.levels.ignore_channels": "levelsIgnoreChannels",
+      "utils.levels.ignore_roles": "levelsIgnoreRoles",
+      "utils.levels.level_roles": "levelsRoles",
+      "utils.components.modals": "customModals",
+      "utils.components.embed": "customEmbeds",
+      "utils.components.buttons": "customButtons",
+      "economy.currency.emoji": "currencyEmoji",
+      "economy.currency.id": "currencyId",
+      "moderation.moderation_roles": "moderationRoles",
+      "permissions.commands": "commandPermissions",
+    };
+
+    const fieldPath = Object.entries(mapping).find(([_, v]) => v === field)?.[0];
+    let remainingKeys: string[] = [];
+    if (fieldPath) {
+      const fieldKeys = fieldPath.split(".");
+      remainingKeys = keys.slice(fieldKeys.length);
+    }
+
+    // For JSON fields with nested paths, we need to update the whole field
+    if (remainingKeys.length > 0) {
+      // Get current data
+      const currentData = await prisma.guild.findUnique({
+        where: { id: this.guild.id },
+        select: { [field]: true },
+      });
+
+      const currentValue = (currentData?.[field as keyof typeof currentData] || {}) as any;
+      const updatedValue = this.setNestedValue(currentValue, remainingKeys, value);
+
+      await prisma.guild.update({
+        where: { id: this.guild.id },
+        data: { [field]: updatedValue },
+      });
+    } else {
+      // Direct field update
+      await prisma.guild.update({
+        where: { id: this.guild.id },
+        data: { [field]: value },
+      });
+    }
 
     // Invalidate cache
     this.data = null;
+  }
+
+  /**
+   * Set nested value in object (immutable)
+   */
+  private setNestedValue(obj: any, keys: string[], value: any): any {
+    if (keys.length === 0) return value;
+
+    const result = typeof obj === "object" && obj !== null ? { ...obj } : {};
+    const [currentKey, ...restKeys] = keys;
+
+    if (restKeys.length === 0) {
+      result[currentKey] = value;
+    } else {
+      result[currentKey] = this.setNestedValue(result[currentKey], restKeys, value);
+    }
+
+    return result;
   }
 
   /**
@@ -233,7 +329,20 @@ export class DBGuild {
     };
 
     const fullPath = keys.join(".");
-    return mapping[fullPath] || keys[0];
+
+    // Check exact match first
+    if (mapping[fullPath]) {
+      return mapping[fullPath];
+    }
+
+    // Check if path starts with a mapped prefix (for dynamic paths like permissions.commands.commandName)
+    for (const [mapKey, mapValue] of Object.entries(mapping)) {
+      if (fullPath.startsWith(mapKey + ".") || fullPath === mapKey) {
+        return mapValue;
+      }
+    }
+
+    return keys[0];
   }
 
   /**
@@ -248,29 +357,5 @@ export class DBGuild {
     }
 
     return obj;
-  }
-
-  /**
-   * Build update value for nested paths
-   */
-  private buildUpdateValue(keys: string[], value: any): any {
-    if (keys.length === 0) return value;
-
-    // For simple fields, return value directly
-    if (keys.length === 1 && typeof value !== "object") {
-      return value;
-    }
-
-    // For JSON fields, build nested object
-    const result: any = {};
-    let current = result;
-
-    for (let i = 0; i < keys.length - 1; i++) {
-      current[keys[i]] = {};
-      current = current[keys[i]];
-    }
-
-    current[keys[keys.length - 1]] = value;
-    return result;
   }
 }
