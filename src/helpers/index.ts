@@ -1,4 +1,3 @@
-export * from "./Language";
 export * from "./Guild";
 export * from "./User";
 export * from "./canvasUtil";
