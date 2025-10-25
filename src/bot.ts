@@ -88,18 +88,18 @@ client.holder = {
     .forEach((handler: any) => {
       require(`./handlers/${handler}`)(client);
     });
+
+  const watcher = new FileWatcher().setAllowedExtensions(".js", ".json");
+
+  watcher.setHandler("./dist/slash", "change", (dir, file, relativePath) => {
+    const loader = commandLoader(client);
+    loader.reload(relativePath, file);
+    console.log(`Reloaded ${file} in ${dir}`.green);
+  });
+
+  watcher.setMonitoredDirectories("./dist");
+
+  watcher.startWatching();
+
+  await client.login(process.env.PRODACTION ? process.env.TOKEN : process.env.DEV_TOKEN);
 })();
-
-const watcher = new FileWatcher().setAllowedExtensions(".js", ".json");
-
-watcher.setHandler("./dist/slash", "change", (dir, file, relativePath) => {
-  const loader = commandLoader(client);
-  loader.reload(relativePath, file);
-  console.log(`Reloaded ${file} in ${dir}`.green);
-});
-
-watcher.setMonitoredDirectories("./dist");
-
-watcher.startWatching();
-
-client.login(process.env.PRODACTION ? process.env.TOKEN : process.env.DEV_TOKEN);
