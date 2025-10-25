@@ -26,6 +26,9 @@ module.exports = {
   },
   run: async (client, interaction) => {
     if (!interaction.guild) return;
+
+    await interaction.deferReply();
+
     let guild = new Guild(client, interaction.guild);
 
     const user = interaction.options.getUser("user") || interaction.user;
@@ -45,8 +48,6 @@ module.exports = {
       },
       displayOptions,
     });
-
-    await interaction.deferReply();
 
     const buffer = await rank.render();
     if (!buffer) {

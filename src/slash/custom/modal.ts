@@ -1,7 +1,6 @@
 import { ModalCustom, SlashCommand } from "../../types/helpers";
 import {
   Client,
-  CommandInteraction,
   PermissionsBitField,
   EmbedBuilder,
   ButtonBuilder,
@@ -17,6 +16,8 @@ import {
   StringSelectMenuInteraction,
   AttachmentBuilder,
   ButtonInteraction,
+  ChatInputCommandInteraction,
+  MessageFlagsBitField,
 } from "discord.js";
 import { Guild, canvasUtil, customUtil } from "../../helpers";
 import { generateID } from "../../handlers/functions";
@@ -35,8 +36,11 @@ module.exports = {
     bot: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
   },
   key: null,
-  run: async (client: Client, interaction: CommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.guild) return;
+
+    await interaction.deferReply({ flags: [MessageFlagsBitField.Flags.Ephemeral] });
+
     let guild = new Guild(client, interaction.guild);
 
     let lang = (await guild.get(`settings.language`)) as string;
@@ -146,7 +150,7 @@ module.exports = {
       ),
     ];
 
-    let msg = await interaction.reply({ embeds: [embed], components: [base], ephemeral: true });
+    let msg = await interaction.editReply({ embeds: [embed], components: [base] });
 
     const filter = (i: any) => i.user.id === interaction.user.id;
 
@@ -154,7 +158,7 @@ module.exports = {
 
     collector.on("collect", async (i) => {
       if (i instanceof StringSelectMenuInteraction) {
-        i.deferUpdate();
+        await i.deferUpdate();
         switch (i.customId) {
           case "NI_modal:base":
             switch (i.values[0]) {
@@ -166,7 +170,7 @@ module.exports = {
                     name: t(client, lang, "commands.modal.embeds.edit.field.name"),
                     value: t(client, lang, "commands.modal.embeds.edit.field.value", _schema.title),
                   });
-                msg.edit({
+                await i.editReply({
                   embeds: [embed],
                   components: [...editrow, fieldList(client, lang, _schema)],
                 });
@@ -175,7 +179,7 @@ module.exports = {
                 embed
                   .setTitle(t(client, lang, "commands.modal.embeds.search.title"))
                   .setDescription(t(client, lang, "commands.modal.embeds.search.description"));
-                msg.edit({ embeds: [embed], components: searchrow });
+                await i.editReply({ embeds: [embed], components: searchrow });
                 break;
             }
             _back = i.values[0];
@@ -193,7 +197,7 @@ module.exports = {
                 name: t(client, lang, "commands.modal.embeds.edit.field.name"),
                 value: t(client, lang, "commands.modal.embeds.edit.field.value", _schema.title),
               });
-            msg.edit({
+            await i.editReply({
               embeds: [embed],
               components: [...editrow, fieldList(client, lang, _schema)],
             });
@@ -211,7 +215,7 @@ module.exports = {
                   name: t(client, lang, "commands.modal.embeds.edit.field.name"),
                   value: t(client, lang, "commands.modal.embeds.edit.field.value", _schema.title),
                 });
-              msg.edit({
+              await i.editReply({
                 embeds: [embed],
                 components: [...editrow, fieldList(client, lang, _schema)],
                 files: [],
@@ -236,7 +240,7 @@ module.exports = {
               let fieldEmbed = await modalFieldEmbed(embed, client, lang, _schema, field);
               embed = fieldEmbed.embed;
 
-              msg.edit({
+              await i.editReply({
                 embeds: [embed],
                 components: [fieldList(client, lang, _schema), ...editfieldrow],
                 files: [fieldEmbed.attachment],
@@ -256,7 +260,7 @@ module.exports = {
             `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)}`,
           );
 
-          msg.edit({ embeds: [embed], components: searchrow });
+          await i.update({ embeds: [embed], components: searchrow });
         } else if (i.customId === "NI_modal:page:next") {
           page++;
           if (page > Math.ceil((await mostUsedQueries.getModals(guild)).length / 25))
@@ -268,7 +272,7 @@ module.exports = {
             `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
           );
 
-          msg.edit({ embeds: [embed], components: searchrow });
+          await i.update({ embeds: [embed], components: searchrow });
         } else if (i.customId === "NI_modal:page:jump") {
           let modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.modal.modals.jump.title"))
@@ -411,7 +415,7 @@ module.exports = {
           embed
             .setTitle(t(client, lang, "commands.modal.embeds.base.title"))
             .setDescription(t(client, lang, "commands.modal.embeds.base.description"));
-          msg.edit({ embeds: [embed], components: [base] });
+          await i.update({ embeds: [embed], components: [base] });
         } else if (i.customId === "NI_modal:edit:delete") {
           let modals = (await mostUsedQueries.getModals(guild)) as Array<ModalCustom>;
 
@@ -426,7 +430,7 @@ module.exports = {
           embed
             .setTitle(t(client, lang, "commands.modal.embeds.base.title"))
             .setDescription(t(client, lang, "commands.modal.embeds.base.description"));
-          msg.edit({ embeds: [embed], components: [base] });
+          await i.update({ embeds: [embed], components: [base] });
         } else if (i.customId === "NI_modal:edit:back") {
           switch (_back) {
             case "NI_modal:base:add":
@@ -436,14 +440,14 @@ module.exports = {
                 .setTitle(t(client, lang, "commands.modal.embeds.base.title"))
                 .setDescription(t(client, lang, "commands.modal.embeds.base.description"))
                 .setColor(client.holder.colors.default);
-              msg.edit({ embeds: [embed], components: [base] });
+              await i.update({ embeds: [embed], components: [base] });
               break;
             case "NI_modal:base:edit":
               _back = "";
               embed
                 .setTitle(t(client, lang, "commands.modal.embeds.base.title"))
                 .setDescription(t(client, lang, "commands.modal.embeds.base.description"));
-              msg.edit({ embeds: [embed], components: [base] });
+              await i.update({ embeds: [embed], components: [base] });
               break;
             case "NI_modal:page:search":
               _back = "";
@@ -466,7 +470,7 @@ module.exports = {
                 });
 
               // @ts-ignore
-              msg.edit({ embeds: [embed], components: searchrow });
+              await i.update({ embeds: [embed], components: searchrow });
               break;
             case "NI_modal:select":
               _back = "";
@@ -484,7 +488,7 @@ module.exports = {
                 .setTitle(t(client, lang, "commands.modal.embeds.search.title"))
                 .setDescription(t(client, lang, "commands.modal.embeds.search.description"));
 
-              msg.edit({ embeds: [embed], components: searchrow });
+              await i.update({ embeds: [embed], components: searchrow });
               break;
             default:
               _back = "";
@@ -493,7 +497,7 @@ module.exports = {
                 .setTitle(t(client, lang, "commands.modal.embeds.base.title"))
                 .setDescription(t(client, lang, "commands.modal.embeds.base.description"))
                 .setColor(client.holder.colors.default);
-              msg.edit({ embeds: [embed], components: [base] });
+              await i.update({ embeds: [embed], components: [base] });
               break;
           }
         } else if (i.customId === "NI_modal:edit:label") {
@@ -675,7 +679,7 @@ module.exports = {
               name: t(client, lang, "commands.modal.embeds.edit.field.name"),
               value: t(client, lang, "commands.modal.embeds.edit.field.value", _schema.title),
             });
-          msg.edit({
+          await i.update({
             embeds: [embed],
             components: [...editrow, fieldList(client, lang, _schema)],
             files: [],

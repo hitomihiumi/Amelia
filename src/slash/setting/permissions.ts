@@ -20,6 +20,7 @@ import {
   Collection,
   RoleSelectMenuInteraction,
   Guild as DJSGuild,
+  MessageFlagsBitField,
 } from "discord.js";
 import { Guild } from "../../helpers";
 import { CommandPermission } from "../../types/helpers";
@@ -49,6 +50,9 @@ module.exports = {
   },
   run: async (client: Client, interaction: CommandInteraction) => {
     if (!interaction.guild) return;
+
+    await interaction.deferReply({ flags: MessageFlagsBitField.Flags.Ephemeral });
+
     let guild = new Guild(client, interaction.guild);
 
     const lang = (await guild.get(`settings.language`)) as string;
@@ -88,10 +92,9 @@ module.exports = {
         .setStyle(ButtonStyle.Primary),
     );
 
-    let msg = await interaction.reply({
+    let msg = await interaction.editReply({
       embeds: [embed],
       components: [pageControl, commandsSelect],
-      ephemeral: true,
     });
 
     const filter = (i: any) => i.user.id === interaction.user.id;
@@ -302,9 +305,6 @@ module.exports = {
           permissionsSelect = permissionsList(client, lang, permission);
           rolesSelect = permissionRoles(client, guild, lang, permission);
 
-          console.log(permission);
-          console.log(command);
-
           back = "main";
 
           embed
@@ -352,8 +352,6 @@ module.exports = {
 
           permissionsSelect = permissionsList(client, lang, permission);
           rolesSelect = permissionRoles(client, guild, lang, permission);
-
-          console.log(permission);
 
           embed
             .setTitle(t(client, lang, "commands.permissions.embeds.command.title", command.name))

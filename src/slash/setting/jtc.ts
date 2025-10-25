@@ -14,6 +14,7 @@ import {
   TextInputStyle,
   ModalActionRowComponentBuilder,
   PermissionsBitField,
+  MessageFlagsBitField,
 } from "discord.js";
 import { Guild } from "../../helpers";
 import { t } from "../../i18n/helpers";
@@ -35,6 +36,9 @@ module.exports = {
   options: [],
   run: async (client: Client, interaction: CommandInteraction) => {
     if (!interaction.guild) return;
+
+    await interaction.deferReply({ flags: MessageFlagsBitField.Flags.Ephemeral });
+
     let guild = new Guild(client, interaction.guild);
 
     const lang = await guild.get("settings.language");
@@ -89,7 +93,7 @@ module.exports = {
       );
     }
 
-    let msg = await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+    let msg = await interaction.editReply({ embeds: [embed], components: [row] });
 
     const filter = (i: any) => i.user.id === interaction.user.id;
 
