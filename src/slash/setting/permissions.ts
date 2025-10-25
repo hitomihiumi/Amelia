@@ -182,14 +182,15 @@ module.exports = {
 
             embed
               .setTitle(t(client, lang, "commands.permissions.embeds.command.title", command.name))
-              // @ts-ignore
               .setDescription(
                 t(
                   client,
                   lang,
                   "commands.permissions.embeds.command.description",
                   command.name,
-                  command.locale[lang] ? command.locale[lang] : command.description,
+                  // @ts-ignore
+                  (command.locale ? command.locale[lang] : command.description) ||
+                    command.description,
                 ),
               )
               .setColor(client.holder.colors.default);
@@ -202,7 +203,7 @@ module.exports = {
         } else if (i.customId === "NI_permissions:role:delete") {
           permission.roles = permission.roles.filter((role) => role.id !== temp.id);
 
-          guild.set(`permissions.commands.${command.name}`, permission);
+          await mostUsedQueries.setPermission(guild, command.name, permission);
 
           rolesSelect = permissionRoles(client, guild, lang, permission);
 
@@ -294,7 +295,7 @@ module.exports = {
             }
           }
 
-          guild.set(`permissions.commands.${command.name}`, permission);
+          await mostUsedQueries.setPermission(guild, command.name, permission);
 
           rolesSelect = permissionRoles(client, guild, lang, permission);
 
@@ -308,14 +309,15 @@ module.exports = {
 
           embed
             .setTitle(t(client, lang, "commands.permissions.embeds.command.title", command.name))
-            // @ts-ignore
             .setDescription(
               t(
                 client,
                 lang,
                 "commands.permissions.embeds.command.description",
                 command.name,
-                command.locale[lang] ? command.locale[lang] : command.description,
+                // @ts-ignore
+                (command.locale ? command.locale[lang] : command.description) ||
+                  command.description,
               ),
             )
             .setColor(client.holder.colors.default);
@@ -342,7 +344,7 @@ module.exports = {
 
           command = client.holder.cmds.slashCommands.get(i.values[0]) as AnySlash;
 
-          permission = ((await guild.get(`permissions.commands.${command.name}`)) || {
+          permission = ((await mostUsedQueries.getPermission(guild, command.name)) || {
             name: command.name,
             roles: [],
             permission: command.permissions?.user,
@@ -355,14 +357,15 @@ module.exports = {
 
           embed
             .setTitle(t(client, lang, "commands.permissions.embeds.command.title", command.name))
-            // @ts-ignore
             .setDescription(
               t(
                 client,
                 lang,
                 "commands.permissions.embeds.command.description",
                 command.name,
-                command.locale[lang] ? command.locale[lang] : command.description,
+                // @ts-ignore
+                (command.locale ? command.locale[lang] : command.description) ||
+                  command.description,
               ),
             )
             .setColor(client.holder.colors.default);
@@ -385,7 +388,7 @@ module.exports = {
         } else if (i.customId === "NI_permissions:permissions") {
           permission.permission = BigInt(i.values[0]);
 
-          guild.set(`permissions.commands.${command.name}`, permission);
+          await mostUsedQueries.setPermission(guild, command.name, permission);
 
           permissionsSelect = permissionsList(client, lang, permission);
 
@@ -536,8 +539,8 @@ async function commandsList(client: Client, guild: Guild, lang: string, page: nu
     .setPlaceholder(t(client, lang, "commands.permissions.select_menus.commands.placeholder"))
     .setMaxValues(1);
 
-  commands.forEach(async (cmd) => {
-    let perm = (await guild.get(`permissions.commands.${cmd.name}`)) as
+  for (const cmd of commands) {
+    let perm = (await mostUsedQueries.getPermission(guild, cmd.name)) as
       | CommandPermission
       | undefined;
     commandsSelect.addOptions(
@@ -554,7 +557,7 @@ async function commandsList(client: Client, guild: Guild, lang: string, page: nu
               : cmd.description,
         ),
     );
-  });
+  }
 
   return new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(commandsSelect);
 }
@@ -617,3 +620,16 @@ function permissionRoles(
 
   return new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(rolesSelect);
 }
+
+const mostUsedQueries = {
+  getPermission: async (guild: Guild, commandName: string) => {
+    return (await guild.get(`permissions.commands.${commandName}`)) as CommandPermission;
+  },
+  setPermission: async (
+    guild: Guild,
+    commandName: string,
+    commandPermissions: CommandPermission,
+  ) => {
+    return await guild.set(`permissions.commands.${commandName}`, commandPermissions);
+  },
+};

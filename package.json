@@ -3,7 +3,7 @@
     "@hitomihiumi/colors.ts": "^1.0.3",
     "@hitomihiumi/filewatcher": "^0.1.1",
     "@napi-rs/canvas": "^0.1.77",
-    "@nmmty/lazycanvas": "^0.6.0-dev.1d5786",
+    "@nmmty/lazycanvas": "^0.6.1",
     "@prisma/client": "^6.18.0",
     "body-parser": "^1.20.3",
     "chokidar": "^4.0.3",
@@ -15,7 +15,7 @@
     "fuse.js": "^7.1.0",
     "prisma": "^6.18.0"
   },
-  "name": "kyoko",
+  "name": "amelia",
   "version": "0.1.1",
   "main": "/dist/index.js",
   "devDependencies": {

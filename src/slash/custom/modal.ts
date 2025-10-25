@@ -182,7 +182,7 @@ module.exports = {
             break;
           case "NI_modal:select":
             _schema = schema(
-              (await guild.get("utils.components.modals")).find(
+              (await mostUsedQueries.getModals(guild)).find(
                 (m: ModalCustom) => m.id === i.values[0].split(":")[2],
               ),
             );
@@ -247,25 +247,25 @@ module.exports = {
       } else if (i instanceof ButtonInteraction) {
         if (i.customId === "NI_modal:page:prev") {
           page--;
-          if (page > Math.ceil((await guild.get("utils.components.modals")).length / 25))
-            page = Math.ceil((await guild.get("utils.components.modals")).length / 25) - 1;
+          if (page > Math.ceil((await mostUsedQueries.getModals(guild)).length / 25))
+            page = Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) - 1;
 
           searchrow = await modalList(client, lang, guild, page);
           // @ts-ignore
           searchrow[1].components[1].setLabel(
-            `${page + 1}/${Math.ceil(guild.get("utils.components.modals").length / 25)}`,
+            `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)}`,
           );
 
           msg.edit({ embeds: [embed], components: searchrow });
         } else if (i.customId === "NI_modal:page:next") {
           page++;
-          if (page > Math.ceil((await guild.get("utils.components.modals")).length / 25))
-            page = Math.ceil((await guild.get("utils.components.modals")).length / 25) - 1;
+          if (page > Math.ceil((await mostUsedQueries.getModals(guild)).length / 25))
+            page = Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) - 1;
 
           searchrow = await modalList(client, lang, guild, page);
           // @ts-ignore
           searchrow[1].components[1].setLabel(
-            `${page + 1}/${Math.ceil(guild.get("utils.components.modals").length / 25) || 1}`,
+            `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
           );
 
           msg.edit({ embeds: [embed], components: searchrow });
@@ -279,7 +279,7 @@ module.exports = {
                   .setCustomId("NI_modal:text:jump")
                   .setLabel(t(client, lang, "commands.modal.modals.jump.label"))
                   .setPlaceholder(
-                    `1-${Math.ceil((await guild.get("utils.components.modals")).length / 25) || 1}`,
+                    `1-${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
                   )
                   .setStyle(TextInputStyle.Short),
               ),
@@ -298,14 +298,14 @@ module.exports = {
           page =
             jump < 0
               ? 0
-              : jump > Math.ceil((await guild.get("utils.components.modals")).length / 25)
-                ? Math.ceil((await guild.get("utils.components.modals")).length / 25)
+              : jump > Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)
+                ? Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)
                 : jump;
 
           searchrow = await modalList(client, lang, guild, page);
           // @ts-ignore
           searchrow[1].components[1].setLabel(
-            `${page + 1}/${Math.ceil(guild.get("utils.components.modals").length / 25) || 1}`,
+            `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
           );
 
           // @ts-ignore
@@ -341,7 +341,7 @@ module.exports = {
 
           // @ts-ignore
           searchrow[1].components[1].setLabel(
-            `${page + 1}/${Math.ceil(guild.get("utils.components.modals").length / 25)}`,
+            `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)}`,
           );
 
           delete embed.data.fields;
@@ -394,7 +394,7 @@ module.exports = {
         } else if (i.customId === "NI_modal:edit:preview") {
           await i.showModal(new customUtil.CustomModal(_schema).getModal());
         } else if (i.customId === "NI_modal:edit:save") {
-          let modals = (await guild.get("utils.components.modals")) as Array<ModalCustom>;
+          let modals = (await mostUsedQueries.getModals(guild)) as Array<ModalCustom>;
 
           if (modals.findIndex((m) => m.id === _schema.id) === -1) {
             modals.push(_schema);
@@ -402,7 +402,7 @@ module.exports = {
             modals[modals.findIndex((m) => m.id === _schema.id)] = _schema;
           }
 
-          guild.set("utils.components.modals", modals);
+          await mostUsedQueries.setModals(guild, modals);
 
           _schema = schema();
 
@@ -413,11 +413,11 @@ module.exports = {
             .setDescription(t(client, lang, "commands.modal.embeds.base.description"));
           msg.edit({ embeds: [embed], components: [base] });
         } else if (i.customId === "NI_modal:edit:delete") {
-          let modals = (await guild.get("utils.components.modals")) as Array<ModalCustom>;
+          let modals = (await mostUsedQueries.getModals(guild)) as Array<ModalCustom>;
 
           modals = modals.filter((m) => m.id !== _schema.id);
 
-          guild.set("utils.components.modals", modals);
+          await mostUsedQueries.setModals(guild, modals);
 
           _schema = schema();
 
@@ -452,7 +452,7 @@ module.exports = {
 
               // @ts-ignore
               searchrow[1].components[1].setLabel(
-                `${page + 1}/${Math.ceil(guild.get("utils.components.modals").length / 25) || 1}`,
+                `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
               );
 
               delete embed.data.fields;
@@ -475,7 +475,7 @@ module.exports = {
 
               // @ts-ignore
               searchrow[1].components[1].setLabel(
-                `${page + 1}/${Math.ceil(guild.get("utils.components.modals").length / 25) || 1}`,
+                `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
               );
 
               delete embed.data.fields;
@@ -693,7 +693,7 @@ async function modalList(
   page: number = 0,
   search?: string,
 ) {
-  let arr = (await guild.get("utils.components.modals")) as Array<ModalCustom>;
+  let arr = (await mostUsedQueries.getModals(guild)) as Array<ModalCustom>;
 
   if (search) {
     let fuseSearch = new fuse(arr, {
@@ -740,7 +740,7 @@ async function modalList(
       new ButtonBuilder()
         .setCustomId("NI_modal:page:jump")
         .setLabel(
-          `${page + 1}/${Math.ceil((await guild.get("utils.components.modals")).length / 25) || 1}`,
+          `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
         )
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
@@ -886,3 +886,12 @@ async function modalFieldEmbed(
 
   return { embed, attachment };
 }
+
+const mostUsedQueries = {
+  getModals: async (guild: Guild) => {
+    return (await guild.get("utils.components.modals")) as Array<ModalCustom>;
+  },
+  setModals: async (guild: Guild, modals: Array<ModalCustom>) => {
+    await guild.set("utils.components.modals", modals);
+  },
+};

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "path";
-import { Guild, Language } from "../helpers";
+import { Guild } from "../helpers";
 import { Command, Component, SlashCommand } from "../types/helpers";
 import {
   Client,
@@ -14,22 +14,6 @@ import { t } from "../i18n/helpers";
 
 export function foldersCheck() {
   let folders = [
-    {
-      name: "dbs",
-      path: "./../../",
-    },
-    {
-      name: "guilds",
-      path: "./../../dbs/",
-    },
-    {
-      name: "users",
-      path: "./../../dbs/",
-    },
-    {
-      name: "history",
-      path: "./../../dbs/",
-    },
     {
       name: "commands",
       path: "../",
@@ -65,10 +49,6 @@ export function foldersCheck() {
     {
       name: "guild",
       path: "../events",
-    },
-    {
-      name: "locale",
-      path: "./../../",
     },
   ];
 

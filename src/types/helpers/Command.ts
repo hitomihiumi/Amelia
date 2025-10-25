@@ -54,3 +54,5 @@ export interface Manifest {
   };
   context: InteractionContextType[];
 }
+
+export type AnySlash = SlashCommand | Manifest;
