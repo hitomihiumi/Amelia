@@ -2,11 +2,12 @@ import { Client, GatewayIntentBits, Partials, Collection, ColorResolvable } from
 import "dotenv/config";
 import "@hitomihiumi/colors.ts";
 import "./global";
-import { fastEmbed, foldersCheck, reVar } from "./handlers/functions";
+import { fastEmbed, foldersCheck, fullEmbed, reVar } from "./handlers/functions";
 import { FileWatcher } from "@hitomihiumi/filewatcher";
 import { commandLoader } from "./handlers/cmdLoaders";
 import { initializeI18n } from "./i18n/locales";
 import { prisma, DatabaseService } from "./database";
+import { emojis } from "./emoji/emojis";
 
 foldersCheck();
 
@@ -68,6 +69,7 @@ client.holder = {
   },
   utils: {
     reVar,
+    fastEmbed: fullEmbed,
   },
   colors: {
     default: "#4a3f66",
@@ -75,7 +77,7 @@ client.holder = {
     success: "#6bff97",
     info: "#7dd8ff",
   },
-  emojis: {},
+  emojis,
 };
 
 // Connect to database before loading handlers

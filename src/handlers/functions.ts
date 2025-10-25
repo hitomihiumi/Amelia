@@ -9,6 +9,7 @@ import {
   EmbedBuilder,
   PermissionsBitField,
   ColorResolvable,
+  EmbedData,
 } from "discord.js";
 import { t } from "../i18n/helpers";
 
@@ -98,6 +99,10 @@ export function fastEmbed(color: ColorResolvable, title: string, desc: string) {
       .setTitle(title)
       .setDescription(desc)
   );
+}
+
+export function fullEmbed(embedData: EmbedData) {
+  return new EmbedBuilder(embedData);
 }
 
 export function reVar(str: string, ...args: any[]) {

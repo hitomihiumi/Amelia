@@ -1,15 +1,8 @@
 import { Collection, ColorResolvable } from "discord.js";
-import {
-  Command,
-  Manifest,
-  SlashComman,
-  Autocomplete,
-  Button,
-  Modal,
-  SelectMenu,
-} from "./types/helpers";
+import { Command, Manifest, Autocomplete, Button, Modal, SelectMenu } from "./types/helpers";
 import { I18nManager } from "./i18n/I18n";
 import { PrismaClient } from "@prisma/client";
+import { EmojisKey } from "./emoji/emojis";
 
 declare module "discord.js" {
   export interface Client {
@@ -43,6 +36,7 @@ export interface Holder {
   };
   utils: {
     reVar: Function;
+    fastEmbed: Function;
   };
   colors: {
     default: ColorResolvable;
@@ -51,6 +45,6 @@ export interface Holder {
     info: ColorResolvable;
   };
   emojis: {
-    [key: string]: string;
+    [key in EmojisKey]: string;
   };
 }
