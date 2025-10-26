@@ -1,7 +1,7 @@
 import { Button, Autocomplete, Modal, SelectMenu } from "../types/helpers";
 import { Client } from "discord.js";
 import { readdirSync } from "node:fs";
-import path from "path";
+import path from "node:path";
 
 module.exports = (client: Client) => {
   try {

@@ -17,13 +17,11 @@
   "license": "MIT",
   "description": "",
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
+    "@biomejs/biome": "1.9.4",
     "i": "^0.3.7",
     "tslib": "^2.8.1",
-    "typescript": "^5.7.2",
-    "@biomejs/biome": "1.9.4",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   },
   "dependencies": {
     "@hitomihiumi/colors.ts": "^1.0.3",
@@ -33,11 +31,8 @@
     "@prisma/client": "^6.18.0",
     "body-parser": "^1.20.3",
     "chokidar": "^4.0.3",
-    "cors": "^2.8.5",
     "discord.js": "^14.21.0",
     "dotenv": "^16.6.1",
-    "enmap": "^5.9.10",
-    "express": "^4.21.2",
     "fuse.js": "^7.1.0",
     "prisma": "^6.18.0"
   }

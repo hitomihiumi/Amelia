@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 
 export const assetsMap: Record<string, string> = {
   microphone: path.resolve(__dirname, "../../assets/microphone.png"),

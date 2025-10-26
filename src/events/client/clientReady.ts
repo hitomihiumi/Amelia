@@ -1,5 +1,5 @@
 import { ActivityType, Client } from "discord.js";
-import { resolve } from "path";
+import { resolve } from "node:path";
 
 module.exports = async (client: Client) => {
   try {

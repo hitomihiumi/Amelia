@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import { Client } from "discord.js";
 import { Command } from "../types/helpers";
-import path from "path";
+import path from "node:path";
 
 module.exports = (client: Client) => {
   try {

@@ -1,7 +1,7 @@
 import { Manifest, SlashCommand } from "../types/helpers";
 import { Client, SlashCommandBuilder, SlashCommandSubcommandBuilder } from "discord.js";
 import { lstatSync, readdirSync } from "node:fs";
-import path from "path";
+import path from "node:path";
 
 function groupCommandLoad(manifest: Manifest, dir: string) {
   let command = new SlashCommandBuilder()
