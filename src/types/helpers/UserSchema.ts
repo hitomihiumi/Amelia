@@ -43,8 +43,9 @@ interface DisplayOptions {
   mode: boolean;
   solid: {
     bg_color: string;
-    text_color: string;
-    text: string;
+    first_component: string;
+    second_component: string;
+    third_component: string;
   };
   url: string | null;
 }

@@ -4,6 +4,7 @@ import { prisma } from "./prisma";
 import { Client } from "discord.js";
 import { DBUser } from "./DBUser";
 import { DBHistory } from "./DBHistory";
+import { GuildPathMap, GuildFieldMap } from "./mappings/GuildMapping";
 
 /**
  * Type-safe paths for Guild data access
@@ -99,6 +100,7 @@ export class DBGuild {
 
   /**
    * Get value by path with type inference
+   * Supports parent paths (e.g., "utils.join_to_create" returns all JTC fields)
    */
   public async get<T extends GuildPath>(path: T): Promise<PathValue<T>> {
     await this.ensureGuild();
@@ -108,47 +110,67 @@ export class DBGuild {
       return this.jtcChannelCache as any;
     }
 
-    const keys = path.split(".");
-    const field = this.mapPathToField(keys);
-
     const data = await prisma.guild.findUnique({
       where: { id: this.guild.id },
-      select: { [field]: true },
     });
 
     if (!data) return null as any;
 
-    // Determine how many keys were consumed by the field mapping
-    const fieldPath = Object.entries({
-      "settings.prefix": "prefix",
-      "settings.language": "language",
-      "utils.join_to_create.enabled": "jtcEnabled",
-      "utils.join_to_create.channel": "jtcChannel",
-      "utils.join_to_create.category": "jtcCategory",
-      "utils.join_to_create.default_name": "jtcDefaultName",
-      "utils.counter.enabled": "counterEnabled",
-      "utils.counter.category": "counterCategory",
-      "utils.counter.channels": "counterChannels",
-      "utils.levels.enabled": "levelsEnabled",
-      "utils.levels.ignore_channels": "levelsIgnoreChannels",
-      "utils.levels.ignore_roles": "levelsIgnoreRoles",
-      "utils.levels.level_roles": "levelsRoles",
-      "utils.components.modals": "customModals",
-      "utils.components.embed": "customEmbeds",
-      "utils.components.buttons": "customButtons",
-      "economy.currency.emoji": "currencyEmoji",
-      "economy.currency.id": "currencyId",
-      "moderation.moderation_roles": "moderationRoles",
-      "permissions.commands": "commandPermissions",
-    }).find(([_, v]) => v === field)?.[0];
+    // Check if this is a parent path (has children)
+    const pathInfo = GuildPathMap[path];
 
-    let remainingKeys: string[] = [];
-    if (fieldPath) {
-      const fieldKeys = fieldPath.split(".");
-      remainingKeys = keys.slice(fieldKeys.length);
+    if (pathInfo && pathInfo.children) {
+      // This is a parent path, collect all child values
+      const result: any = {};
+
+      for (const childKey of pathInfo.children) {
+        const childPath = `${path}.${childKey}`;
+        const childInfo = GuildPathMap[childPath];
+
+        if (childInfo && childInfo.field) {
+          result[childKey] = data[childInfo.field as keyof typeof data];
+        }
+      }
+
+      return result as PathValue<T>;
     }
 
-    return this.extractValue(data[field as keyof typeof data], remainingKeys) as PathValue<T>;
+    // This is a leaf path or dynamic path
+    const keys = path.split(".");
+
+    // Try to get mapped field
+    let field: string;
+    let remainingKeys: string[] = [];
+
+    try {
+      field = this.mapPathToField(path);
+    } catch (error) {
+      // Path not found, might be dynamic path in JSON field
+      // Try to find the closest parent path
+      for (let i = keys.length - 1; i > 0; i--) {
+        const parentPath = keys.slice(0, i).join(".");
+        try {
+          field = this.mapPathToField(parentPath);
+          remainingKeys = keys.slice(i);
+          break;
+        } catch {
+          // Try next parent
+        }
+      }
+
+      if (!field!) {
+        throw error;
+      }
+    }
+
+    const fieldValue = data[field as keyof typeof data];
+
+    // If we have remaining keys, extract nested value from JSON field
+    if (remainingKeys.length > 0) {
+      return this.extractValue(fieldValue, remainingKeys) as PathValue<T>;
+    }
+
+    return fieldValue as PathValue<T>;
   }
 
   /**
@@ -164,37 +186,28 @@ export class DBGuild {
     }
 
     const keys = path.split(".");
-    const field = this.mapPathToField(keys);
-
-    // Determine how many keys were consumed by the field mapping
-    const mapping: Record<string, string> = {
-      "settings.prefix": "prefix",
-      "settings.language": "language",
-      "utils.join_to_create.enabled": "jtcEnabled",
-      "utils.join_to_create.channel": "jtcChannel",
-      "utils.join_to_create.category": "jtcCategory",
-      "utils.join_to_create.default_name": "jtcDefaultName",
-      "utils.counter.enabled": "counterEnabled",
-      "utils.counter.category": "counterCategory",
-      "utils.counter.channels": "counterChannels",
-      "utils.levels.enabled": "levelsEnabled",
-      "utils.levels.ignore_channels": "levelsIgnoreChannels",
-      "utils.levels.ignore_roles": "levelsIgnoreRoles",
-      "utils.levels.level_roles": "levelsRoles",
-      "utils.components.modals": "customModals",
-      "utils.components.embed": "customEmbeds",
-      "utils.components.buttons": "customButtons",
-      "economy.currency.emoji": "currencyEmoji",
-      "economy.currency.id": "currencyId",
-      "moderation.moderation_roles": "moderationRoles",
-      "permissions.commands": "commandPermissions",
-    };
-
-    const fieldPath = Object.entries(mapping).find(([_, v]) => v === field)?.[0];
+    let field: string;
     let remainingKeys: string[] = [];
-    if (fieldPath) {
-      const fieldKeys = fieldPath.split(".");
-      remainingKeys = keys.slice(fieldKeys.length);
+
+    try {
+      field = this.mapPathToField(path);
+    } catch (error) {
+      // Path not found, might be dynamic path in JSON field
+      // Try to find the closest parent path
+      for (let i = keys.length - 1; i > 0; i--) {
+        const parentPath = keys.slice(0, i).join(".");
+        try {
+          field = this.mapPathToField(parentPath);
+          remainingKeys = keys.slice(i);
+          break;
+        } catch {
+          // Try next parent
+        }
+      }
+
+      if (!field!) {
+        throw error;
+      }
     }
 
     // For JSON fields with nested paths, we need to update the whole field
@@ -202,7 +215,6 @@ export class DBGuild {
       // Get current data
       const currentData = await prisma.guild.findUnique({
         where: { id: this.guild.id },
-        select: { [field]: true },
       });
 
       const currentValue = (currentData?.[field as keyof typeof currentData] || {}) as any;
@@ -302,47 +314,18 @@ export class DBGuild {
   }
 
   /**
-   * Map dot-notation path to Prisma field
+   * Map dot-notation path to Prisma field using auto-generated mapping
    */
-  private mapPathToField(keys: string[]): string {
-    const mapping: Record<string, string> = {
-      "settings.prefix": "prefix",
-      "settings.language": "language",
-      "utils.join_to_create.enabled": "jtcEnabled",
-      "utils.join_to_create.channel": "jtcChannel",
-      "utils.join_to_create.category": "jtcCategory",
-      "utils.join_to_create.default_name": "jtcDefaultName",
-      "utils.counter.enabled": "counterEnabled",
-      "utils.counter.category": "counterCategory",
-      "utils.counter.channels": "counterChannels",
-      "utils.levels.enabled": "levelsEnabled",
-      "utils.levels.ignore_channels": "levelsIgnoreChannels",
-      "utils.levels.ignore_roles": "levelsIgnoreRoles",
-      "utils.levels.level_roles": "levelsRoles",
-      "utils.components.modals": "customModals",
-      "utils.components.embed": "customEmbeds",
-      "utils.components.buttons": "customButtons",
-      "economy.currency.emoji": "currencyEmoji",
-      "economy.currency.id": "currencyId",
-      "moderation.moderation_roles": "moderationRoles",
-      "permissions.commands": "commandPermissions",
-    };
+  private mapPathToField(path: string): string {
+    const field = GuildFieldMap[path];
 
-    const fullPath = keys.join(".");
-
-    // Check exact match first
-    if (mapping[fullPath]) {
-      return mapping[fullPath];
+    if (!field) {
+      throw new Error(
+        `Unknown guild path: ${path}. Please regenerate mappings with 'npm run generate:schema'`
+      );
     }
 
-    // Check if path starts with a mapped prefix (for dynamic paths like permissions.commands.commandName)
-    for (const [mapKey, mapValue] of Object.entries(mapping)) {
-      if (fullPath.startsWith(mapKey + ".") || fullPath === mapKey) {
-        return mapValue;
-      }
-    }
-
-    return keys[0];
+    return field;
   }
 
   /**

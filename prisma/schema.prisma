@@ -143,17 +143,17 @@ model User {
   // Custom card settings
   balanceNumber String
   balanceMode   Boolean @default(false)
-  balanceSolid  Json    @default("{\"bg_color\":\"#000000\",\"text_color\":\"#ffffff\",\"text\":\"Kyoko\"}")
+  balanceSolid  Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#ffffff\",\"second_component\":\"#C30F45\",\"third_component\":\"#422242\"}")
   balanceUrl    String?
 
   profileBio   String  @default("")
   profileMode  Boolean @default(false)
-  profileSolid Json    @default("{\"bg_color\":\"#000000\",\"text_color\":\"#ffffff\",\"text\":\"Kyoko\"}")
+  profileSolid Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#422242\",\"second_component\":\"#C30F45\",\"third_component\":\"#422242\"}")
   profileUrl   String?
   profileColor String?
 
   rankMode  Boolean @default(false)
-  rankSolid Json    @default("{\"bg_color\":\"#000000\",\"text_color\":\"#ffffff\",\"text\":\"Kyoko\"}")
+  rankSolid Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#ffffff\",\"second_component\":\"#C30F45\",\"third_component\":\"#422242\"}")
   rankUrl   String?
   rankColor String?
 

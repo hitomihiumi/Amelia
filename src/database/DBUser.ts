@@ -1,26 +1,32 @@
 import { User as PrismaUser } from "@prisma/client";
 import { User as DiscordUser, Guild, Client } from "discord.js";
-import { prisma } from "../database/prisma";
+import { prisma } from "./prisma";
 import { DBHistory } from "./DBHistory";
+import { UserPathMap, UserFieldMap } from "./mappings/UserMapping";
 
 /**
  * Type-safe paths for User data access
  */
 type UserPath =
+  | "level"
   | "level.xp"
   | "level.total_xp"
   | "level.level"
   | "level.voice_time"
   | "level.message_count"
+  | "economy.balance"
   | "economy.balance.wallet"
   | "economy.balance.bank"
   | "economy.timeout.work"
   | "economy.timeout.daily"
   | "economy.timeout.weekly"
   | "economy.timeout.rob"
+  | "custom.balance"
   | "custom.balance.number"
   | "custom.balance.mode"
+  | "custom.profile"
   | "custom.profile.bio"
+  | "custom.rank"
   | "custom.badges"
   | "presets.jtc"
   | string;
@@ -95,13 +101,12 @@ export class DBUser {
 
   /**
    * Get value by path with type inference
+   * Supports parent paths (e.g., "level" returns all level fields)
    */
   public async get<T extends UserPath>(path: T): Promise<UserPathValue<T>> {
     await this.ensureUser();
 
-    const keys = path.split(".");
-    const field = this.mapPathToField(keys);
-
+    // Fetch all data once
     const data = await prisma.user.findUnique({
       where: {
         userId_guildId: {
@@ -109,12 +114,32 @@ export class DBUser {
           guildId: this.guild.id,
         },
       },
-      select: { [field]: true },
     });
 
     if (!data) return null as any;
 
-    return this.extractValue(data[field as keyof typeof data], keys.slice(1)) as UserPathValue<T>;
+    // Check if this is a parent path (has children)
+    const pathInfo = UserPathMap[path];
+
+    if (pathInfo && pathInfo.children) {
+      // This is a parent path, collect all child values
+      const result: any = {};
+
+      for (const childKey of pathInfo.children) {
+        const childPath = `${path}.${childKey}`;
+        const childInfo = UserPathMap[childPath];
+
+        if (childInfo && childInfo.field) {
+          result[childKey] = data[childInfo.field as keyof typeof data];
+        }
+      }
+
+      return result as UserPathValue<T>;
+    }
+
+    // This is a leaf path, get the single field value
+    const field = this.mapPathToField(path);
+    return data[field as keyof typeof data] as UserPathValue<T>;
   }
 
   /**
@@ -123,9 +148,7 @@ export class DBUser {
   public async set<T extends UserPath>(path: T, value: UserPathValue<T>): Promise<void> {
     await this.ensureUser();
 
-    const keys = path.split(".");
-    const field = this.mapPathToField(keys);
-    const updateValue = this.buildUpdateValue(keys.slice(1), value);
+    const field = this.mapPathToField(path);
 
     await prisma.user.update({
       where: {
@@ -134,7 +157,7 @@ export class DBUser {
           guildId: this.guild.id,
         },
       },
-      data: { [field]: updateValue },
+      data: { [field]: value },
     });
 
     // Invalidate cache
@@ -190,78 +213,17 @@ export class DBUser {
   }
 
   /**
-   * Map dot-notation path to Prisma field
+   * Map dot-notation path to Prisma field using auto-generated mapping
    */
-  private mapPathToField(keys: string[]): string {
-    const mapping: Record<string, string> = {
-      "level.xp": "xp",
-      "level.total_xp": "totalXp",
-      "level.level": "level",
-      "level.voice_time": "voiceTime",
-      "level.message_count": "messageCount",
-      "economy.balance.wallet": "wallet",
-      "economy.balance.bank": "bank",
-      "economy.inventory.custom.roles": "customRoles",
-      "economy.inventory.custom.items": "customItems",
-      "economy.timeout.work": "workTimeout",
-      "economy.timeout.timely": "timelyTimeout",
-      "economy.timeout.daily": "dailyTimeout",
-      "economy.timeout.weekly": "weeklyTimeout",
-      "economy.timeout.rob": "robTimeout",
-      "custom.balance.number": "balanceNumber",
-      "custom.balance.mode": "balanceMode",
-      "custom.balance.solid": "balanceSolid",
-      "custom.balance.url": "balanceUrl",
-      "custom.profile.bio": "profileBio",
-      "custom.profile.mode": "profileMode",
-      "custom.profile.solid": "profileSolid",
-      "custom.profile.url": "profileUrl",
-      "custom.profile.color": "profileColor",
-      "custom.rank.mode": "rankMode",
-      "custom.rank.solid": "rankSolid",
-      "custom.rank.url": "rankUrl",
-      "custom.rank.color": "rankColor",
-      "custom.badges": "customBadges",
-      "temp.games": "tempGames",
-      "presets.jtc": "jtcPresets",
-    };
+  private mapPathToField(path: string): string {
+    const field = UserFieldMap[path];
 
-    const fullPath = keys.join(".");
-    return mapping[fullPath] || keys[0];
-  }
-
-  /**
-   * Extract nested value from object
-   */
-  private extractValue(obj: any, keys: string[]): any {
-    if (keys.length === 0 || !obj) return obj;
-
-    if (typeof obj === "object" && keys.length > 0) {
-      return keys.reduce((acc, key) => acc?.[key], obj);
+    if (!field) {
+      throw new Error(
+        `Unknown user path: ${path}. Please regenerate mappings with 'npm run generate:schema'`
+      );
     }
 
-    return obj;
-  }
-
-  /**
-   * Build update value for nested paths
-   */
-  private buildUpdateValue(keys: string[], value: any): any {
-    if (keys.length === 0) return value;
-
-    if (keys.length === 1 && typeof value !== "object") {
-      return value;
-    }
-
-    const result: any = {};
-    let current = result;
-
-    for (let i = 0; i < keys.length - 1; i++) {
-      current[keys[i]] = {};
-      current = current[keys[i]];
-    }
-
-    current[keys[keys.length - 1]] = value;
-    return result;
+    return field;
   }
 }
