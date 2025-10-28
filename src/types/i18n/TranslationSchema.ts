@@ -228,6 +228,10 @@ export interface TranslationSchema {
         };
       };
     };
+    rank: {
+      error: string;
+      success: string;
+    };
   };
 
   // События

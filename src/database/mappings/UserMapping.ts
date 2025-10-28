@@ -12,175 +12,135 @@ export interface PathMap {
 
 export const UserPathMap: PathMap = {
   "level.xp": {
-    "field": "xp"
+    field: "xp",
   },
   "level.total_xp": {
-    "field": "totalXp"
+    field: "totalXp",
   },
   "level.level": {
-    "field": "level"
+    field: "level",
   },
   "level.voice_time": {
-    "field": "voiceTime"
+    field: "voiceTime",
   },
   "level.message_count": {
-    "field": "messageCount"
+    field: "messageCount",
   },
   "economy.balance.wallet": {
-    "field": "wallet"
+    field: "wallet",
   },
   "economy.balance.bank": {
-    "field": "bank"
+    field: "bank",
   },
   "economy.inventory.custom.roles": {
-    "field": "customRoles"
+    field: "customRoles",
   },
   "economy.inventory.custom.items": {
-    "field": "customItems"
+    field: "customItems",
   },
   "economy.timeout.work": {
-    "field": "workTimeout"
+    field: "workTimeout",
   },
   "economy.timeout.timely": {
-    "field": "timelyTimeout"
+    field: "timelyTimeout",
   },
   "economy.timeout.daily": {
-    "field": "dailyTimeout"
+    field: "dailyTimeout",
   },
   "economy.timeout.weekly": {
-    "field": "weeklyTimeout"
+    field: "weeklyTimeout",
   },
   "economy.timeout.rob": {
-    "field": "robTimeout"
+    field: "robTimeout",
   },
   "custom.balance.number": {
-    "field": "balanceNumber"
+    field: "balanceNumber",
   },
   "custom.balance.mode": {
-    "field": "balanceMode"
+    field: "balanceMode",
   },
   "custom.balance.solid": {
-    "field": "balanceSolid"
+    field: "balanceSolid",
   },
   "custom.balance.url": {
-    "field": "balanceUrl"
+    field: "balanceUrl",
   },
   "custom.profile.bio": {
-    "field": "profileBio"
+    field: "profileBio",
   },
   "custom.profile.mode": {
-    "field": "profileMode"
+    field: "profileMode",
   },
   "custom.profile.solid": {
-    "field": "profileSolid"
+    field: "profileSolid",
   },
   "custom.profile.url": {
-    "field": "profileUrl"
+    field: "profileUrl",
   },
   "custom.profile.color": {
-    "field": "profileColor"
+    field: "profileColor",
   },
   "custom.rank.mode": {
-    "field": "rankMode"
+    field: "rankMode",
   },
   "custom.rank.solid": {
-    "field": "rankSolid"
+    field: "rankSolid",
   },
   "custom.rank.url": {
-    "field": "rankUrl"
+    field: "rankUrl",
   },
   "custom.rank.color": {
-    "field": "rankColor"
+    field: "rankColor",
   },
   "custom.badges": {
-    "field": "customBadges"
+    field: "customBadges",
   },
   "temp.games": {
-    "field": "tempGames"
+    field: "tempGames",
   },
   "presets.jtc": {
-    "field": "jtcPresets"
+    field: "jtcPresets",
   },
-  "level": {
-    "field": "",
-    "children": [
-      "xp",
-      "total_xp",
-      "level",
-      "voice_time",
-      "message_count"
-    ]
+  level: {
+    field: "",
+    children: ["xp", "total_xp", "level", "voice_time", "message_count"],
   },
   "economy.balance": {
-    "field": "",
-    "children": [
-      "wallet",
-      "bank"
-    ]
+    field: "",
+    children: ["wallet", "bank"],
   },
   "economy.inventory.custom": {
-    "field": "",
-    "children": [
-      "roles",
-      "items"
-    ]
+    field: "",
+    children: ["roles", "items"],
   },
   "economy.timeout": {
-    "field": "",
-    "children": [
-      "work",
-      "timely",
-      "daily",
-      "weekly",
-      "rob"
-    ]
+    field: "",
+    children: ["work", "timely", "daily", "weekly", "rob"],
   },
-  "custom": {
-    "field": "",
-    "children": [
-      "badges"
-    ]
+  custom: {
+    field: "",
+    children: ["badges"],
   },
   "custom.balance": {
-    "field": "",
-    "children": [
-      "number",
-      "mode",
-      "solid",
-      "url"
-    ]
+    field: "",
+    children: ["number", "mode", "solid", "url"],
   },
   "custom.profile": {
-    "field": "",
-    "children": [
-      "bio",
-      "mode",
-      "solid",
-      "url",
-      "color"
-    ]
+    field: "",
+    children: ["bio", "mode", "solid", "url", "color"],
   },
   "custom.rank": {
-    "field": "",
-    "children": [
-      "mode",
-      "solid",
-      "url",
-      "color"
-    ]
+    field: "",
+    children: ["mode", "solid", "url", "color"],
   },
-  "temp": {
-    "field": "",
-    "children": [
-      "games"
-    ]
+  temp: {
+    field: "",
+    children: ["games"],
   },
-  "presets": {
-    "field": "",
-    "children": [
-      "jtc"
-    ]
-  }
+  presets: {
+    field: "",
+    children: ["jtc"],
+  },
 };
 
 export const UserFieldMap: Record<string, string> = {
@@ -213,5 +173,5 @@ export const UserFieldMap: Record<string, string> = {
   "custom.rank.color": "rankColor",
   "custom.badges": "customBadges",
   "temp.games": "tempGames",
-  "presets.jtc": "jtcPresets"
+  "presets.jtc": "jtcPresets",
 };

@@ -227,6 +227,10 @@ export const en: TranslationSchema = {
         },
       },
     },
+    rank: {
+      error: "An error occurred while generating the rank card.",
+      success: "{0}'s rank card:",
+    },
   },
 
   events: {

@@ -267,12 +267,12 @@ const guildSchemaMap: Record<string, SchemaField> = {
   "economy.income.rob.income": {
     prismaField: "robIncome",
     prismaType: "Json",
-    default: '"{\\\"min\\\":100,\\\"max\\\":500,\\\"type\\\":\\\"fixed\\\"}"',
+    default: '"{\\"min\\":100,\\"max\\":500,\\"type\\":\\"fixed\\"}"',
   },
   "economy.income.rob.punishment": {
     prismaField: "robPunishment",
     prismaType: "Json",
-    default: '"{\\\"min\\\":10,\\\"max\\\":50,\\\"type\\\":\\\"fixed\\\",\\\"fail_chance\\\":0.5}"',
+    default: '"{\\"min\\":10,\\"max\\":50,\\"type\\":\\"fixed\\",\\"fail_chance\\":0.5}"',
   },
 
   // Moderation
@@ -314,7 +314,7 @@ const guildSchemaMap: Record<string, SchemaField> = {
   "moderation.auto_moderation.invite.punishment": {
     prismaField: "invitePunishment",
     prismaType: "Json",
-    default: '"{\\\"type\\\":\\\"warn\\\",\\\"time\\\":0,\\\"reason\\\":\\\"Auto moderation\\\"}"',
+    default: '"{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"}"',
   },
 
   // Auto Moderation - Links
@@ -354,7 +354,7 @@ const guildSchemaMap: Record<string, SchemaField> = {
   "moderation.auto_moderation.links.punishment": {
     prismaField: "linksPunishment",
     prismaType: "Json",
-    default: '"{\\\"type\\\":\\\"warn\\\",\\\"time\\\":0,\\\"reason\\\":\\\"Auto moderation\\\"}"',
+    default: '"{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"}"',
   },
 
   // Permissions
@@ -460,7 +460,8 @@ const userSchemaMap: Record<string, SchemaField> = {
   "custom.balance.solid": {
     prismaField: "balanceSolid",
     prismaType: "Json",
-    default: '"{\\\"bg_color\\\":\\\"#000000\\\",\\\"first_component\\\":\\\"#ffffff\\\",\\\"second_component\\\":\\\"#C30F45\\\",\\\"third_component\\\":\\\"#422242\\\"}"',
+    default:
+      '"{\\"bg_color\\":\\"#000000\\",\\"first_component\\":\\"#ffffff\\",\\"second_component\\":\\"#C30F45\\",\\"third_component\\":\\"#422242\\"}"',
   },
   "custom.balance.url": {
     prismaField: "balanceUrl",
@@ -482,7 +483,8 @@ const userSchemaMap: Record<string, SchemaField> = {
   "custom.profile.solid": {
     prismaField: "profileSolid",
     prismaType: "Json",
-    default: '"{\\\"bg_color\\\":\\\"#000000\\\",\\\"first_component\\\":\\\"#422242\\\",\\\"second_component\\\":\\\"#C30F45\\\",\\\"third_component\\\":\\\"#422242\\\"}"',
+    default:
+      '"{\\"bg_color\\":\\"#000000\\",\\"first_component\\":\\"#422242\\",\\"second_component\\":\\"#C30F45\\",\\"third_component\\":\\"#422242\\"}"',
   },
   "custom.profile.url": {
     prismaField: "profileUrl",
@@ -504,7 +506,8 @@ const userSchemaMap: Record<string, SchemaField> = {
   "custom.rank.solid": {
     prismaField: "rankSolid",
     prismaType: "Json",
-    default: '"{\\\"bg_color\\\":\\\"#000000\\\",\\\"first_component\\\":\\\"#ffffff\\\",\\\"second_component\\\":\\\"#C30F45\\\",\\\"third_component\\\":\\\"#422242\\\"}"',
+    default:
+      '"{\\"bg_color\\":\\"#000000\\",\\"first_component\\":\\"#ffffff\\",\\"second_component\\":\\"#C30F45\\",\\"third_component\\":\\"#422242\\"}"',
   },
   "custom.rank.url": {
     prismaField: "rankUrl",
@@ -566,7 +569,10 @@ function buildPathHierarchy(schemaMap: Record<string, SchemaField>): PathMapping
 
   // Add parent paths with their children
   for (const parentPath of Array.from(parentPaths)) {
-    const children = paths.filter((p) => p.startsWith(parentPath + ".") && p.split(".").length === parentPath.split(".").length + 1);
+    const children = paths.filter(
+      (p) =>
+        p.startsWith(parentPath + ".") && p.split(".").length === parentPath.split(".").length + 1,
+    );
 
     if (children.length > 0) {
       hierarchy[parentPath] = {
@@ -582,7 +588,11 @@ function buildPathHierarchy(schemaMap: Record<string, SchemaField>): PathMapping
 /**
  * Generate mapping file
  */
-function generateMapping(name: string, schemaMap: Record<string, SchemaField>, outputPath: string): void {
+function generateMapping(
+  name: string,
+  schemaMap: Record<string, SchemaField>,
+  outputPath: string,
+): void {
   const hierarchy = buildPathHierarchy(schemaMap);
 
   const content = `/**
@@ -602,7 +612,7 @@ export const ${name}PathMap: PathMap = ${JSON.stringify(hierarchy, null, 2)};
 export const ${name}FieldMap: Record<string, string> = ${JSON.stringify(
     Object.fromEntries(Object.entries(schemaMap).map(([path, field]) => [path, field.prismaField])),
     null,
-    2
+    2,
   )};
 `;
 
@@ -631,4 +641,3 @@ function main(): void {
 }
 
 main();
-

@@ -321,7 +321,7 @@ export class DBGuild {
 
     if (!field) {
       throw new Error(
-        `Unknown guild path: ${path}. Please regenerate mappings with 'npm run generate:schema'`
+        `Unknown guild path: ${path}. Please regenerate mappings with 'npm run generate:schema'`,
       );
     }
 

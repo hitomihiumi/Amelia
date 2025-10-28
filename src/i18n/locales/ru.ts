@@ -227,6 +227,10 @@ export const ru: TranslationSchema = {
         },
       },
     },
+      rank: {
+          error: "Произошла ошибка при создании карточки ранга",
+          success: "Ранговая карта {0}:"
+      },
   },
 
   events: {

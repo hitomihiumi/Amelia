@@ -220,7 +220,7 @@ export class DBUser {
 
     if (!field) {
       throw new Error(
-        `Unknown user path: ${path}. Please regenerate mappings with 'npm run generate:schema'`
+        `Unknown user path: ${path}. Please regenerate mappings with 'npm run generate:schema'`,
       );
     }
 
