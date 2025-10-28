@@ -547,3 +547,7 @@ export function formatTime(
 
   return parts.join(" ") || formatValue(0, units.second);
 }
+
+export function getNextLevelXP(level: number): number {
+  return 5 * level ** 2 + 50 * level + 100;
+}

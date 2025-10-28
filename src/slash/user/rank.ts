@@ -2,6 +2,7 @@ import { Level, RankCardDisplayOptions, SlashCommand } from "../../types/helpers
 import { AttachmentBuilder, PermissionsBitField } from "discord.js";
 import { Guild } from "../../helpers";
 import { RankCard } from "../../helpers/canvas/RankCard";
+import {t} from "../../i18n/helpers";
 
 module.exports = {
   name: "rank",
@@ -42,6 +43,7 @@ module.exports = {
     const rank = new RankCard({
       avatar: user.displayAvatarURL({ size: 512, extension: "png" }),
       username: user.username,
+      globalName: user.globalName || user.username,
       data: {
         ...levelData,
         rank: 1,
@@ -51,15 +53,14 @@ module.exports = {
 
     const buffer = await rank.render();
     if (!buffer) {
-      return interaction.reply({
-        content: "An error occurred while generating the rank card.",
-        ephemeral: true,
+      return interaction.editReply({
+        content: t(client, await guild.get(`settings.language`), "commands.rank.error"),
       });
     }
     const attachment = new AttachmentBuilder(buffer, { name: "rank.png" });
 
     return interaction.editReply({
-      content: `${user.username}'s rank card:`,
+      content: t(client, await guild.get(`settings.language`), "commands.rank.success", user.globalName),
       files: [attachment],
     });
   },
