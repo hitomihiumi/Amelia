@@ -80,6 +80,9 @@ export const UserPathMap: PathMap = {
   "custom.profile.color": {
     field: "profileColor",
   },
+  "custom.profile.icons": {
+    field: "profileIcons",
+  },
   "custom.rank.mode": {
     field: "rankMode",
   },
@@ -127,7 +130,7 @@ export const UserPathMap: PathMap = {
   },
   "custom.profile": {
     field: "",
-    children: ["bio", "mode", "solid", "url", "color"],
+    children: ["bio", "mode", "solid", "url", "color", "icons"],
   },
   "custom.rank": {
     field: "",
@@ -167,6 +170,7 @@ export const UserFieldMap: Record<string, string> = {
   "custom.profile.solid": "profileSolid",
   "custom.profile.url": "profileUrl",
   "custom.profile.color": "profileColor",
+  "custom.profile.icons": "profileIcons",
   "custom.rank.mode": "rankMode",
   "custom.rank.solid": "rankSolid",
   "custom.rank.url": "rankUrl",

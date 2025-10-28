@@ -65,6 +65,10 @@ export interface RankCardDisplayOptions extends DisplayOptions {
 export interface ProfileCardDisplayOptions extends DisplayOptions {
   color: string | null;
   bio: string | null;
+  icons: Array<{
+    name: string;
+    pos: [number, number];
+  }>;
 }
 
 export interface BalanceCardDisplayOptions extends DisplayOptions {

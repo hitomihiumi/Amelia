@@ -29,11 +29,11 @@ export class RankCard {
       .setPoints({ x: 225, y: 202.5 }, { x: 705, y: 202.5 })
       .setStops(
         {
-          offset: Number((isNaN(xpbar) ? 30 / 475 : xpbar / 475).toFixed(2)) + 0.01,
+          offset: Number(((isNaN(xpbar) ? 30 : xpbar) / 475).toFixed(2)) + 0.01,
           color: "#ffffff",
         },
         {
-          offset: Number((isNaN(xpbar) ? 30 / 475 : xpbar / 475).toFixed(2)) + 0.02,
+          offset: Number(((isNaN(xpbar) ? 30 : xpbar) / 475).toFixed(2)) + 0.02,
           color: this.data.displayOptions.solid.second_component,
         },
       );

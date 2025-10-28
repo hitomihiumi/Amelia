@@ -232,6 +232,10 @@ export interface TranslationSchema {
       error: string;
       success: string;
     };
+    profile: {
+      error: string;
+      success: string;
+    };
   };
 
   // События

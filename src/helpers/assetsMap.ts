@@ -11,3 +11,5 @@ export const fontMap: Record<string, Font> = {
     .setWeight(FontWeight.Regular)
     .setPath(path.resolve(__dirname, "../../assets/fonts/WDXLLubrifontSC.ttf")),
 };
+
+export const iconsMap: Record<string, string> = {};

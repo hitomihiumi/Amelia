@@ -496,6 +496,11 @@ const userSchemaMap: Record<string, SchemaField> = {
     prismaType: "String",
     optional: true,
   },
+  "custom.profile.icons": {
+    prismaField: "profileIcons",
+    prismaType: "Json",
+    default: '"[]"',
+  },
 
   // Custom Rank
   "custom.rank.mode": {

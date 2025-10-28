@@ -151,6 +151,7 @@ model User {
   profileSolid Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#422242\",\"second_component\":\"#C30F45\",\"third_component\":\"#422242\"}")
   profileUrl   String?
   profileColor String?
+  profileIcons Json    @default("[]")
 
   rankMode  Boolean @default(false)
   rankSolid Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#ffffff\",\"second_component\":\"#C30F45\",\"third_component\":\"#422242\"}")

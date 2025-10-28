@@ -231,6 +231,10 @@ export const en: TranslationSchema = {
       error: "An error occurred while generating the rank card.",
       success: "{0}'s rank card:",
     },
+    profile: {
+      error: "An error occurred while generating the profile card.",
+      success: "{0}'s profile card:",
+    },
   },
 
   events: {

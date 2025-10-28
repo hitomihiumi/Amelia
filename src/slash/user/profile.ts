@@ -1,24 +1,24 @@
-import { Level, RankCardDisplayOptions, SlashCommand } from "../../types/helpers";
+import { Level, ProfileCardDisplayOptions, SlashCommand } from "../../types/helpers";
 import { AttachmentBuilder, PermissionsBitField } from "discord.js";
 import { Guild } from "../../helpers";
-import { RankCard } from "../../helpers/canvas/RankCard";
 import { t } from "../../i18n/helpers";
+import { ProfileCard } from "../../helpers/canvas/ProfileCard";
 
 module.exports = {
-  name: "rank",
-  description: "Shows your, or someone else's, level on the server",
+  name: "profile",
+  description: "Shows your, or someone else's, profile on the server",
   cooldown: 5,
   locale: {
-    ru: "Показывает ваш, или чей-то, уровень на сервере",
+    ru: "Показывает ваш, или чей-то, профиль на сервере",
   },
   options: [
     {
       name: "user",
-      description: "The user whose rank you want to see",
+      description: "The user whose profile you want to see",
       type: "USER",
       required: false,
       local: {
-        ru: "Пользователь, чей ранг вы хотите увидеть",
+        ru: "Пользователь, чей профиль вы хотите увидеть",
       },
     },
   ],
@@ -38,9 +38,9 @@ module.exports = {
 
     const levelData = (await member.get("level")) as Level;
 
-    const displayOptions = (await member.get("custom.rank")) as RankCardDisplayOptions;
+    const displayOptions = (await member.get("custom.profile")) as ProfileCardDisplayOptions;
 
-    const rank = new RankCard({
+    const profile = new ProfileCard({
       avatar: user.displayAvatarURL({ size: 512, extension: "png" }),
       username: user.username,
       globalName: user.globalName || user.username,
@@ -51,10 +51,10 @@ module.exports = {
       displayOptions,
     });
 
-    const buffer = await rank.render();
+    const buffer = await profile.render();
     if (!buffer) {
       return interaction.editReply({
-        content: t(client, await guild.get(`settings.language`), "commands.rank.error"),
+        content: t(client, await guild.get(`settings.language`), "commands.profile.error"),
       });
     }
     const attachment = new AttachmentBuilder(buffer, { name: "rank.png" });
@@ -63,7 +63,7 @@ module.exports = {
       content: t(
         client,
         await guild.get(`settings.language`),
-        "commands.rank.success",
+        "commands.profile.success",
         user.globalName,
       ),
       files: [attachment],
