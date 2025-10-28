@@ -147,24 +147,27 @@ export class ProfileCard {
         [0, 0],
         [0, 1],
         [0, 2],
+        [0, 3],
         [1, 0],
         [1, 1],
         [1, 2],
+        [1, 3],
         [2, 0],
         [2, 1],
         [2, 2],
+        [2, 3],
       ].map((pos) => {
         const icon = this.data.displayOptions.icons.find(
           (i) => i.pos[0] === pos[0] && i.pos[1] === pos[1],
         );
         if (!icon)
           return new MorphLayer()
-            .setPosition(516 + pos[0] * 70, 454 + pos[1] * 70)
-            .setSize(30, 30, { all: 15 })
-            .setColor("#555555")
+            .setPosition(516 + pos[0] * 70, 434 + pos[1] * 70)
+            .setSize(20, 20, { all: 10 })
+            .setColor("#ffffff")
             .setOpacity(0.5);
         return new ImageLayer()
-          .setPosition(516 + pos[0] * 70, 454 + pos[1] * 70)
+          .setPosition(516 + pos[0] * 70, 434 + pos[1] * 70)
           .setSize(60, 60)
           .setSrc(iconsMap[icon.name]);
       }),
