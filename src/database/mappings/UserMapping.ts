@@ -95,6 +95,15 @@ export const UserPathMap: PathMap = {
   "custom.rank.color": {
     field: "rankColor",
   },
+  "custom.levelup.mode": {
+    field: "levelupMode",
+  },
+  "custom.levelup.solid": {
+    field: "levelupSolid",
+  },
+  "custom.levelup.url": {
+    field: "levelupUrl",
+  },
   "custom.badges": {
     field: "customBadges",
   },
@@ -136,6 +145,10 @@ export const UserPathMap: PathMap = {
     field: "",
     children: ["mode", "solid", "url", "color"],
   },
+  "custom.levelup": {
+    field: "",
+    children: ["mode", "solid", "url"],
+  },
   temp: {
     field: "",
     children: ["games"],
@@ -175,6 +188,9 @@ export const UserFieldMap: Record<string, string> = {
   "custom.rank.solid": "rankSolid",
   "custom.rank.url": "rankUrl",
   "custom.rank.color": "rankColor",
+  "custom.levelup.mode": "levelupMode",
+  "custom.levelup.solid": "levelupSolid",
+  "custom.levelup.url": "levelupUrl",
   "custom.badges": "customBadges",
   "temp.games": "tempGames",
   "presets.jtc": "jtcPresets",

@@ -525,6 +525,23 @@ const userSchemaMap: Record<string, SchemaField> = {
     optional: true,
   },
 
+  "custom.levelup.mode": {
+    prismaField: "levelupMode",
+    prismaType: "Boolean",
+    default: "false",
+  },
+  "custom.levelup.solid": {
+    prismaField: "levelupSolid",
+    prismaType: "Json",
+    default:
+      '"{\\"bg_color\\":\\"#000000\\",\\"first_component\\":\\"#ffffff\\",\\"second_component\\":\\"#422242\\",\\"third_component\\":\\"#C30F45\\"}"',
+  },
+  "custom.levelup.url": {
+    prismaField: "levelupUrl",
+    prismaType: "String",
+    optional: true,
+  },
+
   // Custom Badges
   "custom.badges": {
     prismaField: "customBadges",

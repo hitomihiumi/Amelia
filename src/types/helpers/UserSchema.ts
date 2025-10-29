@@ -75,6 +75,8 @@ export interface BalanceCardDisplayOptions extends DisplayOptions {
   number: string;
 }
 
+export interface LevelCardDisplayOptions extends DisplayOptions {}
+
 export interface JTCPreset {
   id: string;
   name: string;

@@ -28,7 +28,7 @@
     "@hitomihiumi/colors.ts": "^1.0.3",
     "@hitomihiumi/filewatcher": "^0.1.1",
     "@napi-rs/canvas": "^0.1.77",
-    "@nmmty/lazycanvas": "^0.6.4",
+    "@nmmty/lazycanvas": "^0.6.5",
     "@prisma/client": "^6.18.0",
     "body-parser": "^1.20.3",
     "chokidar": "^4.0.3",

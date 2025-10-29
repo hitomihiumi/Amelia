@@ -158,6 +158,10 @@ model User {
   rankUrl   String?
   rankColor String?
 
+  levelupMode  Boolean @default(false)
+  levelupSolid Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#ffffff\",\"second_component\":\"#422242\",\"third_component\":\"#C30F45\"}")
+  levelupUrl   String?
+
   customBadges Json @default("[]")
 
   // Temp data
