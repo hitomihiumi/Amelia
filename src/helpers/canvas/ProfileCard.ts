@@ -22,7 +22,7 @@ export class ProfileCard {
   }
 
   async render() {
-    const xpbar = Math.max((415 * Number(this.data.data.xp)) / Number(this.data.data.total_xp), 30);
+    const xpbar = Math.max((415 * Number(this.data.data.xp)) / getNextLevelXP(this.data.data.level), 30);
 
     const gradient = new Gradient()
       .setType("linear")
@@ -38,7 +38,7 @@ export class ProfileCard {
         },
       );
 
-    const canvas = new LazyCanvas({ debug: true }).create(736, 736);
+    const canvas = new LazyCanvas().create(736, 736);
 
     canvas.manager.fonts.add(fontMap.wdxllubrifont);
 

@@ -7,7 +7,7 @@ import {
   MorphLayer,
   Path2DLayer,
   PolygonLayer,
-  TextLayer
+  TextLayer,
 } from "@nmmty/lazycanvas";
 import { LevelCardDisplayOptions } from "../../types/helpers";
 import { fontMap } from "../assetsMap";
@@ -20,7 +20,7 @@ export class LevelCard {
   }
 
   async render() {
-    const canvas = new LazyCanvas({ debug: true }).create(400, 120);
+    const canvas = new LazyCanvas().create(400, 120);
 
     canvas.manager.fonts.add(fontMap.wdxllubrifont);
 

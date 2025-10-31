@@ -1,6 +1,6 @@
 import { History as PrismaHistory } from "@prisma/client";
 import { Guild, Client } from "discord.js";
-import { prisma } from "../database/prisma";
+import { prisma } from "./prisma";
 
 /**
  * History action types

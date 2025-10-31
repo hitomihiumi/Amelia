@@ -22,23 +22,23 @@ export class RankCard {
   }
 
   async render() {
-    const xpbar = Math.max((475 * Number(this.data.data.xp)) / Number(this.data.data.total_xp), 30);
+    const xpbar = Math.max((475 * Number(this.data.data.xp)) / getNextLevelXP(this.data.data.level), 30);
 
     const gradient = new Gradient()
       .setType("linear")
       .setPoints({ x: 225, y: 202.5 }, { x: 705, y: 202.5 })
       .setStops(
         {
-          offset: Number(((isNaN(xpbar) ? 30 : xpbar) / 475).toFixed(2)) + 0.01,
+          offset: Number(((isNaN(xpbar) ? 30 : xpbar) / 475).toFixed(2)),
           color: "#ffffff",
         },
         {
-          offset: Number(((isNaN(xpbar) ? 30 : xpbar) / 475).toFixed(2)) + 0.02,
+          offset: Number(((isNaN(xpbar) ? 30 : xpbar) / 475).toFixed(2)) + 0.01,
           color: this.data.displayOptions.solid.second_component,
         },
       );
 
-    const canvas = new LazyCanvas({ debug: true }).create(736, 260);
+    const canvas = new LazyCanvas().create(736, 260);
 
     canvas.manager.fonts.add(fontMap.wdxllubrifont);
 
@@ -89,7 +89,7 @@ export class RankCard {
         .setShadow("#000000", 4, 0, 0),
       new MorphLayer().setPosition(465, 202.5).setSize(480, 35, { all: 17.5 }).setColor("#ffffff"),
       new MorphLayer()
-        .setPosition(230, 202.5)
+        .setPosition(227.5, 202.5)
         .setSize(isNaN(xpbar) ? 30 : xpbar, 30, { all: 15 })
         .setColor(this.data.displayOptions.solid.second_component)
         .setCentring("start"),

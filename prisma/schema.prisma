@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("INERNAL_DATABASE_URL")
 }
 
 // Guild (Server) model

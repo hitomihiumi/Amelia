@@ -1,7 +1,7 @@
 import { TranslationSchema, TranslationKey } from "../types/i18n/TranslationSchema";
 
 /**
- * Метаданные языка
+ * Language metadata
  */
 export interface LanguageMetadata {
   name: string;
@@ -11,7 +11,7 @@ export interface LanguageMetadata {
 }
 
 /**
- * Улучшенный класс для работы с переводами
+ * Enhanced class for working with translations
  */
 export class I18n {
   public readonly metadata: LanguageMetadata;
@@ -25,10 +25,10 @@ export class I18n {
   }
 
   /**
-   * Получить перевод по ключу с поддержкой переменных
-   * @param key - Ключ перевода (типобезопасный)
-   * @param args - Переменные для подстановки
-   * @returns Переведенная строка
+   * Get translation by key with variable substitution support
+   * @param key - Translation key (type-safe)
+   * @param args - Variables for substitution
+   * @returns Translated string
    */
   public t(key: TranslationKey, ...args: any[]): string {
     const value = this.getByPath(key);
@@ -36,7 +36,7 @@ export class I18n {
     if (value === undefined) {
       console.warn(`Translation key "${key}" not found for language "${this.metadata.code}"`);
 
-      // Попытка получить из fallback языка
+      // Try to get from fallback language
       if (this.fallback) {
         return this.fallback.t(key, ...args);
       }
@@ -44,35 +44,35 @@ export class I18n {
       return `[Missing: ${key}]`;
     }
 
-    // Подстановка переменных
+    // Replace variables
     return this.replaceVariables(value, args);
   }
 
   /**
-   * Проверить существование ключа перевода
-   * @param key - Ключ перевода
+   * Check if translation key exists
+   * @param key - Translation key
    */
   public has(key: TranslationKey): boolean {
     return this.getByPath(key) !== undefined;
   }
 
   /**
-   * Получить все переводы (для отладки)
+   * Get all translations (for debugging)
    */
   public getAll(): TranslationSchema {
     return this.translations;
   }
 
   /**
-   * Обновить переводы
-   * @param translations - Новые переводы
+   * Update translations
+   * @param translations - New translations
    */
   public update(translations: Partial<TranslationSchema>): void {
     this.translations = this.deepMerge(this.translations, translations) as TranslationSchema;
   }
 
   /**
-   * Получить значение по пути (например, "common.error.title")
+   * Get value by path (for example, "common.error.title")
    */
   private getByPath(path: string): string | undefined {
     const keys = path.split(".");
@@ -90,18 +90,18 @@ export class I18n {
   }
 
   /**
-   * Заменить переменные в строке
-   * Поддерживает: {0}, {1}, {2} или %{VAR}%
+   * Replace variables in string
+   * Supports: {0}, {1}, {2} or %{VAR}%
    */
   private replaceVariables(text: string, args: any[]): string {
     let result = text;
 
-    // Замена {0}, {1}, {2} и т.д.
+    // Replace {0}, {1}, {2}, etc.
     args.forEach((arg, index) => {
       result = result.replace(new RegExp(`\\{${index}\\}`, "g"), String(arg));
     });
 
-    // Замена %{VAR}% (обратная совместимость)
+    // Replace %{VAR}% (backward compatibility)
     args.forEach((arg) => {
       result = result.replace(/%\{VAR\}%/, String(arg));
     });
@@ -110,7 +110,7 @@ export class I18n {
   }
 
   /**
-   * Глубокое слияние объектов
+   * Deep merge objects
    */
   private deepMerge(target: any, source: any): any {
     const output = { ...target };
@@ -133,7 +133,7 @@ export class I18n {
   }
 
   /**
-   * Проверка является ли значение объектом
+   * Check if value is an object
    */
   private isObject(item: any): boolean {
     return item && typeof item === "object" && !Array.isArray(item);
@@ -141,21 +141,21 @@ export class I18n {
 }
 
 /**
- * Менеджер языков
+ * Language manager
  */
 export class I18nManager {
   private languages: Map<string, I18n> = new Map();
   private defaultLanguage: string = "en";
 
   /**
-   * Зарегистрировать язык
+   * Register a language
    */
   public register(language: I18n): void {
     this.languages.set(language.metadata.code, language);
   }
 
   /**
-   * Установить язык по умолчанию
+   * Set default language
    */
   public setDefault(code: string): void {
     if (!this.languages.has(code)) {
@@ -165,14 +165,14 @@ export class I18nManager {
   }
 
   /**
-   * Получить язык по коду
+   * Get language by code
    */
   public get(code: string): I18n | undefined {
     return this.languages.get(code);
   }
 
   /**
-   * Получить язык по умолчанию
+   * Get default language
    */
   public getDefault(): I18n {
     const lang = this.languages.get(this.defaultLanguage);
@@ -183,21 +183,21 @@ export class I18nManager {
   }
 
   /**
-   * Получить все зарегистрированные языки
+   * Get all registered languages
    */
   public getAll(): I18n[] {
     return Array.from(this.languages.values());
   }
 
   /**
-   * Проверить существование языка
+   * Check if language exists
    */
   public has(code: string): boolean {
     return this.languages.has(code);
   }
 
   /**
-   * Получить список кодов языков
+   * Get list of language codes
    */
   public getCodes(): string[] {
     return Array.from(this.languages.keys());

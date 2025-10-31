@@ -1,9 +1,11 @@
+import { SchemaKey } from "../helpers";
+
 /**
- * Базовая структура языкового пакета
- * Все языки должны реализовывать эту структуру
+ * Base structure of a language package
+ * All languages should implement this structure
  */
 export interface TranslationSchema {
-  // Общие переводы
+  // General translations
   common: {
     error: {
       title: string;
@@ -19,7 +21,7 @@ export interface TranslationSchema {
     };
   };
 
-  // Команды
+  // Commands
   commands: {
     permissions: {
       embeds: {
@@ -238,11 +240,12 @@ export interface TranslationSchema {
     };
   };
 
-  // События
+  // Events
   events: {
     message_create: {
       prefix: string;
       cooldown: string;
+      level_up: string;
     };
     interaction_create: {
       cooldown: string;
@@ -251,7 +254,7 @@ export interface TranslationSchema {
     };
   };
 
-  // Функции/утилиты
+  // Functions/utilities
   functions: {
     permission_check: {
       commands: {
@@ -397,7 +400,7 @@ export interface TranslationSchema {
     };
   };
 
-  // Разрешения (permissions)
+  // Permissions
   permissions: {
     add_reactions: string;
     administrator: string;
@@ -442,28 +445,6 @@ export interface TranslationSchema {
 }
 
 /**
- * Тип для извлечения строковых путей из объекта
+ * Type-safe path to a translation
  */
-export type PathsToStringProps<T> = T extends string
-  ? []
-  : {
-      [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
-    }[Extract<keyof T, string>];
-
-/**
- * Тип для строкового представления пути
- */
-export type Join<T extends string[], D extends string> = T extends []
-  ? never
-  : T extends [infer F]
-    ? F
-    : T extends [infer F, ...infer R]
-      ? F extends string
-        ? `${F}${D}${Join<Extract<R, string[]>, D>}`
-        : never
-      : string;
-
-/**
- * Типобезопасный путь к переводу
- */
-export type TranslationKey = Join<PathsToStringProps<TranslationSchema>, ".">;
+export type TranslationKey = SchemaKey<TranslationSchema>;

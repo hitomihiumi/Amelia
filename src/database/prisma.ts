@@ -11,7 +11,10 @@ class DatabaseService {
   public static getInstance(): PrismaClient {
     if (!DatabaseService.instance) {
       DatabaseService.instance = new PrismaClient({
-        log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+        log:
+          (process.env.PRODACTION as unknown as Boolean) === false
+            ? ["query", "error", "warn"]
+            : ["error"],
       });
     }
     return DatabaseService.instance;

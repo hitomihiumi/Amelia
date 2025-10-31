@@ -3,12 +3,12 @@ import { en } from "./en";
 import { ru } from "./ru";
 
 /**
- * Инициализация системы переводов
+ * Initialize the translation system
  */
 export function initializeI18n(): I18nManager {
   const manager = new I18nManager();
 
-  // Создаем английский язык (базовый/fallback)
+  // Create English language (base/fallback)
   const enLang = new I18n(
     {
       name: "English",
@@ -19,7 +19,7 @@ export function initializeI18n(): I18nManager {
     en,
   );
 
-  // Создаем русский язык с fallback на английский
+  // Create Russian language with fallback to English
   const ruLang = new I18n(
     {
       name: "Russian",
@@ -28,18 +28,18 @@ export function initializeI18n(): I18nManager {
       nativeName: "Русский",
     },
     ru,
-    enLang, // Fallback на английский
+    enLang, // Fallback to English
   );
 
-  // Регистрируем языки
+  // Register languages
   manager.register(enLang);
   manager.register(ruLang);
 
-  // Устанавливаем английский как язык по умолчанию
+  // Set English as the default language
   manager.setDefault("en");
 
   return manager;
 }
 
-// Экспортируем языки для прямого использования (если нужно)
+// Export languages for direct use (if needed)
 export { en, ru };

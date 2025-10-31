@@ -2,12 +2,12 @@ import { Client } from "discord.js";
 import { TranslationKey } from "../types/i18n/TranslationSchema";
 
 /**
- * Хелпер для получения переводов из клиента
- * @param client - Discord клиент
- * @param lang - Код языка
- * @param key - Ключ перевода
- * @param args - Аргументы для подстановки
- * @returns Переведенная строка
+ * Helper for getting translations from the client
+ * @param client - Discord client
+ * @param lang - Language code
+ * @param key - Translation key
+ * @param args - Arguments for substitution
+ * @returns Translated string
  */
 export function t(client: Client, lang: string, key: TranslationKey, ...args: any[]): string {
   const i18n = client.holder.i18n.get(lang);
@@ -21,9 +21,9 @@ export function t(client: Client, lang: string, key: TranslationKey, ...args: an
 }
 
 /**
- * Хелпер для получения объекта i18n
- * @param client - Discord клиент
- * @param lang - Код языка
+ * Helper for getting the i18n object
+ * @param client - Discord client
+ * @param lang - Language code
  */
 export function getI18n(client: Client, lang: string) {
   return client.holder.i18n.get(lang) || client.holder.i18n.getDefault();

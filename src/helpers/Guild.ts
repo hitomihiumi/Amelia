@@ -1,4 +1,4 @@
-import { GuildSchema } from "../types/helpers";
+import { GuildSchema, GuildSchemaKey } from "../types/helpers";
 import { Client, Guild as DiscordGuild, User as DiscordUser } from "discord.js";
 import { DBHistory } from "../database/DBHistory";
 import { DBUser } from "../database/DBUser";
@@ -26,42 +26,42 @@ export class Guild {
   /**
    * Get value by path (ASYNC - must use await)
    */
-  public async get(path: string): Promise<any> {
+  public async get(path: GuildSchemaKey): Promise<any> {
     return await this.db.get(path as any);
   }
 
   /**
    * Set value by path (ASYNC - must use await)
    */
-  public async set(path: string, value: any): Promise<void> {
+  public async set(path: GuildSchemaKey, value: any): Promise<void> {
     return await this.db.set(path as any, value);
   }
 
   /**
    * Add to numeric value (ASYNC - must use await)
    */
-  public async add(path: string, value: any): Promise<void> {
+  public async add(path: GuildSchemaKey, value: any): Promise<void> {
     return await this.db.add(path, value);
   }
 
   /**
    * Subtract from numeric value (ASYNC - must use await)
    */
-  public async sub(path: string, value: any): Promise<void> {
+  public async sub(path: GuildSchemaKey, value: any): Promise<void> {
     return await this.db.sub(path, value);
   }
 
   /**
    * Push to array (ASYNC - must use await)
    */
-  public async push(path: string, value: any): Promise<void> {
+  public async push(path: GuildSchemaKey, value: any): Promise<void> {
     return await this.db.push(path, value);
   }
 
   /**
    * Delete field (ASYNC - must use await)
    */
-  public async delete(path: string): Promise<void> {
+  public async delete(path: GuildSchemaKey): Promise<void> {
     return await this.db.delete(path);
   }
 

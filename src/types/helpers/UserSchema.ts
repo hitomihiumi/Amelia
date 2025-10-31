@@ -1,4 +1,5 @@
 import { PermissionsBitField } from "discord.js";
+import { SchemaKey } from "./SchemaKeys";
 
 export interface UserSchema {
   user_id: string;
@@ -27,6 +28,7 @@ export interface UserSchema {
     balance: BalanceCardDisplayOptions;
     profile: ProfileCardDisplayOptions;
     rank: RankCardDisplayOptions;
+    level_up: LevelCardDisplayOptions;
     badges: string[];
   };
   temp: {
@@ -94,3 +96,5 @@ export interface JTCPreset {
     };
   };
 }
+
+export type UserSchemaKey = SchemaKey<UserSchema>;

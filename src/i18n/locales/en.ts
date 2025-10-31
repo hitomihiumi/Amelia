@@ -1,7 +1,7 @@
 import { TranslationSchema } from "../../types/i18n/TranslationSchema";
 
 /**
- * Английский языковой пакет (базовый/fallback)
+ * English language package (base/fallback)
  */
 export const en: TranslationSchema = {
   common: {
@@ -241,6 +241,7 @@ export const en: TranslationSchema = {
     message_create: {
       prefix: "My prefix is **{0}**",
       cooldown: "Please wait **{0}s** before using **{1}** again",
+      level_up: "Congratulations {0}, you have leveled up!",
     },
     interaction_create: {
       cooldown: "Please wait **{0}s** before using **{1}** again",

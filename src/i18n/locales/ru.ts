@@ -1,7 +1,7 @@
 import { TranslationSchema } from "../../types/i18n/TranslationSchema";
 
 /**
- * Русский языковой пакет
+ * Russian language package
  */
 export const ru: TranslationSchema = {
   common: {
@@ -241,6 +241,7 @@ export const ru: TranslationSchema = {
     message_create: {
       prefix: "Мой префикс: **{0}**",
       cooldown: "Пожалуйста, подождите **{0}с** перед повторным использованием **{1}**",
+      level_up: "Поздравляю, {0}, вы получили новый уроверь!",
     },
     interaction_create: {
       cooldown: "Пожалуйста, подождите **{0}с** перед повторным использованием **{1}**",

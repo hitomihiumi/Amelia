@@ -525,18 +525,18 @@ const userSchemaMap: Record<string, SchemaField> = {
     optional: true,
   },
 
-  "custom.levelup.mode": {
+  "custom.level_up.mode": {
     prismaField: "levelupMode",
     prismaType: "Boolean",
     default: "false",
   },
-  "custom.levelup.solid": {
+  "custom.level_up.solid": {
     prismaField: "levelupSolid",
     prismaType: "Json",
     default:
       '"{\\"bg_color\\":\\"#000000\\",\\"first_component\\":\\"#ffffff\\",\\"second_component\\":\\"#422242\\",\\"third_component\\":\\"#C30F45\\"}"',
   },
-  "custom.levelup.url": {
+  "custom.level_up.url": {
     prismaField: "levelupUrl",
     prismaType: "String",
     optional: true,

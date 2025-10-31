@@ -30,7 +30,7 @@ const client = new Client({
   ],
 });
 
-// Инициализируем систему переводов
+// Initialize the translation system
 const i18nManager = initializeI18n();
 
 client.holder = {

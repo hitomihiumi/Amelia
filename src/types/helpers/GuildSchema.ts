@@ -1,5 +1,6 @@
 import { EmojiResolvable } from "discord.js";
 import { EmbedCustom, ModalCustom, IModalField, ButtonCustom } from "./";
+import { SchemaKey } from "./SchemaKeys";
 
 export interface GuildSchema {
   id: string;
@@ -21,29 +22,7 @@ export interface GuildSchema {
         [key: string]: CounterChannel;
       };
     };
-    levels: {
-      enabled: boolean;
-      ignore_channels: string[];
-      ignore_roles: string[];
-      level_roles: {
-        [key: string]: LevelRole;
-      };
-      message: {
-        enabled: boolean;
-        channel: string | null;
-        content: {
-          text: string | null;
-          embed: {
-            title: string | null;
-            description: string | null;
-            color: string | null;
-            thumbnail: string | null;
-            footer: string | null;
-          };
-        };
-        delete: number;
-      };
-    };
+    levels: Levels;
     find_team: {
       enabled: boolean;
       channel: string | null;
@@ -203,3 +182,29 @@ interface Game {
     fields: IModalField[];
   };
 }
+
+export interface Levels {
+  enabled: boolean;
+  ignore_channels: string[];
+  ignore_roles: string[];
+  level_roles: {
+    [key: string]: LevelRole;
+  };
+  message: {
+    enabled: boolean;
+    channel: string | null;
+    content: {
+      text: string | null;
+      embed: {
+        title: string | null;
+        description: string | null;
+        color: string | null;
+        thumbnail: string | null;
+        footer: string | null;
+      };
+    };
+    delete: number;
+  };
+}
+
+export type GuildSchemaKey = SchemaKey<GuildSchema>;
