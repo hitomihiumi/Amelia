@@ -22,7 +22,10 @@ export class RankCard {
   }
 
   async render() {
-    const xpbar = Math.max((475 * Number(this.data.data.xp)) / getNextLevelXP(this.data.data.level), 30);
+    const xpbar = Math.max(
+      (475 * Number(this.data.data.xp)) / getNextLevelXP(this.data.data.level),
+      30,
+    );
 
     const gradient = new Gradient()
       .setType("linear")

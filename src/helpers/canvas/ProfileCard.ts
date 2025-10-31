@@ -22,7 +22,10 @@ export class ProfileCard {
   }
 
   async render() {
-    const xpbar = Math.max((415 * Number(this.data.data.xp)) / getNextLevelXP(this.data.data.level), 30);
+    const xpbar = Math.max(
+      (415 * Number(this.data.data.xp)) / getNextLevelXP(this.data.data.level),
+      30,
+    );
 
     const gradient = new Gradient()
       .setType("linear")
@@ -127,10 +130,7 @@ export class ProfileCard {
       new TextLayer()
         .setPosition(235, 404)
         .setMultiline(404, 310)
-        .setText(
-          this.data.displayOptions.bio ||
-            "This user has not set a biography yet."
-        )
+        .setText(this.data.displayOptions.bio || "This user has not set a biography yet.")
         .setFont("WDXL Lubrifont", 28, FontWeight.Regular)
         .setColor("#ffffff")
         .setAlign("center")
@@ -162,12 +162,18 @@ export class ProfileCard {
         );
         if (!icon)
           return new MorphLayer()
-            .setPosition(516 + pos[0] * (60 + this.data.displayOptions.icons_padding.x), 434 + pos[1] * (60 + this.data.displayOptions.icons_padding.y))
+            .setPosition(
+              516 + pos[0] * (60 + this.data.displayOptions.icons_padding.x),
+              434 + pos[1] * (60 + this.data.displayOptions.icons_padding.y),
+            )
             .setSize(20, 20, { all: 10 })
             .setColor("#ffffff")
             .setOpacity(0.5);
         return new ImageLayer()
-          .setPosition(516 + pos[0] * (60 + this.data.displayOptions.icons_padding.x), 434 + pos[1] * (60 + this.data.displayOptions.icons_padding.y))
+          .setPosition(
+            516 + pos[0] * (60 + this.data.displayOptions.icons_padding.x),
+            434 + pos[1] * (60 + this.data.displayOptions.icons_padding.y),
+          )
           .setSize(60, 60)
           .setSrc(iconsMap[icon.name]);
       }),

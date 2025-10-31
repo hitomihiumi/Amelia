@@ -19,7 +19,7 @@ import {
   ChatInputCommandInteraction,
   MessageFlagsBitField,
 } from "discord.js";
-import { Guild, canvasUtil, customUtil } from "../../helpers";
+import { Guild, canvasUtil, customUtil, defaultPermissions } from "../../helpers";
 import { generateID } from "../../handlers/functions";
 import fuse from "fuse.js";
 import { t } from "../../i18n/helpers";
@@ -33,7 +33,7 @@ module.exports = {
   },
   options: [],
   permissions: {
-    bot: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
+    bot: [...defaultPermissions],
   },
   key: null,
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {

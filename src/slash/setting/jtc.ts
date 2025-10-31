@@ -16,7 +16,7 @@ import {
   PermissionsBitField,
   MessageFlagsBitField,
 } from "discord.js";
-import { Guild } from "../../helpers";
+import { defaultPermissions, Guild } from "../../helpers";
 import { t } from "../../i18n/helpers";
 
 module.exports = {
@@ -27,11 +27,7 @@ module.exports = {
   },
   cooldown: 5,
   permissions: {
-    bot: [
-      PermissionsBitField.Flags.SendMessages,
-      PermissionsBitField.Flags.ManageChannels,
-      PermissionsBitField.Flags.EmbedLinks,
-    ],
+    bot: [...defaultPermissions, PermissionsBitField.Flags.ManageChannels],
   },
   options: [],
   run: async (client: Client, interaction: CommandInteraction) => {

@@ -1,6 +1,6 @@
 import { Level, RankCardDisplayOptions, SlashCommand } from "../../types/helpers";
 import { AttachmentBuilder, PermissionsBitField } from "discord.js";
-import { Guild } from "../../helpers";
+import { defaultPermissions, Guild } from "../../helpers";
 import { RankCard } from "../../helpers/canvas/RankCard";
 import { t } from "../../i18n/helpers";
 
@@ -23,7 +23,7 @@ module.exports = {
     },
   ],
   permissions: {
-    bot: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
+    bot: [...defaultPermissions],
   },
   run: async (client, interaction) => {
     if (!interaction.guild) return;

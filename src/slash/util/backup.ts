@@ -1,6 +1,6 @@
 import { SlashCommand } from "../../types/helpers";
 import { Client, CommandInteraction, PermissionsBitField } from "discord.js";
-import { Guild } from "../../helpers";
+import { defaultPermissions, Guild } from "../../helpers";
 
 module.exports = {
   name: "backup",
@@ -11,7 +11,7 @@ module.exports = {
   },
   options: [],
   permissions: {
-    bot: [],
+    bot: [...defaultPermissions],
   },
   key: null,
   run: async (client: Client, interaction: CommandInteraction) => {

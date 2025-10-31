@@ -46,7 +46,7 @@ module.exports = {
   },
   options: [],
   permissions: {
-    bot: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
+    bot: [...defaultPermissions],
   },
   run: async (client: Client, interaction: CommandInteraction) => {
     if (!interaction.guild) return;

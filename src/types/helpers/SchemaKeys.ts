@@ -39,12 +39,8 @@ export type PathsToStringProps<T, Depth = 0> = Depth extends 10
             number,
             ...PathsToStringProps<
               U extends object ? U : never,
-              [Depth, 1] extends [infer D, infer _]
-                ? D extends number
-                  ? 1
-                  : never
-                : never
-            >
+              [Depth, 1] extends [infer D, infer _] ? (D extends number ? 1 : never) : never
+            >,
           ]
         : [number]
       : T extends object
@@ -74,10 +70,7 @@ export type Join<T extends (string | number)[], D extends string> = T extends []
  * Gets all type-safe paths to string values in an object
  * This is a combination of PathsToStringProps and Join for convenient use
  */
-export type SchemaKey<T, D extends string = "."> = Join<
-  PathsToStringProps<T>,
-  D
-> extends infer R
+export type SchemaKey<T, D extends string = "."> = Join<PathsToStringProps<T>, D> extends infer R
   ? string extends R
     ? string
     : R
@@ -87,9 +80,7 @@ export type SchemaKey<T, D extends string = "."> = Join<
  * Validates that a path is a valid schema key
  * Usage: type ValidKey = ValidateSchemaKey<GuildSchema, "settings.prefix">;
  */
-export type ValidateSchemaKey<T, K extends string> = K extends SchemaKey<T>
-  ? K
-  : never;
+export type ValidateSchemaKey<T, K extends string> = K extends SchemaKey<T> ? K : never;
 
 /**
  * Gets the value type by path in the schema
@@ -104,5 +95,3 @@ export type GetSchemaValueType<T, Path extends string> = Path extends keyof T
         : never
       : never
     : never;
-
-

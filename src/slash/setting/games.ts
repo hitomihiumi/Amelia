@@ -1,6 +1,6 @@
 import { SlashCommand } from "../../types/helpers";
 import { Client, CommandInteraction, PermissionsBitField } from "discord.js";
-import { Guild } from "../../helpers";
+import { defaultPermissions, Guild } from "../../helpers";
 
 module.exports = {
   name: "games",
@@ -11,11 +11,7 @@ module.exports = {
   },
   options: [],
   permissions: {
-    bot: [
-      PermissionsBitField.Flags.SendMessages,
-      PermissionsBitField.Flags.ManageChannels,
-      PermissionsBitField.Flags.EmbedLinks,
-    ],
+    bot: [...defaultPermissions, PermissionsBitField.Flags.ManageChannels],
   },
   key: null,
   run: async (client: Client, interaction: CommandInteraction) => {
