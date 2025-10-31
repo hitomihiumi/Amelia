@@ -71,6 +71,10 @@ export interface ProfileCardDisplayOptions extends DisplayOptions {
     name: string;
     pos: [number, number];
   }>;
+  icons_padding: {
+    x: number;
+    y: number;
+  };
 }
 
 export interface BalanceCardDisplayOptions extends DisplayOptions {

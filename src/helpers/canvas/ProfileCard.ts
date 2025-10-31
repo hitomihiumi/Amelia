@@ -129,7 +129,7 @@ export class ProfileCard {
         .setMultiline(404, 310)
         .setText(
           this.data.displayOptions.bio ||
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam venenatis et nulla sit amet aliquam. Nunc id urna semper, placerat ligula quis, eleifend lorem. Proin sagittis lacinia vestibulum. Nulla tempus metus gravida erat molestie porta. Nam a tellus enim. Proin sed neque quis felis facilisis maximus. Suspendisse potenti. Quisque feugiat nisl ac commodo molestie.",
+            "This user has not set a biography yet."
         )
         .setFont("WDXL Lubrifont", 28, FontWeight.Regular)
         .setColor("#ffffff")
@@ -162,12 +162,12 @@ export class ProfileCard {
         );
         if (!icon)
           return new MorphLayer()
-            .setPosition(516 + pos[0] * 70, 434 + pos[1] * 70)
+            .setPosition(516 + pos[0] * (60 + this.data.displayOptions.icons_padding.x), 434 + pos[1] * (60 + this.data.displayOptions.icons_padding.y))
             .setSize(20, 20, { all: 10 })
             .setColor("#ffffff")
             .setOpacity(0.5);
         return new ImageLayer()
-          .setPosition(516 + pos[0] * 70, 434 + pos[1] * 70)
+          .setPosition(516 + pos[0] * (60 + this.data.displayOptions.icons_padding.x), 434 + pos[1] * (60 + this.data.displayOptions.icons_padding.y))
           .setSize(60, 60)
           .setSrc(iconsMap[icon.name]);
       }),
