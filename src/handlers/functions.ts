@@ -9,8 +9,22 @@ import {
   EmbedBuilder,
   PermissionsBitField,
   ColorResolvable,
-  EmbedData,
+  APIButtonComponent,
+  ButtonBuilder,
+  ActionRowBuilder,
+  APIChannelSelectComponent,
+  APIUserSelectComponent,
+  APIRoleSelectComponent,
+  APIStringSelectComponent,
+  ChannelSelectMenuBuilder,
+  UserSelectMenuBuilder,
+  RoleSelectMenuBuilder,
+  StringSelectMenuBuilder,
+  APISelectMenuOption,
+  StringSelectMenuOptionBuilder,
+  MessageActionRowComponentBuilder,
 } from "discord.js";
+import { APIEmbed } from "discord-api-types/v10";
 import { t } from "../i18n/helpers";
 
 export function foldersCheck() {
@@ -101,8 +115,40 @@ export function fastEmbed(color: ColorResolvable, title: string, desc: string) {
   );
 }
 
-export function fullEmbed(embedData: EmbedData) {
+export function fullEmbed(embedData: APIEmbed) {
   return new EmbedBuilder(embedData);
+}
+
+export function fastButtons(...buttonData: APIButtonComponent[]) {
+  return buttonData.map((button) => {
+    return new ButtonBuilder(button);
+  });
+}
+
+export function fastChannelSelect(selectMenuData: APIChannelSelectComponent) {
+  return new ChannelSelectMenuBuilder(selectMenuData);
+}
+
+export function fastUserSelect(selectMenuData: APIUserSelectComponent) {
+  return new UserSelectMenuBuilder(selectMenuData);
+}
+
+export function fastRoleSelect(selectMenuData: APIRoleSelectComponent) {
+  return new RoleSelectMenuBuilder(selectMenuData);
+}
+
+export function fastStringSelect(selectMenuData: APIStringSelectComponent) {
+  return new StringSelectMenuBuilder(selectMenuData);
+}
+
+export function fastStringOptions(...optionData: APISelectMenuOption[]) {
+  return optionData.map((option) => {
+    return new StringSelectMenuOptionBuilder(option);
+  });
+}
+
+export function fastRow(components: MessageActionRowComponentBuilder[]) {
+  return new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(components);
 }
 
 export function reVar(str: string, ...args: any[]) {
@@ -463,7 +509,7 @@ export function formatTime(
     short?: boolean;
   },
 ) {
-  const { locale = "ru", full = false, short = false } = opts || {};
+  const { locale = "en", full = false, short = false } = opts || {};
 
   const timeUnits = {
     ru: {
@@ -550,4 +596,8 @@ export function formatTime(
 
 export function getNextLevelXP(level: number): number {
   return 5 * level ** 2 + 50 * level + 100;
+}
+
+export function isHexColor(color: string): boolean {
+  return /^#([0-9A-F]{3}){1,2}$/i.test(color);
 }

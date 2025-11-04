@@ -1,8 +1,27 @@
-import { Collection, ColorResolvable } from "discord.js";
+import {
+  ActionRowBuilder,
+  ChannelSelectMenuBuilder,
+  Collection,
+  ColorResolvable,
+  EmbedBuilder,
+  APIButtonComponent,
+  ButtonBuilder,
+  APIChannelSelectComponent,
+  APIUserSelectComponent,
+  APIRoleSelectComponent,
+  APIStringSelectComponent,
+  UserSelectMenuBuilder,
+  RoleSelectMenuBuilder,
+  StringSelectMenuBuilder,
+  APISelectMenuOption,
+  StringSelectMenuOptionBuilder,
+  MessageActionRowComponentBuilder,
+} from "discord.js";
 import { Command, Manifest, Autocomplete, Button, Modal, SelectMenu } from "./types/helpers";
 import { I18nManager } from "./i18n/I18n";
 import { PrismaClient } from "@prisma/client";
 import { EmojisKey } from "./emoji/emojis";
+import { APIEmbed } from "discord-api-types/v10";
 
 declare module "discord.js" {
   export interface Client {
@@ -35,8 +54,17 @@ export interface Holder {
     fast: (color: ColorResolvable, title: string, desc: string) => any;
   };
   utils: {
-    reVar: Function;
-    fastEmbed: Function;
+    reVar: (str: string, ...args: any[]) => string;
+    fastEmbed: (embedData: APIEmbed) => EmbedBuilder;
+    fastButtons: (...buttonData: APIButtonComponent[]) => ButtonBuilder[];
+    fastStringSelect: (selectMenuData: APIStringSelectComponent) => StringSelectMenuBuilder;
+    fastRoleSelect: (selectMenuData: APIRoleSelectComponent) => RoleSelectMenuBuilder;
+    fastUserSelect: (selectMenuData: APIUserSelectComponent) => UserSelectMenuBuilder;
+    fastChannelSelect: (selectMenuData: APIChannelSelectComponent) => ChannelSelectMenuBuilder;
+    fastStringOptions: (...optionData: APISelectMenuOption[]) => StringSelectMenuOptionBuilder[];
+    fastRow: (
+      components: MessageActionRowComponentBuilder[],
+    ) => ActionRowBuilder<MessageActionRowComponentBuilder>;
   };
   colors: {
     default: ColorResolvable;

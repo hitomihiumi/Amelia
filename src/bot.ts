@@ -1,7 +1,19 @@
 import { Client, GatewayIntentBits, Partials, Collection, ColorResolvable } from "discord.js";
 import "dotenv/config";
 import "@hitomihiumi/colors.ts";
-import { fastEmbed, foldersCheck, fullEmbed, reVar } from "./handlers/functions";
+import {
+  fastButtons,
+  fastEmbed,
+  foldersCheck,
+  fullEmbed,
+  reVar,
+  fastChannelSelect,
+  fastRoleSelect,
+  fastStringSelect,
+  fastUserSelect,
+  fastRow,
+  fastStringOptions,
+} from "./handlers/functions";
 import { FileWatcher } from "@hitomihiumi/filewatcher";
 import { commandLoader } from "./handlers/cmdLoaders";
 import { initializeI18n } from "./i18n/locales";
@@ -69,6 +81,13 @@ client.holder = {
   utils: {
     reVar,
     fastEmbed: fullEmbed,
+    fastButtons,
+    fastStringSelect,
+    fastRoleSelect,
+    fastUserSelect,
+    fastChannelSelect,
+    fastStringOptions,
+    fastRow,
   },
   colors: {
     default: "#4a3f66",
