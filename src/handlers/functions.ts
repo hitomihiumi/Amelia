@@ -20,9 +20,9 @@ import {
   UserSelectMenuBuilder,
   RoleSelectMenuBuilder,
   StringSelectMenuBuilder,
-  APISelectMenuOption,
   StringSelectMenuOptionBuilder,
   MessageActionRowComponentBuilder,
+  SelectMenuComponentOptionData,
 } from "discord.js";
 import { APIEmbed } from "discord-api-types/v10";
 import { t } from "../i18n/helpers";
@@ -141,7 +141,7 @@ export function fastStringSelect(selectMenuData: APIStringSelectComponent) {
   return new StringSelectMenuBuilder(selectMenuData);
 }
 
-export function fastStringOptions(...optionData: APISelectMenuOption[]) {
+export function fastStringOptions(...optionData: SelectMenuComponentOptionData[]) {
   return optionData.map((option) => {
     return new StringSelectMenuOptionBuilder(option);
   });

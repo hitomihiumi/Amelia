@@ -19,6 +19,7 @@ import { commandLoader } from "./handlers/cmdLoaders";
 import { initializeI18n } from "./i18n/locales";
 import { prisma, DatabaseService } from "./database";
 import { emojis } from "./emoji/emojis";
+import { iconsMap } from "./helpers/assetsMap";
 
 foldersCheck();
 
@@ -96,6 +97,9 @@ client.holder = {
     info: "#7dd8ff",
   },
   emojis,
+  assets: {
+    profileIcons: iconsMap,
+  },
 };
 
 // Connect to database before loading handlers

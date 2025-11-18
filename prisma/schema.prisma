@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("INERNAL_DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 // Guild (Server) model
@@ -17,7 +17,7 @@ model Guild {
   updatedAt DateTime @updatedAt
 
   // Settings
-  prefix   String @default("k.")
+  prefix   String @default("a.")
   language String @default("ru")
 
   // Join to Create settings

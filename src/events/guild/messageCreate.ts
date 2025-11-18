@@ -24,7 +24,7 @@ module.exports = async (client: Client, message: Message) => {
     if (levelS.enabled) {
       const member = guild.getUser(message.author.id);
 
-      const rand = Math.floor(Math.random() * 2) + 1;
+      const rand = Math.floor(Math.random() * 4) + 2;
 
       await member.add("level.total_xp", rand);
       await member.add("level.xp", rand);

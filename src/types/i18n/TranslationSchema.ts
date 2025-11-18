@@ -75,6 +75,7 @@ export interface TranslationSchema {
         };
       };
     };
+
     jtc: {
       embeds: {
         title: string;
@@ -103,6 +104,7 @@ export interface TranslationSchema {
         };
       };
     };
+
     modal: {
       embeds: {
         base: {
@@ -230,13 +232,149 @@ export interface TranslationSchema {
         };
       };
     };
+
     rank: {
       error: string;
       success: string;
     };
+
     profile: {
       error: string;
       success: string;
+    };
+
+    appearance: {
+      embeds: {
+        base: {
+          title: string;
+          description: string;
+        };
+        rank: {
+          title: string;
+          description: string;
+        };
+        level_up: {
+          title: string;
+          description: string;
+        };
+        profile: {
+          title: string;
+          description: string;
+        };
+        fields: {
+          bg_color: {
+            name: string;
+            value: string;
+          };
+          first_component: {
+            name: string;
+            value: string;
+          };
+          second_component: {
+            name: string;
+            value: string;
+          };
+          third_component: {
+            name: string;
+            value: string;
+          };
+        };
+      };
+      select_menus: {
+        base: {
+          placeholder: string;
+          options: {
+            rank: string;
+            profile: string;
+            level_up: string;
+          };
+        };
+        color: {
+          placeholder: string;
+          options: {
+            bg_color: string;
+            first_component: string;
+            second_component: string;
+            third_component: string;
+          };
+        };
+        icons: {
+          placeholder: string;
+          options: {
+            empty: {
+              label: string;
+            };
+            remove: {
+              description: string;
+            };
+            add: {
+              description: string;
+            };
+          };
+        };
+      };
+      buttons: {
+        mode: string;
+        url: string;
+        reset: string;
+        icons_padding_x: string;
+        icons_padding_y: string;
+        bio: string;
+      };
+      modals: {
+        color: {
+          title: string;
+          label: string;
+        };
+        url: {
+          title: string;
+          label: string;
+        };
+        bio: {
+          title: string;
+          label: string;
+        };
+        icons_padding: {
+          title: string;
+          x: {
+            label: string;
+          };
+          y: {
+            label: string;
+          };
+        };
+      };
+      messages: {
+        error: {
+          invalid_color: string;
+          invalid_url: string;
+          invalid_padding: string;
+          no_available_icons: string;
+        };
+      };
+    };
+
+    language: {
+      embeds: {
+        base: {
+          title: string;
+          description: string;
+        };
+      };
+      select_menus: {
+        placeholder: string;
+        options: {
+          en: {
+            description: string;
+          };
+          ru: {
+            description: string;
+          };
+        };
+      };
+      messages: {
+        success: string;
+      };
     };
   };
 
@@ -441,6 +579,10 @@ export interface TranslationSchema {
     view_audit_log: string;
     view_channel: string;
     view_guild_insights: string;
+  };
+
+  icons: {
+    empty: string;
   };
 }
 

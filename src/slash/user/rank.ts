@@ -1,5 +1,5 @@
 import { Level, RankCardDisplayOptions, SlashCommand } from "../../types/helpers";
-import { AttachmentBuilder, PermissionsBitField } from "discord.js";
+import { AttachmentBuilder, MessageFlags, PermissionsBitField } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
 import { RankCard } from "../../helpers/canvas/RankCard";
 import { t } from "../../i18n/helpers";
@@ -53,19 +53,19 @@ module.exports = {
 
     const buffer = await rank.render();
     if (!buffer) {
-      return interaction.editReply({
-        content: t(client, await guild.get(`settings.language`), "commands.rank.error"),
-      });
+      return interaction
+        .editReply({
+          content: t(client, await guild.get(`settings.language`), "commands.rank.error"),
+        })
+        .then((msg) => {
+          setTimeout(() => {
+            msg.delete().catch(() => {});
+          }, 5000);
+        });
     }
     const attachment = new AttachmentBuilder(buffer, { name: "rank.png" });
 
     return interaction.editReply({
-      content: t(
-        client,
-        await guild.get(`settings.language`),
-        "commands.rank.success",
-        user.globalName,
-      ),
       files: [attachment],
     });
   },

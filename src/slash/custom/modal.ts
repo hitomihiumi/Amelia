@@ -157,7 +157,7 @@ module.exports = {
     const collector = msg.createMessageComponentCollector({ filter, time: 600000 });
 
     collector.on("collect", async (i) => {
-      if (i instanceof StringSelectMenuInteraction) {
+      if (i.isStringSelectMenu()) {
         await i.deferUpdate();
         switch (i.customId) {
           case "NI_modal:base":
@@ -248,7 +248,7 @@ module.exports = {
             }
             break;
         }
-      } else if (i instanceof ButtonInteraction) {
+      } else if (i.isButton()) {
         if (i.customId === "NI_modal:page:prev") {
           page--;
           if (page > Math.ceil((await mostUsedQueries.getModals(guild)).length / 25))

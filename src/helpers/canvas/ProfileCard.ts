@@ -160,19 +160,27 @@ export class ProfileCard {
         const icon = this.data.displayOptions.icons.find(
           (i) => i.pos[0] === pos[0] && i.pos[1] === pos[1],
         );
-        if (!icon)
+        if (!icon || icon.name === "empty")
           return new MorphLayer()
             .setPosition(
-              516 + pos[0] * (60 + this.data.displayOptions.icons_padding.x),
-              434 + pos[1] * (60 + this.data.displayOptions.icons_padding.y),
+              516 -
+                (this.data.displayOptions.icons_padding.x - 10) +
+                pos[0] * (60 + this.data.displayOptions.icons_padding.x),
+              434 -
+                (this.data.displayOptions.icons_padding.y - 10) +
+                pos[1] * (60 + this.data.displayOptions.icons_padding.y),
             )
             .setSize(20, 20, { all: 10 })
             .setColor("#ffffff")
             .setOpacity(0.5);
         return new ImageLayer()
           .setPosition(
-            516 + pos[0] * (60 + this.data.displayOptions.icons_padding.x),
-            434 + pos[1] * (60 + this.data.displayOptions.icons_padding.y),
+            516 -
+              (this.data.displayOptions.icons_padding.x - 10) +
+              pos[0] * (60 + this.data.displayOptions.icons_padding.x),
+            434 -
+              (this.data.displayOptions.icons_padding.y - 10) +
+              pos[1] * (60 + this.data.displayOptions.icons_padding.y),
           )
           .setSize(60, 60)
           .setSrc(iconsMap[icon.name]);

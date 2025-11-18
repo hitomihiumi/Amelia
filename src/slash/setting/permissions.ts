@@ -21,6 +21,7 @@ import {
   RoleSelectMenuInteraction,
   Guild as DJSGuild,
   MessageFlagsBitField,
+  LabelBuilder,
 } from "discord.js";
 import { Guild } from "../../helpers";
 import { CommandPermission } from "../../types/helpers";
@@ -102,7 +103,7 @@ module.exports = {
     const collector = msg.createMessageComponentCollector({ filter, time: 600000 });
 
     collector.on("collect", async (i) => {
-      if (i instanceof ButtonInteraction) {
+      if (i.isButton()) {
         if (i.customId === "NI_permissions:page:prev") {
           page--;
           if (page < 0) page = 0;
@@ -130,43 +131,46 @@ module.exports = {
           let modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.permissions.modals.jump.title"))
             .setCustomId("NI_permissions:modal:jump")
-            .setComponents(
-              new ActionRowBuilder<ModalActionRowComponentBuilder>().setComponents(
-                new TextInputBuilder()
-                  .setCustomId("NI_permissions:text:jump")
-                  .setLabel(t(client, lang, "commands.permissions.modals.jump.label"))
-                  .setPlaceholder(
-                    `1-${Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)}`,
-                  )
-                  .setStyle(TextInputStyle.Short),
-              ),
+            .setLabelComponents(
+              new LabelBuilder()
+                .setLabel(t(client, lang, "commands.permissions.modals.jump.label"))
+                .setTextInputComponent(
+                  new TextInputBuilder()
+                    .setCustomId("NI_permissions:text:jump")
+                    .setPlaceholder(
+                      `1-${Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)}`,
+                    )
+                    .setStyle(TextInputStyle.Short),
+                ),
             );
 
           await i.showModal(modal);
 
-          const submit = await i.awaitModalSubmit({
-            time: 5 * 60 * 1000,
-            filter: (i: any) =>
-              i.user.id === interaction.user.id && i.customId === "NI_permissions:page:jump",
-          });
+          await i
+            .awaitModalSubmit({
+              time: 5 * 60 * 1000,
+              filter: (i: any) =>
+                i.user.id === interaction.user.id && i.customId === "NI_permissions:page:jump",
+            })
+            .then(async (int) => {
+              await int.deferUpdate();
+              let jump = parseInt(int.fields.getTextInputValue("NI_permissions:text:jump")) - 1;
 
-          let jump = parseInt(submit.fields.getTextInputValue("NI_permissions:text:jump")) - 1;
+              page =
+                jump < 0
+                  ? 0
+                  : jump > Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)
+                    ? Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)
+                    : jump;
 
-          page =
-            jump < 0
-              ? 0
-              : jump > Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)
-                ? Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)
-                : jump;
+              commandsSelect = await commandsList(client, guild, lang, page);
+              // @ts-ignore
+              pageControl.components[1].setLabel(
+                `${page + 1}/${Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)}`,
+              );
 
-          commandsSelect = await commandsList(client, guild, lang, page);
-          // @ts-ignore
-          pageControl.components[1].setLabel(
-            `${page + 1}/${Math.ceil(client.holder.cmds.slashCommands.toJSON().length / 25)}`,
-          );
-
-          // @ts-ignore
-          submit.update({ components: [pageControl, commandsSelect] });
+              await int.editReply({ components: [pageControl, commandsSelect] });
+            });
         } else if (i.customId === "NI_permissions:back") {
           if (back === "main") {
             embed
@@ -338,7 +342,7 @@ module.exports = {
             ],
           });
         }
-      } else if (i instanceof StringSelectMenuInteraction) {
+      } else if (i.isStringSelectMenu()) {
         if (i.customId === "NI_permissions:commands") {
           back = "main";
 
@@ -466,7 +470,7 @@ module.exports = {
             ],
           });
         }
-      } else if (i instanceof RoleSelectMenuInteraction) {
+      } else if (i.isRoleSelectMenu()) {
         if (i.customId === "NI_permissions:role") {
           if (
             (temp = permission.roles.find((role) => {

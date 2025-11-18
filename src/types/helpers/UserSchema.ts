@@ -1,5 +1,6 @@
 import { PermissionsBitField } from "discord.js";
 import { SchemaKey } from "./SchemaKeys";
+import { TranslationSchema } from "../i18n/TranslationSchema";
 
 export interface UserSchema {
   user_id: string;
@@ -52,6 +53,53 @@ interface DisplayOptions {
   url: string | null;
 }
 
+export const defaultDisplayOptions = {
+  rank: {
+    mode: false,
+    solid: {
+      bg_color: "#000000",
+      first_component: "#ffffff",
+      second_component: "#C30F45",
+      third_component: "#422242",
+    },
+    url: null,
+  },
+  profile: {
+    icons_padding: {
+      x: 10,
+      y: 10,
+    },
+    mode: false,
+    solid: {
+      bg_color: "#000000",
+      first_component: "#ffffff",
+      second_component: "#C30F45",
+      third_component: "#422242",
+    },
+    url: null,
+  },
+  balance: {
+    mode: false,
+    solid: {
+      bg_color: "#000000",
+      first_component: "#ffffff",
+      second_component: "#C30F45",
+      third_component: "#422242",
+    },
+    url: null,
+  },
+  level_up: {
+    mode: false,
+    solid: {
+      bg_color: "#000000",
+      first_component: "#ffffff",
+      second_component: "#422242",
+      third_component: "#C30F45",
+    },
+    url: null,
+  },
+};
+
 export type Level = {
   xp: number;
   total_xp: number;
@@ -68,7 +116,7 @@ export interface ProfileCardDisplayOptions extends DisplayOptions {
   color: string | null;
   bio: string | null;
   icons: Array<{
-    name: string;
+    name: keyof TranslationSchema["icons"];
     pos: [number, number];
   }>;
   icons_padding: {

@@ -13,7 +13,6 @@ import {
   UserSelectMenuBuilder,
   RoleSelectMenuBuilder,
   StringSelectMenuBuilder,
-  APISelectMenuOption,
   StringSelectMenuOptionBuilder,
   MessageActionRowComponentBuilder,
 } from "discord.js";
@@ -22,6 +21,7 @@ import { I18nManager } from "./i18n/I18n";
 import { PrismaClient } from "@prisma/client";
 import { EmojisKey } from "./emoji/emojis";
 import { APIEmbed } from "discord-api-types/v10";
+import { TranslationSchema } from "./types/i18n/TranslationSchema";
 
 declare module "discord.js" {
   export interface Client {
@@ -61,7 +61,9 @@ export interface Holder {
     fastRoleSelect: (selectMenuData: APIRoleSelectComponent) => RoleSelectMenuBuilder;
     fastUserSelect: (selectMenuData: APIUserSelectComponent) => UserSelectMenuBuilder;
     fastChannelSelect: (selectMenuData: APIChannelSelectComponent) => ChannelSelectMenuBuilder;
-    fastStringOptions: (...optionData: APISelectMenuOption[]) => StringSelectMenuOptionBuilder[];
+    fastStringOptions: (
+      ...optionData: SelectMenuComponentOptionData[]
+    ) => StringSelectMenuOptionBuilder[];
     fastRow: (
       components: MessageActionRowComponentBuilder[],
     ) => ActionRowBuilder<MessageActionRowComponentBuilder>;
@@ -74,5 +76,8 @@ export interface Holder {
   };
   emojis: {
     [key in EmojisKey]: string;
+  };
+  assets: {
+    profileIcons: Record<keyof TranslationSchema["icons"], string>;
   };
 }

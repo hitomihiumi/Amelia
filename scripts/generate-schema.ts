@@ -29,7 +29,7 @@ const guildSchemaMap: Record<string, SchemaField> = {
   "settings.prefix": {
     prismaField: "prefix",
     prismaType: "String",
-    default: '"k."',
+    default: '"a."',
   },
   "settings.language": {
     prismaField: "language",

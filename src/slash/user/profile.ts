@@ -53,19 +53,19 @@ module.exports = {
 
     const buffer = await profile.render();
     if (!buffer) {
-      return interaction.editReply({
-        content: t(client, await guild.get(`settings.language`), "commands.profile.error"),
-      });
+      return interaction
+        .editReply({
+          content: t(client, await guild.get(`settings.language`), "commands.profile.error"),
+        })
+        .then((msg) => {
+          setTimeout(() => {
+            msg.delete().catch(() => {});
+          }, 5000);
+        });
     }
-    const attachment = new AttachmentBuilder(buffer, { name: "rank.png" });
+    const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
 
     return interaction.editReply({
-      content: t(
-        client,
-        await guild.get(`settings.language`),
-        "commands.profile.success",
-        user.globalName,
-      ),
       files: [attachment],
     });
   },

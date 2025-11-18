@@ -15,6 +15,7 @@ import {
   ModalActionRowComponentBuilder,
   PermissionsBitField,
   MessageFlagsBitField,
+  LabelBuilder,
 } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
 import { t } from "../../i18n/helpers";
@@ -218,60 +219,64 @@ module.exports = {
         let modal = new ModalBuilder()
           .setTitle(`${t(client, lang, "commands.jtc.modals.change_name.title")}`)
           .setCustomId("NI_jtc:change_modal")
-          .setComponents(
-            new ActionRowBuilder<ModalActionRowComponentBuilder>().setComponents(
-              new TextInputBuilder()
-                .setRequired(true)
-                .setMinLength(7)
-                .setMaxLength(56)
-                .setStyle(TextInputStyle.Short)
-                .setCustomId("NI_jtc:change_name")
-                .setLabel(`${t(client, lang, "commands.jtc.modals.change_name.label")}`)
-                .setPlaceholder(
-                  `${t(client, lang, "commands.jtc.modals.change_name.placeholder")}`,
-                ),
-            ),
+          .setLabelComponents(
+            new LabelBuilder()
+              .setLabel(t(client, lang, "commands.jtc.modals.change_name.label"))
+              .setTextInputComponent(
+                new TextInputBuilder()
+                  .setRequired(true)
+                  .setMinLength(7)
+                  .setMaxLength(56)
+                  .setStyle(TextInputStyle.Short)
+                  .setCustomId("NI_jtc:change_name")
+                  .setPlaceholder(
+                    `${t(client, lang, "commands.jtc.modals.change_name.placeholder")}`,
+                  ),
+              ),
           );
 
         await i.showModal(modal);
 
-        const submit = await i.awaitModalSubmit({
-          time: 5 * 60 * 1000,
-          filter: (i: any) =>
-            i.user.id === interaction.user.id && i.customId === "NI_jtc:change_modal",
-        });
+        await i
+          .awaitModalSubmit({
+            time: 5 * 60 * 1000,
+            filter: (i: any) =>
+              i.user.id === interaction.user.id && i.customId === "NI_jtc:change_modal",
+          })
+          .then(async (int) => {
+            await int.deferUpdate();
 
-        let name = submit.fields.getTextInputValue("NI_jtc:change_name");
+            let name = int.fields.getTextInputValue("NI_jtc:change_name");
 
-        await guild.set("utils.join_to_create.default_name", name);
+            await guild.set("utils.join_to_create.default_name", name);
 
-        delete embed.data.fields;
+            delete embed.data.fields;
 
-        embed.addFields(
-          {
-            name: `${t(client, lang, "commands.jtc.embeds.fields.status.status")}`,
-            value: `${(await guild.get("utils.join_to_create.enabled")) ? t(client, lang, "commands.jtc.embeds.fields.status.enabled") : t(client, lang, "commands.jtc.embeds.fields.status.disabled")}`,
-            inline: true,
-          },
-          {
-            name: `${t(client, lang, "commands.jtc.embeds.fields.category")}`,
-            value: `<#${await guild.get("utils.join_to_create.category")}>`,
-            inline: true,
-          },
-          {
-            name: `${t(client, lang, "commands.jtc.embeds.fields.channel")}`,
-            value: `<#${await guild.get("utils.join_to_create.channel")}>`,
-            inline: true,
-          },
-          {
-            name: `${t(client, lang, "commands.jtc.embeds.fields.default_name")}`,
-            value: `${client.holder.utils.reVar(await guild.get("utils.join_to_create.default_name"), interaction.user.displayName)}`,
-            inline: true,
-          },
-        );
+            embed.addFields(
+              {
+                name: `${t(client, lang, "commands.jtc.embeds.fields.status.status")}`,
+                value: `${(await guild.get("utils.join_to_create.enabled")) ? t(client, lang, "commands.jtc.embeds.fields.status.enabled") : t(client, lang, "commands.jtc.embeds.fields.status.disabled")}`,
+                inline: true,
+              },
+              {
+                name: `${t(client, lang, "commands.jtc.embeds.fields.category")}`,
+                value: `<#${await guild.get("utils.join_to_create.category")}>`,
+                inline: true,
+              },
+              {
+                name: `${t(client, lang, "commands.jtc.embeds.fields.channel")}`,
+                value: `<#${await guild.get("utils.join_to_create.channel")}>`,
+                inline: true,
+              },
+              {
+                name: `${t(client, lang, "commands.jtc.embeds.fields.default_name")}`,
+                value: `${client.holder.utils.reVar(await guild.get("utils.join_to_create.default_name"), interaction.user.displayName)}`,
+                inline: true,
+              },
+            );
 
-        // @ts-ignore
-        submit.update({ embeds: [embed], components: [row] });
+            await int.editReply({ embeds: [embed], components: [row] });
+          });
       }
     });
   },

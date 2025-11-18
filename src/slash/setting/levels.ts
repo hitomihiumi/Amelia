@@ -3,7 +3,7 @@ import { Client, CommandInteraction, PermissionsBitField } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
 
 module.exports = {
-  name: "",
+  name: "levels",
   description: "",
   cooldown: 5,
   locale: {
@@ -11,7 +11,7 @@ module.exports = {
   },
   options: [],
   permissions: {
-    bot: [...defaultPermissions],
+    bot: [...defaultPermissions, PermissionsBitField.Flags.ManageRoles],
   },
   key: null,
   run: async (client: Client, interaction: CommandInteraction) => {

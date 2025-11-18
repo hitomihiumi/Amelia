@@ -55,7 +55,7 @@ async function createChannel(client: Client, guild: Guild, newState: VoiceState)
   let map = await guild.get("temp.join_to_create.map");
   let channel = await newState.guild.channels.create({
     name: client.holder.utils.reVar(
-      guild.get("utils.join_to_create.default_name"),
+      await guild.get("utils.join_to_create.default_name"),
       newState.member.displayName,
     ),
     type: ChannelType.GuildVoice,

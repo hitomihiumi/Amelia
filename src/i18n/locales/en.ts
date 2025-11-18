@@ -235,6 +235,138 @@ export const en: TranslationSchema = {
       error: "An error occurred while generating the profile card.",
       success: "{0}'s profile card:",
     },
+    appearance: {
+      embeds: {
+        base: {
+          title: "Appearance Settings",
+          description: "Choose which appearance settings to configure",
+        },
+        rank: {
+          title: "Rank Card",
+          description: "Configure the appearance of your rank card",
+        },
+        level_up: {
+          title: "Level Up Card",
+          description: "Configure the appearance of your level up card",
+        },
+        profile: {
+          title: "Profile Card",
+          description: "Configure the appearance of your profile card",
+        },
+        fields: {
+          bg_color: {
+            name: "Background Color",
+            value: "{0}",
+          },
+          first_component: {
+            name: "First Component",
+            value: "{0}",
+          },
+          second_component: {
+            name: "Second Component",
+            value: "{0}",
+          },
+          third_component: {
+            name: "Third Component",
+            value: "{0}",
+          },
+        },
+      },
+      select_menus: {
+        base: {
+          placeholder: "Select the card you want to customize",
+          options: {
+            rank: "Rank Card",
+            level_up: "Level Up Card",
+            profile: "Profile Card",
+          },
+        },
+        color: {
+          placeholder: "Select the component you want to customize",
+          options: {
+            bg_color: "Background Color",
+            first_component: "First Component",
+            second_component: "Second Component",
+            third_component: "Third Component",
+          },
+        },
+        icons: {
+          placeholder: "Select an icon to manage",
+          options: {
+            empty: {
+              label: "No Icon Configured",
+            },
+            remove: {
+              description: "Remove the current icon",
+            },
+            add: {
+              description: "Add a new icon",
+            },
+          },
+        },
+      },
+      buttons: {
+        mode: "Toggle Mode",
+        url: "Set BG URL",
+        reset: "Reset",
+        icons_padding_x: "Padding X",
+        icons_padding_y: "Padding Y",
+        bio: "Set Bio",
+      },
+      modals: {
+        color: {
+          title: "Set Color",
+          label: "Enter a HEX color code",
+        },
+        url: {
+          title: "Set Background URL",
+          label: "Enter a valid image URL",
+        },
+        bio: {
+          title: "Set Bio",
+          label: "Enter your profile bio",
+        },
+        icons_padding: {
+          title: "Set Icons Padding",
+          x: {
+            label: "Set padding for X in pixels",
+          },
+          y: {
+            label: "Set padding for Y in pixels",
+          },
+        },
+      },
+      messages: {
+        error: {
+          invalid_color: "Please provide a valid HEX color code.",
+          invalid_url: "Please provide a valid image URL.",
+          invalid_padding: "Please provide a valid number for padding.",
+          no_available_icons: "You have no available icons to add.",
+        },
+      },
+    },
+    language: {
+      embeds: {
+        base: {
+          title: "Language Settings",
+          description: "Select the language for this server",
+        },
+      },
+      select_menus: {
+        placeholder: "Select a language",
+        options: {
+          en: {
+            description: "Set language to English",
+          },
+          ru: {
+            description: "Set language to Russian",
+          },
+        },
+      },
+      messages: {
+        success: "Server language set to **{0}**",
+      },
+    },
   },
 
   events: {
@@ -435,5 +567,9 @@ export const en: TranslationSchema = {
     view_audit_log: "View Audit Log",
     view_channel: "View Channels",
     view_guild_insights: "View Server Insights",
+  },
+
+  icons: {
+    empty: "No Icon Configured",
   },
 };
