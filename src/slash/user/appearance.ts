@@ -579,26 +579,29 @@ const mostUsedQueries = {
     return (await user.get("custom.level_up")) as LevelCardDisplayOptions;
   },
   setrank: async (user: User, data: Partial<RankCardDisplayOptions>) => {
-    await user.set("custom.rank.mode", data.mode);
-    await user.set("custom.rank.solid", data.solid);
-    await user.set("custom.rank.url", data.url);
-    await user.set("custom.rank.color", data.color);
+    await user.set("custom.rank.mode", data.mode || false);
+    await user.set("custom.rank.solid", data.solid || defaultDisplayOptions.rank.solid);
+    await user.set("custom.rank.url", data.url || null);
+    await user.set("custom.rank.color", data.color || null);
     return;
   },
   setprofile: async (user: User, data: Partial<ProfileCardDisplayOptions>) => {
-    await user.set("custom.profile.mode", data.mode);
-    await user.set("custom.profile.solid", data.solid);
-    await user.set("custom.profile.url", data.url);
-    await user.set("custom.profile.color", data.color);
-    await user.set("custom.profile.bio", data.bio);
-    await user.set("custom.profile.icons", data.icons);
-    await user.set("custom.profile.icons_padding", data.icons_padding);
+    await user.set("custom.profile.mode", data.mode || false);
+    await user.set("custom.profile.solid", data.solid || defaultDisplayOptions.profile.solid);
+    await user.set("custom.profile.url", data.url || null);
+    await user.set("custom.profile.color", data.color || null);
+    await user.set("custom.profile.bio", data.bio || "");
+    await user.set("custom.profile.icons", data.icons || []);
+    await user.set(
+      "custom.profile.icons_padding",
+      data.icons_padding || defaultDisplayOptions.profile.icons_padding,
+    );
     return;
   },
   setlevel_up: async (user: User, data: Partial<LevelCardDisplayOptions>) => {
-    await user.set("custom.level_up.mode", data.mode);
-    await user.set("custom.level_up.solid", data.solid);
-    await user.set("custom.level_up.url", data.url);
+    await user.set("custom.level_up.mode", data.mode || false);
+    await user.set("custom.level_up.solid", data.solid || defaultDisplayOptions.level_up.solid);
+    await user.set("custom.level_up.url", data.url || null);
     return;
   },
 };

@@ -1,6 +1,6 @@
 {
   "name": "amelia",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "main": "/dist/index.js",
   "scripts": {
     "test": "tsc && tsx ./scripts/post-build.ts && node --trace-warnings ./dist/bot.js",
@@ -36,6 +36,7 @@
     "discord.js": "^14.21.0",
     "dotenv": "^16.6.1",
     "fuse.js": "^7.1.0",
+    "mongodb": "^7.0.0",
     "prisma": "^6.18.0"
   }
 }

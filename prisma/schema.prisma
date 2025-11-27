@@ -104,9 +104,8 @@ model Guild {
   commandPermissions Json @default("{}")
 
   // Relationships
-  users       User[]
-  histories   History[]
-  jtcChannels JoinToCreateChannel[]
+  users     User[]
+  histories History[]
 
   @@index([id])
 }
@@ -165,9 +164,6 @@ model User {
 
   customBadges Json @default("[]")
 
-  // Temp data
-  tempGames Json @default("{}")
-
   // Presets
   jtcPresets Json @default("[]")
 
@@ -196,18 +192,4 @@ model History {
   @@index([guildId])
   @@index([userId])
   @@index([type])
-}
-
-// Join to Create temporary channels
-model JoinToCreateChannel {
-  id        String   @id @default(cuid())
-  channelId String   @unique
-  guildId   String
-  ownerId   String
-  createdAt DateTime @default(now())
-
-  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
-
-  @@index([channelId])
-  @@index([guildId])
 }

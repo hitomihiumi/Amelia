@@ -21,13 +21,15 @@ module.exports = {
     if (!(interaction.member instanceof GuildMember)) return;
     if (!interaction.member.voice) return;
     if (!interaction.member.voice.channel) return;
+    if (!interaction.member.voice.channelId) return;
     let guild = new Guild(client, interaction.guild);
     const lang = await guild.get("settings.language");
 
-    let map = await guild.get("temp.join_to_create.map");
+    let map = await guild.cache.get("temp.join_to_create.map");
 
     if (
       map.has(interaction.member.voice.channelId) &&
+      //@ts-ignore
       map.get(interaction.member.voice.channelId).owner === interaction.user.id
     ) {
       let channel = interaction.member.voice.channel;

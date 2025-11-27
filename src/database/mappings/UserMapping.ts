@@ -113,6 +113,9 @@ export const UserPathMap: PathMap = {
   "temp.games": {
     field: "tempGames",
   },
+  "temp.voice_time": {
+    field: "tempVoiceTime",
+  },
   "presets.jtc": {
     field: "jtcPresets",
   },
@@ -154,7 +157,7 @@ export const UserPathMap: PathMap = {
   },
   temp: {
     field: "",
-    children: ["games"],
+    children: ["games", "voice_time"],
   },
   presets: {
     field: "",
@@ -197,5 +200,6 @@ export const UserFieldMap: Record<string, string> = {
   "custom.level_up.url": "levelupUrl",
   "custom.badges": "customBadges",
   "temp.games": "tempGames",
+  "temp.voice_time": "tempVoiceTime",
   "presets.jtc": "jtcPresets",
 };

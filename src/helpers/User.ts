@@ -1,7 +1,15 @@
-import { JTCPreset, UserSchema, UserSchemaKey } from "../types/helpers";
+import {
+  UserCacheKey,
+  UserSchemaKey,
+  LiteralUserSchemaKey,
+  UserSchema,
+  GetSchemaValueType,
+  UserCache,
+} from "../types/helpers";
 import { Client, Guild, User as DiscordUser } from "discord.js";
-import { DBHistory } from "../database/DBHistory";
-import { DBUser } from "../database/DBUser";
+import { DBUser, DBHistory } from "../database";
+import { UserPathMap } from "../database/mappings/UserMapping";
+import { Cache } from "./";
 
 /**
  * User helper class - wrapper around DBUser with backward compatibility
@@ -14,6 +22,7 @@ export class User {
   public guild: Guild;
   public client: Client;
   public history: DBHistory;
+  public cache: Cache<UserCache, UserCacheKey>;
   private db: DBUser;
 
   constructor(client: Client, user: DiscordUser, guild: Guild) {
@@ -22,40 +31,70 @@ export class User {
     this.guild = guild;
     this.db = new DBUser(client, user, guild);
     this.history = this.db.history;
+    this.cache = new Cache("user_temp", `${user.id}:${guild.id}`, UserPathMap);
   }
 
   /**
    * Get value by path (ASYNC - must use await)
+   * Supports both literal paths (with precise type inference) and dynamic paths
    */
-  public async get(path: UserSchemaKey): Promise<any> {
+  public async get<K extends LiteralUserSchemaKey>(
+    path: K,
+  ): Promise<GetSchemaValueType<UserSchema, K>>;
+  public async get(path: string): Promise<any>;
+  public async get(path: string): Promise<any> {
     return await this.db.get(path as any);
   }
 
   /**
    * Set value by path (ASYNC - must use await)
+   * Supports both literal paths (with type checking) and dynamic paths
    */
-  public async set(path: UserSchemaKey, value: any): Promise<void> {
+  public async set<K extends LiteralUserSchemaKey>(
+    path: K,
+    value: GetSchemaValueType<UserSchema, K>,
+  ): Promise<void>;
+  public async set(path: string, value: any): Promise<void>;
+  public async set(path: string, value: any): Promise<void> {
     return await this.db.set(path as any, value);
   }
 
   /**
    * Add to numeric value (ASYNC - must use await)
+   * Supports both literal paths (with type checking) and dynamic paths
    */
-  public async add(path: UserSchemaKey, value: any): Promise<void> {
+  public async add<K extends LiteralUserSchemaKey>(
+    path: K,
+    value: GetSchemaValueType<UserSchema, K> extends number ? number : never,
+  ): Promise<void>;
+  public async add(path: string, value: number): Promise<void>;
+  public async add(path: string, value: number): Promise<void> {
     return await this.db.add(path, value);
   }
 
   /**
    * Subtract from numeric value (ASYNC - must use await)
+   * Supports both literal paths (with type checking) and dynamic paths
    */
-  public async sub(path: UserSchemaKey, value: any): Promise<void> {
+  public async sub<K extends LiteralUserSchemaKey>(
+    path: K,
+    value: GetSchemaValueType<UserSchema, K> extends number ? number : never,
+  ): Promise<void>;
+  public async sub(path: string, value: number): Promise<void>;
+  public async sub(path: string, value: number): Promise<void> {
     return await this.db.sub(path, value);
   }
 
   /**
    * Push to array (ASYNC - must use await)
+   * Supports both literal paths (with type checking) and dynamic paths
    */
-  public async push(path: UserSchemaKey, value: any): Promise<void> {
+  public async push<K extends LiteralUserSchemaKey>(
+    path: K,
+    value: GetSchemaValueType<UserSchema, K> extends Array<infer T> ? T : never,
+  ): Promise<void>;
+  public async push(path: string, value: any): Promise<void>;
+  public async push(path: string, value: any): Promise<void> {
     return await this.db.push(path, value);
   }
 

@@ -363,6 +363,12 @@ const guildSchemaMap: Record<string, SchemaField> = {
     prismaType: "Json",
     default: '"{}"',
   },
+
+  "temp.join_to_create.map": {
+    prismaField: "jtcTempMap",
+    prismaType: "Json",
+    default: '"{}"',
+  },
 };
 
 /**
@@ -530,6 +536,7 @@ const userSchemaMap: Record<string, SchemaField> = {
     optional: true,
   },
 
+  // Custom Level Up
   "custom.level_up.mode": {
     prismaField: "levelupMode",
     prismaType: "Boolean",
@@ -559,6 +566,11 @@ const userSchemaMap: Record<string, SchemaField> = {
     prismaField: "tempGames",
     prismaType: "Json",
     default: '"{}"',
+  },
+  "temp.voice_time": {
+    prismaField: "tempVoiceTime",
+    prismaType: "Int",
+    default: "0",
   },
 
   // Presets

@@ -17,7 +17,7 @@ import {
 import { FileWatcher } from "@hitomihiumi/filewatcher";
 import { commandLoader } from "./handlers/cmdLoaders";
 import { initializeI18n } from "./i18n/locales";
-import { prisma, DatabaseService } from "./database";
+import { prisma, DatabaseService, MongoDBService } from "./database";
 import { emojis } from "./emoji/emojis";
 import { iconsMap } from "./helpers/assetsMap";
 
@@ -104,7 +104,16 @@ client.holder = {
 
 // Connect to database before loading handlers
 (async () => {
-  await DatabaseService.connect();
+  try {
+    // Connect to PostgreSQL
+    await DatabaseService.connect();
+
+    // Connect to MongoDB for temp data cache
+    await MongoDBService.connect();
+  } catch (error) {
+    console.error("Failed to connect to databases:".red, error);
+    process.exit(1);
+  }
 
   ["antiCrash", "events", "commands", "components", "slash", "joinToCreate"]
     .filter(Boolean)
@@ -126,3 +135,28 @@ client.holder = {
 
   await client.login(process.env.PRODACTION ? process.env.TOKEN : process.env.DEV_TOKEN);
 })();
+
+// Graceful shutdown handler
+const shutdown = async (signal: string) => {
+  console.log(`\n${signal} received. Shutting down gracefully...`.yellow);
+
+  try {
+    // Disconnect from MongoDB
+    await MongoDBService.disconnect();
+
+    // Disconnect from PostgreSQL
+    await DatabaseService.disconnect();
+
+    // Destroy Discord client
+    client.destroy();
+
+    console.log("Shutdown complete".green);
+    process.exit(0);
+  } catch (error) {
+    console.error("Error during shutdown:".red, error);
+    process.exit(1);
+  }
+};
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));

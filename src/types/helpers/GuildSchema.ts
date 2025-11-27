@@ -1,6 +1,6 @@
 import { EmojiResolvable } from "discord.js";
 import { EmbedCustom, ModalCustom, IModalField, ButtonCustom } from "./";
-import { SchemaKey } from "./SchemaKeys";
+import { SchemaKey, LiteralSchemaKey } from "./SchemaKeys";
 
 export interface GuildSchema {
   id: string;
@@ -123,6 +123,9 @@ export interface GuildSchema {
       [key: string]: CommandPermission;
     };
   };
+}
+
+export interface GuildCache {
   temp: {
     join_to_create: {
       map: Map<
@@ -208,3 +211,6 @@ export interface Levels {
 }
 
 export type GuildSchemaKey = SchemaKey<GuildSchema>;
+export type LiteralGuildSchemaKey = LiteralSchemaKey<GuildSchema>;
+export type GuildCacheKey = SchemaKey<GuildCache>;
+export type LiteralGuildCacheKey = LiteralSchemaKey<GuildCache>;

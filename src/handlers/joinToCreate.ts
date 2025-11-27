@@ -19,13 +19,17 @@ module.exports = async (client: Client) => {
   client.on("voiceStateUpdate", async (oldState, newState) => {
     if (!newState.guild) return;
     let guild = new Guild(client, newState.guild);
-    let map = await guild.get("temp.join_to_create.map");
-    let oldID = oldState.channelId || "undefined";
-    let newID = newState.channelId || "undefined";
+    let map =
+      (await guild.cache.get("temp.join_to_create.map")) ||
+      new Map<string, { channel: string; owner: string }>();
+    let oldID = oldState.channelId || undefined;
+    let newID = newState.channelId || undefined;
     if (newID === (await guild.get("utils.join_to_create.channel"))) {
       if (oldID) {
         if (!newState.member) return;
+        // @ts-ignore
         if (map.has(oldID) && map.get(oldID).owner === newState.member.id) {
+          // @ts-ignore
           await newState.member.voice.setChannel(map.get(oldID).channel);
           return;
         } else await createChannel(client, guild, newState);
@@ -39,20 +43,22 @@ module.exports = async (client: Client) => {
 };
 
 async function deleteChannel(guild: Guild, channelId: string) {
-  let map = await guild.get("temp.join_to_create.map");
+  let map = await guild.cache.get("temp.join_to_create.map");
+  // @ts-ignore
   let channel = guild.guild.channels.cache.get(map.get(channelId).channel) as BaseGuildVoiceChannel;
   if (!channel) return;
   if (channel.members.size === 0) {
     await channel.delete();
     map.delete(channelId);
-    await guild.set("temp.join_to_create.map", map);
+    await guild.cache.set("temp.join_to_create.map", map);
   }
 }
 
 async function createChannel(client: Client, guild: Guild, newState: VoiceState) {
   if (!newState.member) return;
+  if (!newState.channelId) return;
   const lang = await guild.get("settings.language");
-  let map = await guild.get("temp.join_to_create.map");
+  let map = await guild.cache.get("temp.join_to_create.map");
   let channel = await newState.guild.channels.create({
     name: client.holder.utils.reVar(
       await guild.get("utils.join_to_create.default_name"),
@@ -209,5 +215,5 @@ async function createChannel(client: Client, guild: Guild, newState: VoiceState)
     owner: newState.member.id,
   });
 
-  await guild.set("temp.join_to_create.map", map);
+  await guild.cache.set("temp.join_to_create.map", map);
 }

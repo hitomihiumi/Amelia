@@ -73,7 +73,6 @@ export class DBGuild {
   public guild: DiscordGuild;
   public history: DBHistory;
   private data: PrismaGuild | null = null;
-  private jtcChannelCache: Map<string, { channel: string; owner: string }> = new Map();
 
   constructor(client: Client, guild: DiscordGuild) {
     this.client = client;
@@ -104,11 +103,6 @@ export class DBGuild {
    */
   public async get<T extends GuildPath>(path: T): Promise<PathValue<T>> {
     await this.ensureGuild();
-
-    // Handle temp data (in-memory cache)
-    if (path === "temp.join_to_create.map") {
-      return this.jtcChannelCache as any;
-    }
 
     const data = await prisma.guild.findUnique({
       where: { id: this.guild.id },
@@ -178,12 +172,6 @@ export class DBGuild {
    */
   public async set<T extends GuildPath>(path: T, value: PathValue<T>): Promise<void> {
     await this.ensureGuild();
-
-    // Handle temp data (in-memory cache)
-    if (path === "temp.join_to_create.map") {
-      this.jtcChannelCache = value as any;
-      return;
-    }
 
     const keys = path.split(".");
     let field: string;

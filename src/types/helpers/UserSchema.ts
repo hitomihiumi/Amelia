@@ -1,5 +1,5 @@
 import { PermissionsBitField } from "discord.js";
-import { SchemaKey } from "./SchemaKeys";
+import { SchemaKey, LiteralSchemaKey } from "./SchemaKeys";
 import { TranslationSchema } from "../i18n/TranslationSchema";
 
 export interface UserSchema {
@@ -32,13 +32,17 @@ export interface UserSchema {
     level_up: LevelCardDisplayOptions;
     badges: string[];
   };
+  presets: {
+    jtc: JTCPreset[];
+  };
+}
+
+export interface UserCache {
   temp: {
     games: {
       tiles: any;
     };
-  };
-  presets: {
-    jtc: JTCPreset[];
+    voice_time: number;
   };
 }
 
@@ -150,3 +154,6 @@ export interface JTCPreset {
 }
 
 export type UserSchemaKey = SchemaKey<UserSchema>;
+export type LiteralUserSchemaKey = LiteralSchemaKey<UserSchema>;
+export type UserCacheKey = SchemaKey<UserCache>;
+export type LiteralUserCacheKey = LiteralSchemaKey<UserCache>;

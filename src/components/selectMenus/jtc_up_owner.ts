@@ -26,7 +26,7 @@ module.exports = {
         ephemeral: true,
       });
 
-    let map = await guild.get("temp.join_to_create.map");
+    let map = await guild.cache.get("temp.join_to_create.map");
 
     await channel.permissionOverwrites.delete(interaction.user.id);
 
@@ -41,7 +41,7 @@ module.exports = {
       owner: member,
     });
 
-    guild.set("temp.join_to_create.map", map);
+    await guild.cache.set("temp.join_to_create.map", map);
 
     await interaction.reply({
       content: t(client, lang, "functions.join_to_create.msg.owner", `<@${member}>`),

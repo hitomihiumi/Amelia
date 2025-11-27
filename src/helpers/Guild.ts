@@ -1,8 +1,15 @@
-import { GuildSchema, GuildSchemaKey } from "../types/helpers";
+import {
+  GuildCacheKey,
+  GuildSchema,
+  GuildSchemaKey,
+  LiteralGuildSchemaKey,
+  GetSchemaValueType,
+  GuildCache,
+} from "../types/helpers";
 import { Client, Guild as DiscordGuild, User as DiscordUser } from "discord.js";
-import { DBHistory } from "../database/DBHistory";
-import { DBUser } from "../database/DBUser";
-import { DBGuild } from "../database/DBGuild";
+import { DBHistory, DBGuild } from "../database";
+import { GuildPathMap } from "../database/mappings/GuildMapping";
+import { Cache, User } from "./";
 
 /**
  * Guild helper class - wrapper around DBGuild with backward compatibility
@@ -14,6 +21,7 @@ export class Guild {
   public client: Client;
   public guild: DiscordGuild;
   public history: DBHistory;
+  public cache: Cache<GuildCache, GuildCacheKey>;
   private db: DBGuild;
 
   constructor(client: Client, guild: DiscordGuild) {
@@ -21,40 +29,70 @@ export class Guild {
     this.guild = guild;
     this.db = new DBGuild(client, guild);
     this.history = this.db.history;
+    this.cache = new Cache("guild_temp", guild.id, GuildPathMap);
   }
 
   /**
    * Get value by path (ASYNC - must use await)
+   * Supports both literal paths (with precise type inference) and dynamic paths
    */
-  public async get(path: GuildSchemaKey): Promise<any> {
+  public async get<K extends LiteralGuildSchemaKey>(
+    path: K,
+  ): Promise<GetSchemaValueType<GuildSchema, K>>;
+  public async get(path: string): Promise<any>;
+  public async get(path: string): Promise<any> {
     return await this.db.get(path as any);
   }
 
   /**
    * Set value by path (ASYNC - must use await)
+   * Supports both literal paths (with type checking) and dynamic paths
    */
-  public async set(path: GuildSchemaKey, value: any): Promise<void> {
+  public async set<K extends LiteralGuildSchemaKey>(
+    path: K,
+    value: GetSchemaValueType<GuildSchema, K>,
+  ): Promise<void>;
+  public async set(path: string, value: any): Promise<void>;
+  public async set(path: string, value: any): Promise<void> {
     return await this.db.set(path as any, value);
   }
 
   /**
    * Add to numeric value (ASYNC - must use await)
+   * Supports both literal paths (with type checking) and dynamic paths
    */
-  public async add(path: GuildSchemaKey, value: any): Promise<void> {
+  public async add<K extends LiteralGuildSchemaKey>(
+    path: K,
+    value: GetSchemaValueType<GuildSchema, K> extends number ? number : never,
+  ): Promise<void>;
+  public async add(path: string, value: number): Promise<void>;
+  public async add(path: string, value: number): Promise<void> {
     return await this.db.add(path, value);
   }
 
   /**
    * Subtract from numeric value (ASYNC - must use await)
+   * Supports both literal paths (with type checking) and dynamic paths
    */
-  public async sub(path: GuildSchemaKey, value: any): Promise<void> {
+  public async sub<K extends LiteralGuildSchemaKey>(
+    path: K,
+    value: GetSchemaValueType<GuildSchema, K> extends number ? number : never,
+  ): Promise<void>;
+  public async sub(path: string, value: number): Promise<void>;
+  public async sub(path: string, value: number): Promise<void> {
     return await this.db.sub(path, value);
   }
 
   /**
    * Push to array (ASYNC - must use await)
+   * Supports both literal paths (with type checking) and dynamic paths
    */
-  public async push(path: GuildSchemaKey, value: any): Promise<void> {
+  public async push<K extends LiteralGuildSchemaKey>(
+    path: K,
+    value: GetSchemaValueType<GuildSchema, K> extends Array<infer T> ? T : never,
+  ): Promise<void>;
+  public async push(path: string, value: any): Promise<void>;
+  public async push(path: string, value: any): Promise<void> {
     return await this.db.push(path, value);
   }
 
@@ -89,6 +127,3 @@ export class Guild {
     return new User(this.client, this.guild.members.cache.get(id)?.user as DiscordUser, this.guild);
   }
 }
-
-// Re-export User from the same file to maintain compatibility
-import { User } from "./User";

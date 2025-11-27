@@ -125,10 +125,10 @@ module.exports = {
           });
 
           let category = guild.guild.channels.cache.get(
-            await guild.get("utils.join_to_create.category"),
+            (await guild.get("utils.join_to_create.category")) as string,
           );
           let channel = guild.guild.channels.cache.get(
-            await guild.get("utils.join_to_create.channel"),
+            (await guild.get("utils.join_to_create.channel")) as string,
           );
 
           if (category) {

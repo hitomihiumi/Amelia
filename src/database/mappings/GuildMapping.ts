@@ -194,6 +194,9 @@ export const GuildPathMap: PathMap = {
   "permissions.commands": {
     field: "commandPermissions",
   },
+  "temp.join_to_create.map": {
+    field: "jtcTempMap",
+  },
   settings: {
     field: "",
     children: ["prefix", "language"],
@@ -293,6 +296,10 @@ export const GuildPathMap: PathMap = {
     field: "",
     children: ["commands"],
   },
+  "temp.join_to_create": {
+    field: "",
+    children: ["map"],
+  },
 };
 
 export const GuildFieldMap: Record<string, string> = {
@@ -357,4 +364,5 @@ export const GuildFieldMap: Record<string, string> = {
   "moderation.auto_moderation.links.moderation_immune": "linksModerationImmune",
   "moderation.auto_moderation.links.punishment": "linksPunishment",
   "permissions.commands": "commandPermissions",
+  "temp.join_to_create.map": "jtcTempMap",
 };

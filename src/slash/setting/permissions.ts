@@ -625,7 +625,7 @@ function permissionRoles(
 
 const mostUsedQueries = {
   getPermission: async (guild: Guild, commandName: string) => {
-    return (await guild.get(`permissions.commands.${commandName}`)) as CommandPermission;
+    return (await guild.get(`permissions.commands.${commandName}`)) as unknown as CommandPermission;
   },
   setPermission: async (
     guild: Guild,
