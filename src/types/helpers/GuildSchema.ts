@@ -171,11 +171,6 @@ interface CounterChannel {
   name: string;
 }
 
-interface LevelRole {
-  level: number;
-  role: string;
-}
-
 interface Game {
   name: string;
   emoji: EmojiResolvable;
@@ -191,7 +186,7 @@ export interface Levels {
   ignore_channels: string[];
   ignore_roles: string[];
   level_roles: {
-    [key: string]: LevelRole;
+    [key: number]: string;
   };
   message: {
     enabled: boolean;

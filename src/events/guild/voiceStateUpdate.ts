@@ -1,12 +1,12 @@
 import { Client, VoiceState, ChannelType } from "discord.js";
 import { Guild, User } from "../../helpers";
 import { Levels } from "../../types/helpers";
-import { getNextLevelXP } from "../../handlers/functions";
+import {awardLevelRole, getNextLevelXP, userLevelIgnoreCheck} from "../../handlers/functions";
 
 const VOICE_XP_BASE_MIN = 2;
 const VOICE_XP_BASE_MAX = 4;
 const VOICE_XP_MULTIPLIER = 2;
-const MINIMUM_VOICE_TIME_MS = 60000;
+const MINIMUM_VOICE_TIME_MS = 1000;
 
 module.exports = async (client: Client, oldState: VoiceState, newState: VoiceState) => {
   if (!newState.guild || !newState.member || newState.member.user.bot) return;
@@ -18,8 +18,12 @@ module.exports = async (client: Client, oldState: VoiceState, newState: VoiceSta
 
   await handleUserVoiceStateChange(guild, newState, oldState, levelS);
 
+  if (oldState.channel) {
+    await updateOtherUsersStatus(guild, oldState, levelS);
+  }
+
   if (newState.channel) {
-    await updateOtherUsersStatus(guild, newState);
+    await updateOtherUsersStatus(guild, newState, levelS);
   }
 
   await handleStageChannel(newState);
@@ -31,7 +35,8 @@ async function handleUserVoiceStateChange(
   oldState: VoiceState,
   levelS: Levels,
 ) {
-  const user = guild.getUser(newState.member!.user.id);
+  if (!newState.member) return;
+  const user = guild.getUser(newState.member.user.id);
   let timerData = (await user.cache.get("temp.voice_time")) as number | null;
 
   if (!oldState.channelId && newState.channelId) {
@@ -41,9 +46,24 @@ async function handleUserVoiceStateChange(
 
   if (oldState.channelId && !newState.channelId) {
     if (timerData && timerData > 0) {
-      await awardVoiceXP(timerData, user);
+      await awardVoiceXP(timerData, user, levelS);
     }
     await user.cache.set("temp.voice_time", 0);
+    return;
+  }
+
+  if (newState.channelId && userLevelIgnoreCheck(newState.member, levelS, newState.channelId)) {
+    if (timerData && timerData > 0) {
+      await awardVoiceXP(timerData, user, levelS);
+    }
+    await user.cache.set("temp.voice_time", 0);
+    return;
+  }
+
+  if (oldState.channelId && userLevelIgnoreCheck(newState.member, levelS, oldState.channelId)) {
+    if (!isUserAFK(newState)) {
+      await user.cache.set("temp.voice_time", Date.now());
+    }
     return;
   }
 
@@ -56,7 +76,7 @@ async function handleUserVoiceStateChange(
 
   if (shouldInterruptVoiceTime(newState)) {
     if (timerData > 0) {
-      await awardVoiceXP(timerData, user);
+      await awardVoiceXP(timerData, user, levelS);
     }
     await user.cache.set("temp.voice_time", 0);
     return;
@@ -69,20 +89,20 @@ async function handleUserVoiceStateChange(
     levelS.ignore_channels?.includes(newState.channelId)
   ) {
     if (timerData > 0) {
-      await awardVoiceXP(timerData, user);
+      await awardVoiceXP(timerData, user, levelS);
     }
     await user.cache.set("temp.voice_time", 0);
   }
 }
 
-async function updateOtherUsersStatus(guild: Guild, newState: VoiceState) {
-  const channel = newState.channel;
+async function updateOtherUsersStatus(guild: Guild, state: VoiceState, levelS: Levels) {
+  const channel = state.channel;
   if (!channel?.members || channel.members.size === 0) return;
 
   const promises: Promise<void>[] = [];
 
   channel.members.forEach((member) => {
-    if (member.user.bot || member.id === newState.member?.id) return;
+    if (member.user.bot || member.id === state.member?.id) return;
 
     const promise = (async () => {
       const user = guild.getUser(member.user.id);
@@ -93,7 +113,7 @@ async function updateOtherUsersStatus(guild: Guild, newState: VoiceState) {
           await user.cache.set("temp.voice_time", Date.now());
         }
       } else if (shouldInterruptVoiceTime(member.voice)) {
-        await awardVoiceXP(timerData, user);
+        await awardVoiceXP(timerData, user, levelS);
         await user.cache.set("temp.voice_time", 0);
       }
     })();
@@ -121,11 +141,11 @@ function shouldInterruptVoiceTime(voiceState: VoiceState): boolean {
   return (voiceState.channel?.members?.size ?? 0) === 1;
 }
 
-async function handleStageChannel(newState: VoiceState) {
-  if (!newState.channel || newState.channel.type !== ChannelType.GuildStageVoice) return;
-  if (!newState.guild.members.me) return;
+async function handleStageChannel(state: VoiceState) {
+  if (!state.channel || state.channel.type !== ChannelType.GuildStageVoice) return;
+  if (!state.guild.members.me) return;
 
-  const botVoiceState = newState.guild.members.me.voice;
+  const botVoiceState = state.guild.members.me.voice;
   if (!botVoiceState.suppress) return;
 
   try {
@@ -135,7 +155,7 @@ async function handleStageChannel(newState: VoiceState) {
   }
 }
 
-async function awardVoiceXP(startTime: number, user: User) {
+async function awardVoiceXP(startTime: number, user: User, levelS: Levels) {
   const currentTime = Date.now();
   const timeDiffMs = currentTime - startTime;
 
@@ -154,6 +174,7 @@ async function awardVoiceXP(startTime: number, user: User) {
     const [newLevel, newXP] = calculateNewLevel(currentLevel, newXPTotal);
 
     if (newLevel > currentLevel) {
+        awardLevelRole(user.member, levelS, newLevel);
       await user.set("level.level", newLevel);
       await user.set("level.xp", newXP);
       await user.add("level.total_xp", addedXP);
@@ -172,7 +193,7 @@ function calculateNewLevel(currentLevel: number, totalXP: number): [number, numb
   let xpRemaining = totalXP;
   let newLevel = 0;
 
-  for (let i = 0; i <= currentLevel + 100; i++) {
+  for (let i = currentLevel; i <= currentLevel + 100; i++) {
     const requiredXP = getNextLevelXP(i);
 
     if (xpRemaining < requiredXP) {

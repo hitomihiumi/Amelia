@@ -82,6 +82,7 @@ export const en: TranslationSchema = {
             enabled: "✅ Enabled",
             disabled: "❌ Disabled",
           },
+          empty: "Empty",
           category: "Category",
           channel: "Channel",
           default_name: "Default Name",
@@ -90,13 +91,31 @@ export const en: TranslationSchema = {
       buttons: {
         enable: "Enable",
         disable: "Disable",
+        setup: "Auto-Setup",
+        set_channel: "Set Channel",
         change_name: "Change Name",
+      },
+      select_menus: {
+        channel: {
+          placeholder: "Select a channel",
+        },
       },
       modals: {
         change_name: {
           title: "Change Default Name",
           label: "Default channel name",
           placeholder: "e.g. {username}'s Channel",
+        },
+      },
+      messages: {
+        channel: {
+          set: "Choose channel to set Join to Create",
+          success: "Join to Create channel set to {0}",
+          error: "Error setting Join to Create channel",
+        },
+        setup: {
+          success: "Join to Create has been set up successfully",
+          error: "Error during Join to Create setup",
         },
       },
     },
@@ -365,6 +384,123 @@ export const en: TranslationSchema = {
       },
       messages: {
         success: "Server language set to **{0}**",
+      },
+    },
+    levels: {
+      embeds: {
+        base: {
+          title: "Leveling System Settings",
+          description:
+            "Configure the leveling system for your server. Enable or disable the system, set ignored channels and roles, and manage level-based role rewards.",
+          fields: {
+            status: {
+              name: "Status",
+              enabled: "✅ Enabled",
+              disabled: "❌ Disabled",
+            },
+            ignored_channels: {
+              name: "Ignored Channels",
+              none: "None",
+            },
+            ignored_roles: {
+              name: "Ignored Roles",
+              none: "None",
+            },
+            level_roles: {
+              name: "Level Roles",
+              none: "None",
+              level_format: "Level {0}: {1}",
+            },
+          },
+        },
+        ignore: {
+          title: "Ignored Channels and Roles",
+          description:
+            "Configure channels and roles that the leveling system will ignore. Users will not earn experience points in the specified channels or if they have the specified roles. Maximum of 25 channels and 25 roles can be ignored.",
+          fields: {
+            ignored_channels: {
+              name: "Ignored Channels",
+              none: "None",
+            },
+            ignored_roles: {
+              name: "Ignored Roles",
+              none: "None",
+            },
+          },
+        },
+        level_roles: {
+          title: "Level Role Rewards",
+          description:
+            "Manage role rewards that users will receive upon reaching specific levels. You can assign roles to levels, and users will be granted these roles when they reach the corresponding level.",
+          fields: {
+            current_roles: {
+              name: "Current Level Roles",
+              none: "No level roles configured",
+              level_format: "**Level {0}:** {1}",
+            },
+          },
+        },
+      },
+      buttons: {
+        enable: "Enable Leveling System",
+        disable: "Disable Leveling System",
+        back: "← Back",
+        add_level_role: "Add Level Role",
+        remove_level_role: "Remove Level Role",
+        cancel: "Cancel",
+      },
+      select_menus: {
+        main: {
+          placeholder: "Select a settings category",
+          options: {
+            ignore: {
+              label: "Ignored Channels and Roles",
+              description: "Configure ignored channels and roles",
+            },
+            level_roles: {
+              label: "Level Role Rewards",
+              description: "Manage level-based role rewards",
+            },
+          },
+        },
+        ignore_channel: {
+          placeholder: "Choose channel(s) to ignore",
+        },
+        ignore_role: {
+          placeholder: "Choose role(s) to ignore",
+        },
+        level_role: {
+          placeholder: "Choose a level role to manage",
+        },
+        select_role: {
+          placeholder: "Select a role for this level",
+        },
+      },
+      modals: {
+        add_level_role: {
+          title: "Add Level Role",
+          level: {
+            label: "Level",
+            placeholder: "Enter level number (e.g., 5)",
+          },
+        },
+        remove_level_role: {
+          title: "Remove Level Role",
+          level: {
+            label: "Level",
+            placeholder: "Enter level number to remove",
+          },
+        },
+      },
+      messages: {
+        max_channels: "You can only ignore up to 25 channels.",
+        max_roles: "You can only ignore up to 25 roles.",
+        invalid_level: "Invalid level number. Please enter a number between 1 and 999.",
+        role_not_found: "Role not found. Please check the role ID.",
+        level_role_not_found: "Level role not found.",
+        select_role_for_level: "Select a role for level **{0}**:",
+        role_added: "Role {1} has been added for level **{0}**!",
+        cancelled: "Action cancelled.",
       },
     },
   },

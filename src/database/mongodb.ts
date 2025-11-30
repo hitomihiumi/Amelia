@@ -68,7 +68,7 @@ class MongoDBService {
 
       // Optional: Create TTL index for automatic cleanup (uncomment if needed)
       // await guildTempCollection.createIndex({ updatedAt: 1 }, { expireAfterSeconds: 86400 }); // 24 hours
-      // await userTempCollection.createIndex({ updatedAt: 1 }, { expireAfterSeconds: 86400 }); // 24 hours
+      await userTempCollection.createIndex({ updatedAt: 1 }, { expireAfterSeconds: 86400 }); // 24 hours
     } catch (error) {
       console.error("❌ Failed to connect to MongoDB:".red, error);
       throw error;

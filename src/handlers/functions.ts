@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Guild } from "../helpers";
-import { Command, Component, SlashCommand } from "../types/helpers";
+import { Command, Component, Levels, SlashCommand } from "../types/helpers";
 import {
   Client,
   Collection,
@@ -23,6 +23,7 @@ import {
   StringSelectMenuOptionBuilder,
   MessageActionRowComponentBuilder,
   SelectMenuComponentOptionData,
+  GuildMember,
 } from "discord.js";
 import { APIEmbed } from "discord-api-types/v10";
 import { t } from "../i18n/helpers";
@@ -116,7 +117,7 @@ export function fastEmbed(color: ColorResolvable, title: string, desc: string) {
 }
 
 export function fullEmbed(embedData: APIEmbed) {
-  return new EmbedBuilder(embedData);
+  return new EmbedBuilder(embedData).setTimestamp().setFooter({ text: "I Love You💜" });
 }
 
 export function fastButtons(...buttonData: APIButtonComponent[]) {
@@ -600,4 +601,49 @@ export function getNextLevelXP(level: number): number {
 
 export function isHexColor(color: string): boolean {
   return /^#([0-9A-F]{3}){1,2}$/i.test(color);
+}
+
+export function userLevelIgnoreCheck(
+  user: GuildMember,
+  levelS: Levels,
+  currentChannelId: string,
+): boolean {
+  if (levelS.ignore_roles.length) {
+    for (const roleId of levelS.ignore_roles) {
+      if (user.roles.cache.has(roleId)) {
+        return true;
+      }
+    }
+  }
+  if (levelS.ignore_channels.length) {
+    if (levelS.ignore_channels.includes(currentChannelId)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function awardLevelRole(member: GuildMember, levelS: Levels, currentLevel: number) {
+    if (levelS.level_roles) {
+        let roleId = "";
+        let number = 0;
+        for (const roleLevel of Object.keys(levelS.level_roles)) {
+            if (currentLevel >= parseInt(roleLevel)) {
+                roleId = levelS.level_roles[Number(roleLevel)];
+                number = parseInt(roleLevel);
+            }
+        }
+        if (roleId && !member.roles.cache.has(roleId)) {
+            member.roles.add(roleId).catch(() => {});
+        }
+        if (number > 0) {
+            for (const roleLevel in Object.keys(levelS.level_roles)) {
+                const rId = levelS.level_roles[roleLevel];
+                const n = parseInt(roleLevel);
+                if (n < number && member.roles.cache.has(rId)) {
+                    member.roles.remove(rId).catch(() => {});
+                }
+            }
+        }
+    }
 }

@@ -6,7 +6,7 @@ import {
   GetSchemaValueType,
   UserCache,
 } from "../types/helpers";
-import { Client, Guild, User as DiscordUser } from "discord.js";
+import { Client, Guild, User as DiscordUser, GuildMember } from "discord.js";
 import { DBUser, DBHistory } from "../database";
 import { UserPathMap } from "../database/mappings/UserMapping";
 import { Cache } from "./";
@@ -19,6 +19,7 @@ import { Cache } from "./";
  */
 export class User {
   public user: DiscordUser;
+  public member: GuildMember;
   public guild: Guild;
   public client: Client;
   public history: DBHistory;
@@ -28,6 +29,7 @@ export class User {
   constructor(client: Client, user: DiscordUser, guild: Guild) {
     this.client = client;
     this.user = user;
+    this.member = guild.members.cache.get(user.id) as GuildMember;
     this.guild = guild;
     this.db = new DBUser(client, user, guild);
     this.history = this.db.history;

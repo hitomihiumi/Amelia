@@ -91,7 +91,7 @@ client.holder = {
     fastRow,
   },
   colors: {
-    default: "#4a3f66",
+    default: "#7d7772",
     error: "#ff6b7f",
     success: "#6bff97",
     info: "#7dd8ff",

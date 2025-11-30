@@ -86,6 +86,7 @@ export interface TranslationSchema {
             enabled: string;
             disabled: string;
           };
+          empty: string;
           category: string;
           channel: string;
           default_name: string;
@@ -94,13 +95,31 @@ export interface TranslationSchema {
       buttons: {
         enable: string;
         disable: string;
+        setup: string;
+        set_channel: string;
         change_name: string;
+      };
+      select_menus: {
+        channel: {
+          placeholder: string;
+        };
       };
       modals: {
         change_name: {
           title: string;
           label: string;
           placeholder: string;
+        };
+      };
+      messages: {
+        channel: {
+          set: string;
+          error: string;
+          success: string;
+        };
+        setup: {
+          error: string;
+          success: string;
         };
       };
     };
@@ -374,6 +393,121 @@ export interface TranslationSchema {
       };
       messages: {
         success: string;
+      };
+    };
+
+    levels: {
+      embeds: {
+        base: {
+          title: string;
+          description: string;
+          fields: {
+            status: {
+              name: string;
+              enabled: string;
+              disabled: string;
+            };
+            ignored_channels: {
+              name: string;
+              none: string;
+            };
+            ignored_roles: {
+              name: string;
+              none: string;
+            };
+            level_roles: {
+              name: string;
+              none: string;
+              level_format: string;
+            };
+          };
+        };
+        ignore: {
+          title: string;
+          description: string;
+          fields: {
+            ignored_channels: {
+              name: string;
+              none: string;
+            };
+            ignored_roles: {
+              name: string;
+              none: string;
+            };
+          };
+        };
+        level_roles: {
+          title: string;
+          description: string;
+          fields: {
+            current_roles: {
+              name: string;
+              none: string;
+              level_format: string;
+            };
+          };
+        };
+      };
+      buttons: {
+        enable: string;
+        disable: string;
+        back: string;
+        add_level_role: string;
+        remove_level_role: string;
+        cancel: string;
+      };
+      select_menus: {
+        main: {
+          placeholder: string;
+          options: {
+            ignore: {
+              label: string;
+              description: string;
+            };
+            level_roles: {
+              label: string;
+              description: string;
+            };
+          };
+        };
+        ignore_channel: {
+          placeholder: string;
+        };
+        ignore_role: {
+          placeholder: string;
+        };
+        level_role: {
+          placeholder: string;
+        };
+        select_role: {
+          placeholder: string;
+        };
+      };
+      modals: {
+        add_level_role: {
+          title: string;
+          level: {
+            label: string;
+            placeholder: string;
+          };
+        };
+        remove_level_role: {
+          title: string;
+          level: {
+            label: string;
+            placeholder: string;
+          };
+        };
+      };
+      messages: {
+        max_channels: string;
+        max_roles: string;
+        invalid_level: string;
+        role_not_found: string;
+        level_role_not_found: string;
+        select_role_for_level: string;
+        role_added: string;
+        cancelled: string;
       };
     };
   };

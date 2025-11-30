@@ -1,7 +1,12 @@
 import { Command, Levels } from "../../types/helpers";
 import { Client, ChannelType, Message, AttachmentBuilder } from "discord.js";
 import { Guild } from "../../helpers";
-import { onCoolDown, escapeRegex, getNextLevelXP } from "../../handlers/functions";
+import {
+    onCoolDown,
+    escapeRegex,
+    getNextLevelXP,
+    userLevelIgnoreCheck, awardLevelRole,
+} from "../../handlers/functions";
 import { t } from "../../i18n/helpers";
 import { LevelCard } from "../../helpers/canvas/LevelCard";
 
@@ -11,6 +16,7 @@ module.exports = async (client: Client, message: Message) => {
   if (message.channel.type === ChannelType.DM) return;
   if (message.partial) await message.fetch();
   if (!message.guild) return;
+  if (!message.member) return;
 
   const guild = new Guild(client, message.guild);
 
@@ -21,7 +27,7 @@ module.exports = async (client: Client, message: Message) => {
   if (!prefixRegex.test(message.content)) {
     const levelS = (await guild.get("utils.levels")) as Levels;
 
-    if (levelS.enabled) {
+    if (levelS.enabled && !userLevelIgnoreCheck(message.member, levelS, message.channelId)) {
       const member = guild.getUser(message.author.id);
 
       const rand = Math.floor(Math.random() * 4) + 2;
@@ -33,6 +39,8 @@ module.exports = async (client: Client, message: Message) => {
       if (getNextLevelXP(await member.get("level.level")) <= (await member.get("level.xp"))) {
         await member.add("level.level", 1);
         await member.set("level.xp", 0);
+
+        awardLevelRole(message.member, levelS, await member.get('level.level'));
 
         const card = new LevelCard({
           avatar: message.author.displayAvatarURL({ size: 512, extension: "png" }),

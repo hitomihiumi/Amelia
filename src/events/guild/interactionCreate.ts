@@ -1,4 +1,4 @@
-import { Client } from "discord.js";
+import { Client, MessageFlagsBitField } from "discord.js";
 import { Component, SlashCommand, Manifest } from "../../types/helpers";
 import {
   extendedPermissionCommand,
@@ -43,7 +43,7 @@ module.exports = async (client: Client, interaction: any) => {
         if (!extendedPermissionCommand(guild, interaction, lang, command.name)) return;
       } else if (onCoolDown(interaction, command, client)) {
         return interaction.reply({
-          ephemeral: true,
+          flags: MessageFlagsBitField.Flags.Ephemeral,
           embeds: [
             client.holder.embed.info(
               lang,
@@ -76,7 +76,7 @@ module.exports = async (client: Client, interaction: any) => {
               t(client, lang, "events.interaction_create.component_permission"),
             ),
           ],
-          ephemeral: true,
+          flags: MessageFlagsBitField.Flags.Ephemeral,
         });
         return false;
       } else if (component.permissions) {
@@ -97,7 +97,7 @@ module.exports = async (client: Client, interaction: any) => {
               t(client, lang, "events.interaction_create.component_not_active"),
             ),
           ],
-          ephemeral: true,
+          flags: MessageFlagsBitField.Flags.Ephemeral,
         });
 
       if (!(await componentPermission(component))) return;
@@ -122,7 +122,7 @@ module.exports = async (client: Client, interaction: any) => {
               t(client, lang, "events.interaction_create.component_not_active"),
             ),
           ],
-          ephemeral: true,
+          flags: MessageFlagsBitField.Flags.Ephemeral,
         });
 
       if (!(await componentPermission(component))) return;
@@ -147,7 +147,7 @@ module.exports = async (client: Client, interaction: any) => {
               t(client, lang, "events.interaction_create.component_not_active"),
             ),
           ],
-          ephemeral: true,
+          flags: MessageFlagsBitField.Flags.Ephemeral,
         });
 
       try {
@@ -170,7 +170,7 @@ module.exports = async (client: Client, interaction: any) => {
               t(client, lang, "events.interaction_create.component_not_active"),
             ),
           ],
-          ephemeral: true,
+          flags: MessageFlagsBitField.Flags.Ephemeral,
         });
 
       try {

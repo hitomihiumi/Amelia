@@ -42,16 +42,12 @@ module.exports = async (client: Client) => {
     setInterval(() => {
       const activities_list = [
         `I Love You!`,
-        `Bot By hitomihiumi`,
-        `I'm watching you`,
-        `Do it faster, makes us stronger`,
-        `Work it harder, make it better.`,
-        `Open Beta Test | v${require(resolve("./package.json")).version}`,
+        `EXPERIMENTAL | v${require(resolve("./package.json")).version}`,
       ];
       index = (index + 1) % activities_list.length;
       client.user?.setActivity(activities_list[index], {
         type: ActivityType.Streaming,
-        url: "https://www.twitch.tv/darkleroy_ua",
+        url: "https://www.twitch.tv/hitomihiumi",
       });
     }, 20000);
   } catch (e: any) {
