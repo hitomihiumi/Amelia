@@ -1,6 +1,11 @@
 import { SelectMenu } from "../../types/helpers";
 import { Guild } from "../../helpers";
-import { GuildMember, PermissionsBitField, RoleSelectMenuInteraction } from "discord.js";
+import {
+  GuildMember,
+  MessageFlags,
+  PermissionsBitField,
+  RoleSelectMenuInteraction,
+} from "discord.js";
 import { t } from "../../i18n/helpers";
 
 module.exports = {
@@ -31,7 +36,7 @@ module.exports = {
         "functions.join_to_create.msg.remove.role",
         roles.map((r) => `<@&${r}>`).join(", "),
       ),
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 } as SelectMenu;

@@ -1,7 +1,7 @@
 import { Client, VoiceState, ChannelType } from "discord.js";
 import { Guild, User } from "../../helpers";
 import { Levels } from "../../types/helpers";
-import {awardLevelRole, getNextLevelXP, userLevelIgnoreCheck} from "../../handlers/functions";
+import { awardLevelRole, getNextLevelXP, userLevelIgnoreCheck } from "../../handlers/functions";
 
 const VOICE_XP_BASE_MIN = 2;
 const VOICE_XP_BASE_MAX = 4;
@@ -174,7 +174,7 @@ async function awardVoiceXP(startTime: number, user: User, levelS: Levels) {
     const [newLevel, newXP] = calculateNewLevel(currentLevel, newXPTotal);
 
     if (newLevel > currentLevel) {
-        awardLevelRole(user.member, levelS, newLevel);
+      awardLevelRole(user.member, levelS, newLevel);
       await user.set("level.level", newLevel);
       await user.set("level.xp", newXP);
       await user.add("level.total_xp", addedXP);

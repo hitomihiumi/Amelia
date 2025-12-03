@@ -25,7 +25,7 @@ import {
   SelectMenuComponentOptionData,
   GuildMember,
 } from "discord.js";
-import { APIEmbed } from "discord-api-types/v10";
+import { APIEmbed, MessageFlags } from "discord-api-types/v10";
 import { t } from "../i18n/helpers";
 
 export function foldersCheck() {
@@ -86,8 +86,7 @@ export function onCoolDown(message: Message, command: Command | SlashCommand, cl
   if (timestamps.has(message.member.id)) {
     const expirationTime = timestamps.get(message.member.id) + cooldownAmount;
     if (now < expirationTime) {
-      const timeLeft = (expirationTime - now) / 1000;
-      return timeLeft;
+      return (expirationTime - now) / 1000;
     } else {
       timestamps.set(message.member.id, now);
       // @ts-ignore
@@ -189,7 +188,7 @@ export function permissionCommand(
               ),
             ),
           ],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return false;
       } else {
@@ -211,7 +210,7 @@ export function permissionCommand(
               ),
             ),
           ],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return false;
       } else {
@@ -249,7 +248,7 @@ export function permissionComponent(
               ),
             ),
           ],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return false;
       } else {
@@ -270,7 +269,7 @@ export function permissionComponent(
               ),
             ),
           ],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return false;
       } else {
@@ -319,7 +318,7 @@ export async function extendedPermissionCommand(
                   ),
                 ),
               ],
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
             return false;
           }
@@ -339,7 +338,7 @@ export async function extendedPermissionCommand(
                 ),
               ),
             ],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return false;
         }
@@ -359,7 +358,7 @@ export async function extendedPermissionCommand(
                 ),
               ),
             ],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return false;
         }
@@ -624,26 +623,26 @@ export function userLevelIgnoreCheck(
 }
 
 export function awardLevelRole(member: GuildMember, levelS: Levels, currentLevel: number) {
-    if (levelS.level_roles) {
-        let roleId = "";
-        let number = 0;
-        for (const roleLevel of Object.keys(levelS.level_roles)) {
-            if (currentLevel >= parseInt(roleLevel)) {
-                roleId = levelS.level_roles[Number(roleLevel)];
-                number = parseInt(roleLevel);
-            }
-        }
-        if (roleId && !member.roles.cache.has(roleId)) {
-            member.roles.add(roleId).catch(() => {});
-        }
-        if (number > 0) {
-            for (const roleLevel in Object.keys(levelS.level_roles)) {
-                const rId = levelS.level_roles[roleLevel];
-                const n = parseInt(roleLevel);
-                if (n < number && member.roles.cache.has(rId)) {
-                    member.roles.remove(rId).catch(() => {});
-                }
-            }
-        }
+  if (levelS.level_roles) {
+    let roleId = "";
+    let number = 0;
+    for (const roleLevel of Object.keys(levelS.level_roles)) {
+      if (currentLevel >= parseInt(roleLevel)) {
+        roleId = levelS.level_roles[Number(roleLevel)];
+        number = parseInt(roleLevel);
+      }
     }
+    if (roleId && !member.roles.cache.has(roleId)) {
+      member.roles.add(roleId).catch(() => {});
+    }
+    if (number > 0) {
+      for (const roleLevel in Object.keys(levelS.level_roles)) {
+        const rId = levelS.level_roles[roleLevel];
+        const n = parseInt(roleLevel);
+        if (n < number && member.roles.cache.has(rId)) {
+          member.roles.remove(rId).catch(() => {});
+        }
+      }
+    }
+  }
 }

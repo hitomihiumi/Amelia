@@ -2,10 +2,11 @@ import { Command, Levels } from "../../types/helpers";
 import { Client, ChannelType, Message, AttachmentBuilder } from "discord.js";
 import { Guild } from "../../helpers";
 import {
-    onCoolDown,
-    escapeRegex,
-    getNextLevelXP,
-    userLevelIgnoreCheck, awardLevelRole,
+  onCoolDown,
+  escapeRegex,
+  getNextLevelXP,
+  userLevelIgnoreCheck,
+  awardLevelRole,
 } from "../../handlers/functions";
 import { t } from "../../i18n/helpers";
 import { LevelCard } from "../../helpers/canvas/LevelCard";
@@ -40,7 +41,7 @@ module.exports = async (client: Client, message: Message) => {
         await member.add("level.level", 1);
         await member.set("level.xp", 0);
 
-        awardLevelRole(message.member, levelS, await member.get('level.level'));
+        awardLevelRole(message.member, levelS, await member.get("level.level"));
 
         const card = new LevelCard({
           avatar: message.author.displayAvatarURL({ size: 512, extension: "png" }),

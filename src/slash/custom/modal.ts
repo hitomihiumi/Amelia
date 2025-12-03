@@ -1,23 +1,20 @@
 import { ModalCustom, SlashCommand } from "../../types/helpers";
 import {
   Client,
-  PermissionsBitField,
   EmbedBuilder,
   ButtonBuilder,
   ActionRowBuilder,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  ModalActionRowComponentBuilder,
   MessageActionRowComponentBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
   ButtonStyle,
-  StringSelectMenuInteraction,
   AttachmentBuilder,
-  ButtonInteraction,
   ChatInputCommandInteraction,
   MessageFlagsBitField,
+  LabelBuilder,
 } from "discord.js";
 import { Guild, canvasUtil, customUtil, defaultPermissions } from "../../helpers";
 import { generateID } from "../../handlers/functions";
@@ -277,124 +274,131 @@ module.exports = {
           let modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.modal.modals.jump.title"))
             .setCustomId("NI_modal:modal:jump")
-            .setComponents(
-              new ActionRowBuilder<ModalActionRowComponentBuilder>().setComponents(
-                new TextInputBuilder()
-                  .setCustomId("NI_modal:text:jump")
-                  .setLabel(t(client, lang, "commands.modal.modals.jump.label"))
-                  .setPlaceholder(
-                    `1-${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
-                  )
-                  .setStyle(TextInputStyle.Short),
-              ),
+            .setLabelComponents(
+              new LabelBuilder()
+                .setLabel(t(client, lang, "commands.modal.modals.jump.label"))
+                .setTextInputComponent(
+                  new TextInputBuilder()
+                    .setCustomId("NI_modal:text:jump")
+                    .setPlaceholder(
+                      `1-${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
+                    )
+                    .setStyle(TextInputStyle.Short),
+                ),
             );
 
           await i.showModal(modal);
 
-          const submit = await i.awaitModalSubmit({
-            time: 5 * 60 * 1000,
-            filter: (si: any) =>
-              si.user.id === interaction.user.id && si.customId === "NI_modal:modal:jump",
-          });
+          await i
+            .awaitModalSubmit({
+              time: 5 * 60 * 1000,
+              filter: (si: any) =>
+                si.user.id === interaction.user.id && si.customId === "NI_modal:modal:jump",
+            })
+            .then(async (int) => {
+              let jump = parseInt(int.fields.getTextInputValue("NI_modal:text:jump")) - 1;
 
-          let jump = parseInt(submit.fields.getTextInputValue("NI_modal:text:jump")) - 1;
+              page =
+                jump < 0
+                  ? 0
+                  : jump > Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)
+                    ? Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)
+                    : jump;
 
-          page =
-            jump < 0
-              ? 0
-              : jump > Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)
-                ? Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)
-                : jump;
+              searchrow = await modalList(client, lang, guild, page);
+              // @ts-ignore
+              searchrow[1].components[1].setLabel(
+                `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
+              );
 
-          searchrow = await modalList(client, lang, guild, page);
-          // @ts-ignore
-          searchrow[1].components[1].setLabel(
-            `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25) || 1}`,
-          );
-
-          // @ts-ignore
-          submit.update({ components: searchrow });
+              await int.editReply({ components: searchrow });
+            });
         } else if (i.customId === "NI_modal:page:search") {
           let modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.modal.modals.search.title"))
             .setCustomId("NI_modal:modal:search")
-            .setComponents(
-              new ActionRowBuilder<ModalActionRowComponentBuilder>().setComponents(
-                new TextInputBuilder()
-                  .setCustomId("NI_modal:text:search")
-                  .setLabel(t(client, lang, "commands.modal.modals.search.label"))
-                  .setStyle(TextInputStyle.Short),
-              ),
+            .setLabelComponents(
+              new LabelBuilder()
+                .setLabel(t(client, lang, "commands.modal.modals.search.label"))
+                .setTextInputComponent(
+                  new TextInputBuilder()
+                    .setCustomId("NI_modal:text:search")
+                    .setStyle(TextInputStyle.Short),
+                ),
             );
 
           await i.showModal(modal);
 
-          const submit = await i.awaitModalSubmit({
-            time: 5 * 60 * 1000,
-            filter: (si: any) =>
-              si.user.id === interaction.user.id && si.customId === "NI_modal:modal:search",
-          });
+          await i
+            .awaitModalSubmit({
+              time: 5 * 60 * 1000,
+              filter: (si: any) =>
+                si.user.id === interaction.user.id && si.customId === "NI_modal:modal:search",
+            })
+            .then(async (int) => {
+              _search = int.fields.getTextInputValue("NI_modal:text:search");
 
-          _search = submit.fields.getTextInputValue("NI_modal:text:search");
+              page = 0;
 
-          page = 0;
+              searchrow = await modalList(client, lang, guild, page, _search);
 
-          searchrow = await modalList(client, lang, guild, page, _search);
+              _back = i.customId;
 
-          _back = i.customId;
+              // @ts-ignore
+              searchrow[1].components[1].setLabel(
+                `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)}`,
+              );
 
-          // @ts-ignore
-          searchrow[1].components[1].setLabel(
-            `${page + 1}/${Math.ceil((await mostUsedQueries.getModals(guild)).length / 25)}`,
-          );
+              delete embed.data.fields;
 
-          delete embed.data.fields;
+              embed.addFields({
+                name: t(client, lang, "commands.modal.embeds.search.field.name"),
+                value: t(client, lang, "commands.modal.embeds.search.field.value", _search),
+              });
 
-          embed.addFields({
-            name: t(client, lang, "commands.modal.embeds.search.field.name"),
-            value: t(client, lang, "commands.modal.embeds.search.field.value", _search),
-          });
-          // @ts-ignore
-          submit.update({ embeds: [embed], components: searchrow });
+              await int.editReply({ embeds: [embed], components: searchrow });
+            });
         } else if (i.customId === "NI_modal:edit:title") {
           let modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.modal.modals.edit.title"))
             .setCustomId("NI_modal:modal:title")
-            .setComponents(
-              new ActionRowBuilder<ModalActionRowComponentBuilder>().setComponents(
-                new TextInputBuilder()
-                  .setCustomId("NI_modal:text:title")
-                  .setLabel(t(client, lang, "commands.modal.modals.edit.label"))
-                  .setPlaceholder(_schema.title)
-                  .setStyle(TextInputStyle.Short)
-                  .setRequired(true)
-                  .setMinLength(1)
-                  .setMaxLength(45),
-              ),
+            .setLabelComponents(
+              new LabelBuilder()
+                .setLabel(t(client, lang, "commands.modal.modals.edit.label"))
+                .setTextInputComponent(
+                  new TextInputBuilder()
+                    .setCustomId("NI_modal:text:title")
+                    .setPlaceholder(_schema.title)
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true)
+                    .setMinLength(1)
+                    .setMaxLength(45),
+                ),
             );
 
           await i.showModal(modal);
 
-          const submit = await i.awaitModalSubmit({
-            time: 5 * 60 * 1000,
-            filter: (si: any) =>
-              si.user.id === interaction.user.id && si.customId === "NI_modal:modal:title",
-          });
+          await i
+            .awaitModalSubmit({
+              time: 5 * 60 * 1000,
+              filter: (si: any) =>
+                si.user.id === interaction.user.id && si.customId === "NI_modal:modal:title",
+            })
+            .then(async (int) => {
+              _schema.title = int.fields.getTextInputValue("NI_modal:text:title");
 
-          _schema.title = submit.fields.getTextInputValue("NI_modal:text:title");
+              delete embed.data.fields;
 
-          delete embed.data.fields;
+              embed.addFields({
+                name: t(client, lang, "commands.modal.embeds.edit.field.name"),
+                value: t(client, lang, "commands.modal.embeds.edit.field.value", _schema.title),
+              });
 
-          embed.addFields({
-            name: t(client, lang, "commands.modal.embeds.edit.field.name"),
-            value: t(client, lang, "commands.modal.embeds.edit.field.value", _schema.title),
-          });
-
-          // @ts-ignore
-          submit.update({
-            embeds: [embed],
-            components: [...editrow, fieldList(client, lang, _schema)],
-          });
+              await int.editReply({
+                embeds: [embed],
+                components: [...editrow, fieldList(client, lang, _schema)],
+              });
+            });
         } else if (i.customId === "NI_modal:edit:preview") {
           await i.showModal(new customUtil.CustomModal(_schema).getModal());
         } else if (i.customId === "NI_modal:edit:save") {
@@ -469,7 +473,6 @@ module.exports = {
                   value: t(client, lang, "commands.modal.embeds.search.field.value", _search),
                 });
 
-              // @ts-ignore
               await i.update({ embeds: [embed], components: searchrow });
               break;
             case "NI_modal:select":
@@ -504,76 +507,80 @@ module.exports = {
           let modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.modal.modals.edit_field.label.title"))
             .setCustomId("NI_modal:modal:label")
-            .setComponents(
-              new ActionRowBuilder<ModalActionRowComponentBuilder>().setComponents(
-                new TextInputBuilder()
-                  .setCustomId("NI_modal:text:label")
-                  .setLabel(t(client, lang, "commands.modal.modals.edit_field.label.label"))
-                  .setPlaceholder(_schema.fields[field].name)
-                  .setStyle(TextInputStyle.Short)
-                  .setRequired(true)
-                  .setMinLength(1)
-                  .setMaxLength(45),
-              ),
+            .setLabelComponents(
+              new LabelBuilder()
+                .setLabel(t(client, lang, "commands.modal.modals.edit_field.label.label"))
+                .setTextInputComponent(
+                  new TextInputBuilder()
+                    .setCustomId("NI_modal:text:label")
+                    .setPlaceholder(_schema.fields[field].name)
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true)
+                    .setMinLength(1)
+                    .setMaxLength(45),
+                ),
             );
 
           await i.showModal(modal);
 
-          const submit = await i.awaitModalSubmit({
-            time: 5 * 60 * 1000,
-            filter: (si: any) =>
-              si.user.id === interaction.user.id && si.customId === "NI_modal:modal:label",
-          });
+          await i
+            .awaitModalSubmit({
+              time: 5 * 60 * 1000,
+              filter: (si: any) =>
+                si.user.id === interaction.user.id && si.customId === "NI_modal:modal:label",
+            })
+            .then(async (int) => {
+              _schema.fields[field].name = int.fields.getTextInputValue("NI_modal:text:label");
 
-          _schema.fields[field].name = submit.fields.getTextInputValue("NI_modal:text:label");
+              let fieldEmbed = await modalFieldEmbed(embed, client, lang, _schema, field);
+              embed = fieldEmbed.embed;
 
-          let fieldEmbed = await modalFieldEmbed(embed, client, lang, _schema, field);
-          embed = fieldEmbed.embed;
-
-          // @ts-ignore
-          submit.update({
-            embeds: [embed],
-            components: [fieldList(client, lang, _schema), ...editfieldrow],
-            files: [fieldEmbed.attachment],
-          });
+              await int.editReply({
+                embeds: [embed],
+                components: [fieldList(client, lang, _schema), ...editfieldrow],
+                files: [fieldEmbed.attachment],
+              });
+            });
         } else if (i.customId === "NI_modal:edit:placeholder") {
           let modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.modal.modals.edit_field.placeholder.title"))
             .setCustomId("NI_modal:modal:placeholder")
-            .setComponents(
-              new ActionRowBuilder<ModalActionRowComponentBuilder>().setComponents(
-                new TextInputBuilder()
-                  .setCustomId("NI_modal:text:placeholder")
-                  .setLabel(t(client, lang, "commands.modal.modals.edit_field.placeholder.label"))
-                  .setPlaceholder(_schema.fields[field].placeholder || "")
-                  .setStyle(TextInputStyle.Short)
-                  .setRequired(true)
-                  .setMinLength(1)
-                  .setMaxLength(100),
-              ),
+            .setLabelComponents(
+              new LabelBuilder()
+                .setLabel(t(client, lang, "commands.modal.modals.edit_field.placeholder.label"))
+                .setTextInputComponent(
+                  new TextInputBuilder()
+                    .setCustomId("NI_modal:text:placeholder")
+                    .setPlaceholder(_schema.fields[field].placeholder || "")
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true)
+                    .setMinLength(1)
+                    .setMaxLength(100),
+                ),
             );
 
           await i.showModal(modal);
 
-          const submit = await i.awaitModalSubmit({
-            time: 5 * 60 * 1000,
-            filter: (si: any) =>
-              si.user.id === interaction.user.id && si.customId === "NI_modal:modal:placeholder",
-          });
+          await i
+            .awaitModalSubmit({
+              time: 5 * 60 * 1000,
+              filter: (si: any) =>
+                si.user.id === interaction.user.id && si.customId === "NI_modal:modal:placeholder",
+            })
+            .then(async (int) => {
+              _schema.fields[field].placeholder = int.fields.getTextInputValue(
+                "NI_modal:text:placeholder",
+              );
 
-          _schema.fields[field].placeholder = submit.fields.getTextInputValue(
-            "NI_modal:text:placeholder",
-          );
+              let fieldEmbed = await modalFieldEmbed(embed, client, lang, _schema, field);
+              embed = fieldEmbed.embed;
 
-          let fieldEmbed = await modalFieldEmbed(embed, client, lang, _schema, field);
-          embed = fieldEmbed.embed;
-
-          // @ts-ignore
-          submit.update({
-            embeds: [embed],
-            components: [fieldList(client, lang, _schema), ...editfieldrow],
-            files: [fieldEmbed.attachment],
-          });
+              await int.editReply({
+                embeds: [embed],
+                components: [fieldList(client, lang, _schema), ...editfieldrow],
+                files: [fieldEmbed.attachment],
+              });
+            });
         } else if (i.customId === "NI_modal:edit:style") {
           if (_schema.fields[field].type === "short") {
             _schema.fields[field].type = "long";
@@ -584,8 +591,7 @@ module.exports = {
           let fieldEmbed = await modalFieldEmbed(embed, client, lang, _schema, field);
           embed = fieldEmbed.embed;
 
-          // @ts-ignore
-          i.update({
+          await i.update({
             embeds: [embed],
             components: [fieldList(client, lang, _schema), ...editfieldrow],
             files: [fieldEmbed.attachment],
@@ -594,72 +600,74 @@ module.exports = {
           let modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.modal.modals.edit_field.sizes.title"))
             .setCustomId("NI_modal:modal:sizes")
-            .setComponents(
-              new ActionRowBuilder<ModalActionRowComponentBuilder>().setComponents(
-                new TextInputBuilder()
-                  .setCustomId("NI_modal:text:min")
-                  .setLabel(t(client, lang, "commands.modal.modals.edit_field.sizes.min"))
-                  .setPlaceholder(`${_schema.fields[field].min}` || "0")
-                  .setStyle(TextInputStyle.Short)
-                  .setRequired(true)
-                  .setMinLength(1)
-                  .setMaxLength(4),
-              ),
-              new ActionRowBuilder<ModalActionRowComponentBuilder>().setComponents(
-                new TextInputBuilder()
-                  .setCustomId("NI_modal:text:max")
-                  .setLabel(t(client, lang, "commands.modal.modals.edit_field.sizes.max"))
-                  .setPlaceholder(`${_schema.fields[field].max}` || "0")
-                  .setStyle(TextInputStyle.Short)
-                  .setRequired(true)
-                  .setMinLength(1)
-                  .setMaxLength(4),
-              ),
+            .setLabelComponents(
+              new LabelBuilder()
+                .setLabel(t(client, lang, "commands.modal.modals.edit_field.sizes.min"))
+                .setTextInputComponent(
+                  new TextInputBuilder()
+                    .setCustomId("NI_modal:text:min")
+                    .setPlaceholder(`${_schema.fields[field].min}` || "0")
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true)
+                    .setMinLength(1)
+                    .setMaxLength(4),
+                ),
+              new LabelBuilder()
+                .setLabel(t(client, lang, "commands.modal.modals.edit_field.sizes.max"))
+                .setTextInputComponent(
+                  new TextInputBuilder()
+                    .setCustomId("NI_modal:text:max")
+                    .setPlaceholder(`${_schema.fields[field].max}` || "0")
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true)
+                    .setMinLength(1)
+                    .setMaxLength(4),
+                ),
             );
 
           await i.showModal(modal);
 
-          const submit = await i.awaitModalSubmit({
-            time: 5 * 60 * 1000,
-            filter: (si: any) =>
-              si.user.id === interaction.user.id && si.customId === "NI_modal:modal:sizes",
-          });
+          await i
+            .awaitModalSubmit({
+              time: 5 * 60 * 1000,
+              filter: (si: any) =>
+                si.user.id === interaction.user.id && si.customId === "NI_modal:modal:sizes",
+            })
+            .then(async (int) => {
+              let min = parseInt(int.fields.getTextInputValue("NI_modal:text:min"));
+              let max = parseInt(int.fields.getTextInputValue("NI_modal:text:max"));
 
-          let min = parseInt(submit.fields.getTextInputValue("NI_modal:text:min"));
-          let max = parseInt(submit.fields.getTextInputValue("NI_modal:text:max"));
+              if (min < 0) min = 0;
+              if (max < 0) max = 0;
 
-          if (min < 0) min = 0;
-          if (max < 0) max = 0;
+              if (min > max) {
+                let temp = min;
+                min = max;
+                max = temp;
+              }
 
-          if (min > max) {
-            let temp = min;
-            min = max;
-            max = temp;
-          }
+              if (min < 4000) min = 3999;
+              if (max < 4000) max = 4000;
 
-          if (min < 4000) min = 3999;
-          if (max < 4000) max = 4000;
+              _schema.fields[field].min = min;
+              _schema.fields[field].max = max;
 
-          _schema.fields[field].min = min;
-          _schema.fields[field].max = max;
+              let fieldEmbed = await modalFieldEmbed(embed, client, lang, _schema, field);
+              embed = fieldEmbed.embed;
 
-          let fieldEmbed = await modalFieldEmbed(embed, client, lang, _schema, field);
-          embed = fieldEmbed.embed;
-
-          // @ts-ignore
-          submit.update({
-            embeds: [embed],
-            components: [fieldList(client, lang, _schema), ...editfieldrow],
-            files: [fieldEmbed.attachment],
-          });
+              await int.editReply({
+                embeds: [embed],
+                components: [fieldList(client, lang, _schema), ...editfieldrow],
+                files: [fieldEmbed.attachment],
+              });
+            });
         } else if (i.customId === "NI_modal:edit:required") {
           _schema.fields[field].required = !_schema.fields[field].required;
 
           let fieldEmbed = await modalFieldEmbed(embed, client, lang, _schema, field);
           embed = fieldEmbed.embed;
 
-          // @ts-ignore
-          i.update({
+          await i.update({
             embeds: [embed],
             components: [fieldList(client, lang, _schema), ...editfieldrow],
             files: [fieldEmbed.attachment],

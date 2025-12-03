@@ -40,7 +40,7 @@ module.exports = async (client: Client, interaction: any) => {
     if (command) {
       if (command.permissions) {
         if (!permissionCommand(client, interaction, lang, command)) return;
-        if (!extendedPermissionCommand(guild, interaction, lang, command.name)) return;
+        if (!(await extendedPermissionCommand(guild, interaction, lang, command.name))) return;
       } else if (onCoolDown(interaction, command, client)) {
         return interaction.reply({
           flags: MessageFlagsBitField.Flags.Ephemeral,

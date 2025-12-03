@@ -13,6 +13,7 @@ import {
   UserSelectMenuInteraction,
   PermissionFlagsBits,
   PermissionsBitField,
+  MessageFlags,
 } from "discord.js";
 import { t } from "../../i18n/helpers";
 
@@ -71,7 +72,7 @@ module.exports = {
 
             await submit.reply({
               content: t(client, lang, "functions.join_to_create.modals.rename.success", result),
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
           break;
@@ -117,13 +118,13 @@ module.exports = {
                   "functions.join_to_create.modals.bitrate.isnan",
                   interaction.guild.maximumBitrate / 1000,
                 ),
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
               });
 
             if (parseInt(result) < 8)
               return bitrate.reply({
                 content: t(client, lang, "functions.join_to_create.modals.bitrate.less"),
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
               });
 
             let channel = interaction.member.voice.channel;
@@ -136,7 +137,7 @@ module.exports = {
 
             await bitrate.reply({
               content: t(client, lang, "functions.join_to_create.modals.bitrate.success", result),
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
           break;
@@ -172,20 +173,20 @@ module.exports = {
             if (isNaN(parseInt(result)))
               return limit.reply({
                 content: t(client, lang, "functions.join_to_create.modals.limit.isnan"),
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
               });
 
             if (parseInt(result) < 0)
               return limit.reply({
                 content: t(client, lang, "functions.join_to_create.modals.limit.less"),
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
               });
 
             await channel.setUserLimit(parseInt(result));
 
             await limit.reply({
               content: t(client, lang, "functions.join_to_create.modals.limit.success", result),
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
           break;
@@ -202,14 +203,14 @@ module.exports = {
                   .setMaxValues(1),
               ),
             ],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           break;
       }
     } else {
       await interaction.reply({
         content: t(client, lang, "functions.join_to_create.errors.not_owner"),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

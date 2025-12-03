@@ -2,6 +2,7 @@ import { SelectMenu } from "../../types/helpers";
 import { Guild } from "../../helpers";
 import { GuildMember, PermissionsBitField, UserSelectMenuInteraction } from "discord.js";
 import { t } from "../../i18n/helpers";
+import { MessageFlags } from "discord-api-types/v10";
 
 module.exports = {
   customId: "I_jtc:owner_select",
@@ -23,7 +24,7 @@ module.exports = {
     if (member === interaction.user.id)
       return interaction.reply({
         content: t(client, lang, "functions.join_to_create.errors.yourself"),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
 
     let map = await guild.cache.get("temp.join_to_create.map");
@@ -45,7 +46,7 @@ module.exports = {
 
     await interaction.reply({
       content: t(client, lang, "functions.join_to_create.msg.owner", `<@${member}>`),
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 } as SelectMenu;

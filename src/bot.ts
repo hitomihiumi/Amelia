@@ -148,7 +148,7 @@ const shutdown = async (signal: string) => {
     await DatabaseService.disconnect();
 
     // Destroy Discord client
-    client.destroy();
+    await client.destroy();
 
     console.log("Shutdown complete".green);
     process.exit(0);

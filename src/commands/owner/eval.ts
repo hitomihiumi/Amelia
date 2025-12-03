@@ -43,7 +43,7 @@ module.exports = {
         evalEmbed.setDescription(`\`\`\`` + m + `\`\`\``);
         embeds.push(evalEmbed);
       }
-      message.reply({ embeds: embeds });
+      await message.reply({ embeds: embeds });
     } catch (e: any) {
       return message.reply({
         embeds: [

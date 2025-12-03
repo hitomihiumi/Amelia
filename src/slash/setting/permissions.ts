@@ -22,6 +22,7 @@ import {
   Guild as DJSGuild,
   MessageFlagsBitField,
   LabelBuilder,
+  MessageFlags,
 } from "discord.js";
 import { Guild } from "../../helpers";
 import { CommandPermission } from "../../types/helpers";
@@ -297,7 +298,7 @@ module.exports = {
             } else {
               return i.followUp({
                 content: t(client, lang, "commands.permissions.messages.role.error"),
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
               });
             }
           }

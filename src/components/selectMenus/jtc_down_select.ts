@@ -8,6 +8,7 @@ import {
   UserSelectMenuBuilder,
   RoleSelectMenuBuilder,
   PermissionsBitField,
+  MessageFlags,
 } from "discord.js";
 import { t } from "../../i18n/helpers";
 
@@ -41,7 +42,7 @@ module.exports = {
 
           await interaction.reply({
             content: t(client, lang, "functions.join_to_create.msg.open"),
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           break;
         case "close":
@@ -51,7 +52,7 @@ module.exports = {
 
           await interaction.reply({
             content: t(client, lang, "functions.join_to_create.msg.close"),
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           break;
         case "add":
@@ -73,7 +74,7 @@ module.exports = {
                   ),
               ),
             ],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           break;
         case "remove":
@@ -103,7 +104,7 @@ module.exports = {
                   ),
               ),
             ],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           break;
         case "show":
@@ -113,7 +114,7 @@ module.exports = {
 
           await interaction.reply({
             content: t(client, lang, "functions.join_to_create.msg.show"),
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           break;
         case "hide":
@@ -123,14 +124,14 @@ module.exports = {
 
           await interaction.reply({
             content: t(client, lang, "functions.join_to_create.msg.hide"),
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           break;
       }
     } else {
       await interaction.reply({
         content: t(client, lang, "functions.join_to_create.errors.not_owner"),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },
