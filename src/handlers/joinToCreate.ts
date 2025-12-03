@@ -27,10 +27,8 @@ module.exports = async (client: Client) => {
     if (newID === (await guild.get("utils.join_to_create.channel"))) {
       if (oldID) {
         if (!newState.member) return;
-        // @ts-ignore
-        if (map.has(oldID) && map.get(oldID).owner === newState.member.id) {
-          // @ts-ignore
-          await newState.member.voice.setChannel(map.get(oldID).channel);
+        if (map.has(oldID) && (map.get(oldID)?.owner || "") === newState.member.id) {
+          await newState.member.voice.setChannel(map.get(oldID)?.channel || null);
           return;
         } else await createChannel(client, guild, newState);
       } else await createChannel(client, guild, newState);
@@ -43,9 +41,12 @@ module.exports = async (client: Client) => {
 };
 
 async function deleteChannel(guild: Guild, channelId: string) {
-  let map = await guild.cache.get("temp.join_to_create.map");
-  // @ts-ignore
-  let channel = guild.guild.channels.cache.get(map.get(channelId).channel) as BaseGuildVoiceChannel;
+  let map =
+    (await guild.cache.get("temp.join_to_create.map")) ||
+    new Map<string, { channel: string; owner: string }>();
+  let channel = guild.guild.channels.cache.get(
+    map.get(channelId)?.channel || "",
+  ) as BaseGuildVoiceChannel;
   if (!channel) return;
   if (channel.members.size === 0) {
     await channel.delete();
@@ -58,7 +59,9 @@ async function createChannel(client: Client, guild: Guild, newState: VoiceState)
   if (!newState.member) return;
   if (!newState.channelId) return;
   const lang = await guild.get("settings.language");
-  let map = await guild.cache.get("temp.join_to_create.map");
+  let map =
+    (await guild.cache.get("temp.join_to_create.map")) ||
+    new Map<string, { channel: string; owner: string }>();
   let channel = await newState.guild.channels.create({
     name: client.holder.utils.reVar(
       await guild.get("utils.join_to_create.default_name"),

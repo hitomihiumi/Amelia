@@ -8,6 +8,8 @@ import type { PathMap } from "./mappings/GuildMapping";
 interface TempDocument {
   _id: string;
   data: Record<string, any>;
+  /** Tracks which paths contain Map structures */
+  mapPaths?: string[];
   updatedAt: Date;
 }
 
@@ -59,7 +61,7 @@ export class TempCache<TMapping extends PathMap> {
 
         for (const childKey of pathInfo.children) {
           const childPath = `${path}.${childKey}`;
-          const value = this.extractValue(doc.data, childPath);
+          const value = this.extractValue(doc.data, childPath, doc.mapPaths);
           if (value !== undefined) {
             result[childKey] = value;
           }
@@ -69,7 +71,14 @@ export class TempCache<TMapping extends PathMap> {
       }
 
       // Leaf path: extract single value
-      return this.extractValue(doc.data, path) as T;
+      const value = this.extractValue(doc.data, path, doc.mapPaths);
+
+      // Cache Maps in local cache
+      if (value instanceof Map) {
+        this.localCache.set(path, value);
+      }
+
+      return value as T;
     } catch (error) {
       console.error(`Error getting temp data for ${path}:`, error);
       return null;
@@ -80,26 +89,32 @@ export class TempCache<TMapping extends PathMap> {
    * Set value by path
    */
   public async set(path: string, value: any): Promise<void> {
+    const isMap = value instanceof Map;
+
     // Store Map structures in local cache
-    if (value instanceof Map) {
+    if (isMap) {
       this.localCache.set(path, value);
-      // Also persist to MongoDB as array of entries
+      // Convert to array of entries for MongoDB
       value = Array.from(value.entries());
     }
 
     try {
       const updateData = this.buildUpdateObject(path, value);
-
-      await this.collection.updateOne(
-        { _id: this.entityId },
-        {
-          $set: {
-            ...updateData,
-            updatedAt: new Date(),
-          },
+      const update: any = {
+        $set: {
+          ...updateData,
+          updatedAt: new Date(),
         },
-        { upsert: true },
-      );
+      };
+
+      // Track Map paths
+      if (isMap) {
+        update.$addToSet = { mapPaths: path };
+      } else {
+        update.$pull = { mapPaths: path };
+      }
+
+      await this.collection.updateOne({ _id: this.entityId }, update, { upsert: true });
     } catch (error) {
       console.error(`Error setting temp data for ${path}:`, error);
       throw error;
@@ -120,6 +135,7 @@ export class TempCache<TMapping extends PathMap> {
         { _id: this.entityId },
         {
           $unset: unsetData,
+          $pull: { mapPaths: path },
           $set: { updatedAt: new Date() },
         },
       );
@@ -170,8 +186,11 @@ export class TempCache<TMapping extends PathMap> {
 
   /**
    * Extract value from nested object by path
+   * @param data - The data object to extract from
+   * @param path - The path to extract
+   * @param mapPaths - Array of paths that should be converted to Maps
    */
-  private extractValue(data: any, path: string): any {
+  private extractValue(data: any, path: string, mapPaths?: string[]): any {
     const keys = path.split(".");
     let current = data;
 
@@ -182,14 +201,8 @@ export class TempCache<TMapping extends PathMap> {
       current = current[key];
     }
 
-    // Convert array back to Map if needed
-    if (
-      Array.isArray(current) &&
-      current.length > 0 &&
-      Array.isArray(current[0]) &&
-      current[0].length === 2
-    ) {
-      // This looks like Map entries
+    // Check if this path should be a Map (using metadata)
+    if (mapPaths && mapPaths.includes(path) && Array.isArray(current)) {
       return new Map(current);
     }
 
