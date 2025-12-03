@@ -11,48 +11,6 @@ export interface PathMap {
 }
 
 export const UserPathMap: PathMap = {
-  "level.xp": {
-    field: "xp",
-  },
-  "level.total_xp": {
-    field: "totalXp",
-  },
-  "level.level": {
-    field: "level",
-  },
-  "level.voice_time": {
-    field: "voiceTime",
-  },
-  "level.message_count": {
-    field: "messageCount",
-  },
-  "economy.balance.wallet": {
-    field: "wallet",
-  },
-  "economy.balance.bank": {
-    field: "bank",
-  },
-  "economy.inventory.custom.roles": {
-    field: "customRoles",
-  },
-  "economy.inventory.custom.items": {
-    field: "customItems",
-  },
-  "economy.timeout.work": {
-    field: "workTimeout",
-  },
-  "economy.timeout.timely": {
-    field: "timelyTimeout",
-  },
-  "economy.timeout.daily": {
-    field: "dailyTimeout",
-  },
-  "economy.timeout.weekly": {
-    field: "weeklyTimeout",
-  },
-  "economy.timeout.rob": {
-    field: "robTimeout",
-  },
   "custom.balance.number": {
     field: "balanceNumber",
   },
@@ -119,22 +77,6 @@ export const UserPathMap: PathMap = {
   "presets.jtc": {
     field: "jtcPresets",
   },
-  level: {
-    field: "",
-    children: ["xp", "total_xp", "level", "voice_time", "message_count"],
-  },
-  "economy.balance": {
-    field: "",
-    children: ["wallet", "bank"],
-  },
-  "economy.inventory.custom": {
-    field: "",
-    children: ["roles", "items"],
-  },
-  "economy.timeout": {
-    field: "",
-    children: ["work", "timely", "daily", "weekly", "rob"],
-  },
   custom: {
     field: "",
     children: ["badges"],
@@ -166,20 +108,6 @@ export const UserPathMap: PathMap = {
 };
 
 export const UserFieldMap: Record<string, string> = {
-  "level.xp": "xp",
-  "level.total_xp": "totalXp",
-  "level.level": "level",
-  "level.voice_time": "voiceTime",
-  "level.message_count": "messageCount",
-  "economy.balance.wallet": "wallet",
-  "economy.balance.bank": "bank",
-  "economy.inventory.custom.roles": "customRoles",
-  "economy.inventory.custom.items": "customItems",
-  "economy.timeout.work": "workTimeout",
-  "economy.timeout.timely": "timelyTimeout",
-  "economy.timeout.daily": "dailyTimeout",
-  "economy.timeout.weekly": "weeklyTimeout",
-  "economy.timeout.rob": "robTimeout",
   "custom.balance.number": "balanceNumber",
   "custom.balance.mode": "balanceMode",
   "custom.balance.solid": "balanceSolid",

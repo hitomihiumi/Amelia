@@ -118,27 +118,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Level system
-  xp           Int @default(0)
-  totalXp      Int @default(0)
-  level        Int @default(1)
-  voiceTime    Int @default(0)
-  messageCount Int @default(0)
-
-  // Economy
-  wallet Int @default(0)
-  bank   Int @default(0)
-
-  customRoles Json @default("[]")
-  customItems Json @default("[]")
-
-  // Timeouts
-  workTimeout   DateTime?
-  timelyTimeout DateTime?
-  dailyTimeout  DateTime?
-  weeklyTimeout DateTime?
-  robTimeout    DateTime?
-
   // Custom card settings
   balanceNumber String
   balanceMode   Boolean @default(false)

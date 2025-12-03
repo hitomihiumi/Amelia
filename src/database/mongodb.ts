@@ -62,13 +62,17 @@ class MongoDBService {
       // Create indexes for temp collections
       const guildTempCollection = MongoDBService.getCollection("guild_temp");
       const userTempCollection = MongoDBService.getCollection("user_temp");
+      const userDataCollection = MongoDBService.getCollection("user_data");
 
       await guildTempCollection.createIndex({ guildId: 1 });
       await userTempCollection.createIndex({ userId: 1, guildId: 1 });
+      await userDataCollection.createIndex({ userId: 1, guildId: 1 });
 
-      // Optional: Create TTL index for automatic cleanup (uncomment if needed)
-      // await guildTempCollection.createIndex({ updatedAt: 1 }, { expireAfterSeconds: 86400 }); // 24 hours
-      await userTempCollection.createIndex({ updatedAt: 1 }, { expireAfterSeconds: 86400 }); // 24 hours
+      // TTL index for automatic cleanup of temp data (24 hours)
+      await userTempCollection.createIndex({ updatedAt: 1 }, { expireAfterSeconds: 86400 });
+
+      // Note: user_data collection does NOT have TTL - it's persistent
+      console.log("✅ MongoDB indexes created successfully".green);
     } catch (error) {
       console.error("❌ Failed to connect to MongoDB:".red, error);
       throw error;
