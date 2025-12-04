@@ -114,18 +114,8 @@ export class DBGuild {
     const pathInfo = GuildPathMap[path];
 
     if (pathInfo && pathInfo.children) {
-      // This is a parent path, collect all child values
-      const result: any = {};
-
-      for (const childKey of pathInfo.children) {
-        const childPath = `${path}.${childKey}`;
-        const childInfo = GuildPathMap[childPath];
-
-        if (childInfo && childInfo.field) {
-          result[childKey] = data[childInfo.field as keyof typeof data];
-        }
-      }
-
+      // This is a parent path, recursively collect all child values
+      const result = this.collectChildValues(path, pathInfo.children, data);
       return result as PathValue<T>;
     }
 
@@ -173,28 +163,41 @@ export class DBGuild {
   public async set<T extends GuildPath>(path: T, value: PathValue<T>): Promise<void> {
     await this.ensureGuild();
 
+    // Check if this is a parent path (has children)
+    const pathInfo = GuildPathMap[path];
+
+    if (pathInfo && pathInfo.children && pathInfo.children.length > 0) {
+      // This is a parent path, set all child values recursively
+      await this.setChildValues(path, pathInfo.children, value);
+      this.data = null;
+      return;
+    }
+
     const keys = path.split(".");
-    let field: string;
+    let field: string | undefined;
     let remainingKeys: string[] = [];
 
-    try {
-      field = this.mapPathToField(path);
-    } catch (error) {
+    // First check if this path has a direct field mapping
+    const directField = GuildFieldMap[path];
+    if (directField) {
+      field = directField;
+    } else {
       // Path not found, might be dynamic path in JSON field
-      // Try to find the closest parent path
+      // Try to find the closest parent path with a field
       for (let i = keys.length - 1; i > 0; i--) {
         const parentPath = keys.slice(0, i).join(".");
-        try {
-          field = this.mapPathToField(parentPath);
+        const parentField = GuildFieldMap[parentPath];
+        if (parentField) {
+          field = parentField;
           remainingKeys = keys.slice(i);
           break;
-        } catch {
-          // Try next parent
         }
       }
 
-      if (!field!) {
-        throw error;
+      if (!field) {
+        throw new Error(
+          `Unknown guild path: ${path}. Please regenerate mappings with 'npm run generate:schema'`,
+        );
       }
     }
 
@@ -299,6 +302,78 @@ export class DBGuild {
       throw new Error(`Member with ID ${userId} not found in guild ${this.guild.name}.`);
     }
     return new DBUser(this.client, member.user, this.guild);
+  }
+
+  /**
+   * Recursively collect child values for a parent path
+   */
+  private collectChildValues(parentPath: string, children: string[], data: any): any {
+    const result: any = {};
+
+    for (const childKey of children) {
+      const childPath = `${parentPath}.${childKey}`;
+      const childInfo = GuildPathMap[childPath];
+
+      if (!childInfo) continue;
+
+      if (childInfo.children && childInfo.children.length > 0) {
+        // This child is also a parent, recurse
+        result[childKey] = this.collectChildValues(childPath, childInfo.children, data);
+      } else if (childInfo.field) {
+        // This is a leaf node with a direct field mapping
+        result[childKey] = data[childInfo.field as keyof typeof data];
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Recursively set child values for a parent path
+   */
+  private async setChildValues(parentPath: string, children: string[], value: any): Promise<void> {
+    if (!value || typeof value !== "object") return;
+
+    const updateData: Record<string, any> = {};
+
+    // Collect all field updates
+    this.collectFieldUpdates(parentPath, children, value, updateData);
+
+    // Perform single update with all fields
+    if (Object.keys(updateData).length > 0) {
+      await prisma.guild.update({
+        where: { id: this.guild.id },
+        data: updateData,
+      });
+    }
+  }
+
+  /**
+   * Recursively collect field updates from nested value object
+   */
+  private collectFieldUpdates(
+    parentPath: string,
+    children: string[],
+    value: any,
+    updateData: Record<string, any>,
+  ): void {
+    for (const childKey of children) {
+      const childPath = `${parentPath}.${childKey}`;
+      const childInfo = GuildPathMap[childPath];
+      const childValue = value[childKey];
+
+      if (childValue === undefined) continue;
+
+      if (!childInfo) continue;
+
+      if (childInfo.children && childInfo.children.length > 0) {
+        // This child is also a parent, recurse
+        this.collectFieldUpdates(childPath, childInfo.children, childValue, updateData);
+      } else if (childInfo.field) {
+        // This is a leaf node with a direct field mapping
+        updateData[childInfo.field] = childValue;
+      }
+    }
   }
 
   /**

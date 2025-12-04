@@ -79,19 +79,19 @@ export const UserPathMap: PathMap = {
   },
   custom: {
     field: "",
-    children: ["badges"],
+    children: ["badges", "balance", "level_up", "profile", "rank"],
   },
   "custom.balance": {
     field: "",
-    children: ["number", "mode", "solid", "url"],
+    children: ["mode", "number", "solid", "url"],
   },
   "custom.profile": {
     field: "",
-    children: ["bio", "mode", "solid", "url", "color", "icons", "icons_padding"],
+    children: ["bio", "color", "icons", "icons_padding", "mode", "solid", "url"],
   },
   "custom.rank": {
     field: "",
-    children: ["mode", "solid", "url", "color"],
+    children: ["color", "mode", "solid", "url"],
   },
   "custom.level_up": {
     field: "",

@@ -254,6 +254,45 @@ export const en: TranslationSchema = {
       error: "An error occurred while generating the profile card.",
       success: "{0}'s profile card:",
     },
+    work: {
+      messages: {
+        disabled: "❌ The work command is currently disabled on this server.",
+        cooldown: "⏰ You're too tired to work! Try again in **{0}**.",
+        success: "{0} and earned {1}!",
+      },
+    },
+    timely: {
+      messages: {
+        disabled: "❌ The timely reward is currently disabled on this server.",
+        cooldown: "⏰ You've already claimed your hourly reward! Try again in **{0}**.",
+        success: "💵 You claimed your hourly reward of {0}!",
+      },
+    },
+    daily: {
+      messages: {
+        disabled: "❌ The daily reward is currently disabled on this server.",
+        cooldown: "⏰ You've already claimed your daily reward! Try again in **{0}**.",
+        success: "💵 You claimed your daily reward of {0}!",
+      },
+    },
+    weekly: {
+      messages: {
+        disabled: "❌ The weekly reward is currently disabled on this server.",
+        cooldown: "⏰ You've already claimed your weekly reward! Try again in **{0}**.",
+        success: "💵 You claimed your weekly reward of {0}!",
+      },
+    },
+    rob: {
+      messages: {
+        disabled: "❌ The rob command is currently disabled on this server.",
+        cooldown: "⏰ You need to lay low for a while! Try again in **{0}**.",
+        self: "❌ You can't rob yourself!",
+        bot: "❌ You can't rob a bot!",
+        no_money: "❌ {0} doesn't have any money to steal!",
+        success: "🎭 You successfully robbed {0} and got away with {1}!",
+        fail: "🚔 You got caught trying to rob {0} and paid a fine of {1}!",
+      },
+    },
     appearance: {
       embeds: {
         base: {
@@ -501,6 +540,366 @@ export const en: TranslationSchema = {
         select_role_for_level: "Select a role for level **{0}**:",
         role_added: "Role {1} has been added for level **{0}**!",
         cancelled: "Action cancelled.",
+      },
+    },
+
+    economy: {
+      embeds: {
+        base: {
+          title: "Economy Settings",
+          description:
+            "Configure the economy system for your server. Manage currency, shop, and income settings.",
+          fields: {
+            currency: {
+              name: "Currency",
+              value: "{0}",
+              default: "💰 (Default)",
+            },
+            shop_roles: {
+              name: "Shop Roles",
+              none: "No roles configured",
+              format: "{0} - {1}",
+            },
+          },
+        },
+        currency: {
+          title: "Currency Settings",
+          description: "Configure the currency emoji used throughout the economy system.",
+          fields: {
+            current: {
+              name: "Current Currency",
+              default: "💰 (Default)",
+            },
+          },
+        },
+        shop: {
+          title: "Role Shop Settings",
+          description:
+            "Manage roles that users can purchase with their currency. Select a role to manage its discount.",
+          fields: {
+            roles: {
+              name: "Available Roles",
+              none: "No roles in shop",
+              format: "{0} - **{1}**",
+              discount_format: "{0} - ~~{1}~~ **{2}** ({3}% off)",
+              discount_active: "🏷️ Active",
+              discount_scheduled: "⏰ Scheduled: {0}",
+              discount_expired: "❌ Expired",
+            },
+          },
+        },
+        income: {
+          title: "Income Settings",
+          description: "Select an income source to configure.",
+        },
+        work: {
+          title: "Work Settings",
+          description: "Configure the work command that allows users to earn currency.",
+          fields: {
+            status: {
+              name: "Status",
+              enabled: "✅ Enabled",
+              disabled: "❌ Disabled",
+            },
+            cooldown: {
+              name: "Cooldown",
+              value: "{0} seconds",
+            },
+            reward: {
+              name: "Reward Range",
+              value: "{0} - {1}",
+            },
+          },
+        },
+        timely: {
+          title: "Timely Settings",
+          description: "Configure the timely command for regular rewards.",
+          fields: {
+            status: {
+              name: "Status",
+              enabled: "✅ Enabled",
+              disabled: "❌ Disabled",
+            },
+            amount: {
+              name: "Amount",
+              value: "{0}",
+            },
+          },
+        },
+        daily: {
+          title: "Daily Settings",
+          description: "Configure the daily reward command.",
+          fields: {
+            status: {
+              name: "Status",
+              enabled: "✅ Enabled",
+              disabled: "❌ Disabled",
+            },
+            amount: {
+              name: "Amount",
+              value: "{0}",
+            },
+          },
+        },
+        weekly: {
+          title: "Weekly Settings",
+          description: "Configure the weekly reward command.",
+          fields: {
+            status: {
+              name: "Status",
+              enabled: "✅ Enabled",
+              disabled: "❌ Disabled",
+            },
+            amount: {
+              name: "Amount",
+              value: "{0}",
+            },
+          },
+        },
+        level_up: {
+          title: "Level Up Reward",
+          description: "Configure currency rewards for leveling up.",
+          fields: {
+            status: {
+              name: "Status",
+              enabled: "✅ Enabled",
+              disabled: "❌ Disabled",
+            },
+            amount: {
+              name: "Amount",
+              value: "{0}",
+            },
+          },
+        },
+        bump: {
+          title: "Bump Reward",
+          description: "Configure currency rewards for bumping the server.",
+          fields: {
+            status: {
+              name: "Status",
+              enabled: "✅ Enabled",
+              disabled: "❌ Disabled",
+            },
+            amount: {
+              name: "Amount",
+              value: "{0}",
+            },
+          },
+        },
+        rob: {
+          title: "Rob Settings",
+          description: "Configure the rob command that allows users to steal from others.",
+          fields: {
+            status: {
+              name: "Status",
+              enabled: "✅ Enabled",
+              disabled: "❌ Disabled",
+            },
+            cooldown: {
+              name: "Cooldown",
+              value: "{0} seconds",
+            },
+            income: {
+              name: "Success Income",
+              value: "{0} - {1} ({2})",
+            },
+            punishment: {
+              name: "Punishment",
+              value: "{0} - {1} ({2})",
+            },
+            fail_chance: {
+              name: "Fail Chance",
+              value: "{0}%",
+            },
+          },
+        },
+      },
+      buttons: {
+        back: "← Back",
+        toggle: "Toggle",
+        enable: "Enable",
+        disable: "Disable",
+        edit: "Edit Settings",
+        add_role: "Add Role",
+        remove_role: "Remove Role",
+        set_emoji: "Set Emoji",
+        reset_emoji: "Reset Emoji",
+        set_discount: "Set Discount",
+        remove_discount: "Remove Discount",
+      },
+      select_menus: {
+        main: {
+          placeholder: "Select a settings category",
+          options: {
+            currency: {
+              label: "Currency",
+              description: "Configure currency emoji",
+            },
+            shop: {
+              label: "Role Shop",
+              description: "Manage purchasable roles",
+            },
+            income: {
+              label: "Income Sources",
+              description: "Configure income commands",
+            },
+          },
+        },
+        income: {
+          placeholder: "Select an income source",
+          options: {
+            work: {
+              label: "Work",
+              description: "Configure work command",
+            },
+            timely: {
+              label: "Timely",
+              description: "Configure timely rewards",
+            },
+            daily: {
+              label: "Daily",
+              description: "Configure daily rewards",
+            },
+            weekly: {
+              label: "Weekly",
+              description: "Configure weekly rewards",
+            },
+            level_up: {
+              label: "Level Up",
+              description: "Configure level up rewards",
+            },
+            bump: {
+              label: "Bump",
+              description: "Configure bump rewards",
+            },
+            rob: {
+              label: "Rob",
+              description: "Configure rob command",
+            },
+          },
+        },
+        shop_role: {
+          placeholder: "Select a role to add",
+        },
+        manage_role: {
+          placeholder: "Select a role to manage",
+        },
+      },
+      modals: {
+        currency: {
+          title: "Set Currency Emoji",
+          emoji: {
+            label: "Emoji",
+            placeholder: "Enter an emoji (e.g., 💰 or custom emoji ID)",
+          },
+        },
+        shop_role: {
+          title: "Add Shop Role",
+          price: {
+            label: "Price",
+            placeholder: "Enter the price for this role",
+          },
+        },
+        discount: {
+          title: "Set Discount",
+          amount: {
+            label: "Discount Percentage",
+            placeholder: "Enter discount percentage (e.g., 20)",
+          },
+          starts_at: {
+            label: "Start Date (optional)",
+            placeholder: "YYYY-MM-DD HH:MM or leave empty",
+          },
+          expires_at: {
+            label: "End Date (optional)",
+            placeholder: "YYYY-MM-DD HH:MM or leave empty",
+          },
+        },
+        remove_role: {
+          title: "Remove Shop Role",
+          role: {
+            label: "Role ID",
+            placeholder: "Enter the role ID to remove",
+          },
+        },
+        work: {
+          title: "Work Settings",
+          cooldown: {
+            label: "Cooldown (seconds)",
+            placeholder: "Enter cooldown in seconds",
+          },
+          min: {
+            label: "Minimum Reward",
+            placeholder: "Enter minimum reward amount",
+          },
+          max: {
+            label: "Maximum Reward",
+            placeholder: "Enter maximum reward amount",
+          },
+        },
+        simple_amount: {
+          title: "Set Amount",
+          amount: {
+            label: "Amount",
+            placeholder: "Enter the reward amount",
+          },
+        },
+        rob: {
+          title: "Rob Cooldown",
+          cooldown: {
+            label: "Cooldown (seconds)",
+            placeholder: "Enter cooldown in seconds",
+          },
+        },
+        rob_income: {
+          title: "Rob Income Settings",
+          min: {
+            label: "Minimum",
+            placeholder: "Enter minimum amount",
+          },
+          max: {
+            label: "Maximum",
+            placeholder: "Enter maximum amount",
+          },
+          type: {
+            label: "Type (percentage/fixed)",
+            placeholder: "Enter 'percentage' or 'fixed'",
+          },
+        },
+        rob_punishment: {
+          title: "Rob Punishment Settings",
+          min: {
+            label: "Minimum",
+            placeholder: "Enter minimum amount",
+          },
+          max: {
+            label: "Maximum",
+            placeholder: "Enter maximum amount",
+          },
+          type: {
+            label: "Type (percentage/fixed)",
+            placeholder: "Enter 'percentage' or 'fixed'",
+          },
+          fail_chance: {
+            label: "Fail Chance (%)",
+            placeholder: "Enter fail chance percentage (0-100)",
+          },
+        },
+      },
+      messages: {
+        invalid_emoji: "Invalid emoji. Please enter a valid emoji.",
+        invalid_number: "Invalid number. Please enter a valid number.",
+        invalid_type: "Invalid type. Please enter 'percentage' or 'fixed'.",
+        invalid_date: "Invalid date format. Please use YYYY-MM-DD HH:MM format.",
+        role_added: "Role {0} has been added to the shop for **{1}**!",
+        role_removed: "Role has been removed from the shop.",
+        role_not_found: "Role not found in the shop.",
+        currency_set: "Currency has been set to {0}",
+        currency_reset: "Currency has been reset to default.",
+        settings_updated: "Settings have been updated.",
+        discount_set: "Discount of **{0}%** has been set for {1}!",
+        discount_removed: "Discount has been removed from the role.",
+        select_role_to_manage: "Select a role to manage its discount.",
       },
     },
   },

@@ -262,6 +262,50 @@ export interface TranslationSchema {
       success: string;
     };
 
+    work: {
+      messages: {
+        disabled: string;
+        cooldown: string;
+        success: string;
+      };
+    };
+
+    timely: {
+      messages: {
+        disabled: string;
+        cooldown: string;
+        success: string;
+      };
+    };
+
+    daily: {
+      messages: {
+        disabled: string;
+        cooldown: string;
+        success: string;
+      };
+    };
+
+    weekly: {
+      messages: {
+        disabled: string;
+        cooldown: string;
+        success: string;
+      };
+    };
+
+    rob: {
+      messages: {
+        disabled: string;
+        cooldown: string;
+        self: string;
+        bot: string;
+        no_money: string;
+        success: string;
+        fail: string;
+      };
+    };
+
     appearance: {
       embeds: {
         base: {
@@ -508,6 +552,364 @@ export interface TranslationSchema {
         select_role_for_level: string;
         role_added: string;
         cancelled: string;
+      };
+    };
+
+    economy: {
+      embeds: {
+        base: {
+          title: string;
+          description: string;
+          fields: {
+            currency: {
+              name: string;
+              value: string;
+              default: string;
+            };
+            shop_roles: {
+              name: string;
+              none: string;
+              format: string;
+            };
+          };
+        };
+        currency: {
+          title: string;
+          description: string;
+          fields: {
+            current: {
+              name: string;
+              default: string;
+            };
+          };
+        };
+        shop: {
+          title: string;
+          description: string;
+          fields: {
+            roles: {
+              name: string;
+              none: string;
+              format: string;
+              discount_format: string;
+              discount_active: string;
+              discount_scheduled: string;
+              discount_expired: string;
+            };
+          };
+        };
+        income: {
+          title: string;
+          description: string;
+        };
+        work: {
+          title: string;
+          description: string;
+          fields: {
+            status: {
+              name: string;
+              enabled: string;
+              disabled: string;
+            };
+            cooldown: {
+              name: string;
+              value: string;
+            };
+            reward: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        timely: {
+          title: string;
+          description: string;
+          fields: {
+            status: {
+              name: string;
+              enabled: string;
+              disabled: string;
+            };
+            amount: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        daily: {
+          title: string;
+          description: string;
+          fields: {
+            status: {
+              name: string;
+              enabled: string;
+              disabled: string;
+            };
+            amount: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        weekly: {
+          title: string;
+          description: string;
+          fields: {
+            status: {
+              name: string;
+              enabled: string;
+              disabled: string;
+            };
+            amount: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        level_up: {
+          title: string;
+          description: string;
+          fields: {
+            status: {
+              name: string;
+              enabled: string;
+              disabled: string;
+            };
+            amount: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        bump: {
+          title: string;
+          description: string;
+          fields: {
+            status: {
+              name: string;
+              enabled: string;
+              disabled: string;
+            };
+            amount: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        rob: {
+          title: string;
+          description: string;
+          fields: {
+            status: {
+              name: string;
+              enabled: string;
+              disabled: string;
+            };
+            cooldown: {
+              name: string;
+              value: string;
+            };
+            income: {
+              name: string;
+              value: string;
+            };
+            punishment: {
+              name: string;
+              value: string;
+            };
+            fail_chance: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+      };
+      buttons: {
+        back: string;
+        toggle: string;
+        enable: string;
+        disable: string;
+        edit: string;
+        add_role: string;
+        remove_role: string;
+        set_emoji: string;
+        reset_emoji: string;
+        set_discount: string;
+        remove_discount: string;
+      };
+      select_menus: {
+        main: {
+          placeholder: string;
+          options: {
+            currency: {
+              label: string;
+              description: string;
+            };
+            shop: {
+              label: string;
+              description: string;
+            };
+            income: {
+              label: string;
+              description: string;
+            };
+          };
+        };
+        income: {
+          placeholder: string;
+          options: {
+            work: {
+              label: string;
+              description: string;
+            };
+            timely: {
+              label: string;
+              description: string;
+            };
+            daily: {
+              label: string;
+              description: string;
+            };
+            weekly: {
+              label: string;
+              description: string;
+            };
+            level_up: {
+              label: string;
+              description: string;
+            };
+            bump: {
+              label: string;
+              description: string;
+            };
+            rob: {
+              label: string;
+              description: string;
+            };
+          };
+        };
+        shop_role: {
+          placeholder: string;
+        };
+        manage_role: {
+          placeholder: string;
+        };
+      };
+      modals: {
+        currency: {
+          title: string;
+          emoji: {
+            label: string;
+            placeholder: string;
+          };
+        };
+        shop_role: {
+          title: string;
+          price: {
+            label: string;
+            placeholder: string;
+          };
+        };
+        discount: {
+          title: string;
+          amount: {
+            label: string;
+            placeholder: string;
+          };
+          starts_at: {
+            label: string;
+            placeholder: string;
+          };
+          expires_at: {
+            label: string;
+            placeholder: string;
+          };
+        };
+        remove_role: {
+          title: string;
+          role: {
+            label: string;
+            placeholder: string;
+          };
+        };
+        work: {
+          title: string;
+          cooldown: {
+            label: string;
+            placeholder: string;
+          };
+          min: {
+            label: string;
+            placeholder: string;
+          };
+          max: {
+            label: string;
+            placeholder: string;
+          };
+        };
+        simple_amount: {
+          title: string;
+          amount: {
+            label: string;
+            placeholder: string;
+          };
+        };
+        rob: {
+          title: string;
+          cooldown: {
+            label: string;
+            placeholder: string;
+          };
+        };
+        rob_income: {
+          title: string;
+          min: {
+            label: string;
+            placeholder: string;
+          };
+          max: {
+            label: string;
+            placeholder: string;
+          };
+          type: {
+            label: string;
+            placeholder: string;
+          };
+        };
+        rob_punishment: {
+          title: string;
+          min: {
+            label: string;
+            placeholder: string;
+          };
+          max: {
+            label: string;
+            placeholder: string;
+          };
+          type: {
+            label: string;
+            placeholder: string;
+          };
+          fail_chance: {
+            label: string;
+            placeholder: string;
+          };
+        };
+      };
+      messages: {
+        invalid_emoji: string;
+        invalid_number: string;
+        invalid_type: string;
+        invalid_date: string;
+        role_added: string;
+        role_removed: string;
+        role_not_found: string;
+        currency_set: string;
+        currency_reset: string;
+        settings_updated: string;
+        discount_set: string;
+        discount_removed: string;
+        select_role_to_manage: string;
       };
     };
   };

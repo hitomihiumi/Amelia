@@ -199,35 +199,39 @@ export const GuildPathMap: PathMap = {
   },
   settings: {
     field: "",
-    children: ["prefix", "language"],
+    children: ["language", "prefix"],
   },
   utils: {
     field: "",
-    children: ["giveaways"],
+    children: ["components", "counter", "find_team", "giveaways", "join_to_create", "levels"],
   },
   "utils.join_to_create": {
     field: "",
-    children: ["enabled", "channel", "category", "default_name"],
+    children: ["category", "channel", "default_name", "enabled"],
   },
   "utils.counter": {
     field: "",
-    children: ["enabled", "category", "channels"],
+    children: ["category", "channels", "enabled"],
   },
   "utils.levels": {
     field: "",
-    children: ["enabled", "ignore_channels", "ignore_roles", "level_roles"],
+    children: ["enabled", "ignore_channels", "ignore_roles", "level_roles", "message"],
   },
   "utils.levels.message": {
     field: "",
-    children: ["enabled", "channel", "content", "delete"],
+    children: ["channel", "content", "delete", "enabled"],
   },
   "utils.find_team": {
     field: "",
-    children: ["enabled", "channel", "send_channel", "games"],
+    children: ["channel", "enabled", "games", "send_channel"],
   },
   "utils.components": {
     field: "",
-    children: ["modals", "embed", "buttons"],
+    children: ["buttons", "embed", "modals"],
+  },
+  economy: {
+    field: "",
+    children: ["currency", "income", "shop"],
   },
   "economy.currency": {
     field: "",
@@ -237,45 +241,53 @@ export const GuildPathMap: PathMap = {
     field: "",
     children: ["roles"],
   },
+  "economy.income": {
+    field: "",
+    children: ["bump", "daily", "level_up", "rob", "timely", "weekly", "work"],
+  },
   "economy.income.work": {
     field: "",
-    children: ["enabled", "cooldown", "min", "max"],
+    children: ["cooldown", "enabled", "max", "min"],
   },
   "economy.income.timely": {
     field: "",
-    children: ["enabled", "amount"],
+    children: ["amount", "enabled"],
   },
   "economy.income.daily": {
     field: "",
-    children: ["enabled", "amount"],
+    children: ["amount", "enabled"],
   },
   "economy.income.weekly": {
     field: "",
-    children: ["enabled", "amount"],
+    children: ["amount", "enabled"],
   },
   "economy.income.level_up": {
     field: "",
-    children: ["enabled", "amount"],
+    children: ["amount", "enabled"],
   },
   "economy.income.bump": {
     field: "",
-    children: ["enabled", "amount"],
+    children: ["amount", "enabled"],
   },
   "economy.income.rob": {
     field: "",
-    children: ["enabled", "cooldown", "income", "punishment"],
+    children: ["cooldown", "enabled", "income", "punishment"],
   },
   moderation: {
     field: "",
-    children: ["moderation_roles"],
+    children: ["auto_moderation", "moderation_roles"],
+  },
+  "moderation.auto_moderation": {
+    field: "",
+    children: ["invite", "links"],
   },
   "moderation.auto_moderation.invite": {
     field: "",
     children: [
+      "delete_message",
       "enabled",
       "ignore_channels",
       "ignore_roles",
-      "delete_message",
       "moderation_immune",
       "punishment",
     ],
@@ -283,11 +295,11 @@ export const GuildPathMap: PathMap = {
   "moderation.auto_moderation.links": {
     field: "",
     children: [
+      "delete_message",
       "enabled",
       "ignore_channels",
-      "ignore_roles",
       "ignore_links",
-      "delete_message",
+      "ignore_roles",
       "moderation_immune",
       "punishment",
     ],
@@ -295,6 +307,10 @@ export const GuildPathMap: PathMap = {
   permissions: {
     field: "",
     children: ["commands"],
+  },
+  temp: {
+    field: "",
+    children: ["join_to_create"],
   },
   "temp.join_to_create": {
     field: "",

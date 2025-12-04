@@ -41,7 +41,7 @@ module.exports = {
     const displayOptions = (await member.get("custom.rank")) as RankCardDisplayOptions;
 
     const rank = new RankCard({
-      avatar: user.displayAvatarURL({ size: 512, extension: "png" }),
+      avatar: user.displayAvatarURL({ size: 512, extension: "jpg" }),
       username: user.username,
       globalName: user.globalName || user.username,
       data: {
@@ -63,7 +63,7 @@ module.exports = {
           }, 5000);
         });
     }
-    const attachment = new AttachmentBuilder(buffer, { name: "rank.png" });
+    const attachment = new AttachmentBuilder(buffer, { name: "rank.jpg" });
 
     return interaction.editReply({
       files: [attachment],

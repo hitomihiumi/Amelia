@@ -163,6 +163,11 @@ export interface CommandPermission {
 interface ShopRole {
   role: string;
   price: number;
+  discount: {
+    amount: number;
+    starts_at: number | null;
+    expires_at: number | null;
+  };
 }
 
 interface CounterChannel {

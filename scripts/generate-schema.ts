@@ -518,29 +518,51 @@ function buildPathHierarchy(schemaMap: Record<string, SchemaField>): PathMapping
     };
   }
 
-  // Build parent paths
-  const parentPaths = new Set<string>();
+  // Build all parent paths (including intermediate ones)
+  const parentPaths = new Map<string, Set<string>>();
+
   for (const fullPath of paths) {
     const parts = fullPath.split(".");
+
+    // Build all possible parent paths for this leaf
     for (let i = 1; i < parts.length; i++) {
       const parentPath = parts.slice(0, i).join(".");
-      parentPaths.add(parentPath);
+      const childKey = parts[i]; // The immediate child key
+
+      if (!parentPaths.has(parentPath)) {
+        parentPaths.set(parentPath, new Set());
+      }
+      parentPaths.get(parentPath)!.add(childKey);
+    }
+  }
+
+  // Also check if any existing path is a parent of another path (for direct children like utils.giveaways)
+  for (const fullPath of paths) {
+    const parts = fullPath.split(".");
+    if (parts.length >= 2) {
+      // Check if this path's parent should have it as a direct child
+      const parentPath = parts.slice(0, -1).join(".");
+      const childKey = parts[parts.length - 1];
+
+      // If the parent path is not a leaf path, add this as a child
+      if (!schemaMap[parentPath]) {
+        if (!parentPaths.has(parentPath)) {
+          parentPaths.set(parentPath, new Set());
+        }
+        parentPaths.get(parentPath)!.add(childKey);
+      }
     }
   }
 
   // Add parent paths with their children
-  for (const parentPath of Array.from(parentPaths)) {
-    const children = paths.filter(
-      (p) =>
-        p.startsWith(parentPath + ".") && p.split(".").length === parentPath.split(".").length + 1,
-    );
+  for (const [parentPath, childrenSet] of parentPaths) {
+    // Skip if this is a leaf path (already added above)
+    if (schemaMap[parentPath]) continue;
 
-    if (children.length > 0) {
-      hierarchy[parentPath] = {
-        field: "", // Parent paths don't map to a single field
-        children: children.map((c) => c.split(".").pop()!),
-      };
-    }
+    hierarchy[parentPath] = {
+      field: "", // Parent paths don't map to a single field
+      children: Array.from(childrenSet).sort(),
+    };
   }
 
   return hierarchy;
