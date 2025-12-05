@@ -973,6 +973,361 @@ export interface TranslationSchema {
         select_role_to_manage: string;
       };
     };
+
+    games: {
+      embeds: {
+        base: {
+          title: string;
+          description: string;
+          fields: {
+            status: {
+              name: string;
+              enabled: string;
+              disabled: string;
+            };
+            channel: {
+              name: string;
+              value: string;
+              none: string;
+            };
+            send_channel: {
+              name: string;
+              value: string;
+              none: string;
+            };
+            games_count: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        embed_settings: {
+          title: string;
+          description: string;
+          fields: {
+            title: {
+              name: string;
+              value: string;
+              none: string;
+            };
+            description: {
+              name: string;
+              value: string;
+              none: string;
+            };
+            color: {
+              name: string;
+              value: string;
+              none: string;
+            };
+            thumbnail: {
+              name: string;
+              value: string;
+              none: string;
+            };
+            image: {
+              name: string;
+              value: string;
+              none: string;
+            };
+            footer: {
+              name: string;
+              value: string;
+              none: string;
+            };
+          };
+        };
+        games_list: {
+          title: string;
+          description: string;
+          fields: {
+            games: {
+              name: string;
+              none: string;
+              format: string;
+            };
+          };
+        };
+        game_edit: {
+          title: string;
+          description: string;
+          fields: {
+            name: {
+              name: string;
+              value: string;
+            };
+            emoji: {
+              name: string;
+              value: string;
+              none: string;
+            };
+            role: {
+              name: string;
+              value: string;
+              none: string;
+            };
+            modal_title: {
+              name: string;
+              value: string;
+            };
+            fields_count: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        game_field_edit: {
+          title: string;
+          description: string;
+          fields: {
+            name: {
+              name: string;
+              value: string;
+            };
+            placeholder: {
+              name: string;
+              value: string;
+            };
+            style: {
+              name: string;
+              value: string;
+            };
+            sizes: {
+              name: string;
+              value: string;
+            };
+            required: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        preview: {
+          title: string;
+          description: string;
+          footer: string;
+        };
+        game_emoji: {
+          title: string;
+          description: string;
+          fields: {
+            current: {
+              name: string;
+            };
+            game: {
+              name: string;
+            };
+          };
+        };
+        find_team_result: {
+          default_title: string;
+          fields: {
+            organizer: string;
+            voice_channel: string;
+          };
+        };
+      };
+      buttons: {
+        enable: string;
+        disable: string;
+        back: string;
+        setup: string;
+        send_embed: string;
+        add_game: string;
+        delete_game: string;
+        edit_name: string;
+        edit_emoji: string;
+        edit_role: string;
+        edit_modal_title: string;
+        add_field: string;
+        delete_field: string;
+        edit_label: string;
+        edit_placeholder: string;
+        toggle_style: string;
+        edit_sizes: string;
+        toggle_required: string;
+        preview: string;
+        join: string;
+        reset_emoji: string;
+      };
+      select_menus: {
+        main: {
+          placeholder: string;
+          options: {
+            channels: {
+              label: string;
+              description: string;
+            };
+            embed: {
+              label: string;
+              description: string;
+            };
+            games: {
+              label: string;
+              description: string;
+            };
+          };
+        };
+        embed: {
+          placeholder: string;
+          options: {
+            title: {
+              label: string;
+              description: string;
+            };
+            description: {
+              label: string;
+              description: string;
+            };
+            color: {
+              label: string;
+              description: string;
+            };
+            thumbnail: {
+              label: string;
+              description: string;
+            };
+            image: {
+              label: string;
+              description: string;
+            };
+            footer: {
+              label: string;
+              description: string;
+            };
+            placeholder: {
+              label: string;
+              description: string;
+            };
+          };
+        };
+        games: {
+          placeholder: string;
+          options: {
+            add: {
+              label: string;
+              description: string;
+            };
+          };
+        };
+        game_fields: {
+          placeholder: string;
+          options: {
+            main: {
+              label: string;
+              description: string;
+            };
+            add: {
+              label: string;
+              description: string;
+            };
+          };
+        };
+        select_channel: {
+          placeholder: string;
+        };
+        send_channel: {
+          placeholder: string;
+        };
+        find_team: {
+          placeholder: string;
+          default_placeholder: string;
+        };
+        emoji: {
+          placeholder: string;
+        };
+      };
+      modals: {
+        embed_title: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        embed_description: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        embed_color: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        embed_thumbnail: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        embed_image: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        embed_footer: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        select_placeholder: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        game_name: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        game_emoji: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        game_modal_title: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        field_label: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        field_placeholder: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        field_sizes: {
+          title: string;
+          min_label: string;
+          max_label: string;
+          placeholder: string;
+        };
+      };
+      messages: {
+        channel_set: string;
+        send_channel_set: string;
+        embed_sent: string;
+        embed_updated: string;
+        game_added: string;
+        game_deleted: string;
+        game_updated: string;
+        field_added: string;
+        field_deleted: string;
+        field_updated: string;
+        invalid_color: string;
+        invalid_url: string;
+        invalid_emoji: string;
+        max_games: string;
+        max_fields: string;
+        setup_success: string;
+        setup_error: string;
+        not_in_voice: string;
+        emoji_set: string;
+        no_fields: string;
+      };
+    };
   };
 
   // Events

@@ -27,7 +27,16 @@ export interface GuildSchema {
       enabled: boolean;
       channel: string | null;
       send_channel: string | null;
-      games: Game[];
+      select_placeholder: string | null;
+      embed: {
+        title: string | null;
+        description: string | null;
+        color: string | null;
+        thumbnail: string | null;
+        image: string | null;
+        footer: string | null;
+      };
+      games: FindTeamGame[];
     };
     components: {
       modals: Array<ModalCustom>;
@@ -176,10 +185,11 @@ interface CounterChannel {
   name: string;
 }
 
-interface Game {
+interface FindTeamGame {
+  id: string;
   name: string;
   emoji: EmojiResolvable;
-  role: string;
+  role: string | null;
   modal: {
     title: string;
     fields: IModalField[];
@@ -214,3 +224,4 @@ export type GuildSchemaKey = SchemaKey<GuildSchema>;
 export type LiteralGuildSchemaKey = LiteralSchemaKey<GuildSchema>;
 export type GuildCacheKey = SchemaKey<GuildCache>;
 export type LiteralGuildCacheKey = LiteralSchemaKey<GuildCache>;
+export type { FindTeamGame };

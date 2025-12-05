@@ -961,6 +961,361 @@ export const ru: TranslationSchema = {
         select_role_to_manage: "Выберите роль для управления скидкой.",
       },
     },
+
+    games: {
+      embeds: {
+        base: {
+          title: "Настройки поиска напарников",
+          description: "Настройте систему поиска напарников для вашего сервера.",
+          fields: {
+            status: {
+              name: "Статус",
+              enabled: "✅ Включено",
+              disabled: "❌ Отключено",
+            },
+            channel: {
+              name: "Канал с меню",
+              value: "<#{0}>",
+              none: "Не установлен",
+            },
+            send_channel: {
+              name: "Канал для результатов",
+              value: "<#{0}>",
+              none: "Не установлен",
+            },
+            games_count: {
+              name: "Игры",
+              value: "{0} игр настроено",
+            },
+          },
+        },
+        embed_settings: {
+          title: "Настройки эмбеда",
+          description: "Настройте эмбед, который будет отправлен с меню выбора.",
+          fields: {
+            title: {
+              name: "Заголовок",
+              value: "{0}",
+              none: "Не установлен",
+            },
+            description: {
+              name: "Описание",
+              value: "{0}",
+              none: "Не установлено",
+            },
+            color: {
+              name: "Цвет",
+              value: "{0}",
+              none: "По умолчанию",
+            },
+            thumbnail: {
+              name: "Миниатюра",
+              value: "[Ссылка]({0})",
+              none: "Не установлена",
+            },
+            image: {
+              name: "Изображение",
+              value: "[Ссылка]({0})",
+              none: "Не установлено",
+            },
+            footer: {
+              name: "Подпись",
+              value: "{0}",
+              none: "Не установлена",
+            },
+          },
+        },
+        games_list: {
+          title: "Список игр",
+          description: "Управление играми для поиска напарников.",
+          fields: {
+            games: {
+              name: "Настроенные игры",
+              none: "Игры не настроены",
+              format: "{0} {1}",
+            },
+          },
+        },
+        game_edit: {
+          title: "Редактирование игры: {0}",
+          description: "Настройте параметры игры и поля модального окна.",
+          fields: {
+            name: {
+              name: "Название",
+              value: "{0}",
+            },
+            emoji: {
+              name: "Эмодзи",
+              value: "{0}",
+              none: "Не установлен",
+            },
+            role: {
+              name: "Роль для пинга",
+              value: "<@&{0}>",
+              none: "Не установлена",
+            },
+            modal_title: {
+              name: "Заголовок модального окна",
+              value: "{0}",
+            },
+            fields_count: {
+              name: "Поля",
+              value: "{0} полей настроено",
+            },
+          },
+        },
+        game_field_edit: {
+          title: "Редактирование поля",
+          description: "Настройте параметры поля модального окна.",
+          fields: {
+            name: {
+              name: "Название",
+              value: "{0}",
+            },
+            placeholder: {
+              name: "Плейсхолдер",
+              value: "{0}",
+            },
+            style: {
+              name: "Стиль",
+              value: "{0}",
+            },
+            sizes: {
+              name: "Ограничения символов",
+              value: "Мин: {0}, Макс: {1}",
+            },
+            required: {
+              name: "Обязательное",
+              value: "{0}",
+            },
+          },
+        },
+        preview: {
+          title: "Предпросмотр",
+          description: "Так будет выглядеть эмбед.",
+          footer: "Предпросмотр - Не отправлено",
+        },
+        game_emoji: {
+          title: "Выбор эмодзи",
+          description: "Выберите эмодзи с этого сервера для использования в игре.",
+          fields: {
+            current: {
+              name: "Текущий эмодзи",
+            },
+            game: {
+              name: "Игра",
+            },
+          },
+        },
+        find_team_result: {
+          default_title: "Ищу напарников!",
+          fields: {
+            organizer: "Организатор",
+            voice_channel: "Голосовой канал",
+          },
+        },
+      },
+      buttons: {
+        enable: "Включить",
+        disable: "Отключить",
+        back: "Назад",
+        setup: "Авто-настройка",
+        send_embed: "Отправить эмбед",
+        add_game: "Добавить игру",
+        delete_game: "Удалить игру",
+        edit_name: "Изменить название",
+        edit_emoji: "Изменить эмодзи",
+        edit_role: "Изменить роль",
+        edit_modal_title: "Изменить заголовок",
+        add_field: "Добавить поле",
+        delete_field: "Удалить поле",
+        edit_label: "Изменить название",
+        edit_placeholder: "Изменить плейсхолдер",
+        toggle_style: "Изменить стиль",
+        edit_sizes: "Изменить размеры",
+        toggle_required: "Обязательное",
+        preview: "Предпросмотр",
+        join: "Присоединиться",
+        reset_emoji: "Сбросить на стандартный",
+      },
+      select_menus: {
+        main: {
+          placeholder: "Выберите опцию",
+          options: {
+            channels: {
+              label: "Настройки каналов",
+              description: "Настроить каналы для меню и результатов",
+            },
+            embed: {
+              label: "Настройки эмбеда",
+              description: "Настроить внешний вид эмбеда",
+            },
+            games: {
+              label: "Игры",
+              description: "Управление доступными играми",
+            },
+          },
+        },
+        embed: {
+          placeholder: "Выберите свойство для редактирования",
+          options: {
+            title: {
+              label: "Заголовок",
+              description: "Изменить заголовок эмбеда",
+            },
+            description: {
+              label: "Описание",
+              description: "Изменить описание эмбеда",
+            },
+            color: {
+              label: "Цвет",
+              description: "Изменить цвет эмбеда",
+            },
+            thumbnail: {
+              label: "Миниатюра",
+              description: "Изменить URL миниатюры",
+            },
+            image: {
+              label: "Изображение",
+              description: "Изменить URL изображения",
+            },
+            footer: {
+              label: "Подпись",
+              description: "Изменить текст подписи",
+            },
+            placeholder: {
+              label: "Плейсхолдер меню",
+              description: "Изменить текст плейсхолдера меню",
+            },
+          },
+        },
+        games: {
+          placeholder: "Выберите игру для редактирования",
+          options: {
+            add: {
+              label: "Добавить игру",
+              description: "Добавить новую игру в список",
+            },
+          },
+        },
+        game_fields: {
+          placeholder: "Выберите поле для редактирования",
+          options: {
+            main: {
+              label: "Настройки игры",
+              description: "Вернуться к настройкам игры",
+            },
+            add: {
+              label: "Добавить поле",
+              description: "Добавить новое поле в модальное окно",
+            },
+          },
+        },
+        select_channel: {
+          placeholder: "Выберите канал для меню",
+        },
+        send_channel: {
+          placeholder: "Выберите канал для результатов",
+        },
+        find_team: {
+          placeholder: "Выберите игру",
+          default_placeholder: "Выберите игру для поиска напарников",
+        },
+        emoji: {
+          placeholder: "Выберите эмодзи",
+        },
+      },
+      modals: {
+        embed_title: {
+          title: "Изменить заголовок",
+          label: "Заголовок",
+          placeholder: "Введите заголовок эмбеда",
+        },
+        embed_description: {
+          title: "Изменить описание",
+          label: "Описание",
+          placeholder: "Введите описание эмбеда",
+        },
+        embed_color: {
+          title: "Изменить цвет",
+          label: "Цвет (Hex)",
+          placeholder: "#FF5733",
+        },
+        embed_thumbnail: {
+          title: "Изменить миниатюру",
+          label: "URL изображения",
+          placeholder: "https://example.com/image.png",
+        },
+        embed_image: {
+          title: "Изменить изображение",
+          label: "URL изображения",
+          placeholder: "https://example.com/image.png",
+        },
+        embed_footer: {
+          title: "Изменить подпись",
+          label: "Текст подписи",
+          placeholder: "Введите текст подписи",
+        },
+        select_placeholder: {
+          title: "Изменить плейсхолдер",
+          label: "Текст плейсхолдера",
+          placeholder: "Выберите игру...",
+        },
+        game_name: {
+          title: "Название игры",
+          label: "Название",
+          placeholder: "Введите название игры",
+        },
+        game_emoji: {
+          title: "Эмодзи игры",
+          label: "Эмодзи",
+          placeholder: "🎮 или кастомный эмодзи",
+        },
+        game_modal_title: {
+          title: "Заголовок модального окна",
+          label: "Заголовок",
+          placeholder: "Поиск напарников - {game}",
+        },
+        field_label: {
+          title: "Название поля",
+          label: "Название",
+          placeholder: "Введите название поля",
+        },
+        field_placeholder: {
+          title: "Плейсхолдер поля",
+          label: "Плейсхолдер",
+          placeholder: "Введите текст плейсхолдера",
+        },
+        field_sizes: {
+          title: "Ограничения символов",
+          min_label: "Минимум символов",
+          max_label: "Максимум символов",
+          placeholder: "Введите число",
+        },
+      },
+      messages: {
+        channel_set: "Канал для меню установлен на {0}",
+        send_channel_set: "Канал для результатов установлен на {0}",
+        embed_sent: "Эмбед отправлен в {0}",
+        embed_updated: "Настройка эмбеда обновлена.",
+        game_added: "Игра **{0}** добавлена!",
+        game_deleted: "Игра удалена.",
+        game_updated: "Игра обновлена.",
+        field_added: "Поле добавлено.",
+        field_deleted: "Поле удалено.",
+        field_updated: "Поле обновлено.",
+        invalid_color: "Неверный цвет. Используйте формат hex (например, #FF5733).",
+        invalid_url: "Неверный URL. Введите корректный URL изображения.",
+        invalid_emoji: "Неверный эмодзи. Введите корректный эмодзи.",
+        max_games: "Максимум 25 игр.",
+        max_fields: "Максимум 5 полей в модальном окне.",
+        setup_success: "Авто-настройка завершена! Каналы настроены.",
+        setup_error: "Не удалось создать каналы. Проверьте права бота.",
+        not_in_voice: "Вы должны быть в голосовом канале для использования этой функции.",
+        emoji_set: "Эмодзи установлен на {0}",
+        no_fields: "Нет настроенных полей для этой игры. Сначала добавьте поле.",
+      },
+    },
   },
 
   events: {

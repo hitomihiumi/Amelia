@@ -960,6 +960,361 @@ export const en: TranslationSchema = {
         select_role_to_manage: "Select a role to manage its discount.",
       },
     },
+
+    games: {
+      embeds: {
+        base: {
+          title: "Find Team Settings",
+          description: "Configure the teammate finder system for your server.",
+          fields: {
+            status: {
+              name: "Status",
+              enabled: "✅ Enabled",
+              disabled: "❌ Disabled",
+            },
+            channel: {
+              name: "Select Menu Channel",
+              value: "<#{0}>",
+              none: "Not set",
+            },
+            send_channel: {
+              name: "Results Channel",
+              value: "<#{0}>",
+              none: "Not set",
+            },
+            games_count: {
+              name: "Games",
+              value: "{0} games configured",
+            },
+          },
+        },
+        embed_settings: {
+          title: "Embed Settings",
+          description: "Configure the embed that will be sent with the select menu.",
+          fields: {
+            title: {
+              name: "Title",
+              value: "{0}",
+              none: "Not set",
+            },
+            description: {
+              name: "Description",
+              value: "{0}",
+              none: "Not set",
+            },
+            color: {
+              name: "Color",
+              value: "{0}",
+              none: "Default",
+            },
+            thumbnail: {
+              name: "Thumbnail",
+              value: "[Link]({0})",
+              none: "Not set",
+            },
+            image: {
+              name: "Image",
+              value: "[Link]({0})",
+              none: "Not set",
+            },
+            footer: {
+              name: "Footer",
+              value: "{0}",
+              none: "Not set",
+            },
+          },
+        },
+        games_list: {
+          title: "Games List",
+          description: "Manage games available for teammate search.",
+          fields: {
+            games: {
+              name: "Configured Games",
+              none: "No games configured",
+              format: "{0} {1}",
+            },
+          },
+        },
+        game_edit: {
+          title: "Edit Game: {0}",
+          description: "Configure game settings and modal fields.",
+          fields: {
+            name: {
+              name: "Name",
+              value: "{0}",
+            },
+            emoji: {
+              name: "Emoji",
+              value: "{0}",
+              none: "Not set",
+            },
+            role: {
+              name: "Ping Role",
+              value: "<@&{0}>",
+              none: "Not set",
+            },
+            modal_title: {
+              name: "Modal Title",
+              value: "{0}",
+            },
+            fields_count: {
+              name: "Fields",
+              value: "{0} fields configured",
+            },
+          },
+        },
+        game_field_edit: {
+          title: "Edit Field",
+          description: "Configure modal field settings.",
+          fields: {
+            name: {
+              name: "Label",
+              value: "{0}",
+            },
+            placeholder: {
+              name: "Placeholder",
+              value: "{0}",
+            },
+            style: {
+              name: "Style",
+              value: "{0}",
+            },
+            sizes: {
+              name: "Character Limits",
+              value: "Min: {0}, Max: {1}",
+            },
+            required: {
+              name: "Required",
+              value: "{0}",
+            },
+          },
+        },
+        preview: {
+          title: "Preview",
+          description: "This is how the embed will look.",
+          footer: "Preview - Not sent",
+        },
+        game_emoji: {
+          title: "Select Emoji",
+          description: "Select an emoji from this server to use for the game.",
+          fields: {
+            current: {
+              name: "Current Emoji",
+            },
+            game: {
+              name: "Game",
+            },
+          },
+        },
+        find_team_result: {
+          default_title: "Looking for Teammates!",
+          fields: {
+            organizer: "Organizer",
+            voice_channel: "Voice Channel",
+          },
+        },
+      },
+      buttons: {
+        enable: "Enable",
+        disable: "Disable",
+        back: "Back",
+        setup: "Auto-Setup",
+        send_embed: "Send Embed",
+        add_game: "Add Game",
+        delete_game: "Delete Game",
+        edit_name: "Edit Name",
+        edit_emoji: "Edit Emoji",
+        edit_role: "Edit Role",
+        edit_modal_title: "Edit Modal Title",
+        add_field: "Add Field",
+        delete_field: "Delete Field",
+        edit_label: "Edit Label",
+        edit_placeholder: "Edit Placeholder",
+        toggle_style: "Toggle Style",
+        edit_sizes: "Edit Sizes",
+        toggle_required: "Toggle Required",
+        preview: "Preview",
+        join: "Join Voice",
+        reset_emoji: "Reset to Default",
+      },
+      select_menus: {
+        main: {
+          placeholder: "Select an option",
+          options: {
+            channels: {
+              label: "Channel Settings",
+              description: "Configure select menu and results channels",
+            },
+            embed: {
+              label: "Embed Settings",
+              description: "Configure the embed appearance",
+            },
+            games: {
+              label: "Games",
+              description: "Manage available games",
+            },
+          },
+        },
+        embed: {
+          placeholder: "Select embed property to edit",
+          options: {
+            title: {
+              label: "Title",
+              description: "Edit embed title",
+            },
+            description: {
+              label: "Description",
+              description: "Edit embed description",
+            },
+            color: {
+              label: "Color",
+              description: "Edit embed color",
+            },
+            thumbnail: {
+              label: "Thumbnail",
+              description: "Edit thumbnail image URL",
+            },
+            image: {
+              label: "Image",
+              description: "Edit main image URL",
+            },
+            footer: {
+              label: "Footer",
+              description: "Edit embed footer text",
+            },
+            placeholder: {
+              label: "Select Menu Placeholder",
+              description: "Edit the select menu placeholder text",
+            },
+          },
+        },
+        games: {
+          placeholder: "Select a game to edit",
+          options: {
+            add: {
+              label: "Add New Game",
+              description: "Add a new game to the list",
+            },
+          },
+        },
+        game_fields: {
+          placeholder: "Select a field to edit",
+          options: {
+            main: {
+              label: "Game Settings",
+              description: "Return to game settings",
+            },
+            add: {
+              label: "Add Field",
+              description: "Add a new modal field",
+            },
+          },
+        },
+        select_channel: {
+          placeholder: "Select the channel for the select menu",
+        },
+        send_channel: {
+          placeholder: "Select the channel for results",
+        },
+        find_team: {
+          placeholder: "Select a game",
+          default_placeholder: "Choose a game to find teammates",
+        },
+        emoji: {
+          placeholder: "Select an emoji",
+        },
+      },
+      modals: {
+        embed_title: {
+          title: "Edit Embed Title",
+          label: "Title",
+          placeholder: "Enter embed title",
+        },
+        embed_description: {
+          title: "Edit Embed Description",
+          label: "Description",
+          placeholder: "Enter embed description",
+        },
+        embed_color: {
+          title: "Edit Embed Color",
+          label: "Color (Hex)",
+          placeholder: "#FF5733",
+        },
+        embed_thumbnail: {
+          title: "Edit Thumbnail",
+          label: "Image URL",
+          placeholder: "https://example.com/image.png",
+        },
+        embed_image: {
+          title: "Edit Image",
+          label: "Image URL",
+          placeholder: "https://example.com/image.png",
+        },
+        embed_footer: {
+          title: "Edit Footer",
+          label: "Footer Text",
+          placeholder: "Enter footer text",
+        },
+        select_placeholder: {
+          title: "Edit Placeholder",
+          label: "Placeholder Text",
+          placeholder: "Choose a game...",
+        },
+        game_name: {
+          title: "Game Name",
+          label: "Name",
+          placeholder: "Enter game name",
+        },
+        game_emoji: {
+          title: "Game Emoji",
+          label: "Emoji",
+          placeholder: "🎮 or custom emoji",
+        },
+        game_modal_title: {
+          title: "Modal Title",
+          label: "Title",
+          placeholder: "Looking for teammates - {game}",
+        },
+        field_label: {
+          title: "Field Label",
+          label: "Label",
+          placeholder: "Enter field label",
+        },
+        field_placeholder: {
+          title: "Field Placeholder",
+          label: "Placeholder",
+          placeholder: "Enter placeholder text",
+        },
+        field_sizes: {
+          title: "Field Character Limits",
+          min_label: "Minimum Characters",
+          max_label: "Maximum Characters",
+          placeholder: "Enter a number",
+        },
+      },
+      messages: {
+        channel_set: "Select menu channel has been set to {0}",
+        send_channel_set: "Results channel has been set to {0}",
+        embed_sent: "Embed has been sent to {0}",
+        embed_updated: "Embed setting has been updated.",
+        game_added: "Game **{0}** has been added!",
+        game_deleted: "Game has been deleted.",
+        game_updated: "Game has been updated.",
+        field_added: "Field has been added.",
+        field_deleted: "Field has been deleted.",
+        field_updated: "Field has been updated.",
+        invalid_color: "Invalid color. Please use hex format (e.g., #FF5733).",
+        invalid_url: "Invalid URL. Please enter a valid image URL.",
+        invalid_emoji: "Invalid emoji. Please enter a valid emoji.",
+        max_games: "You can only have up to 25 games.",
+        max_fields: "You can only have up to 5 fields per modal.",
+        setup_success: "Auto-setup complete! Channels have been configured.",
+        setup_error: "Failed to create channels. Please check bot permissions.",
+        not_in_voice: "You must be in a voice channel to use this feature.",
+        emoji_set: "Emoji has been set to {0}",
+        no_fields: "No fields configured for this game. Add a field first.",
+      },
+    },
   },
 
   events: {

@@ -1,10 +1,10 @@
 {
   "name": "amelia",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "/dist/index.js",
   "scripts": {
-    "test": "tsc && tsx ./scripts/post-build.ts && node --trace-warnings ./dist/bot.js",
-    "start": "node ./dist/bot.js",
+    "test": "tsc && tsx ./scripts/post-build.ts && node --trace-warnings ./dist/index.js",
+    "start": "node ./dist/index.js",
     "build": "tsc && tsx ./scripts/post-build.ts",
     "biome-write": "npx @biomejs/biome format --write .",
     "generate:schema": "tsx scripts/generate-schema.ts",

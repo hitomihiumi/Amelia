@@ -136,6 +136,16 @@ const guildSchemaMap: Record<string, SchemaField> = {
     prismaType: "String",
     optional: true,
   },
+  "utils.find_team.select_placeholder": {
+    prismaField: "findTeamSelectPlaceholder",
+    prismaType: "String",
+    optional: true,
+  },
+  "utils.find_team.embed": {
+    prismaField: "findTeamEmbed",
+    prismaType: "Json",
+    default: '"{\\\"title\\\":null,\\\"description\\\":null,\\\"color\\\":null,\\\"thumbnail\\\":null,\\\"image\\\":null,\\\"footer\\\":null}"',
+  },
   "utils.find_team.games": {
     prismaField: "findTeamGames",
     prismaType: "Json",

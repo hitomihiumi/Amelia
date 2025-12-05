@@ -71,6 +71,12 @@ export const GuildPathMap: PathMap = {
   "utils.find_team.send_channel": {
     field: "findTeamSendChannel",
   },
+  "utils.find_team.select_placeholder": {
+    field: "findTeamSelectPlaceholder",
+  },
+  "utils.find_team.embed": {
+    field: "findTeamEmbed",
+  },
   "utils.find_team.games": {
     field: "findTeamGames",
   },
@@ -223,7 +229,7 @@ export const GuildPathMap: PathMap = {
   },
   "utils.find_team": {
     field: "",
-    children: ["channel", "enabled", "games", "send_channel"],
+    children: ["channel", "embed", "enabled", "games", "select_placeholder", "send_channel"],
   },
   "utils.components": {
     field: "",
@@ -339,6 +345,8 @@ export const GuildFieldMap: Record<string, string> = {
   "utils.find_team.enabled": "findTeamEnabled",
   "utils.find_team.channel": "findTeamChannel",
   "utils.find_team.send_channel": "findTeamSendChannel",
+  "utils.find_team.select_placeholder": "findTeamSelectPlaceholder",
+  "utils.find_team.embed": "findTeamEmbed",
   "utils.find_team.games": "findTeamGames",
   "utils.components.modals": "customModals",
   "utils.components.embed": "customEmbeds",

@@ -42,10 +42,12 @@ model Guild {
   levelsMessageDelete  Int      @default(15)
 
   // Find Team settings
-  findTeamEnabled     Boolean @default(false)
-  findTeamChannel     String?
-  findTeamSendChannel String?
-  findTeamGames       Json    @default("[]")
+  findTeamEnabled           Boolean @default(false)
+  findTeamChannel           String?
+  findTeamSendChannel       String?
+  findTeamSelectPlaceholder String?
+  findTeamEmbed             Json    @default("{\"title\":null,\"description\":null,\"color\":null,\"thumbnail\":null,\"image\":null,\"footer\":null}")
+  findTeamGames             Json    @default("[]")
 
   // Custom Components
   customModals  Json @default("[]")
