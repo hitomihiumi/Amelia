@@ -83,7 +83,12 @@ module.exports = {
             new EmbedBuilder()
               .setColor(client.holder.colors.error)
               .setDescription(
-                t(client, lang, "commands.bank.messages.insufficient_wallet", `${currencyEmoji} ${wallet.toLocaleString()}`),
+                t(
+                  client,
+                  lang,
+                  "commands.bank.messages.insufficient_wallet",
+                  `${currencyEmoji} ${wallet.toLocaleString()}`,
+                ),
               ),
           ],
         });
@@ -157,7 +162,12 @@ module.exports = {
             new EmbedBuilder()
               .setColor(client.holder.colors.error)
               .setDescription(
-                t(client, lang, "commands.bank.messages.insufficient_bank", `${currencyEmoji} ${bank.toLocaleString()}`),
+                t(
+                  client,
+                  lang,
+                  "commands.bank.messages.insufficient_bank",
+                  `${currencyEmoji} ${bank.toLocaleString()}`,
+                ),
               ),
           ],
         });

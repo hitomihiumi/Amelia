@@ -11,7 +11,7 @@ const balanceCard = new BalanceCard({
     ...defaultDisplayOptions.balance,
     number: "1259 2130 5844 7783",
   },
-    emojiURL: `https://cdn.discordapp.com/emojis/1046509960172937296.png?size=44`,
+  emojiURL: `https://cdn.discordapp.com/emojis/1046509960172937296.png?size=44`,
 });
 
 balanceCard.render().then((buffer) => {

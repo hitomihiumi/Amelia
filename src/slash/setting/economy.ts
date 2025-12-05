@@ -24,7 +24,14 @@ import { GuildEmoji } from "discord.js";
 
 type EconomySettings = GuildSchema["economy"];
 type IncomeType = "work" | "timely" | "daily" | "weekly" | "level_up" | "bump" | "rob";
-type ViewType = "main" | "currency" | "currency_emoji" | "shop" | "shop_manage" | "income" | IncomeType;
+type ViewType =
+  | "main"
+  | "currency"
+  | "currency_emoji"
+  | "shop"
+  | "shop_manage"
+  | "income"
+  | IncomeType;
 
 module.exports = {
   name: "economy",
@@ -51,8 +58,26 @@ module.exports = {
     let emojiPage = 0;
     const EMOJIS_PER_PAGE = 25;
 
-    const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
-    let embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+    const components = buildComponents(
+      client,
+      lang,
+      settings,
+      currentView,
+      selectedRoleId,
+      interaction.guild,
+      emojiPage,
+      EMOJIS_PER_PAGE,
+    );
+    let embed = buildEmbed(
+      client,
+      lang,
+      settings,
+      currentView,
+      selectedRoleId,
+      interaction.guild,
+      emojiPage,
+      EMOJIS_PER_PAGE,
+    );
 
     const msg = await interaction.editReply({ embeds: [embed], components });
 
@@ -76,16 +101,52 @@ module.exports = {
             currentView = "main";
           }
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          const components = buildComponents(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
+          embed = buildEmbed(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:reset_emoji") {
           settings.currency.emoji = null;
           settings.currency.id = null;
           await mostUsedQueries.setCurrency(guild, null, null);
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          const components = buildComponents(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
+          embed = buildEmbed(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
 
           await i.update({ embeds: [embed], components });
           await i.followUp({
@@ -106,7 +167,16 @@ module.exports = {
             emojiPage,
             EMOJIS_PER_PAGE,
           );
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          embed = buildEmbed(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:emoji_prev") {
           emojiPage = Math.max(0, emojiPage - 1);
@@ -121,7 +191,16 @@ module.exports = {
             emojiPage,
             EMOJIS_PER_PAGE,
           );
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          embed = buildEmbed(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:emoji_next") {
           const totalEmojis = interaction.guild?.emojis.cache.size || 0;
@@ -138,7 +217,16 @@ module.exports = {
             emojiPage,
             EMOJIS_PER_PAGE,
           );
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          embed = buildEmbed(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:remove_role") {
           const modal = new ModalBuilder()
@@ -191,7 +279,16 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+              embed = buildEmbed(
+                client,
+                lang,
+                settings,
+                currentView,
+                selectedRoleId,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              );
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.role_removed"),
@@ -246,8 +343,26 @@ module.exports = {
               break;
           }
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          const components = buildComponents(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
+          embed = buildEmbed(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:edit_work") {
           const modal = new ModalBuilder()
@@ -328,7 +443,16 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+              embed = buildEmbed(
+                client,
+                lang,
+                settings,
+                currentView,
+                selectedRoleId,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              );
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.settings_updated"),
@@ -395,7 +519,16 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+              embed = buildEmbed(
+                client,
+                lang,
+                settings,
+                currentView,
+                selectedRoleId,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              );
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.settings_updated"),
@@ -455,7 +588,16 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+              embed = buildEmbed(
+                client,
+                lang,
+                settings,
+                currentView,
+                selectedRoleId,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              );
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.settings_updated"),
@@ -556,7 +698,16 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+              embed = buildEmbed(
+                client,
+                lang,
+                settings,
+                currentView,
+                selectedRoleId,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              );
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.settings_updated"),
@@ -686,7 +837,16 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+              embed = buildEmbed(
+                client,
+                lang,
+                settings,
+                currentView,
+                selectedRoleId,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              );
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.settings_updated"),
@@ -809,7 +969,16 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+              embed = buildEmbed(
+                client,
+                lang,
+                settings,
+                currentView,
+                selectedRoleId,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              );
 
               await int.reply({
                 content: t(
@@ -837,8 +1006,26 @@ module.exports = {
             await mostUsedQueries.setShopRoles(guild, settings.shop.roles);
           }
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          const components = buildComponents(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
+          embed = buildEmbed(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
 
           await i.update({ embeds: [embed], components });
           await i.followUp({
@@ -850,21 +1037,75 @@ module.exports = {
         if (i.customId === "NI_economy:main_menu") {
           currentView = i.values[0] as "currency" | "shop" | "income";
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          const components = buildComponents(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
+          embed = buildEmbed(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:income_menu") {
           currentView = i.values[0] as IncomeType;
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          const components = buildComponents(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
+          embed = buildEmbed(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:manage_role") {
           selectedRoleId = i.values[0];
           currentView = "shop_manage";
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          const components = buildComponents(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
+          embed = buildEmbed(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:emoji_select") {
           const selectedEmojiId = i.values[0];
@@ -882,8 +1123,26 @@ module.exports = {
 
             currentView = "currency";
 
-            const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
-            embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+            const components = buildComponents(
+              client,
+              lang,
+              settings,
+              currentView,
+              selectedRoleId,
+              interaction.guild,
+              emojiPage,
+              EMOJIS_PER_PAGE,
+            );
+            embed = buildEmbed(
+              client,
+              lang,
+              settings,
+              currentView,
+              selectedRoleId,
+              interaction.guild,
+              emojiPage,
+              EMOJIS_PER_PAGE,
+            );
 
             await i.update({ embeds: [embed], components });
             await i.followUp({
@@ -964,7 +1223,16 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+              embed = buildEmbed(
+                client,
+                lang,
+                settings,
+                currentView,
+                selectedRoleId,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              );
 
               await int.reply({
                 content: t(
@@ -1014,7 +1282,12 @@ function buildEmbed(
           name: t(client, lang, "commands.economy.embeds.base.fields.currency.name"),
           value:
             settings.currency.emoji ||
-            t(client, lang, "commands.economy.embeds.base.fields.currency.default", client.holder.emojis.discord.gems),
+            t(
+              client,
+              lang,
+              "commands.economy.embeds.base.fields.currency.default",
+              client.holder.emojis.discord.gems,
+            ),
           inline: true,
         },
         {
@@ -1028,7 +1301,8 @@ function buildEmbed(
                       lang,
                       "commands.economy.embeds.base.fields.shop_roles.format",
                       `<@&${r.role}>`,
-                      r.price.toString(), settings.currency.emoji || client.holder.emojis.discord.gems,
+                      r.price.toString(),
+                      settings.currency.emoji || client.holder.emojis.discord.gems,
                     ),
                   )
                   .join("\n")
@@ -1044,7 +1318,12 @@ function buildEmbed(
         name: t(client, lang, "commands.economy.embeds.currency.fields.current.name"),
         value:
           settings.currency.emoji ||
-          t(client, lang, "commands.economy.embeds.currency.fields.current.default", client.holder.emojis.discord.gems),
+          t(
+            client,
+            lang,
+            "commands.economy.embeds.currency.fields.current.default",
+            client.holder.emojis.discord.gems,
+          ),
         inline: true,
       });
   } else if (view === "currency_emoji") {
@@ -1056,7 +1335,13 @@ function buildEmbed(
       .setTitle(t(client, lang, "commands.economy.embeds.currency_emoji.title"))
       .setDescription(t(client, lang, "commands.economy.embeds.currency_emoji.description"))
       .setFooter({
-        text: t(client, lang, "commands.economy.embeds.currency_emoji.footer", (emojiPage + 1).toString(), totalPages.toString()),
+        text: t(
+          client,
+          lang,
+          "commands.economy.embeds.currency_emoji.footer",
+          (emojiPage + 1).toString(),
+          totalPages.toString(),
+        ),
       });
   } else if (view === "shop") {
     embed
@@ -1066,7 +1351,9 @@ function buildEmbed(
         name: t(client, lang, "commands.economy.embeds.shop.fields.roles.name"),
         value:
           settings.shop.roles.length > 0
-            ? settings.shop.roles.map((r) => formatRoleWithDiscount(client, lang, r, settings)).join("\n")
+            ? settings.shop.roles
+                .map((r) => formatRoleWithDiscount(client, lang, r, settings))
+                .join("\n")
             : t(client, lang, "commands.economy.embeds.shop.fields.roles.none"),
         inline: false,
       });
@@ -1323,7 +1610,7 @@ function buildEmbed(
             client,
             lang,
             "commands.economy.embeds.rob.fields.fail_chance.value",
-              settings.income.rob.punishment.fail_chance.toString(),
+            settings.income.rob.punishment.fail_chance.toString(),
           ),
           inline: true,
         },
@@ -1409,11 +1696,13 @@ function buildComponents(
             new StringSelectMenuOptionBuilder()
               .setLabel(emoji.name || "Unknown")
               .setValue(emoji.id)
-              .setEmoji({ id: emoji.id, animated: emoji.animated || false })
-          )
+              .setEmoji({ id: emoji.id, animated: emoji.animated || false }),
+          ),
         );
 
-      const selectRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(emojiSelectMenu);
+      const selectRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+        emojiSelectMenu,
+      );
       components.push(selectRow);
     }
 
@@ -1686,7 +1975,7 @@ function formatRoleWithDiscount(
       "commands.economy.embeds.shop.fields.roles.format",
       `<@&${role.role}>`,
       role.price.toString(),
-        settings.currency.emoji || client.holder.emojis.discord.gems,
+      settings.currency.emoji || client.holder.emojis.discord.gems,
     );
   }
 
@@ -1700,7 +1989,7 @@ function formatRoleWithDiscount(
       `<@&${role.role}>`,
       role.price.toString(),
       discountedPrice.toString(),
-        settings.currency.emoji || client.holder.emojis.discord.gems,
+      settings.currency.emoji || client.holder.emojis.discord.gems,
       role.discount.amount.toString(),
     );
   }
@@ -1742,5 +2031,3 @@ function getDiscountStatus(
 
   return t(client, lang, "commands.economy.embeds.shop.fields.roles.discount_active");
 }
-
-

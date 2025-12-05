@@ -1,11 +1,12 @@
 import {
-    Exporter,
-    Filters,
-    FontWeight, ImageLayer,
-    LazyCanvas,
-    MorphLayer,
-    Path2DLayer,
-    TextLayer,
+  Exporter,
+  Filters,
+  FontWeight,
+  ImageLayer,
+  LazyCanvas,
+  MorphLayer,
+  Path2DLayer,
+  TextLayer,
 } from "@nmmty/lazycanvas";
 import { BalanceCardDisplayOptions } from "../../types/helpers";
 import { fontMap } from "../assetsMap";
@@ -24,26 +25,26 @@ export class BalanceCard {
     canvas.manager.fonts.add(fontMap.wdxllubrifont);
 
     const text = [
-        new TextLayer()
-            .setPosition(30, 102)
-            .setText(`Wallet: ${this.data.data.wallet}`)
-            .setFont("WDXL Lubrifont", 20, FontWeight.Regular)
-            .setColor("#ffffff")
-            .setShadow("#000000", 4, 0, 0)
-            .setBaseline("top"),
-        new TextLayer()
-            .setPosition(30, 70)
-            .setText(`Bank: ${this.data.data.bank}`)
-            .setFont("WDXL Lubrifont", 20, FontWeight.Regular)
-            .setColor("#ffffff")
-            .setShadow("#000000", 4, 0, 0)
-            .setBaseline("top"),
-    ]
+      new TextLayer()
+        .setPosition(30, 102)
+        .setText(`Wallet: ${this.data.data.wallet}`)
+        .setFont("WDXL Lubrifont", 20, FontWeight.Regular)
+        .setColor("#ffffff")
+        .setShadow("#000000", 4, 0, 0)
+        .setBaseline("top"),
+      new TextLayer()
+        .setPosition(30, 70)
+        .setText(`Bank: ${this.data.data.bank}`)
+        .setFont("WDXL Lubrifont", 20, FontWeight.Regular)
+        .setColor("#ffffff")
+        .setShadow("#000000", 4, 0, 0)
+        .setBaseline("top"),
+    ];
 
-      const measure = [
-        text[0].measureText(canvas.ctx, canvas.canvas),
-        text[1].measureText(canvas.ctx, canvas.canvas),
-      ]
+    const measure = [
+      text[0].measureText(canvas.ctx, canvas.canvas),
+      text[1].measureText(canvas.ctx, canvas.canvas),
+    ];
 
     canvas.manager.layers.add(
       new MorphLayer()
@@ -135,17 +136,17 @@ export class BalanceCard {
         .setColor("#ffffff")
         .setShadow("#000000", 4, 0, 0)
         .setBaseline("top"),
-        ...text,
-        new ImageLayer()
-            .setPosition(50 + measure[0].width, 110)
-            .setSize(20, 20)
-            .setSrc(this.data.emojiURL)
-            .setShadow("#000000", 1, 0, 0),
-        new ImageLayer()
-            .setPosition(50 + measure[1].width, 78)
-            .setSize(20, 20)
-            .setSrc(this.data.emojiURL)
-            .setShadow("#000000", 1, 0, 0),
+      ...text,
+      new ImageLayer()
+        .setPosition(50 + measure[0].width, 110)
+        .setSize(20, 20)
+        .setSrc(this.data.emojiURL)
+        .setShadow("#000000", 1, 0, 0),
+      new ImageLayer()
+        .setPosition(50 + measure[1].width, 78)
+        .setSize(20, 20)
+        .setSrc(this.data.emojiURL)
+        .setShadow("#000000", 1, 0, 0),
     );
 
     return (await new Exporter(canvas).export("buffer")) as Buffer;
@@ -159,5 +160,5 @@ type BalanceCardOptions = {
     bank: number;
   };
   displayOptions: BalanceCardDisplayOptions;
-  emojiURL: string
+  emojiURL: string;
 };

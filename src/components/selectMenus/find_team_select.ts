@@ -66,7 +66,7 @@ module.exports = {
         if (field.max && field.max > 0) textInput.setMaxLength(field.max);
 
         modal.addComponents(
-          new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(textInput)
+          new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(textInput),
         );
       });
     } else {
@@ -80,8 +80,8 @@ module.exports = {
             .setPlaceholder("Describe what you're looking for...")
             .setRequired(true)
             .setMinLength(10)
-            .setMaxLength(1000)
-        )
+            .setMaxLength(1000),
+        ),
       );
     }
 
@@ -90,7 +90,8 @@ module.exports = {
     try {
       const modalSubmit = await interaction.awaitModalSubmit({
         time: 10 * 60 * 1000, // 10 minutes
-        filter: (i) => i.user.id === interaction.user.id && i.customId === `NI_find_team:modal:${gameId}`,
+        filter: (i) =>
+          i.user.id === interaction.user.id && i.customId === `NI_find_team:modal:${gameId}`,
       });
 
       if (!settings.send_channel) {
@@ -100,7 +101,9 @@ module.exports = {
         });
       }
 
-      const sendChannel = interaction.guild.channels.cache.get(settings.send_channel) as TextChannel;
+      const sendChannel = interaction.guild.channels.cache.get(
+        settings.send_channel,
+      ) as TextChannel;
       if (!sendChannel) {
         return await modalSubmit.reply({
           content: "Results channel not found.",
@@ -180,8 +183,8 @@ module.exports = {
               .setLabel(t(client, lang, "commands.games.buttons.join"))
               .setStyle(ButtonStyle.Link)
               .setURL(inviteUrl)
-              .setEmoji("🔊")
-          )
+              .setEmoji("🔊"),
+          ),
         );
       }
 
@@ -206,4 +209,3 @@ module.exports = {
     }
   },
 } as SelectMenu;
-

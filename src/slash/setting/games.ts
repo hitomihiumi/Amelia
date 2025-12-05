@@ -70,7 +70,17 @@ module.exports = {
     let emojiPage = 0;
     const EMOJIS_PER_PAGE = 25;
 
-    const components = buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+    const components = buildComponents(
+      client,
+      lang,
+      settings,
+      currentView,
+      currentGameIndex,
+      currentFieldIndex,
+      interaction.guild,
+      emojiPage,
+      EMOJIS_PER_PAGE,
+    );
     let embed = buildEmbed(client, lang, settings, currentView);
     let attachment: AttachmentBuilder | null = null;
 
@@ -87,7 +97,20 @@ module.exports = {
             settings.enabled = !settings.enabled;
             await mostUsedQueries.setEnabled(guild, settings.enabled);
             embed = buildEmbed(client, lang, settings, currentView);
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE) });
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+            });
             break;
 
           case "NI_games:back":
@@ -101,8 +124,29 @@ module.exports = {
             } else {
               currentView = "main";
             }
-            embed = buildEmbed(client, lang, settings, currentView, currentGameIndex, currentFieldIndex);
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+            embed = buildEmbed(
+              client,
+              lang,
+              settings,
+              currentView,
+              currentGameIndex,
+              currentFieldIndex,
+            );
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+              files: [],
+            });
             break;
 
           case "NI_games:setup":
@@ -139,7 +183,20 @@ module.exports = {
               });
 
               embed = buildEmbed(client, lang, settings, currentView);
-              await interaction.editReply({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE) });
+              await interaction.editReply({
+                embeds: [embed],
+                components: buildComponents(
+                  client,
+                  lang,
+                  settings,
+                  currentView,
+                  currentGameIndex,
+                  currentFieldIndex,
+                  interaction.guild,
+                  emojiPage,
+                  EMOJIS_PER_PAGE,
+                ),
+              });
             } catch (error) {
               await i.followUp({
                 content: t(client, lang, "commands.games.messages.setup_error"),
@@ -152,11 +209,14 @@ module.exports = {
             await i.deferUpdate();
             if (settings.channel) {
               try {
-                const channel = interaction.guild!.channels.cache.get(settings.channel) as TextChannel;
+                const channel = interaction.guild!.channels.cache.get(
+                  settings.channel,
+                ) as TextChannel;
                 if (channel) {
                   const sendEmbed = new EmbedBuilder();
                   if (settings.embed.title) sendEmbed.setTitle(settings.embed.title);
-                  if (settings.embed.description) sendEmbed.setDescription(settings.embed.description);
+                  if (settings.embed.description)
+                    sendEmbed.setDescription(settings.embed.description);
                   if (settings.embed.color) sendEmbed.setColor(settings.embed.color as any);
                   if (settings.embed.thumbnail) sendEmbed.setThumbnail(settings.embed.thumbnail);
                   if (settings.embed.image) sendEmbed.setImage(settings.embed.image);
@@ -164,7 +224,14 @@ module.exports = {
 
                   const selectMenu = new StringSelectMenuBuilder()
                     .setCustomId("I_find_team:select")
-                    .setPlaceholder(settings.select_placeholder || t(client, lang, "commands.games.select_menus.find_team.default_placeholder"))
+                    .setPlaceholder(
+                      settings.select_placeholder ||
+                        t(
+                          client,
+                          lang,
+                          "commands.games.select_menus.find_team.default_placeholder",
+                        ),
+                    )
                     .setMinValues(1)
                     .setMaxValues(1);
 
@@ -180,16 +247,24 @@ module.exports = {
                     selectMenu.addOptions(
                       new StringSelectMenuOptionBuilder()
                         .setValue("none")
-                        .setLabel("No games configured")
+                        .setLabel("No games configured"),
                     );
                     selectMenu.setDisabled(true);
                   }
 
-                  const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(selectMenu);
+                  const row =
+                    new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+                      selectMenu,
+                    );
 
                   await channel.send({ embeds: [sendEmbed], components: [row] });
                   await i.followUp({
-                    content: t(client, lang, "commands.games.messages.embed_sent", `<#${channel.id}>`),
+                    content: t(
+                      client,
+                      lang,
+                      "commands.games.messages.embed_sent",
+                      `<#${channel.id}>`,
+                    ),
                     flags: MessageFlagsBitField.Flags.Ephemeral,
                   });
                 }
@@ -205,7 +280,21 @@ module.exports = {
             currentView = "games";
             currentGameIndex = 0;
             embed = buildEmbed(client, lang, settings, currentView);
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+              files: [],
+            });
             break;
 
           case "NI_games:edit_name":
@@ -216,20 +305,61 @@ module.exports = {
             currentView = "game_emoji";
             emojiPage = 0;
             embed = buildEmbed(client, lang, settings, currentView, currentGameIndex);
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+              files: [],
+            });
             break;
 
           case "NI_games:reset_emoji":
             settings.games[currentGameIndex].emoji = "🎮";
             await mostUsedQueries.setGames(guild, settings.games);
             embed = buildEmbed(client, lang, settings, currentView, currentGameIndex);
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+              files: [],
+            });
             break;
 
           case "NI_games:emoji_prev":
             emojiPage = Math.max(0, emojiPage - 1);
             embed = buildEmbed(client, lang, settings, currentView, currentGameIndex);
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE) });
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+            });
             break;
 
           case "NI_games:emoji_next":
@@ -237,11 +367,30 @@ module.exports = {
             const maxPage = Math.ceil(totalEmojis / EMOJIS_PER_PAGE) - 1;
             emojiPage = Math.min(maxPage, emojiPage + 1);
             embed = buildEmbed(client, lang, settings, currentView, currentGameIndex);
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE) });
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+            });
             break;
 
           case "NI_games:edit_modal_title":
-            await showModal(i, "game_modal_title", client, lang, settings.games[currentGameIndex]?.modal?.title);
+            await showModal(
+              i,
+              "game_modal_title",
+              client,
+              lang,
+              settings.games[currentGameIndex]?.modal?.title,
+            );
             break;
 
           case "NI_games:delete_field":
@@ -250,53 +399,135 @@ module.exports = {
             currentView = "game_edit";
             currentFieldIndex = 0;
             embed = buildEmbed(client, lang, settings, currentView, currentGameIndex);
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+              files: [],
+            });
             break;
 
           case "NI_games:edit_label":
-            await showModal(i, "field_label", client, lang, settings.games[currentGameIndex]?.modal?.fields[currentFieldIndex]?.name);
+            await showModal(
+              i,
+              "field_label",
+              client,
+              lang,
+              settings.games[currentGameIndex]?.modal?.fields[currentFieldIndex]?.name,
+            );
             break;
 
           case "NI_games:edit_placeholder":
-            await showModal(i, "field_placeholder", client, lang, settings.games[currentGameIndex]?.modal?.fields[currentFieldIndex]?.placeholder);
+            await showModal(
+              i,
+              "field_placeholder",
+              client,
+              lang,
+              settings.games[currentGameIndex]?.modal?.fields[currentFieldIndex]?.placeholder,
+            );
             break;
 
           case "NI_games:toggle_style": {
             const fieldData = settings.games[currentGameIndex].modal.fields[currentFieldIndex];
             fieldData.type = fieldData.type === "short" ? "long" : "short";
             await mostUsedQueries.setGames(guild, settings.games);
-            const fieldEmbedResult = await buildFieldEmbed(embed, client, lang, settings, currentGameIndex, currentFieldIndex);
+            const fieldEmbedResult = await buildFieldEmbed(
+              embed,
+              client,
+              lang,
+              settings,
+              currentGameIndex,
+              currentFieldIndex,
+            );
             embed = fieldEmbedResult.embed;
             attachment = fieldEmbedResult.attachment;
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [attachment] });
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+              files: [attachment],
+            });
             break;
           }
 
           case "NI_games:edit_sizes":
-            await showSizesModal(i, client, lang, settings.games[currentGameIndex]?.modal?.fields[currentFieldIndex]);
+            await showSizesModal(
+              i,
+              client,
+              lang,
+              settings.games[currentGameIndex]?.modal?.fields[currentFieldIndex],
+            );
             break;
 
           case "NI_games:toggle_required": {
-            settings.games[currentGameIndex].modal.fields[currentFieldIndex].required = !settings.games[currentGameIndex].modal.fields[currentFieldIndex].required;
+            settings.games[currentGameIndex].modal.fields[currentFieldIndex].required =
+              !settings.games[currentGameIndex].modal.fields[currentFieldIndex].required;
             await mostUsedQueries.setGames(guild, settings.games);
-            const fieldEmbedResult2 = await buildFieldEmbed(embed, client, lang, settings, currentGameIndex, currentFieldIndex);
+            const fieldEmbedResult2 = await buildFieldEmbed(
+              embed,
+              client,
+              lang,
+              settings,
+              currentGameIndex,
+              currentFieldIndex,
+            );
             embed = fieldEmbedResult2.embed;
             attachment = fieldEmbedResult2.attachment;
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [attachment] });
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+              files: [attachment],
+            });
             break;
           }
 
           case "NI_games:preview":
             await i.deferUpdate();
             const previewEmbed = new EmbedBuilder()
-              .setTitle(settings.embed.title || t(client, lang, "commands.games.embeds.preview.title"))
-              .setDescription(settings.embed.description || t(client, lang, "commands.games.embeds.preview.description"))
+              .setTitle(
+                settings.embed.title || t(client, lang, "commands.games.embeds.preview.title"),
+              )
+              .setDescription(
+                settings.embed.description ||
+                  t(client, lang, "commands.games.embeds.preview.description"),
+              )
               .setFooter({ text: t(client, lang, "commands.games.embeds.preview.footer") });
             if (settings.embed.color) previewEmbed.setColor(settings.embed.color as any);
             if (settings.embed.thumbnail) previewEmbed.setThumbnail(settings.embed.thumbnail);
             if (settings.embed.image) previewEmbed.setImage(settings.embed.image);
 
-            await i.followUp({ embeds: [previewEmbed], flags: MessageFlagsBitField.Flags.Ephemeral });
+            await i.followUp({
+              embeds: [previewEmbed],
+              flags: MessageFlagsBitField.Flags.Ephemeral,
+            });
             break;
 
           case "NI_games:field_preview": {
@@ -320,7 +551,14 @@ module.exports = {
         }
 
         // Handle modal submissions for buttons
-        if (["NI_games:edit_name", "NI_games:edit_modal_title", "NI_games:edit_label", "NI_games:edit_placeholder"].includes(i.customId)) {
+        if (
+          [
+            "NI_games:edit_name",
+            "NI_games:edit_modal_title",
+            "NI_games:edit_label",
+            "NI_games:edit_placeholder",
+          ].includes(i.customId)
+        ) {
           try {
             const modalSubmit = await i.awaitModalSubmit({
               time: 5 * 60 * 1000,
@@ -341,7 +579,8 @@ module.exports = {
                 settings.games[currentGameIndex].modal.fields[currentFieldIndex].name = value;
                 break;
               case "NI_games:edit_placeholder":
-                settings.games[currentGameIndex].modal.fields[currentFieldIndex].placeholder = value;
+                settings.games[currentGameIndex].modal.fields[currentFieldIndex].placeholder =
+                  value;
                 break;
             }
 
@@ -349,13 +588,55 @@ module.exports = {
 
             // Show field preview image for field edits
             if (["NI_games:edit_label", "NI_games:edit_placeholder"].includes(i.customId)) {
-              const fieldEmbedResult = await buildFieldEmbed(embed, client, lang, settings, currentGameIndex, currentFieldIndex);
+              const fieldEmbedResult = await buildFieldEmbed(
+                embed,
+                client,
+                lang,
+                settings,
+                currentGameIndex,
+                currentFieldIndex,
+              );
               embed = fieldEmbedResult.embed;
               attachment = fieldEmbedResult.attachment;
-              await interaction.editReply({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [attachment] });
+              await interaction.editReply({
+                embeds: [embed],
+                components: buildComponents(
+                  client,
+                  lang,
+                  settings,
+                  currentView,
+                  currentGameIndex,
+                  currentFieldIndex,
+                  interaction.guild,
+                  emojiPage,
+                  EMOJIS_PER_PAGE,
+                ),
+                files: [attachment],
+              });
             } else {
-              embed = buildEmbed(client, lang, settings, currentView, currentGameIndex, currentFieldIndex);
-              await interaction.editReply({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+              embed = buildEmbed(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+              );
+              await interaction.editReply({
+                embeds: [embed],
+                components: buildComponents(
+                  client,
+                  lang,
+                  settings,
+                  currentView,
+                  currentGameIndex,
+                  currentFieldIndex,
+                  interaction.guild,
+                  emojiPage,
+                  EMOJIS_PER_PAGE,
+                ),
+                files: [],
+              });
             }
           } catch (error) {
             // Modal timed out or was dismissed
@@ -373,14 +654,41 @@ module.exports = {
             const min = parseInt(modalSubmit.fields.getTextInputValue("NI_games:min")) || 0;
             const max = parseInt(modalSubmit.fields.getTextInputValue("NI_games:max")) || 0;
 
-            settings.games[currentGameIndex].modal.fields[currentFieldIndex].min = Math.max(0, Math.min(min, 4000));
-            settings.games[currentGameIndex].modal.fields[currentFieldIndex].max = Math.max(0, Math.min(max, 4000));
+            settings.games[currentGameIndex].modal.fields[currentFieldIndex].min = Math.max(
+              0,
+              Math.min(min, 4000),
+            );
+            settings.games[currentGameIndex].modal.fields[currentFieldIndex].max = Math.max(
+              0,
+              Math.min(max, 4000),
+            );
 
             await mostUsedQueries.setGames(guild, settings.games);
-            const fieldEmbedResult = await buildFieldEmbed(embed, client, lang, settings, currentGameIndex, currentFieldIndex);
+            const fieldEmbedResult = await buildFieldEmbed(
+              embed,
+              client,
+              lang,
+              settings,
+              currentGameIndex,
+              currentFieldIndex,
+            );
             embed = fieldEmbedResult.embed;
             attachment = fieldEmbedResult.attachment;
-            await interaction.editReply({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [attachment] });
+            await interaction.editReply({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+              files: [attachment],
+            });
           } catch (error) {
             // Modal timed out or was dismissed
           }
@@ -393,7 +701,21 @@ module.exports = {
           case "NI_games:main_menu":
             currentView = i.values[0] as ViewType;
             embed = buildEmbed(client, lang, settings, currentView);
-            await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+            await i.update({
+              embeds: [embed],
+              components: buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                currentGameIndex,
+                currentFieldIndex,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              ),
+              files: [],
+            });
             break;
 
           case "NI_games:emoji_select": {
@@ -406,12 +728,29 @@ module.exports = {
               await mostUsedQueries.setGames(guild, settings.games);
 
               await i.reply({
-                content: (t(client, lang, "commands.games.messages.emoji_set") as string).replace("{0}", String(settings.games[currentGameIndex].emoji)),
+                content: (t(client, lang, "commands.games.messages.emoji_set") as string).replace(
+                  "{0}",
+                  String(settings.games[currentGameIndex].emoji),
+                ),
                 flags: MessageFlagsBitField.Flags.Ephemeral,
               });
 
               embed = buildEmbed(client, lang, settings, currentView, currentGameIndex);
-              await interaction.editReply({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+              await interaction.editReply({
+                embeds: [embed],
+                components: buildComponents(
+                  client,
+                  lang,
+                  settings,
+                  currentView,
+                  currentGameIndex,
+                  currentFieldIndex,
+                  interaction.guild,
+                  emojiPage,
+                  EMOJIS_PER_PAGE,
+                ),
+                files: [],
+              });
             }
             break;
           }
@@ -419,7 +758,13 @@ module.exports = {
           case "NI_games:embed_menu":
             const embedField = i.values[0];
             if (embedField === "placeholder") {
-              await showModal(i, "select_placeholder", client, lang, settings.select_placeholder || undefined);
+              await showModal(
+                i,
+                "select_placeholder",
+                client,
+                lang,
+                settings.select_placeholder || undefined,
+              );
             } else {
               await showEmbedModal(i, embedField, client, lang, settings.embed);
             }
@@ -462,7 +807,21 @@ module.exports = {
               }
 
               embed = buildEmbed(client, lang, settings, currentView);
-              await interaction.editReply({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+              await interaction.editReply({
+                embeds: [embed],
+                components: buildComponents(
+                  client,
+                  lang,
+                  settings,
+                  currentView,
+                  currentGameIndex,
+                  currentFieldIndex,
+                  interaction.guild,
+                  emojiPage,
+                  EMOJIS_PER_PAGE,
+                ),
+                files: [],
+              });
             } catch (error) {
               // Modal timed out
             }
@@ -507,7 +866,21 @@ module.exports = {
                 currentView = "game_edit";
 
                 embed = buildEmbed(client, lang, settings, currentView, currentGameIndex);
-                await interaction.editReply({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+                await interaction.editReply({
+                  embeds: [embed],
+                  components: buildComponents(
+                    client,
+                    lang,
+                    settings,
+                    currentView,
+                    currentGameIndex,
+                    currentFieldIndex,
+                    interaction.guild,
+                    emojiPage,
+                    EMOJIS_PER_PAGE,
+                  ),
+                  files: [],
+                });
               } catch (error) {
                 // Modal timed out
               }
@@ -515,7 +888,21 @@ module.exports = {
               currentGameIndex = settings.games.findIndex((g) => g.id === i.values[0]);
               currentView = "game_edit";
               embed = buildEmbed(client, lang, settings, currentView, currentGameIndex);
-              await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+              await i.update({
+                embeds: [embed],
+                components: buildComponents(
+                  client,
+                  lang,
+                  settings,
+                  currentView,
+                  currentGameIndex,
+                  currentFieldIndex,
+                  interaction.guild,
+                  emojiPage,
+                  EMOJIS_PER_PAGE,
+                ),
+                files: [],
+              });
             }
             break;
 
@@ -523,7 +910,21 @@ module.exports = {
             if (i.values[0] === "main") {
               currentView = "game_edit";
               embed = buildEmbed(client, lang, settings, currentView, currentGameIndex);
-              await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+              await i.update({
+                embeds: [embed],
+                components: buildComponents(
+                  client,
+                  lang,
+                  settings,
+                  currentView,
+                  currentGameIndex,
+                  currentFieldIndex,
+                  interaction.guild,
+                  emojiPage,
+                  EMOJIS_PER_PAGE,
+                ),
+                files: [],
+              });
             } else if (i.values[0] === "add") {
               if (settings.games[currentGameIndex].modal.fields.length >= 5) {
                 await i.reply({
@@ -560,20 +961,64 @@ module.exports = {
                 currentFieldIndex = settings.games[currentGameIndex].modal.fields.length - 1;
                 currentView = "field_edit";
 
-                const fieldEmbedResult = await buildFieldEmbed(embed, client, lang, settings, currentGameIndex, currentFieldIndex);
+                const fieldEmbedResult = await buildFieldEmbed(
+                  embed,
+                  client,
+                  lang,
+                  settings,
+                  currentGameIndex,
+                  currentFieldIndex,
+                );
                 embed = fieldEmbedResult.embed;
                 attachment = fieldEmbedResult.attachment;
-                await interaction.editReply({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [attachment] });
+                await interaction.editReply({
+                  embeds: [embed],
+                  components: buildComponents(
+                    client,
+                    lang,
+                    settings,
+                    currentView,
+                    currentGameIndex,
+                    currentFieldIndex,
+                    interaction.guild,
+                    emojiPage,
+                    EMOJIS_PER_PAGE,
+                  ),
+                  files: [attachment],
+                });
               } catch (error) {
                 // Modal timed out
               }
             } else {
-              currentFieldIndex = settings.games[currentGameIndex].modal.fields.findIndex((f) => f.id === i.values[0]);
+              currentFieldIndex = settings.games[currentGameIndex].modal.fields.findIndex(
+                (f) => f.id === i.values[0],
+              );
               currentView = "field_edit";
-              const fieldEmbedResult = await buildFieldEmbed(embed, client, lang, settings, currentGameIndex, currentFieldIndex);
+              const fieldEmbedResult = await buildFieldEmbed(
+                embed,
+                client,
+                lang,
+                settings,
+                currentGameIndex,
+                currentFieldIndex,
+              );
               embed = fieldEmbedResult.embed;
               attachment = fieldEmbedResult.attachment;
-              await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [attachment] });
+              await i.update({
+                embeds: [embed],
+                components: buildComponents(
+                  client,
+                  lang,
+                  settings,
+                  currentView,
+                  currentGameIndex,
+                  currentFieldIndex,
+                  interaction.guild,
+                  emojiPage,
+                  EMOJIS_PER_PAGE,
+                ),
+                files: [attachment],
+              });
             }
             break;
         }
@@ -589,16 +1034,49 @@ module.exports = {
             flags: MessageFlagsBitField.Flags.Ephemeral,
           });
           embed = buildEmbed(client, lang, settings, currentView);
-          await interaction.editReply({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+          await interaction.editReply({
+            embeds: [embed],
+            components: buildComponents(
+              client,
+              lang,
+              settings,
+              currentView,
+              currentGameIndex,
+              currentFieldIndex,
+              interaction.guild,
+              emojiPage,
+              EMOJIS_PER_PAGE,
+            ),
+            files: [],
+          });
         } else if (i.customId === "NI_games:send_channel") {
           settings.send_channel = i.values[0];
           await mostUsedQueries.setSendChannel(guild, i.values[0]);
           await i.reply({
-            content: t(client, lang, "commands.games.messages.send_channel_set", `<#${i.values[0]}>`),
+            content: t(
+              client,
+              lang,
+              "commands.games.messages.send_channel_set",
+              `<#${i.values[0]}>`,
+            ),
             flags: MessageFlagsBitField.Flags.Ephemeral,
           });
           embed = buildEmbed(client, lang, settings, currentView);
-          await interaction.editReply({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+          await interaction.editReply({
+            embeds: [embed],
+            components: buildComponents(
+              client,
+              lang,
+              settings,
+              currentView,
+              currentGameIndex,
+              currentFieldIndex,
+              interaction.guild,
+              emojiPage,
+              EMOJIS_PER_PAGE,
+            ),
+            files: [],
+          });
         }
       }
 
@@ -608,7 +1086,21 @@ module.exports = {
           settings.games[currentGameIndex].role = i.values[0] || null;
           await mostUsedQueries.setGames(guild, settings.games);
           embed = buildEmbed(client, lang, settings, currentView, currentGameIndex);
-          await i.update({ embeds: [embed], components: buildComponents(client, lang, settings, currentView, currentGameIndex, currentFieldIndex, interaction.guild, emojiPage, EMOJIS_PER_PAGE), files: [] });
+          await i.update({
+            embeds: [embed],
+            components: buildComponents(
+              client,
+              lang,
+              settings,
+              currentView,
+              currentGameIndex,
+              currentFieldIndex,
+              interaction.guild,
+              emojiPage,
+              EMOJIS_PER_PAGE,
+            ),
+            files: [],
+          });
         }
       }
     });
@@ -629,7 +1121,7 @@ function buildEmbed(
   settings: FindTeamSettings,
   view: ViewType,
   gameIndex?: number,
-  fieldIndex?: number
+  fieldIndex?: number,
 ): EmbedBuilder {
   const embed = new EmbedBuilder().setColor(client.holder.colors.default);
 
@@ -656,15 +1148,25 @@ function buildEmbed(
           {
             name: t(client, lang, "commands.games.embeds.base.fields.send_channel.name"),
             value: settings.send_channel
-              ? t(client, lang, "commands.games.embeds.base.fields.send_channel.value", settings.send_channel)
+              ? t(
+                  client,
+                  lang,
+                  "commands.games.embeds.base.fields.send_channel.value",
+                  settings.send_channel,
+                )
               : t(client, lang, "commands.games.embeds.base.fields.send_channel.none"),
             inline: true,
           },
           {
             name: t(client, lang, "commands.games.embeds.base.fields.games_count.name"),
-            value: t(client, lang, "commands.games.embeds.base.fields.games_count.value", settings.games.length),
+            value: t(
+              client,
+              lang,
+              "commands.games.embeds.base.fields.games_count.value",
+              settings.games.length,
+            ),
             inline: true,
-          }
+          },
         );
       break;
 
@@ -683,10 +1185,15 @@ function buildEmbed(
           {
             name: t(client, lang, "commands.games.embeds.base.fields.send_channel.name"),
             value: settings.send_channel
-              ? t(client, lang, "commands.games.embeds.base.fields.send_channel.value", settings.send_channel)
+              ? t(
+                  client,
+                  lang,
+                  "commands.games.embeds.base.fields.send_channel.value",
+                  settings.send_channel,
+                )
               : t(client, lang, "commands.games.embeds.base.fields.send_channel.none"),
             inline: true,
-          }
+          },
         );
       break;
 
@@ -698,45 +1205,76 @@ function buildEmbed(
           {
             name: t(client, lang, "commands.games.embeds.embed_settings.fields.title.name"),
             value: settings.embed.title
-              ? t(client, lang, "commands.games.embeds.embed_settings.fields.title.value", settings.embed.title)
+              ? t(
+                  client,
+                  lang,
+                  "commands.games.embeds.embed_settings.fields.title.value",
+                  settings.embed.title,
+                )
               : t(client, lang, "commands.games.embeds.embed_settings.fields.title.none"),
             inline: true,
           },
           {
             name: t(client, lang, "commands.games.embeds.embed_settings.fields.description.name"),
             value: settings.embed.description
-              ? t(client, lang, "commands.games.embeds.embed_settings.fields.description.value", settings.embed.description.substring(0, 50) + (settings.embed.description.length > 50 ? "..." : ""))
+              ? t(
+                  client,
+                  lang,
+                  "commands.games.embeds.embed_settings.fields.description.value",
+                  settings.embed.description.substring(0, 50) +
+                    (settings.embed.description.length > 50 ? "..." : ""),
+                )
               : t(client, lang, "commands.games.embeds.embed_settings.fields.description.none"),
             inline: true,
           },
           {
             name: t(client, lang, "commands.games.embeds.embed_settings.fields.color.name"),
             value: settings.embed.color
-              ? t(client, lang, "commands.games.embeds.embed_settings.fields.color.value", settings.embed.color)
+              ? t(
+                  client,
+                  lang,
+                  "commands.games.embeds.embed_settings.fields.color.value",
+                  settings.embed.color,
+                )
               : t(client, lang, "commands.games.embeds.embed_settings.fields.color.none"),
             inline: true,
           },
           {
             name: t(client, lang, "commands.games.embeds.embed_settings.fields.thumbnail.name"),
             value: settings.embed.thumbnail
-              ? t(client, lang, "commands.games.embeds.embed_settings.fields.thumbnail.value", settings.embed.thumbnail)
+              ? t(
+                  client,
+                  lang,
+                  "commands.games.embeds.embed_settings.fields.thumbnail.value",
+                  settings.embed.thumbnail,
+                )
               : t(client, lang, "commands.games.embeds.embed_settings.fields.thumbnail.none"),
             inline: true,
           },
           {
             name: t(client, lang, "commands.games.embeds.embed_settings.fields.image.name"),
             value: settings.embed.image
-              ? t(client, lang, "commands.games.embeds.embed_settings.fields.image.value", settings.embed.image)
+              ? t(
+                  client,
+                  lang,
+                  "commands.games.embeds.embed_settings.fields.image.value",
+                  settings.embed.image,
+                )
               : t(client, lang, "commands.games.embeds.embed_settings.fields.image.none"),
             inline: true,
           },
           {
             name: t(client, lang, "commands.games.embeds.embed_settings.fields.footer.name"),
             value: settings.embed.footer
-              ? t(client, lang, "commands.games.embeds.embed_settings.fields.footer.value", settings.embed.footer)
+              ? t(
+                  client,
+                  lang,
+                  "commands.games.embeds.embed_settings.fields.footer.value",
+                  settings.embed.footer,
+                )
               : t(client, lang, "commands.games.embeds.embed_settings.fields.footer.none"),
             inline: true,
-          }
+          },
         );
       break;
 
@@ -747,7 +1285,15 @@ function buildEmbed(
 
       if (settings.games.length > 0) {
         const gamesText = settings.games
-          .map((game) => t(client, lang, "commands.games.embeds.games_list.fields.games.format", game.emoji || "🎮", game.name))
+          .map((game) =>
+            t(
+              client,
+              lang,
+              "commands.games.embeds.games_list.fields.games.format",
+              game.emoji || "🎮",
+              game.name,
+            ),
+          )
           .join("\n");
         embed.addFields({
           name: t(client, lang, "commands.games.embeds.games_list.fields.games.name"),
@@ -770,7 +1316,12 @@ function buildEmbed(
           .addFields(
             {
               name: t(client, lang, "commands.games.embeds.game_edit.fields.name.name"),
-              value: t(client, lang, "commands.games.embeds.game_edit.fields.name.value", game.name),
+              value: t(
+                client,
+                lang,
+                "commands.games.embeds.game_edit.fields.name.value",
+                game.name,
+              ),
               inline: true,
             },
             {
@@ -789,20 +1340,34 @@ function buildEmbed(
             },
             {
               name: t(client, lang, "commands.games.embeds.game_edit.fields.modal_title.name"),
-              value: t(client, lang, "commands.games.embeds.game_edit.fields.modal_title.value", game.modal.title),
+              value: t(
+                client,
+                lang,
+                "commands.games.embeds.game_edit.fields.modal_title.value",
+                game.modal.title,
+              ),
               inline: true,
             },
             {
               name: t(client, lang, "commands.games.embeds.game_edit.fields.fields_count.name"),
-              value: t(client, lang, "commands.games.embeds.game_edit.fields.fields_count.value", game.modal.fields.length),
+              value: t(
+                client,
+                lang,
+                "commands.games.embeds.game_edit.fields.fields_count.value",
+                game.modal.fields.length,
+              ),
               inline: true,
-            }
+            },
           );
       }
       break;
 
     case "field_edit":
-      if (gameIndex !== undefined && fieldIndex !== undefined && settings.games[gameIndex]?.modal?.fields[fieldIndex]) {
+      if (
+        gameIndex !== undefined &&
+        fieldIndex !== undefined &&
+        settings.games[gameIndex]?.modal?.fields[fieldIndex]
+      ) {
         const field = settings.games[gameIndex].modal.fields[fieldIndex];
         embed
           .setTitle(t(client, lang, "commands.games.embeds.game_field_edit.title"))
@@ -810,29 +1375,59 @@ function buildEmbed(
           .addFields(
             {
               name: t(client, lang, "commands.games.embeds.game_field_edit.fields.name.name"),
-              value: t(client, lang, "commands.games.embeds.game_field_edit.fields.name.value", field.name),
+              value: t(
+                client,
+                lang,
+                "commands.games.embeds.game_field_edit.fields.name.value",
+                field.name,
+              ),
               inline: true,
             },
             {
-              name: t(client, lang, "commands.games.embeds.game_field_edit.fields.placeholder.name"),
-              value: t(client, lang, "commands.games.embeds.game_field_edit.fields.placeholder.value", field.placeholder || "-"),
+              name: t(
+                client,
+                lang,
+                "commands.games.embeds.game_field_edit.fields.placeholder.name",
+              ),
+              value: t(
+                client,
+                lang,
+                "commands.games.embeds.game_field_edit.fields.placeholder.value",
+                field.placeholder || "-",
+              ),
               inline: true,
             },
             {
               name: t(client, lang, "commands.games.embeds.game_field_edit.fields.style.name"),
-              value: t(client, lang, "commands.games.embeds.game_field_edit.fields.style.value", field.type),
+              value: t(
+                client,
+                lang,
+                "commands.games.embeds.game_field_edit.fields.style.value",
+                field.type,
+              ),
               inline: true,
             },
             {
               name: t(client, lang, "commands.games.embeds.game_field_edit.fields.sizes.name"),
-              value: t(client, lang, "commands.games.embeds.game_field_edit.fields.sizes.value", field.min, field.max),
+              value: t(
+                client,
+                lang,
+                "commands.games.embeds.game_field_edit.fields.sizes.value",
+                field.min,
+                field.max,
+              ),
               inline: true,
             },
             {
               name: t(client, lang, "commands.games.embeds.game_field_edit.fields.required.name"),
-              value: t(client, lang, "commands.games.embeds.game_field_edit.fields.required.value", field.required ? "✅" : "❌"),
+              value: t(
+                client,
+                lang,
+                "commands.games.embeds.game_field_edit.fields.required.value",
+                field.required ? "✅" : "❌",
+              ),
               inline: true,
-            }
+            },
           );
       }
       break;
@@ -845,7 +1440,11 @@ function buildEmbed(
           .setDescription(t(client, lang, "commands.games.embeds.game_emoji.description") as string)
           .addFields(
             {
-              name: t(client, lang, "commands.games.embeds.game_emoji.fields.current.name") as string,
+              name: t(
+                client,
+                lang,
+                "commands.games.embeds.game_emoji.fields.current.name",
+              ) as string,
               value: String(game.emoji || "🎮"),
               inline: true,
             },
@@ -853,7 +1452,7 @@ function buildEmbed(
               name: t(client, lang, "commands.games.embeds.game_emoji.fields.game.name") as string,
               value: game.name,
               inline: true,
-            }
+            },
           );
       }
       break;
@@ -871,7 +1470,7 @@ function buildComponents(
   fieldIndex?: number,
   guildObj?: import("discord.js").Guild | null,
   emojiPage: number = 0,
-  emojisPerPage: number = 25
+  emojisPerPage: number = 25,
 ): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
   const components: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
 
@@ -881,7 +1480,11 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_games:toggle")
-            .setLabel(settings.enabled ? t(client, lang, "commands.games.buttons.disable") : t(client, lang, "commands.games.buttons.enable"))
+            .setLabel(
+              settings.enabled
+                ? t(client, lang, "commands.games.buttons.disable")
+                : t(client, lang, "commands.games.buttons.enable"),
+            )
             .setStyle(settings.enabled ? ButtonStyle.Danger : ButtonStyle.Success),
           new ButtonBuilder()
             .setCustomId("NI_games:setup")
@@ -891,8 +1494,8 @@ function buildComponents(
             .setCustomId("NI_games:send_embed")
             .setLabel(t(client, lang, "commands.games.buttons.send_embed"))
             .setStyle(ButtonStyle.Primary)
-            .setDisabled(!settings.channel || settings.games.length === 0)
-        )
+            .setDisabled(!settings.channel || settings.games.length === 0),
+        ),
       );
 
       if (settings.enabled) {
@@ -903,19 +1506,31 @@ function buildComponents(
               .setPlaceholder(t(client, lang, "commands.games.select_menus.main.placeholder"))
               .setOptions(
                 new StringSelectMenuOptionBuilder()
-                  .setLabel(t(client, lang, "commands.games.select_menus.main.options.channels.label"))
-                  .setDescription(t(client, lang, "commands.games.select_menus.main.options.channels.description"))
+                  .setLabel(
+                    t(client, lang, "commands.games.select_menus.main.options.channels.label"),
+                  )
+                  .setDescription(
+                    t(
+                      client,
+                      lang,
+                      "commands.games.select_menus.main.options.channels.description",
+                    ),
+                  )
                   .setValue("channels"),
                 new StringSelectMenuOptionBuilder()
                   .setLabel(t(client, lang, "commands.games.select_menus.main.options.embed.label"))
-                  .setDescription(t(client, lang, "commands.games.select_menus.main.options.embed.description"))
+                  .setDescription(
+                    t(client, lang, "commands.games.select_menus.main.options.embed.description"),
+                  )
                   .setValue("embed"),
                 new StringSelectMenuOptionBuilder()
                   .setLabel(t(client, lang, "commands.games.select_menus.main.options.games.label"))
-                  .setDescription(t(client, lang, "commands.games.select_menus.main.options.games.description"))
-                  .setValue("games")
-              )
-          )
+                  .setDescription(
+                    t(client, lang, "commands.games.select_menus.main.options.games.description"),
+                  )
+                  .setValue("games"),
+              ),
+          ),
         );
       }
       break;
@@ -925,21 +1540,23 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ChannelSelectMenuBuilder()
             .setCustomId("NI_games:select_channel")
-            .setPlaceholder(t(client, lang, "commands.games.select_menus.select_channel.placeholder"))
-            .setChannelTypes(ChannelType.GuildText)
+            .setPlaceholder(
+              t(client, lang, "commands.games.select_menus.select_channel.placeholder"),
+            )
+            .setChannelTypes(ChannelType.GuildText),
         ),
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ChannelSelectMenuBuilder()
             .setCustomId("NI_games:send_channel")
             .setPlaceholder(t(client, lang, "commands.games.select_menus.send_channel.placeholder"))
-            .setChannelTypes(ChannelType.GuildText)
+            .setChannelTypes(ChannelType.GuildText),
         ),
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_games:back")
             .setLabel(t(client, lang, "commands.games.buttons.back"))
-            .setStyle(ButtonStyle.Secondary)
-        )
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
 
@@ -952,33 +1569,65 @@ function buildComponents(
             .setOptions(
               new StringSelectMenuOptionBuilder()
                 .setLabel(t(client, lang, "commands.games.select_menus.embed.options.title.label"))
-                .setDescription(t(client, lang, "commands.games.select_menus.embed.options.title.description"))
+                .setDescription(
+                  t(client, lang, "commands.games.select_menus.embed.options.title.description"),
+                )
                 .setValue("title"),
               new StringSelectMenuOptionBuilder()
-                .setLabel(t(client, lang, "commands.games.select_menus.embed.options.description.label"))
-                .setDescription(t(client, lang, "commands.games.select_menus.embed.options.description.description"))
+                .setLabel(
+                  t(client, lang, "commands.games.select_menus.embed.options.description.label"),
+                )
+                .setDescription(
+                  t(
+                    client,
+                    lang,
+                    "commands.games.select_menus.embed.options.description.description",
+                  ),
+                )
                 .setValue("description"),
               new StringSelectMenuOptionBuilder()
                 .setLabel(t(client, lang, "commands.games.select_menus.embed.options.color.label"))
-                .setDescription(t(client, lang, "commands.games.select_menus.embed.options.color.description"))
+                .setDescription(
+                  t(client, lang, "commands.games.select_menus.embed.options.color.description"),
+                )
                 .setValue("color"),
               new StringSelectMenuOptionBuilder()
-                .setLabel(t(client, lang, "commands.games.select_menus.embed.options.thumbnail.label"))
-                .setDescription(t(client, lang, "commands.games.select_menus.embed.options.thumbnail.description"))
+                .setLabel(
+                  t(client, lang, "commands.games.select_menus.embed.options.thumbnail.label"),
+                )
+                .setDescription(
+                  t(
+                    client,
+                    lang,
+                    "commands.games.select_menus.embed.options.thumbnail.description",
+                  ),
+                )
                 .setValue("thumbnail"),
               new StringSelectMenuOptionBuilder()
                 .setLabel(t(client, lang, "commands.games.select_menus.embed.options.image.label"))
-                .setDescription(t(client, lang, "commands.games.select_menus.embed.options.image.description"))
+                .setDescription(
+                  t(client, lang, "commands.games.select_menus.embed.options.image.description"),
+                )
                 .setValue("image"),
               new StringSelectMenuOptionBuilder()
                 .setLabel(t(client, lang, "commands.games.select_menus.embed.options.footer.label"))
-                .setDescription(t(client, lang, "commands.games.select_menus.embed.options.footer.description"))
+                .setDescription(
+                  t(client, lang, "commands.games.select_menus.embed.options.footer.description"),
+                )
                 .setValue("footer"),
               new StringSelectMenuOptionBuilder()
-                .setLabel(t(client, lang, "commands.games.select_menus.embed.options.placeholder.label"))
-                .setDescription(t(client, lang, "commands.games.select_menus.embed.options.placeholder.description"))
-                .setValue("placeholder")
-            )
+                .setLabel(
+                  t(client, lang, "commands.games.select_menus.embed.options.placeholder.label"),
+                )
+                .setDescription(
+                  t(
+                    client,
+                    lang,
+                    "commands.games.select_menus.embed.options.placeholder.description",
+                  ),
+                )
+                .setValue("placeholder"),
+            ),
         ),
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
@@ -988,8 +1637,8 @@ function buildComponents(
           new ButtonBuilder()
             .setCustomId("NI_games:back")
             .setLabel(t(client, lang, "commands.games.buttons.back"))
-            .setStyle(ButtonStyle.Secondary)
-        )
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
 
@@ -1000,9 +1649,11 @@ function buildComponents(
         .addOptions(
           new StringSelectMenuOptionBuilder()
             .setLabel(t(client, lang, "commands.games.select_menus.games.options.add.label"))
-            .setDescription(t(client, lang, "commands.games.select_menus.games.options.add.description"))
+            .setDescription(
+              t(client, lang, "commands.games.select_menus.games.options.add.description"),
+            )
             .setValue("add")
-            .setEmoji("➕")
+            .setEmoji("➕"),
         );
 
       settings.games.forEach((game) => {
@@ -1010,7 +1661,7 @@ function buildComponents(
           new StringSelectMenuOptionBuilder()
             .setLabel(game.name)
             .setValue(game.id)
-            .setEmoji(game.emoji as any || "🎮")
+            .setEmoji((game.emoji as any) || "🎮"),
         );
       });
 
@@ -1020,8 +1671,8 @@ function buildComponents(
           new ButtonBuilder()
             .setCustomId("NI_games:back")
             .setLabel(t(client, lang, "commands.games.buttons.back"))
-            .setStyle(ButtonStyle.Secondary)
-        )
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
 
@@ -1035,22 +1686,28 @@ function buildComponents(
           .setPlaceholder(t(client, lang, "commands.games.select_menus.game_fields.placeholder"))
           .addOptions(
             new StringSelectMenuOptionBuilder()
-              .setLabel(t(client, lang, "commands.games.select_menus.game_fields.options.main.label"))
-              .setDescription(t(client, lang, "commands.games.select_menus.game_fields.options.main.description"))
+              .setLabel(
+                t(client, lang, "commands.games.select_menus.game_fields.options.main.label"),
+              )
+              .setDescription(
+                t(client, lang, "commands.games.select_menus.game_fields.options.main.description"),
+              )
               .setValue("main")
               .setEmoji("🏠"),
             new StringSelectMenuOptionBuilder()
-              .setLabel(t(client, lang, "commands.games.select_menus.game_fields.options.add.label"))
-              .setDescription(t(client, lang, "commands.games.select_menus.game_fields.options.add.description"))
+              .setLabel(
+                t(client, lang, "commands.games.select_menus.game_fields.options.add.label"),
+              )
+              .setDescription(
+                t(client, lang, "commands.games.select_menus.game_fields.options.add.description"),
+              )
               .setValue("add")
-              .setEmoji("➕")
+              .setEmoji("➕"),
           );
 
         game.modal.fields.forEach((field) => {
           fieldsSelect.addOptions(
-            new StringSelectMenuOptionBuilder()
-              .setLabel(field.name)
-              .setValue(field.id)
+            new StringSelectMenuOptionBuilder().setLabel(field.name).setValue(field.id),
           );
         });
 
@@ -1068,14 +1725,14 @@ function buildComponents(
             new ButtonBuilder()
               .setCustomId("NI_games:edit_modal_title")
               .setLabel(t(client, lang, "commands.games.buttons.edit_modal_title"))
-              .setStyle(ButtonStyle.Secondary)
+              .setStyle(ButtonStyle.Secondary),
           ),
           new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
             new RoleSelectMenuBuilder()
               .setCustomId("NI_games:edit_role")
               .setPlaceholder(t(client, lang, "commands.games.buttons.edit_role"))
               .setMinValues(0)
-              .setMaxValues(1)
+              .setMaxValues(1),
           ),
           new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
             new ButtonBuilder()
@@ -1085,8 +1742,8 @@ function buildComponents(
             new ButtonBuilder()
               .setCustomId("NI_games:back")
               .setLabel(t(client, lang, "commands.games.buttons.back"))
-              .setStyle(ButtonStyle.Secondary)
-          )
+              .setStyle(ButtonStyle.Secondary),
+          ),
         );
       }
       break;
@@ -1106,7 +1763,7 @@ function buildComponents(
             new ButtonBuilder()
               .setCustomId("NI_games:toggle_style")
               .setLabel(t(client, lang, "commands.games.buttons.toggle_style"))
-              .setStyle(ButtonStyle.Secondary)
+              .setStyle(ButtonStyle.Secondary),
           ),
           new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
             new ButtonBuilder()
@@ -1116,7 +1773,7 @@ function buildComponents(
             new ButtonBuilder()
               .setCustomId("NI_games:toggle_required")
               .setLabel(t(client, lang, "commands.games.buttons.toggle_required"))
-              .setStyle(ButtonStyle.Secondary)
+              .setStyle(ButtonStyle.Secondary),
           ),
           new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
             new ButtonBuilder()
@@ -1126,8 +1783,8 @@ function buildComponents(
             new ButtonBuilder()
               .setCustomId("NI_games:back")
               .setLabel(t(client, lang, "commands.games.buttons.back"))
-              .setStyle(ButtonStyle.Secondary)
-          )
+              .setStyle(ButtonStyle.Secondary),
+          ),
         );
       }
       break;
@@ -1146,18 +1803,20 @@ function buildComponents(
       if (pageEmojis.length > 0) {
         const emojiSelectMenu = new StringSelectMenuBuilder()
           .setCustomId("NI_games:emoji_select")
-          .setPlaceholder(t(client, lang, "commands.games.select_menus.emoji.placeholder") as string)
+          .setPlaceholder(
+            t(client, lang, "commands.games.select_menus.emoji.placeholder") as string,
+          )
           .setOptions(
             pageEmojis.map((emoji) =>
               new StringSelectMenuOptionBuilder()
                 .setLabel(emoji.name || "Unknown")
                 .setValue(emoji.id)
-                .setEmoji({ id: emoji.id, animated: emoji.animated || false })
-            )
+                .setEmoji({ id: emoji.id, animated: emoji.animated || false }),
+            ),
           );
 
         components.push(
-          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(emojiSelectMenu)
+          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(emojiSelectMenu),
         );
       }
 
@@ -1178,7 +1837,7 @@ function buildComponents(
             .setCustomId("NI_games:emoji_next")
             .setLabel("▶")
             .setStyle(ButtonStyle.Secondary)
-            .setDisabled(emojiPage >= totalPages - 1)
+            .setDisabled(emojiPage >= totalPages - 1),
         ),
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
@@ -1188,8 +1847,8 @@ function buildComponents(
           new ButtonBuilder()
             .setCustomId("NI_games:back")
             .setLabel(t(client, lang, "commands.games.buttons.back"))
-            .setStyle(ButtonStyle.Secondary)
-        )
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
     }
@@ -1198,8 +1857,23 @@ function buildComponents(
   return components;
 }
 
-async function showModal(interaction: any, type: string, client: Client, lang: string, currentValue?: string) {
-  const modalConfigs: Record<string, { title: string; label: string; placeholder: string; style?: TextInputStyle; maxLength?: number }> = {
+async function showModal(
+  interaction: any,
+  type: string,
+  client: Client,
+  lang: string,
+  currentValue?: string,
+) {
+  const modalConfigs: Record<
+    string,
+    {
+      title: string;
+      label: string;
+      placeholder: string;
+      style?: TextInputStyle;
+      maxLength?: number;
+    }
+  > = {
     game_name: {
       title: t(client, lang, "commands.games.modals.game_name.title"),
       label: t(client, lang, "commands.games.modals.game_name.label"),
@@ -1245,23 +1919,36 @@ async function showModal(interaction: any, type: string, client: Client, lang: s
     .setTitle(config.title)
     .setCustomId(`NI_games:modal:${type}`)
     .setLabelComponents(
-      new LabelBuilder()
-        .setLabel(config.label)
-        .setTextInputComponent(
-          new TextInputBuilder()
-            .setCustomId("NI_games:input")
-            .setPlaceholder(currentValue || config.placeholder)
-            .setStyle(config.style || TextInputStyle.Short)
-            .setMaxLength(config.maxLength || 100)
-            .setRequired(false)
-        )
+      new LabelBuilder().setLabel(config.label).setTextInputComponent(
+        new TextInputBuilder()
+          .setCustomId("NI_games:input")
+          .setPlaceholder(currentValue || config.placeholder)
+          .setStyle(config.style || TextInputStyle.Short)
+          .setMaxLength(config.maxLength || 100)
+          .setRequired(false),
+      ),
     );
 
   await interaction.showModal(modal);
 }
 
-async function showEmbedModal(interaction: any, field: string, client: Client, lang: string, embed: FindTeamSettings["embed"]) {
-  const modalConfigs: Record<string, { title: string; label: string; placeholder: string; style?: TextInputStyle; maxLength?: number }> = {
+async function showEmbedModal(
+  interaction: any,
+  field: string,
+  client: Client,
+  lang: string,
+  embed: FindTeamSettings["embed"],
+) {
+  const modalConfigs: Record<
+    string,
+    {
+      title: string;
+      label: string;
+      placeholder: string;
+      style?: TextInputStyle;
+      maxLength?: number;
+    }
+  > = {
     title: {
       title: t(client, lang, "commands.games.modals.embed_title.title"),
       label: t(client, lang, "commands.games.modals.embed_title.label"),
@@ -1310,16 +1997,14 @@ async function showEmbedModal(interaction: any, field: string, client: Client, l
     .setTitle(config.title)
     .setCustomId(`NI_games:modal:embed_${field}`)
     .setLabelComponents(
-      new LabelBuilder()
-        .setLabel(config.label)
-        .setTextInputComponent(
-          new TextInputBuilder()
-            .setCustomId("NI_games:input")
-            .setPlaceholder(currentValue || config.placeholder)
-            .setStyle(config.style || TextInputStyle.Short)
-            .setMaxLength(config.maxLength || 100)
-            .setRequired(false)
-        )
+      new LabelBuilder().setLabel(config.label).setTextInputComponent(
+        new TextInputBuilder()
+          .setCustomId("NI_games:input")
+          .setPlaceholder(currentValue || config.placeholder)
+          .setStyle(config.style || TextInputStyle.Short)
+          .setMaxLength(config.maxLength || 100)
+          .setRequired(false),
+      ),
     );
 
   await interaction.showModal(modal);
@@ -1338,7 +2023,7 @@ async function showSizesModal(interaction: any, client: Client, lang: string, fi
             .setPlaceholder(field?.min?.toString() || "0")
             .setStyle(TextInputStyle.Short)
             .setMaxLength(4)
-            .setRequired(false)
+            .setRequired(false),
         ),
       new LabelBuilder()
         .setLabel(t(client, lang, "commands.games.modals.field_sizes.max_label"))
@@ -1348,8 +2033,8 @@ async function showSizesModal(interaction: any, client: Client, lang: string, fi
             .setPlaceholder(field?.max?.toString() || "100")
             .setStyle(TextInputStyle.Short)
             .setMaxLength(4)
-            .setRequired(false)
-        )
+            .setRequired(false),
+        ),
     );
 
   await interaction.showModal(modal);
@@ -1370,7 +2055,7 @@ async function buildFieldEmbed(
   lang: string,
   settings: FindTeamSettings,
   gameIndex: number,
-  fieldIndex: number
+  fieldIndex: number,
 ): Promise<{ embed: EmbedBuilder; attachment: AttachmentBuilder }> {
   const field = settings.games[gameIndex]?.modal?.fields[fieldIndex];
 
@@ -1382,10 +2067,9 @@ async function buildFieldEmbed(
   }
 
   // Generate canvas preview for the field
-  const attachment = new AttachmentBuilder(
-    await new canvasUtil.ModalField(field).render(),
-    { name: "field.png" }
-  );
+  const attachment = new AttachmentBuilder(await new canvasUtil.ModalField(field).render(), {
+    name: "field.png",
+  });
 
   // Clear existing fields and image
   embed.data.fields = [];
@@ -1397,29 +2081,55 @@ async function buildFieldEmbed(
     .addFields(
       {
         name: t(client, lang, "commands.games.embeds.game_field_edit.fields.name.name"),
-        value: t(client, lang, "commands.games.embeds.game_field_edit.fields.name.value", field.name),
+        value: t(
+          client,
+          lang,
+          "commands.games.embeds.game_field_edit.fields.name.value",
+          field.name,
+        ),
         inline: true,
       },
       {
         name: t(client, lang, "commands.games.embeds.game_field_edit.fields.placeholder.name"),
-        value: t(client, lang, "commands.games.embeds.game_field_edit.fields.placeholder.value", field.placeholder || "-"),
+        value: t(
+          client,
+          lang,
+          "commands.games.embeds.game_field_edit.fields.placeholder.value",
+          field.placeholder || "-",
+        ),
         inline: true,
       },
       {
         name: t(client, lang, "commands.games.embeds.game_field_edit.fields.style.name"),
-        value: t(client, lang, "commands.games.embeds.game_field_edit.fields.style.value", field.type),
+        value: t(
+          client,
+          lang,
+          "commands.games.embeds.game_field_edit.fields.style.value",
+          field.type,
+        ),
         inline: true,
       },
       {
         name: t(client, lang, "commands.games.embeds.game_field_edit.fields.sizes.name"),
-        value: t(client, lang, "commands.games.embeds.game_field_edit.fields.sizes.value", field.min, field.max),
+        value: t(
+          client,
+          lang,
+          "commands.games.embeds.game_field_edit.fields.sizes.value",
+          field.min,
+          field.max,
+        ),
         inline: true,
       },
       {
         name: t(client, lang, "commands.games.embeds.game_field_edit.fields.required.name"),
-        value: t(client, lang, "commands.games.embeds.game_field_edit.fields.required.value", field.required ? "✅" : "❌"),
+        value: t(
+          client,
+          lang,
+          "commands.games.embeds.game_field_edit.fields.required.value",
+          field.required ? "✅" : "❌",
+        ),
         inline: true,
-      }
+      },
     )
     .setImage("attachment://field.png");
 

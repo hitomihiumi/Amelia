@@ -47,7 +47,7 @@ module.exports = {
         ...data,
       },
       displayOptions,
-        emojiURL: `https://cdn.discordapp.com/emojis/${await guild.get("economy.currency.id") || client.holder.emojis.ids.gems}.png?size=44`,
+      emojiURL: `https://cdn.discordapp.com/emojis/${(await guild.get("economy.currency.id")) || client.holder.emojis.ids.gems}.png?size=44`,
     });
 
     const buffer = await balance.render();

@@ -316,7 +316,8 @@ export const en: TranslationSchema = {
       embeds: {
         main: {
           title: "🛒 Role Shop",
-          description: "Browse and purchase roles using your currency. Select a role below to buy it.",
+          description:
+            "Browse and purchase roles using your currency. Select a role below to buy it.",
           fields: {
             roles: "Available Roles",
           },
@@ -335,7 +336,8 @@ export const en: TranslationSchema = {
         already_owned: "❌ You already own this role!",
         insufficient_funds: "❌ You don't have enough money! Price: {0}, Your balance: {1}",
         purchase_success: "🎉 You have successfully purchased {0} for {1}!",
-        purchase_error: "❌ An error occurred while processing your purchase. Your balance has been refunded.",
+        purchase_error:
+          "❌ An error occurred while processing your purchase. Your balance has been refunded.",
       },
       select_menus: {
         buy: {

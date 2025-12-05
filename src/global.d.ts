@@ -75,12 +75,12 @@ export interface Holder {
     info: ColorResolvable;
   };
   emojis: {
-      ids: {
-          [key in EmojisKey]: string;
-      };
-      discord: {
-          [key in EmojisKey]: string;
-      }
+    ids: {
+      [key in EmojisKey]: string;
+    };
+    discord: {
+      [key in EmojisKey]: string;
+    };
   };
   assets: {
     profileIcons: Record<keyof TranslationSchema["icons"], string>;

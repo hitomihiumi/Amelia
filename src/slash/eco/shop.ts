@@ -264,7 +264,13 @@ function buildShopView(
 
   if (totalPages > 1) {
     embed.setFooter({
-      text: t(client, lang, "commands.shop.embeds.main.footer", (currentPage + 1).toString(), totalPages.toString()),
+      text: t(
+        client,
+        lang,
+        "commands.shop.embeds.main.footer",
+        (currentPage + 1).toString(),
+        totalPages.toString(),
+      ),
     });
   }
 
@@ -326,4 +332,3 @@ function buildShopView(
 
   return { embed, components };
 }
-
