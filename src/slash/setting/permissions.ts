@@ -550,7 +550,7 @@ async function commandsList(client: Client, guild: Guild, lang: string, page: nu
       new StringSelectMenuOptionBuilder()
         .setLabel(cmd.name)
         .setValue(`${cmd.name}`)
-        .setEmoji(perm !== undefined ? client.holder.emojis["on"] : client.holder.emojis["none"])
+        .setEmoji(perm !== undefined ? client.holder.emojis.discord["on"] : client.holder.emojis.discord["none"])
         // @ts-ignore
         .setDescription(
           perm !== undefined
@@ -600,7 +600,7 @@ function permissionRoles(
         new StringSelectMenuOptionBuilder()
           .setLabel(`${guild.guild.roles.cache.get(role.id)?.name}`)
           .setEmoji(
-            role.type === "allow" ? client.holder.emojis["on"] : client.holder.emojis["off"],
+            role.type === "allow" ? client.holder.emojis.discord["on"] : client.holder.emojis.discord["off"],
           )
           .setDescription(
             role.type === "allow"

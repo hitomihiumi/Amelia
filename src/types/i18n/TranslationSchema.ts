@@ -262,6 +262,11 @@ export interface TranslationSchema {
       success: string;
     };
 
+    balance: {
+      error: string;
+      success: string;
+    };
+
     work: {
       messages: {
         disabled: string;
@@ -303,6 +308,54 @@ export interface TranslationSchema {
         no_money: string;
         success: string;
         fail: string;
+      };
+    };
+
+    bank: {
+      messages: {
+        invalid_amount: string;
+        insufficient_wallet: string;
+        insufficient_bank: string;
+        no_money_wallet: string;
+        no_money_bank: string;
+        deposit_success: string;
+        withdraw_success: string;
+      };
+      fields: {
+        wallet: string;
+        bank: string;
+      };
+    };
+
+    shop: {
+      embeds: {
+        main: {
+          title: string;
+          description: string;
+          fields: {
+            roles: string;
+          };
+          footer: string;
+        };
+        purchase: {
+          title: string;
+          fields: {
+            new_balance: string;
+          };
+        };
+      };
+      messages: {
+        empty: string;
+        role_not_found: string;
+        already_owned: string;
+        insufficient_funds: string;
+        purchase_success: string;
+        purchase_error: string;
+      };
+      select_menus: {
+        buy: {
+          placeholder: string;
+        };
       };
     };
 
@@ -583,6 +636,11 @@ export interface TranslationSchema {
             };
           };
         };
+        currency_emoji: {
+          title: string;
+          description: string;
+          footer: string;
+        };
         shop: {
           title: string;
           description: string;
@@ -792,6 +850,9 @@ export interface TranslationSchema {
           placeholder: string;
         };
         manage_role: {
+          placeholder: string;
+        };
+        emoji: {
           placeholder: string;
         };
       };

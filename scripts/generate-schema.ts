@@ -272,7 +272,7 @@ const guildSchemaMap: Record<string, SchemaField> = {
   "economy.income.rob.punishment": {
     prismaField: "robPunishment",
     prismaType: "Json",
-    default: '"{\\"min\\":10,\\"max\\":50,\\"type\\":\\"fixed\\",\\"fail_chance\\":0.5}"',
+    default: '"{\\"min\\":10,\\"max\\":50,\\"type\\":\\"fixed\\",\\"fail_chance\\":25}"',
   },
 
   // Moderation

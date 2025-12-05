@@ -78,7 +78,7 @@ model Guild {
   robEnabled     Boolean @default(false)
   robCooldown    Int     @default(3600)
   robIncome      Json    @default("{\"min\":100,\"max\":500,\"type\":\"fixed\"}")
-  robPunishment  Json    @default("{\"min\":10,\"max\":50,\"type\":\"fixed\",\"fail_chance\":0.5}")
+  robPunishment  Json    @default("{\"min\":10,\"max\":50,\"type\":\"fixed\",\"fail_chance\":25}")
 
   // Moderation settings
   moderationRoles String[] @default([])

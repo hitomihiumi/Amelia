@@ -107,7 +107,7 @@ module.exports = {
 
     // Get currency emoji
     const currency = await guild.get("economy.currency");
-    const currencyEmoji = currency.emoji || "💰";
+    const currencyEmoji = currency.emoji || client.holder.emojis.discord.gems;
 
     // Get user's wallet for potential fine
     const userWallet = await user.get("economy.balance.wallet");

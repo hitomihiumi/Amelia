@@ -59,7 +59,7 @@ module.exports = {
 
     // Get currency emoji
     const currency = await guild.get("economy.currency");
-    const currencyEmoji = currency.emoji || "💰";
+    const currencyEmoji = currency.emoji || client.holder.emojis.discord.gems;
 
     // Update user balance and cooldown
     const currentBalance = await user.get("economy.balance.wallet");

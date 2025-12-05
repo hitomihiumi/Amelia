@@ -20,10 +20,11 @@ import {
 import { defaultPermissions, Guild } from "../../helpers";
 import { t } from "../../i18n/helpers";
 import { GuildSchema } from "../../types/helpers";
+import { GuildEmoji } from "discord.js";
 
 type EconomySettings = GuildSchema["economy"];
 type IncomeType = "work" | "timely" | "daily" | "weekly" | "level_up" | "bump" | "rob";
-type ViewType = "main" | "currency" | "shop" | "shop_manage" | "income" | IncomeType;
+type ViewType = "main" | "currency" | "currency_emoji" | "shop" | "shop_manage" | "income" | IncomeType;
 
 module.exports = {
   name: "economy",
@@ -47,9 +48,11 @@ module.exports = {
     let settings = await mostUsedQueries.getEconomySettings(guild);
     let currentView: ViewType = "main";
     let selectedRoleId: string | null = null;
+    let emojiPage = 0;
+    const EMOJIS_PER_PAGE = 25;
 
-    const components = buildComponents(client, lang, settings, currentView, selectedRoleId);
-    let embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+    const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+    let embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
     const msg = await interaction.editReply({ embeds: [embed], components });
 
@@ -67,20 +70,22 @@ module.exports = {
           } else if (currentView === "shop_manage") {
             currentView = "shop";
             selectedRoleId = null;
+          } else if (currentView === "currency_emoji") {
+            currentView = "currency";
           } else {
             currentView = "main";
           }
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:reset_emoji") {
           settings.currency.emoji = null;
           settings.currency.id = null;
           await mostUsedQueries.setCurrency(guild, null, null);
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
           await i.update({ embeds: [embed], components });
           await i.followUp({
@@ -88,69 +93,53 @@ module.exports = {
             flags: MessageFlagsBitField.Flags.Ephemeral,
           });
         } else if (i.customId === "NI_economy:set_emoji") {
-          const modal = new ModalBuilder()
-            .setTitle(t(client, lang, "commands.economy.modals.currency.title"))
-            .setCustomId("NI_economy:currency_modal")
-            .setLabelComponents(
-              new LabelBuilder()
-                .setLabel(t(client, lang, "commands.economy.modals.currency.emoji.label"))
-                .setTextInputComponent(
-                  new TextInputBuilder()
-                    .setRequired(true)
-                    .setMinLength(1)
-                    .setMaxLength(50)
-                    .setStyle(TextInputStyle.Short)
-                    .setCustomId("NI_economy:emoji")
-                    .setPlaceholder(
-                      t(client, lang, "commands.economy.modals.currency.emoji.placeholder"),
-                    ),
-                ),
-            );
+          currentView = "currency_emoji";
+          emojiPage = 0;
 
-          await i.showModal(modal);
+          const components = buildComponents(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
+          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          await i.update({ embeds: [embed], components });
+        } else if (i.customId === "NI_economy:emoji_prev") {
+          emojiPage = Math.max(0, emojiPage - 1);
 
-          await i
-            .awaitModalSubmit({
-              time: 5 * 60 * 1000,
-              filter: (int: any) =>
-                int.user.id === interaction.user.id && int.customId === "NI_economy:currency_modal",
-            })
-            .then(async (int) => {
-              const emoji = int.fields.getTextInputValue("NI_economy:emoji");
+          const components = buildComponents(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
+          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          await i.update({ embeds: [embed], components });
+        } else if (i.customId === "NI_economy:emoji_next") {
+          const totalEmojis = interaction.guild?.emojis.cache.size || 0;
+          const maxPage = Math.ceil(totalEmojis / EMOJIS_PER_PAGE) - 1;
+          emojiPage = Math.min(maxPage, emojiPage + 1);
 
-              // Check if it's a custom emoji (ID format) or unicode emoji
-              const customEmojiMatch = emoji.match(/<a?:\w+:(\d+)>/);
-              if (customEmojiMatch) {
-                settings.currency.id = customEmojiMatch[1];
-                settings.currency.emoji = emoji;
-              } else {
-                settings.currency.emoji = emoji;
-                settings.currency.id = null;
-              }
-
-              await mostUsedQueries.setCurrency(
-                guild,
-                settings.currency.emoji,
-                settings.currency.id,
-              );
-
-              const components = buildComponents(
-                client,
-                lang,
-                settings,
-                currentView,
-                selectedRoleId,
-              );
-
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
-
-              await int.reply({
-                content: t(client, lang, "commands.economy.messages.currency_set", emoji),
-                flags: MessageFlagsBitField.Flags.Ephemeral,
-              });
-              await interaction.editReply({ embeds: [embed], components });
-            })
-            .catch(() => {});
+          const components = buildComponents(
+            client,
+            lang,
+            settings,
+            currentView,
+            selectedRoleId,
+            interaction.guild,
+            emojiPage,
+            EMOJIS_PER_PAGE,
+          );
+          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:remove_role") {
           const modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.economy.modals.remove_role.title"))
@@ -202,7 +191,7 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.role_removed"),
@@ -257,8 +246,8 @@ module.exports = {
               break;
           }
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:edit_work") {
           const modal = new ModalBuilder()
@@ -339,7 +328,7 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.settings_updated"),
@@ -406,7 +395,7 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.settings_updated"),
@@ -466,7 +455,7 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.settings_updated"),
@@ -567,7 +556,7 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.settings_updated"),
@@ -697,7 +686,7 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
               await int.reply({
                 content: t(client, lang, "commands.economy.messages.settings_updated"),
@@ -820,7 +809,7 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
               await int.reply({
                 content: t(
@@ -848,8 +837,8 @@ module.exports = {
             await mostUsedQueries.setShopRoles(guild, settings.shop.roles);
           }
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
           await i.update({ embeds: [embed], components });
           await i.followUp({
@@ -861,22 +850,47 @@ module.exports = {
         if (i.customId === "NI_economy:main_menu") {
           currentView = i.values[0] as "currency" | "shop" | "income";
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:income_menu") {
           currentView = i.values[0] as IncomeType;
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
           await i.update({ embeds: [embed], components });
         } else if (i.customId === "NI_economy:manage_role") {
           selectedRoleId = i.values[0];
           currentView = "shop_manage";
 
-          const components = buildComponents(client, lang, settings, currentView, selectedRoleId);
-          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+          const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+          embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
           await i.update({ embeds: [embed], components });
+        } else if (i.customId === "NI_economy:emoji_select") {
+          const selectedEmojiId = i.values[0];
+          const selectedEmoji = interaction.guild?.emojis.cache.get(selectedEmojiId);
+
+          if (selectedEmoji) {
+            const emojiStr = selectedEmoji.animated
+              ? `<a:${selectedEmoji.name}:${selectedEmoji.id}>`
+              : `<:${selectedEmoji.name}:${selectedEmoji.id}>`;
+
+            settings.currency.emoji = emojiStr;
+            settings.currency.id = selectedEmoji.id;
+
+            await mostUsedQueries.setCurrency(guild, settings.currency.emoji, settings.currency.id);
+
+            currentView = "currency";
+
+            const components = buildComponents(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+            embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
+
+            await i.update({ embeds: [embed], components });
+            await i.followUp({
+              content: t(client, lang, "commands.economy.messages.currency_set", emojiStr),
+              flags: MessageFlagsBitField.Flags.Ephemeral,
+            });
+          }
         }
       } else if (i.isRoleSelectMenu()) {
         if (i.customId === "NI_economy:add_shop_role") {
@@ -950,7 +964,7 @@ module.exports = {
                 currentView,
                 selectedRoleId,
               );
-              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId);
+              embed = buildEmbed(client, lang, settings, currentView, selectedRoleId, interaction.guild, emojiPage, EMOJIS_PER_PAGE);
 
               await int.reply({
                 content: t(
@@ -985,6 +999,9 @@ function buildEmbed(
   settings: EconomySettings,
   view: ViewType,
   selectedRoleId: string | null = null,
+  guildObj: import("discord.js").Guild | null = null,
+  emojiPage: number = 0,
+  emojisPerPage: number = 25,
 ): EmbedBuilder {
   const embed = new EmbedBuilder().setColor(client.holder.colors.default);
 
@@ -997,7 +1014,7 @@ function buildEmbed(
           name: t(client, lang, "commands.economy.embeds.base.fields.currency.name"),
           value:
             settings.currency.emoji ||
-            t(client, lang, "commands.economy.embeds.base.fields.currency.default"),
+            t(client, lang, "commands.economy.embeds.base.fields.currency.default", client.holder.emojis.discord.gems),
           inline: true,
         },
         {
@@ -1011,7 +1028,7 @@ function buildEmbed(
                       lang,
                       "commands.economy.embeds.base.fields.shop_roles.format",
                       `<@&${r.role}>`,
-                      r.price.toString(),
+                      r.price.toString(), settings.currency.emoji || client.holder.emojis.discord.gems,
                     ),
                   )
                   .join("\n")
@@ -1027,8 +1044,19 @@ function buildEmbed(
         name: t(client, lang, "commands.economy.embeds.currency.fields.current.name"),
         value:
           settings.currency.emoji ||
-          t(client, lang, "commands.economy.embeds.currency.fields.current.default"),
+          t(client, lang, "commands.economy.embeds.currency.fields.current.default", client.holder.emojis.discord.gems),
         inline: true,
+      });
+  } else if (view === "currency_emoji") {
+    const emojis = guildObj?.emojis.cache;
+    const totalEmojis = emojis?.size || 0;
+    const totalPages = Math.ceil(totalEmojis / emojisPerPage) || 1;
+
+    embed
+      .setTitle(t(client, lang, "commands.economy.embeds.currency_emoji.title"))
+      .setDescription(t(client, lang, "commands.economy.embeds.currency_emoji.description"))
+      .setFooter({
+        text: t(client, lang, "commands.economy.embeds.currency_emoji.footer", (emojiPage + 1).toString(), totalPages.toString()),
       });
   } else if (view === "shop") {
     embed
@@ -1038,7 +1066,7 @@ function buildEmbed(
         name: t(client, lang, "commands.economy.embeds.shop.fields.roles.name"),
         value:
           settings.shop.roles.length > 0
-            ? settings.shop.roles.map((r) => formatRoleWithDiscount(client, lang, r)).join("\n")
+            ? settings.shop.roles.map((r) => formatRoleWithDiscount(client, lang, r, settings)).join("\n")
             : t(client, lang, "commands.economy.embeds.shop.fields.roles.none"),
         inline: false,
       });
@@ -1295,7 +1323,7 @@ function buildEmbed(
             client,
             lang,
             "commands.economy.embeds.rob.fields.fail_chance.value",
-            settings.income.rob.punishment.fail_chance.toString(),
+              settings.income.rob.punishment.fail_chance.toString(),
           ),
           inline: true,
         },
@@ -1311,6 +1339,9 @@ function buildComponents(
   settings: EconomySettings,
   view: ViewType,
   selectedRoleId: string | null = null,
+  guildObj: import("discord.js").Guild | null = null,
+  emojiPage: number = 0,
+  emojisPerPage: number = 25,
 ): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
   const components: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
 
@@ -1358,6 +1389,52 @@ function buildComponents(
         .setStyle(ButtonStyle.Secondary),
     );
     components.push(buttonRow);
+  } else if (view === "currency_emoji") {
+    // Build paginated emoji select menu
+    const emojis = guildObj?.emojis.cache;
+    const emojiArray = emojis ? Array.from(emojis.values()) : [];
+    const totalEmojis = emojiArray.length;
+    const totalPages = Math.ceil(totalEmojis / emojisPerPage) || 1;
+
+    const startIndex = emojiPage * emojisPerPage;
+    const endIndex = Math.min(startIndex + emojisPerPage, totalEmojis);
+    const pageEmojis = emojiArray.slice(startIndex, endIndex);
+
+    if (pageEmojis.length > 0) {
+      const emojiSelectMenu = new StringSelectMenuBuilder()
+        .setCustomId("NI_economy:emoji_select")
+        .setPlaceholder(t(client, lang, "commands.economy.select_menus.emoji.placeholder"))
+        .setOptions(
+          pageEmojis.map((emoji) =>
+            new StringSelectMenuOptionBuilder()
+              .setLabel(emoji.name || "Unknown")
+              .setValue(emoji.id)
+              .setEmoji({ id: emoji.id, animated: emoji.animated || false })
+          )
+        );
+
+      const selectRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(emojiSelectMenu);
+      components.push(selectRow);
+    }
+
+    // Pagination buttons
+    const buttonRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+      new ButtonBuilder()
+        .setCustomId("NI_economy:emoji_prev")
+        .setLabel("◀")
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(emojiPage === 0),
+      new ButtonBuilder()
+        .setCustomId("NI_economy:emoji_next")
+        .setLabel("▶")
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(emojiPage >= totalPages - 1),
+      new ButtonBuilder()
+        .setCustomId("NI_economy:back")
+        .setLabel(t(client, lang, "commands.economy.buttons.back"))
+        .setStyle(ButtonStyle.Secondary),
+    );
+    components.push(buttonRow);
   } else if (view === "shop") {
     const roleSelectRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
       new RoleSelectMenuBuilder()
@@ -1380,7 +1457,7 @@ function buildComponents(
                 .setLabel(`${r.price}${discountInfo}`)
                 .setDescription(`Role ID: ${r.role}`)
                 .setValue(r.role)
-                .setEmoji(settings.currency?.id || "💰");
+                .setEmoji(settings.currency?.id || client.holder.emojis.discord.gems);
             }),
           ),
       );
@@ -1593,6 +1670,7 @@ function formatRoleWithDiscount(
   client: Client,
   lang: string,
   role: EconomySettings["shop"]["roles"][0],
+  settings: EconomySettings,
 ): string {
   const now = Date.now();
   const hasDiscount = role.discount.amount > 0;
@@ -1608,6 +1686,7 @@ function formatRoleWithDiscount(
       "commands.economy.embeds.shop.fields.roles.format",
       `<@&${role.role}>`,
       role.price.toString(),
+        settings.currency.emoji || client.holder.emojis.discord.gems,
     );
   }
 
@@ -1621,6 +1700,7 @@ function formatRoleWithDiscount(
       `<@&${role.role}>`,
       role.price.toString(),
       discountedPrice.toString(),
+        settings.currency.emoji || client.holder.emojis.discord.gems,
       role.discount.amount.toString(),
     );
   }
@@ -1662,3 +1742,5 @@ function getDiscountStatus(
 
   return t(client, lang, "commands.economy.embeds.shop.fields.roles.discount_active");
 }
+
+

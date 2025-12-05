@@ -189,7 +189,7 @@ export class DBUser {
       create: {
         userId: this.user.id,
         guildId: this.guild.id,
-        balanceNumber: `${this.guild.id.slice(0, 5)} ${this.user.id.slice(0, 5)} ${Math.floor(Math.random() * 1000)} ${Math.floor(Math.random() * 1000)}`,
+        balanceNumber: `${this.guild.id.slice(0, 4)} ${this.user.id.slice(0, 4)} ${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)} ${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`,
       },
     });
 

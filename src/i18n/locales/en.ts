@@ -254,6 +254,10 @@ export const en: TranslationSchema = {
       error: "An error occurred while generating the profile card.",
       success: "{0}'s profile card:",
     },
+    balance: {
+      error: "An error occurred while generating the balance card.",
+      success: "{0}'s balance card:",
+    },
     work: {
       messages: {
         disabled: "❌ The work command is currently disabled on this server.",
@@ -291,6 +295,52 @@ export const en: TranslationSchema = {
         no_money: "❌ {0} doesn't have any money to steal!",
         success: "🎭 You successfully robbed {0} and got away with {1}!",
         fail: "🚔 You got caught trying to rob {0} and paid a fine of {1}!",
+      },
+    },
+    bank: {
+      messages: {
+        invalid_amount: "❌ Please enter a valid amount.",
+        insufficient_wallet: "❌ You don't have enough money in your wallet! You only have {0}.",
+        insufficient_bank: "❌ You don't have enough money in your bank! You only have {0}.",
+        no_money_wallet: "❌ You don't have any money in your wallet to deposit.",
+        no_money_bank: "❌ You don't have any money in your bank to withdraw.",
+        deposit_success: "🏦 Successfully deposited {0} into your bank account!",
+        withdraw_success: "💵 Successfully withdrew {0} from your bank account!",
+      },
+      fields: {
+        wallet: "💳 Wallet",
+        bank: "🏦 Bank",
+      },
+    },
+    shop: {
+      embeds: {
+        main: {
+          title: "🛒 Role Shop",
+          description: "Browse and purchase roles using your currency. Select a role below to buy it.",
+          fields: {
+            roles: "Available Roles",
+          },
+          footer: "Page {0} of {1}",
+        },
+        purchase: {
+          title: "✅ Purchase Successful!",
+          fields: {
+            new_balance: "New Balance",
+          },
+        },
+      },
+      messages: {
+        empty: "🏪 The shop is empty! No roles are available for purchase.",
+        role_not_found: "❌ This role is no longer available in the shop.",
+        already_owned: "❌ You already own this role!",
+        insufficient_funds: "❌ You don't have enough money! Price: {0}, Your balance: {1}",
+        purchase_success: "🎉 You have successfully purchased {0} for {1}!",
+        purchase_error: "❌ An error occurred while processing your purchase. Your balance has been refunded.",
+      },
+      select_menus: {
+        buy: {
+          placeholder: "Select a role to purchase",
+        },
       },
     },
     appearance: {
@@ -553,12 +603,12 @@ export const en: TranslationSchema = {
             currency: {
               name: "Currency",
               value: "{0}",
-              default: "💰 (Default)",
+              default: "{0} (Default)",
             },
             shop_roles: {
               name: "Shop Roles",
               none: "No roles configured",
-              format: "{0} - {1}",
+              format: "{0} - {1} {2}",
             },
           },
         },
@@ -568,9 +618,14 @@ export const en: TranslationSchema = {
           fields: {
             current: {
               name: "Current Currency",
-              default: "💰 (Default)",
+              default: "{0} (Default)",
             },
           },
+        },
+        currency_emoji: {
+          title: "Select Currency Emoji",
+          description: "Choose an emoji from your server to use as currency.",
+          footer: "Page {0} of {1}",
         },
         shop: {
           title: "Role Shop Settings",
@@ -580,8 +635,8 @@ export const en: TranslationSchema = {
             roles: {
               name: "Available Roles",
               none: "No roles in shop",
-              format: "{0} - **{1}**",
-              discount_format: "{0} - ~~{1}~~ **{2}** ({3}% off)",
+              format: "{0} - **{1}** {2}",
+              discount_format: "{0} - ~~{1}~~ **{2}** {3} ({4}% off)",
               discount_active: "🏷️ Active",
               discount_scheduled: "⏰ Scheduled: {0}",
               discount_expired: "❌ Expired",
@@ -783,6 +838,9 @@ export const en: TranslationSchema = {
         },
         manage_role: {
           placeholder: "Select a role to manage",
+        },
+        emoji: {
+          placeholder: "Select an emoji as currency",
         },
       },
       modals: {
