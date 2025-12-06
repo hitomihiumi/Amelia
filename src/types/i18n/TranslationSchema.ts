@@ -1328,6 +1328,158 @@ export interface TranslationSchema {
         no_fields: string;
       };
     };
+
+    backup: {
+      embeds: {
+        main: {
+          title: string;
+          description: string;
+          fields: {
+            backups_count: {
+              name: string;
+              value: string;
+            };
+            warning: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        create: {
+          title: string;
+          description: string;
+          fields: {
+            roles: {
+              name: string;
+              value: string;
+            };
+            channels: {
+              name: string;
+              value: string;
+            };
+            info: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        list: {
+          title: string;
+          description: string;
+          roles: string;
+          channels: string;
+          fields: {
+            backups: {
+              name: string;
+            };
+            empty: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        view: {
+          title: string;
+          no_description: string;
+          fields: {
+            created: {
+              name: string;
+            };
+            created_by: {
+              name: string;
+            };
+            roles: {
+              name: string;
+            };
+            channels: {
+              name: string;
+            };
+          };
+        };
+        restore_confirm: {
+          title: string;
+          description: string;
+          fields: {
+            warning: {
+              name: string;
+              value: string;
+            };
+            actions: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+        brutal_confirm: {
+          title: string;
+          description: string;
+          fields: {
+            warning: {
+              name: string;
+              value: string;
+            };
+            deletion: {
+              name: string;
+              value: string;
+            };
+            actions: {
+              name: string;
+              value: string;
+            };
+          };
+        };
+      };
+      buttons: {
+        create: string;
+        back: string;
+        restore: string;
+        brutal_restore: string;
+        delete: string;
+        confirm_restore: string;
+        confirm_brutal: string;
+        cancel: string;
+      };
+      select_menus: {
+        main: {
+          placeholder: string;
+          options: {
+            create: {
+              label: string;
+              description: string;
+            };
+            list: {
+              label: string;
+              description: string;
+            };
+          };
+        };
+        list: {
+          placeholder: string;
+        };
+      };
+      modals: {
+        create: {
+          title: string;
+          name: {
+            label: string;
+            placeholder: string;
+          };
+          description: {
+            label: string;
+            placeholder: string;
+          };
+        };
+      };
+      messages: {
+        created: string;
+        deleted: string;
+        restored: string;
+        restore_failed: string;
+        brutal_restored: string;
+        brutal_restore_failed: string;
+        not_found: string;
+      };
+    };
   };
 
   // Events

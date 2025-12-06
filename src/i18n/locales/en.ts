@@ -1317,6 +1317,158 @@ export const en: TranslationSchema = {
         no_fields: "No fields configured for this game. Add a field first.",
       },
     },
+
+    backup: {
+      embeds: {
+        main: {
+          title: "Server Backup",
+          description: "Create and restore server backups. Backups include roles (with permissions and members) and channels (with permissions).",
+          fields: {
+            backups_count: {
+              name: "Available Backups",
+              value: "{0} backups",
+            },
+            warning: {
+              name: "⚠️ Important",
+              value: "Backups **do not** include:\n• Messages in channels\n• Server avatar and banner\n• Server settings (name, verification level, etc.)\n• Emojis and stickers\n• Bots and integrations",
+            },
+          },
+        },
+        create: {
+          title: "Create Backup",
+          description: "Create a new backup of your server's roles and channels.",
+          fields: {
+            roles: {
+              name: "Roles",
+              value: "{0} roles will be saved",
+            },
+            channels: {
+              name: "Channels",
+              value: "{0} channels will be saved",
+            },
+            info: {
+              name: "What will be saved",
+              value: "• Role names, colors, permissions, and members\n• Channel names, types, positions, and permissions\n• Category structure",
+            },
+          },
+        },
+        list: {
+          title: "Backup List",
+          description: "Select a backup to view details or restore.",
+          roles: "roles",
+          channels: "channels",
+          fields: {
+            backups: {
+              name: "Your Backups",
+            },
+            empty: {
+              name: "No Backups",
+              value: "You haven't created any backups yet. Create one to get started!",
+            },
+          },
+        },
+        view: {
+          title: "Backup: {0}",
+          no_description: "No description provided",
+          fields: {
+            created: {
+              name: "Created",
+            },
+            created_by: {
+              name: "Created By",
+            },
+            roles: {
+              name: "Roles",
+            },
+            channels: {
+              name: "Channels",
+            },
+          },
+        },
+        restore_confirm: {
+          title: "⚠️ Confirm Restore",
+          description: "Are you sure you want to restore this backup?",
+          fields: {
+            warning: {
+              name: "Warning",
+              value: "This action will **restore roles and channels** from the backup. Existing roles (with same name and color) and channels (with same name, type and category) will **not be duplicated**.",
+            },
+            actions: {
+              name: "This will:",
+              value: "• Create missing roles or use existing ones\n• Update permissions for existing roles\n• Assign roles to members who should have them\n• Create missing channels or skip existing ones\n• Restore channel permissions for new channels",
+            },
+          },
+        },
+        brutal_confirm: {
+          title: "💀 BRUTAL RESTORE - DANGER",
+          description: "**THIS IS A DESTRUCTIVE ACTION!**\n\nAre you absolutely sure you want to perform a brutal restore?",
+          fields: {
+            warning: {
+              name: "⚠️ CRITICAL WARNING",
+              value: "This action is **IRREVERSIBLE**! All your current roles and channels will be **PERMANENTLY DELETED**!",
+            },
+            deletion: {
+              name: "🗑️ Will be deleted:",
+              value: "• **ALL** roles (except @everyone and managed/bot roles)\n• **ALL** channels and categories (except the current channel)\n• All channel permissions\n• All role assignments",
+            },
+            actions: {
+              name: "After deletion:",
+              value: "• All roles from backup will be recreated\n• All channels from backup will be recreated\n• Roles will be assigned to members\n• Channel permissions will be restored",
+            },
+          },
+        },
+      },
+      buttons: {
+        create: "Create Backup",
+        back: "Back",
+        restore: "Restore",
+        brutal_restore: "Brutal Restore",
+        delete: "Delete",
+        confirm_restore: "Yes, Restore",
+        confirm_brutal: "DELETE ALL & RESTORE",
+        cancel: "Cancel",
+      },
+      select_menus: {
+        main: {
+          placeholder: "Select an action",
+          options: {
+            create: {
+              label: "Create Backup",
+              description: "Create a new server backup",
+            },
+            list: {
+              label: "View Backups",
+              description: "View and manage existing backups",
+            },
+          },
+        },
+        list: {
+          placeholder: "Select a backup to view",
+        },
+      },
+      modals: {
+        create: {
+          title: "Create Backup",
+          name: {
+            label: "Backup Name",
+            placeholder: "Enter a name for this backup",
+          },
+          description: {
+            label: "Description (optional)",
+            placeholder: "Enter a description for this backup",
+          },
+        },
+      },
+      messages: {
+        created: "Backup **{0}** has been created successfully!",
+        deleted: "Backup has been deleted.",
+        restored: "Backup **{0}** has been restored successfully!",
+        restore_failed: "Failed to restore backup. Some roles or channels may not have been created.",
+        brutal_restored: "💀 Brutal restore of **{0}** completed! All previous roles and channels have been deleted and recreated from backup.",
+        brutal_restore_failed: "💀 Brutal restore failed. Some roles or channels may have been deleted but not recreated. Check bot permissions.",
+        not_found: "Backup not found.",
+      },
+    },
   },
 
   events: {

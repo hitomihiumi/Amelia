@@ -174,3 +174,25 @@ model History {
   @@index([userId])
   @@index([type])
 }
+
+// Backup model for server backups
+model Backup {
+  id        String   @id @default(cuid())
+  guildId   String
+  createdAt DateTime @default(now())
+  createdBy String // User ID who created the backup
+
+  name        String // Backup name
+  description String? // Optional description
+
+  // Backup data
+  roles    Json // Array of role data with permissions and members
+  channels Json // Array of channel data with permissions
+
+  // Metadata
+  roleCount    Int
+  channelCount Int
+
+  @@index([guildId])
+  @@index([createdAt])
+}
