@@ -12,99 +12,132 @@ export interface PathMap {
 
 export const UserPathMap: PathMap = {
   "custom.balance.number": {
-    field: "balanceNumber",
+    "field": "balanceNumber"
   },
   "custom.balance.mode": {
-    field: "balanceMode",
+    "field": "balanceMode"
   },
   "custom.balance.solid": {
-    field: "balanceSolid",
+    "field": "balanceSolid"
   },
   "custom.balance.url": {
-    field: "balanceUrl",
+    "field": "balanceUrl"
   },
   "custom.profile.bio": {
-    field: "profileBio",
+    "field": "profileBio"
   },
   "custom.profile.mode": {
-    field: "profileMode",
+    "field": "profileMode"
   },
   "custom.profile.solid": {
-    field: "profileSolid",
+    "field": "profileSolid"
   },
   "custom.profile.url": {
-    field: "profileUrl",
+    "field": "profileUrl"
   },
   "custom.profile.color": {
-    field: "profileColor",
+    "field": "profileColor"
   },
   "custom.profile.icons": {
-    field: "profileIcons",
+    "field": "profileIcons"
   },
   "custom.profile.icons_padding": {
-    field: "profileIconsPadding",
+    "field": "profileIconsPadding"
   },
   "custom.rank.mode": {
-    field: "rankMode",
+    "field": "rankMode"
   },
   "custom.rank.solid": {
-    field: "rankSolid",
+    "field": "rankSolid"
   },
   "custom.rank.url": {
-    field: "rankUrl",
+    "field": "rankUrl"
   },
   "custom.rank.color": {
-    field: "rankColor",
+    "field": "rankColor"
   },
   "custom.level_up.mode": {
-    field: "levelupMode",
+    "field": "levelupMode"
   },
   "custom.level_up.solid": {
-    field: "levelupSolid",
+    "field": "levelupSolid"
   },
   "custom.level_up.url": {
-    field: "levelupUrl",
+    "field": "levelupUrl"
   },
   "custom.badges": {
-    field: "customBadges",
+    "field": "customBadges"
   },
   "temp.games": {
-    field: "tempGames",
+    "field": "tempGames"
   },
   "temp.voice_time": {
-    field: "tempVoiceTime",
+    "field": "tempVoiceTime"
   },
   "presets.jtc": {
-    field: "jtcPresets",
+    "field": "jtcPresets"
   },
-  custom: {
-    field: "",
-    children: ["badges", "balance", "level_up", "profile", "rank"],
+  "custom": {
+    "field": "",
+    "children": [
+      "badges",
+      "balance",
+      "level_up",
+      "profile",
+      "rank"
+    ]
   },
   "custom.balance": {
-    field: "",
-    children: ["mode", "number", "solid", "url"],
+    "field": "",
+    "children": [
+      "mode",
+      "number",
+      "solid",
+      "url"
+    ]
   },
   "custom.profile": {
-    field: "",
-    children: ["bio", "color", "icons", "icons_padding", "mode", "solid", "url"],
+    "field": "",
+    "children": [
+      "bio",
+      "color",
+      "icons",
+      "icons_padding",
+      "mode",
+      "solid",
+      "url"
+    ]
   },
   "custom.rank": {
-    field: "",
-    children: ["color", "mode", "solid", "url"],
+    "field": "",
+    "children": [
+      "color",
+      "mode",
+      "solid",
+      "url"
+    ]
   },
   "custom.level_up": {
-    field: "",
-    children: ["mode", "solid", "url"],
+    "field": "",
+    "children": [
+      "mode",
+      "solid",
+      "url"
+    ]
   },
-  temp: {
-    field: "",
-    children: ["games", "voice_time"],
+  "temp": {
+    "field": "",
+    "children": [
+      "games",
+      "voice_time"
+    ]
   },
-  presets: {
-    field: "",
-    children: ["jtc"],
-  },
+  "presets": {
+    "field": "",
+    "children": [
+      "jtc"
+    ]
+  }
 };
 
 export const UserFieldMap: Record<string, string> = {
@@ -129,5 +162,5 @@ export const UserFieldMap: Record<string, string> = {
   "custom.badges": "customBadges",
   "temp.games": "tempGames",
   "temp.voice_time": "tempVoiceTime",
-  "presets.jtc": "jtcPresets",
+  "presets.jtc": "jtcPresets"
 };

@@ -1469,6 +1469,152 @@ export const ru: TranslationSchema = {
         not_found: "Бэкап не найден.",
       },
     },
+
+    embed: {
+      embeds: {
+        base: { title: "📋 Управление эмбедами", description: "Создавайте и управляйте кастомными эмбедами для вашего сервера" },
+        list: { title: "📋 Ваши эмбеды", description: "Выберите эмбед для редактирования" },
+        edit: {
+          title: "✏️ Редактирование эмбеда",
+          description: "Настройте ваш кастомный эмбед",
+          fields: { name: "Название", title: "Заголовок", color: "Цвет", fields_count: "Поля", timestamp: "Время" },
+        },
+        fields: { title: "📋 Поля эмбеда", description: "Управление полями эмбеда (макс. 25)" },
+        field_edit: {
+          title: "📝 Редактирование поля",
+          description: "Настройте это поле",
+          fields: { name: "Название", value: "Значение", inline: "В ряд" },
+        },
+        author: {
+          title: "👤 Настройки автора",
+          description: "Настройка автора эмбеда",
+          fields: { name: "Имя", icon: "URL иконки", url: "URL" },
+        },
+        footer: {
+          title: "📎 Настройки подвала",
+          description: "Настройка подвала эмбеда",
+          fields: { text: "Текст", icon: "URL иконки" },
+        },
+      },
+      select_menus: {
+        base: { placeholder: "Что вы хотите сделать?", options: { create: "Создать эмбед", edit: "Редактировать эмбед" } },
+        list: { placeholder: "Выберите эмбед", no_embeds: "Эмбеды не найдены" },
+        edit: {
+          placeholder: "Что редактировать?",
+          options: {
+            name: "Название", title: "Заголовок", description: "Описание", color: "Цвет",
+            thumbnail: "Миниатюра", image: "Изображение", author: "Автор", footer: "Подвал",
+            fields: "Поля", timestamp: "Время",
+          },
+        },
+        fields: { placeholder: "Выберите поле", add: "Добавить поле" },
+      },
+      buttons: {
+        preview: "Предпросмотр", save: "Сохранить", delete: "Удалить", back: "Назад", clear: "Очистить",
+        field_name: "Название", field_value: "Значение", field_inline: "В ряд",
+        author_name: "Имя", author_icon: "Иконка", author_url: "URL",
+        footer_text: "Текст", footer_icon: "Иконка",
+      },
+      modals: {
+        title: { label: "Заголовок эмбеда" }, description: { label: "Описание эмбеда" },
+        color: { label: "Цвет (HEX)" }, name: { label: "Название эмбеда" },
+        thumbnail: { label: "URL миниатюры" }, image: { label: "URL изображения" },
+        author_name: { label: "Имя автора" }, author_icon: { label: "URL иконки автора" }, author_url: { label: "URL автора" },
+        footer_text: { label: "Текст подвала" }, footer_icon: { label: "URL иконки подвала" },
+        field_name: { label: "Название поля" }, field_value: { label: "Значение поля" },
+        search: { title: "Поиск эмбедов", label: "Поисковый запрос" },
+      },
+      messages: { max_fields: "Максимум 25 полей на эмбед" },
+    },
+    button: {
+      embeds: {
+        base: { title: "🔘 Управление кнопками", description: "Создавайте и управляйте кастомными кнопками" },
+        list: { title: "🔘 Ваши кнопки", description: "Выберите кнопку для редактирования" },
+        edit: {
+          title: "✏️ Редактирование кнопки",
+          description: "Настройте вашу кастомную кнопку",
+          fields: { name: "Название", label: "Текст", style: "Стиль", emoji: "Эмодзи", url: "URL", disabled: "Отключена" },
+        },
+        emoji: { title: "😀 Выберите эмодзи", description: "Выберите эмодзи для кнопки" },
+      },
+      select_menus: {
+        base: { placeholder: "Что вы хотите сделать?", options: { create: "Создать кнопку", edit: "Редактировать кнопку" } },
+        list: { placeholder: "Выберите кнопку", no_buttons: "Кнопки не найдены" },
+        style: { placeholder: "Выберите стиль кнопки" },
+        emoji: { placeholder: "Выберите эмодзи" },
+      },
+      buttons: {
+        name: "Название", label: "Текст", emoji: "Эмодзи", url: "URL", disabled: "Отключена",
+        preview: "Предпросмотр", save: "Сохранить", delete: "Удалить", back: "Назад", clear_emoji: "Убрать эмодзи",
+      },
+      modals: {
+        label: { label: "Текст кнопки" }, url: { label: "URL кнопки" }, name: { label: "Название кнопки" },
+        search: { title: "Поиск кнопок", label: "Поисковый запрос" },
+      },
+      messages: { preview: "Предпросмотр кнопки:" },
+    },
+    selectmenu: {
+      embeds: {
+        base: { title: "📋 Управление селект меню", description: "Создавайте и управляйте кастомными селект меню" },
+        list: { title: "📋 Ваши селект меню", description: "Выберите меню для редактирования" },
+        edit: {
+          title: "✏️ Редактирование меню",
+          description: "Настройте ваше кастомное меню",
+          fields: { name: "Название", placeholder: "Плейсхолдер", options_count: "Опции", min_values: "Мин. значений", max_values: "Макс. значений", disabled: "Отключено" },
+        },
+        options: { title: "📋 Опции меню", description: "Управление опциями меню (макс. 25)" },
+        option_edit: {
+          title: "📝 Редактирование опции",
+          description: "Настройте эту опцию",
+          fields: { label: "Текст", value: "Значение", description: "Описание", emoji: "Эмодзи", default: "По умолчанию" },
+        },
+        emoji: { title: "😀 Выберите эмодзи", description: "Выберите эмодзи для опции" },
+      },
+      select_menus: {
+        base: { placeholder: "Что вы хотите сделать?", options: { create: "Создать меню", edit: "Редактировать меню" } },
+        list: { placeholder: "Выберите меню", no_menus: "Меню не найдены" },
+        options: { placeholder: "Выберите опцию", add: "Добавить опцию" },
+        emoji: { placeholder: "Выберите эмодзи" },
+      },
+      buttons: {
+        name: "Название", placeholder: "Плейсхолдер", minmax: "Мин/Макс", disabled: "Отключено",
+        options: "Опции", preview: "Предпросмотр", save: "Сохранить", delete: "Удалить", back: "Назад",
+        opt_label: "Текст", opt_value: "Значение", opt_description: "Описание",
+        opt_emoji: "Эмодзи", clear_emoji: "Убрать", opt_default: "По умолчанию",
+      },
+      modals: {
+        name: { label: "Название меню" }, placeholder: { label: "Текст плейсхолдера" },
+        opt_label: { label: "Текст опции" }, opt_value: { label: "Значение опции" }, opt_description: { label: "Описание опции" },
+        minmax: { title: "Мин/Макс значений", min_label: "Минимум выборов", max_label: "Максимум выборов" },
+        search: { title: "Поиск меню", label: "Поисковый запрос" },
+      },
+      messages: { max_options: "Максимум 25 опций на меню", no_options: "Добавьте хотя бы одну опцию", preview: "Предпросмотр меню:" },
+    },
+    send: {
+      embeds: {
+        main: { title: "📤 Конструктор сообщений", description: "Создавайте и отправляйте сообщения с кастомными эмбедами, кнопками и меню." },
+        select_embeds: { title: "📋 Выбор эмбедов", description: "Выберите эмбеды для включения в сообщение (макс. 10)." },
+        select_buttons: { title: "🔘 Выбор кнопок", description: "Выберите кнопки для включения в сообщение (макс. 25, 5 в ряд)." },
+        select_selectmenus: { title: "📋 Выбор меню", description: "Выберите меню для включения в сообщение (макс. 5, по одному в ряд)." },
+        select_channel: { title: "📢 Выбор канала", description: "Выберите канал для отправки сообщения." },
+        preview: { title: "👁️ Предпросмотр", description: "Это предпросмотр вашего сообщения." },
+      },
+      fields: {
+        content: "Содержимое", embeds: "Эмбеды", buttons: "Кнопки", selectmenus: "Меню", channel: "Канал",
+        not_set: "Не задано", none: "Нет", selected: "выбрано",
+      },
+      buttons: {
+        edit_content: "Редактировать", select_embeds: "Выбрать эмбеды", select_buttons: "Выбрать кнопки",
+        select_menus: "Выбрать меню", select_channel: "Выбрать канал",
+        clear_content: "Очистить текст", clear_embeds: "Очистить эмбеды", clear_buttons: "Очистить кнопки", clear_menus: "Очистить меню",
+        preview: "Предпросмотр", send: "Отправить", back: "Назад",
+      },
+      messages: {
+        sent: "Сообщение отправлено в {0}!", no_channel: "Пожалуйста, выберите канал для отправки сообщения.",
+        no_content: "Пожалуйста, добавьте текст или хотя бы один эмбед.", channel_not_found: "Канал не найден или недоступен.",
+        send_failed: "Не удалось отправить сообщение. Проверьте права бота.",
+      },
+    },
   },
 
   events: {
@@ -1481,6 +1627,7 @@ export const ru: TranslationSchema = {
       cooldown: "Пожалуйста, подождите **{0}с** перед повторным использованием **{1}**",
       component_permission: "Этот компонент не для вас!",
       component_not_active: "Этот компонент больше не активен",
+      scenario_not_found: "⚠️ Для этого компонента не назначен сценарий. Пожалуйста, настройте сценарий для этой кнопки/меню в настройках сценариев.",
     },
   },
 

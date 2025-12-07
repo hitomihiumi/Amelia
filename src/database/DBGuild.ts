@@ -26,6 +26,8 @@ type GuildPath =
   | "utils.components.modals"
   | "utils.components.embed"
   | "utils.components.buttons"
+  | "utils.components.selectMenus"
+  | "utils.components.scenarios"
   | "economy.currency.emoji"
   | "economy.currency.id"
   | "moderation.moderation_roles"

@@ -1469,6 +1469,152 @@ export const en: TranslationSchema = {
         not_found: "Backup not found.",
       },
     },
+
+    embed: {
+      embeds: {
+        base: { title: "📋 Custom Embed Management", description: "Create and manage custom embeds for your server" },
+        list: { title: "📋 Your Embeds", description: "Select an embed to edit" },
+        edit: {
+          title: "✏️ Edit Embed",
+          description: "Configure your custom embed",
+          fields: { name: "Name", title: "Title", color: "Color", fields_count: "Fields", timestamp: "Timestamp" },
+        },
+        fields: { title: "📋 Embed Fields", description: "Manage embed fields (max 25)" },
+        field_edit: {
+          title: "📝 Edit Field",
+          description: "Configure this field",
+          fields: { name: "Name", value: "Value", inline: "Inline" },
+        },
+        author: {
+          title: "👤 Author Settings",
+          description: "Configure embed author",
+          fields: { name: "Name", icon: "Icon URL", url: "URL" },
+        },
+        footer: {
+          title: "📎 Footer Settings",
+          description: "Configure embed footer",
+          fields: { text: "Text", icon: "Icon URL" },
+        },
+      },
+      select_menus: {
+        base: { placeholder: "What would you like to do?", options: { create: "Create Embed", edit: "Edit Embed" } },
+        list: { placeholder: "Select an embed", no_embeds: "No embeds found" },
+        edit: {
+          placeholder: "What to edit?",
+          options: {
+            name: "Name", title: "Title", description: "Description", color: "Color",
+            thumbnail: "Thumbnail", image: "Image", author: "Author", footer: "Footer",
+            fields: "Fields", timestamp: "Timestamp",
+          },
+        },
+        fields: { placeholder: "Select a field", add: "Add Field" },
+      },
+      buttons: {
+        preview: "Preview", save: "Save", delete: "Delete", back: "Back", clear: "Clear",
+        field_name: "Name", field_value: "Value", field_inline: "Inline",
+        author_name: "Name", author_icon: "Icon", author_url: "URL",
+        footer_text: "Text", footer_icon: "Icon",
+      },
+      modals: {
+        title: { label: "Embed title" }, description: { label: "Embed description" },
+        color: { label: "Color (HEX)" }, name: { label: "Embed name" },
+        thumbnail: { label: "Thumbnail URL" }, image: { label: "Image URL" },
+        author_name: { label: "Author name" }, author_icon: { label: "Author icon URL" }, author_url: { label: "Author URL" },
+        footer_text: { label: "Footer text" }, footer_icon: { label: "Footer icon URL" },
+        field_name: { label: "Field name" }, field_value: { label: "Field value" },
+        search: { title: "Search Embeds", label: "Search query" },
+      },
+      messages: { max_fields: "Maximum 25 fields per embed" },
+    },
+    button: {
+      embeds: {
+        base: { title: "🔘 Custom Button Management", description: "Create and manage custom buttons" },
+        list: { title: "🔘 Your Buttons", description: "Select a button to edit" },
+        edit: {
+          title: "✏️ Edit Button",
+          description: "Configure your custom button",
+          fields: { name: "Name", label: "Label", style: "Style", emoji: "Emoji", url: "URL", disabled: "Disabled" },
+        },
+        emoji: { title: "😀 Select Emoji", description: "Choose an emoji for the button" },
+      },
+      select_menus: {
+        base: { placeholder: "What would you like to do?", options: { create: "Create Button", edit: "Edit Button" } },
+        list: { placeholder: "Select a button", no_buttons: "No buttons found" },
+        style: { placeholder: "Select button style" },
+        emoji: { placeholder: "Select an emoji" },
+      },
+      buttons: {
+        name: "Name", label: "Label", emoji: "Emoji", url: "URL", disabled: "Disabled",
+        preview: "Preview", save: "Save", delete: "Delete", back: "Back", clear_emoji: "Clear Emoji",
+      },
+      modals: {
+        label: { label: "Button label" }, url: { label: "Button URL" }, name: { label: "Button name" },
+        search: { title: "Search Buttons", label: "Search query" },
+      },
+      messages: { preview: "Button preview:" },
+    },
+    selectmenu: {
+      embeds: {
+        base: { title: "📋 Custom Select Menu Management", description: "Create and manage custom select menus" },
+        list: { title: "📋 Your Select Menus", description: "Select a menu to edit" },
+        edit: {
+          title: "✏️ Edit Select Menu",
+          description: "Configure your custom select menu",
+          fields: { name: "Name", placeholder: "Placeholder", options_count: "Options", min_values: "Min Values", max_values: "Max Values", disabled: "Disabled" },
+        },
+        options: { title: "📋 Menu Options", description: "Manage menu options (max 25)" },
+        option_edit: {
+          title: "📝 Edit Option",
+          description: "Configure this option",
+          fields: { label: "Label", value: "Value", description: "Description", emoji: "Emoji", default: "Default" },
+        },
+        emoji: { title: "😀 Select Emoji", description: "Choose an emoji for the option" },
+      },
+      select_menus: {
+        base: { placeholder: "What would you like to do?", options: { create: "Create Menu", edit: "Edit Menu" } },
+        list: { placeholder: "Select a menu", no_menus: "No menus found" },
+        options: { placeholder: "Select an option", add: "Add Option" },
+        emoji: { placeholder: "Select an emoji" },
+      },
+      buttons: {
+        name: "Name", placeholder: "Placeholder", minmax: "Min/Max", disabled: "Disabled",
+        options: "Options", preview: "Preview", save: "Save", delete: "Delete", back: "Back",
+        opt_label: "Label", opt_value: "Value", opt_description: "Description",
+        opt_emoji: "Emoji", clear_emoji: "Clear", opt_default: "Default",
+      },
+      modals: {
+        name: { label: "Menu name" }, placeholder: { label: "Placeholder text" },
+        opt_label: { label: "Option label" }, opt_value: { label: "Option value" }, opt_description: { label: "Option description" },
+        minmax: { title: "Min/Max Values", min_label: "Minimum selections", max_label: "Maximum selections" },
+        search: { title: "Search Menus", label: "Search query" },
+      },
+      messages: { max_options: "Maximum 25 options per menu", no_options: "Add at least one option", preview: "Select menu preview:" },
+    },
+    send: {
+      embeds: {
+        main: { title: "📤 Message Composer", description: "Create and send messages with custom embeds, buttons, and select menus." },
+        select_embeds: { title: "📋 Select Embeds", description: "Choose embeds to include in your message (max 10)." },
+        select_buttons: { title: "🔘 Select Buttons", description: "Choose buttons to include in your message (max 25, 5 per row)." },
+        select_selectmenus: { title: "📋 Select Menus", description: "Choose select menus to include in your message (max 5, one per row)." },
+        select_channel: { title: "📢 Select Channel", description: "Choose the channel to send the message to." },
+        preview: { title: "👁️ Preview", description: "This is a preview of your message composition." },
+      },
+      fields: {
+        content: "Content", embeds: "Embeds", buttons: "Buttons", selectmenus: "Select Menus", channel: "Channel",
+        not_set: "Not set", none: "None", selected: "selected",
+      },
+      buttons: {
+        edit_content: "Edit Content", select_embeds: "Select Embeds", select_buttons: "Select Buttons",
+        select_menus: "Select Menus", select_channel: "Select Channel",
+        clear_content: "Clear Content", clear_embeds: "Clear Embeds", clear_buttons: "Clear Buttons", clear_menus: "Clear Menus",
+        preview: "Preview", send: "Send Message", back: "Back",
+      },
+      messages: {
+        sent: "Message sent to {0}!", no_channel: "Please select a channel to send the message to.",
+        no_content: "Please add content or at least one embed.", channel_not_found: "Channel not found or inaccessible.",
+        send_failed: "Failed to send message. Check bot permissions.",
+      },
+    },
   },
 
   events: {
@@ -1481,6 +1627,7 @@ export const en: TranslationSchema = {
       cooldown: "Please wait **{0}s** before using **{1}** again",
       component_permission: "This component is not for you!",
       component_not_active: "This component is no longer active",
+      scenario_not_found: "⚠️ This component has no scenario assigned. Please configure a scenario for this button/menu in the scenario settings.",
     },
   },
 

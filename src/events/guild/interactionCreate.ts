@@ -8,10 +8,26 @@ import {
 } from "../../handlers/functions";
 import { Guild } from "../../helpers";
 import { t } from "../../i18n/helpers";
+import { handleScenarioInteraction } from "../../handlers/scenarios";
 
 module.exports = async (client: Client, interaction: any) => {
   let guild = interaction.guild ? new Guild(client, interaction.guild) : undefined;
   let lang = guild ? await guild.get(`settings.language`) : "en";
+
+  // Check for custom scenario interactions first (for non-prefixed custom IDs)
+  if (
+    interaction.guild &&
+    (interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit()) &&
+    interaction.customId.startsWith("CI_")
+  ) {
+    try {
+      const handled = await handleScenarioInteraction(client, interaction);
+      if (handled) return;
+    } catch (error) {
+      console.error("[InteractionCreate] Scenario handler error:", error);
+    }
+  }
+
   if (interaction.isCommand()) {
     guild = guild as Guild;
     if (interaction.acknowledged) {

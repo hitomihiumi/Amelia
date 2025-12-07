@@ -50,9 +50,11 @@ model Guild {
   findTeamGames             Json    @default("[]")
 
   // Custom Components
-  customModals  Json @default("[]")
-  customEmbeds  Json @default("[]")
-  customButtons Json @default("[]")
+  customModals      Json @default("[]")
+  customEmbeds      Json @default("[]")
+  customButtons     Json @default("[]")
+  customSelectMenus Json @default("[]")
+  customScenarios   Json @default("[]")
 
   // Giveaways
   giveaways Json @default("[]")

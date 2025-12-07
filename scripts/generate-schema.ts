@@ -169,6 +169,16 @@ const guildSchemaMap: Record<string, SchemaField> = {
     prismaType: "Json",
     default: '"[]"',
   },
+  "utils.components.selectMenus": {
+    prismaField: "customSelectMenus",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+  "utils.components.scenarios": {
+    prismaField: "customScenarios",
+    prismaType: "Json",
+    default: '"[]"',
+  },
 
   // Giveaways
   "utils.giveaways": {

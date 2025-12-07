@@ -1480,6 +1480,152 @@ export interface TranslationSchema {
         not_found: string;
       };
     };
+
+    embed: {
+      embeds: {
+        base: { title: string; description: string };
+        list: { title: string; description: string };
+        edit: {
+          title: string;
+          description: string;
+          fields: { name: string; title: string; color: string; fields_count: string; timestamp: string };
+        };
+        fields: { title: string; description: string };
+        field_edit: {
+          title: string;
+          description: string;
+          fields: { name: string; value: string; inline: string };
+        };
+        author: {
+          title: string;
+          description: string;
+          fields: { name: string; icon: string; url: string };
+        };
+        footer: {
+          title: string;
+          description: string;
+          fields: { text: string; icon: string };
+        };
+      };
+      select_menus: {
+        base: { placeholder: string; options: { create: string; edit: string } };
+        list: { placeholder: string; no_embeds: string };
+        edit: {
+          placeholder: string;
+          options: {
+            name: string; title: string; description: string; color: string;
+            thumbnail: string; image: string; author: string; footer: string;
+            fields: string; timestamp: string;
+          };
+        };
+        fields: { placeholder: string; add: string };
+      };
+      buttons: {
+        preview: string; save: string; delete: string; back: string; clear: string;
+        field_name: string; field_value: string; field_inline: string;
+        author_name: string; author_icon: string; author_url: string;
+        footer_text: string; footer_icon: string;
+      };
+      modals: {
+        title: { label: string }; description: { label: string };
+        color: { label: string }; name: { label: string };
+        thumbnail: { label: string }; image: { label: string };
+        author_name: { label: string }; author_icon: { label: string }; author_url: { label: string };
+        footer_text: { label: string }; footer_icon: { label: string };
+        field_name: { label: string }; field_value: { label: string };
+        search: { title: string; label: string };
+      };
+      messages: { max_fields: string };
+    };
+    button: {
+      embeds: {
+        base: { title: string; description: string };
+        list: { title: string; description: string };
+        edit: {
+          title: string;
+          description: string;
+          fields: { name: string; label: string; style: string; emoji: string; url: string; disabled: string };
+        };
+        emoji: { title: string; description: string };
+      };
+      select_menus: {
+        base: { placeholder: string; options: { create: string; edit: string } };
+        list: { placeholder: string; no_buttons: string };
+        style: { placeholder: string };
+        emoji: { placeholder: string };
+      };
+      buttons: {
+        name: string; label: string; emoji: string; url: string; disabled: string;
+        preview: string; save: string; delete: string; back: string; clear_emoji: string;
+      };
+      modals: {
+        label: { label: string }; url: { label: string }; name: { label: string };
+        search: { title: string; label: string };
+      };
+      messages: { preview: string };
+    };
+    selectmenu: {
+      embeds: {
+        base: { title: string; description: string };
+        list: { title: string; description: string };
+        edit: {
+          title: string;
+          description: string;
+          fields: { name: string; placeholder: string; options_count: string; min_values: string; max_values: string; disabled: string };
+        };
+        options: { title: string; description: string };
+        option_edit: {
+          title: string;
+          description: string;
+          fields: { label: string; value: string; description: string; emoji: string; default: string };
+        };
+        emoji: { title: string; description: string };
+      };
+      select_menus: {
+        base: { placeholder: string; options: { create: string; edit: string } };
+        list: { placeholder: string; no_menus: string };
+        options: { placeholder: string; add: string };
+        emoji: { placeholder: string };
+      };
+      buttons: {
+        name: string; placeholder: string; minmax: string; disabled: string;
+        options: string; preview: string; save: string; delete: string; back: string;
+        opt_label: string; opt_value: string; opt_description: string;
+        opt_emoji: string; clear_emoji: string; opt_default: string;
+      };
+      modals: {
+        name: { label: string }; placeholder: { label: string };
+        opt_label: { label: string }; opt_value: { label: string }; opt_description: { label: string };
+        minmax: { title: string; min_label: string; max_label: string };
+        search: { title: string; label: string };
+      };
+      messages: { max_options: string; no_options: string; preview: string };
+    };
+    send: {
+      embeds: {
+        main: { title: string; description: string };
+        select_embeds: { title: string; description: string };
+        select_buttons: { title: string; description: string };
+        select_selectmenus: { title: string; description: string };
+        select_channel: { title: string; description: string };
+        preview: { title: string; description: string };
+      };
+      fields: {
+        content: string; embeds: string; buttons: string; selectmenus: string; channel: string;
+        not_set: string; none: string; selected: string;
+      };
+      buttons: {
+        edit_content: string; select_embeds: string; select_buttons: string;
+        select_menus: string; select_channel: string;
+        clear_content: string; clear_embeds: string; clear_buttons: string; clear_menus: string;
+        preview: string; send: string; back: string;
+      };
+      messages: {
+        sent: string; no_channel: string;
+        no_content: string; channel_not_found: string;
+        send_failed: string;
+      };
+    };
   };
 
   // Events
@@ -1493,6 +1639,7 @@ export interface TranslationSchema {
       cooldown: string;
       component_permission: string;
       component_not_active: string;
+      scenario_not_found: string;
     };
   };
 

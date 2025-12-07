@@ -1,5 +1,5 @@
 import { EmojiResolvable } from "discord.js";
-import { EmbedCustom, ModalCustom, IModalField, ButtonCustom } from "./";
+import { EmbedCustom, ModalCustom, IModalField, ButtonCustom, SelectMenuCustom, ScenarioCustom } from "./";
 import { SchemaKey, LiteralSchemaKey } from "./SchemaKeys";
 
 export interface GuildSchema {
@@ -42,6 +42,8 @@ export interface GuildSchema {
       modals: Array<ModalCustom>;
       embed: Array<EmbedCustom>;
       buttons: Array<ButtonCustom>;
+      selectMenus: Array<SelectMenuCustom>;
+      scenarios: Array<ScenarioCustom>;
     };
     giveaways: Giveaway[];
   };
