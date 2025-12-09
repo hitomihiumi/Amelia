@@ -4,9 +4,13 @@
 
 ### Hybrid Database System
 - **PostgreSQL** - User settings, guild configuration, metadata
-- **MongoDB** - User level/economy data, temporary cache
+- **MongoDB** - User level/economy data, guild components (custom modals, buttons, etc.), temporary cache
 
 ### Automatic Routing
+DBGuild class automatically routes requests:
+- `utils.components.*` → MongoDB (modals, embed, buttons, selectMenus, scenarios)
+- Everything else → PostgreSQL
+
 DBUser class automatically routes requests:
 - `level.*` → MongoDB
 - `economy.*` → MongoDB  
@@ -36,6 +40,11 @@ const settings = await guild.get("settings");
 // Level system settings
 await guild.set("utils.levels.enabled", true);
 await guild.set("utils.levels.ignore_channels", ["123", "456"]);
+
+// Custom components (stored in MongoDB for better performance)
+const modals = await guild.get("utils.components.modals");
+const buttons = await guild.get("utils.components.buttons");
+await guild.set("utils.components.modals", [...modals, newModal]);
 ```
 
 ### User Data

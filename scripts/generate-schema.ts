@@ -153,32 +153,13 @@ const guildSchemaMap: Record<string, SchemaField> = {
     default: '"[]"',
   },
 
-  // Components
-  "utils.components.modals": {
-    prismaField: "customModals",
-    prismaType: "Json",
-    default: '"[]"',
-  },
-  "utils.components.embed": {
-    prismaField: "customEmbeds",
-    prismaType: "Json",
-    default: '"[]"',
-  },
-  "utils.components.buttons": {
-    prismaField: "customButtons",
-    prismaType: "Json",
-    default: '"[]"',
-  },
-  "utils.components.selectMenus": {
-    prismaField: "customSelectMenus",
-    prismaType: "Json",
-    default: '"[]"',
-  },
-  "utils.components.scenarios": {
-    prismaField: "customScenarios",
-    prismaType: "Json",
-    default: '"[]"',
-  },
+  // Components - STORED IN MONGODB, not in Prisma
+  // These paths are kept for mapping but won't generate Prisma fields
+  // "utils.components.modals": MongoDB
+  // "utils.components.embed": MongoDB
+  // "utils.components.buttons": MongoDB
+  // "utils.components.selectMenus": MongoDB
+  // "utils.components.scenarios": MongoDB
 
   // Giveaways
   "utils.giveaways": {
@@ -525,11 +506,31 @@ const userSchemaMap: Record<string, SchemaField> = {
 };
 
 /**
+ * MongoDB-stored paths (not in PostgreSQL)
+ * These paths are stored in MongoDB for better performance
+ */
+const mongoDBPaths: Record<string, string[]> = {
+  guild: [
+    "utils.components.modals",
+    "utils.components.embed",
+    "utils.components.buttons",
+    "utils.components.selectMenus",
+    "utils.components.scenarios",
+  ],
+};
+
+/**
  * Build path hierarchy to support parent paths
  */
-function buildPathHierarchy(schemaMap: Record<string, SchemaField>): PathMapping {
+function buildPathHierarchy(
+  schemaMap: Record<string, SchemaField>,
+  schemaName: string,
+): PathMapping {
   const hierarchy: PathMapping = {};
   const paths = Object.keys(schemaMap);
+
+  // Get MongoDB paths for this schema
+  const mongoPaths = mongoDBPaths[schemaName.toLowerCase()] || [];
 
   // Add all leaf paths
   for (const fullPath of paths) {
@@ -539,10 +540,20 @@ function buildPathHierarchy(schemaMap: Record<string, SchemaField>): PathMapping
     };
   }
 
+  // Add MongoDB paths with empty field (they don't map to PostgreSQL)
+  for (const mongoPath of mongoPaths) {
+    hierarchy[mongoPath] = {
+      field: "", // MongoDB paths don't have PostgreSQL fields
+    };
+  }
+
   // Build all parent paths (including intermediate ones)
   const parentPaths = new Map<string, Set<string>>();
 
-  for (const fullPath of paths) {
+  // Include MongoDB paths in the hierarchy building
+  const allPaths = [...paths, ...mongoPaths];
+
+  for (const fullPath of allPaths) {
     const parts = fullPath.split(".");
 
     // Build all possible parent paths for this leaf
@@ -558,7 +569,7 @@ function buildPathHierarchy(schemaMap: Record<string, SchemaField>): PathMapping
   }
 
   // Also check if any existing path is a parent of another path (for direct children like utils.giveaways)
-  for (const fullPath of paths) {
+  for (const fullPath of allPaths) {
     const parts = fullPath.split(".");
     if (parts.length >= 2) {
       // Check if this path's parent should have it as a direct child
@@ -566,7 +577,7 @@ function buildPathHierarchy(schemaMap: Record<string, SchemaField>): PathMapping
       const childKey = parts[parts.length - 1];
 
       // If the parent path is not a leaf path, add this as a child
-      if (!schemaMap[parentPath]) {
+      if (!schemaMap[parentPath] && !mongoPaths.includes(parentPath)) {
         if (!parentPaths.has(parentPath)) {
           parentPaths.set(parentPath, new Set());
         }
@@ -578,7 +589,7 @@ function buildPathHierarchy(schemaMap: Record<string, SchemaField>): PathMapping
   // Add parent paths with their children
   for (const [parentPath, childrenSet] of parentPaths) {
     // Skip if this is a leaf path (already added above)
-    if (schemaMap[parentPath]) continue;
+    if (schemaMap[parentPath] || mongoPaths.includes(parentPath)) continue;
 
     hierarchy[parentPath] = {
       field: "", // Parent paths don't map to a single field
@@ -597,7 +608,10 @@ function generateMapping(
   schemaMap: Record<string, SchemaField>,
   outputPath: string,
 ): void {
-  const hierarchy = buildPathHierarchy(schemaMap);
+  const hierarchy = buildPathHierarchy(schemaMap, name);
+
+  // Get MongoDB paths for this schema (they shouldn't be in FieldMap)
+  const mongoPaths = mongoDBPaths[name.toLowerCase()] || [];
 
   const content = `/**
  * Auto-generated ${name} path mapping
@@ -613,6 +627,7 @@ export interface PathMap {
 
 export const ${name}PathMap: PathMap = ${JSON.stringify(hierarchy, null, 2)};
 
+// Note: MongoDB paths (${mongoPaths.join(", ")}) are not included in FieldMap
 export const ${name}FieldMap: Record<string, string> = ${JSON.stringify(
     Object.fromEntries(Object.entries(schemaMap).map(([path, field]) => [path, field.prismaField])),
     null,

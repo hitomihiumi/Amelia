@@ -80,21 +80,6 @@ export const GuildPathMap: PathMap = {
   "utils.find_team.games": {
     field: "findTeamGames",
   },
-  "utils.components.modals": {
-    field: "customModals",
-  },
-  "utils.components.embed": {
-    field: "customEmbeds",
-  },
-  "utils.components.buttons": {
-    field: "customButtons",
-  },
-  "utils.components.selectMenus": {
-    field: "customSelectMenus",
-  },
-  "utils.components.scenarios": {
-    field: "customScenarios",
-  },
   "utils.giveaways": {
     field: "giveaways",
   },
@@ -209,6 +194,21 @@ export const GuildPathMap: PathMap = {
   "temp.join_to_create.map": {
     field: "jtcTempMap",
   },
+  "utils.components.modals": {
+    field: "",
+  },
+  "utils.components.embed": {
+    field: "",
+  },
+  "utils.components.buttons": {
+    field: "",
+  },
+  "utils.components.selectMenus": {
+    field: "",
+  },
+  "utils.components.scenarios": {
+    field: "",
+  },
   settings: {
     field: "",
     children: ["language", "prefix"],
@@ -236,10 +236,6 @@ export const GuildPathMap: PathMap = {
   "utils.find_team": {
     field: "",
     children: ["channel", "embed", "enabled", "games", "select_placeholder", "send_channel"],
-  },
-  "utils.components": {
-    field: "",
-    children: ["buttons", "embed", "modals", "scenarios", "selectMenus"],
   },
   economy: {
     field: "",
@@ -328,8 +324,13 @@ export const GuildPathMap: PathMap = {
     field: "",
     children: ["map"],
   },
+  "utils.components": {
+    field: "",
+    children: ["buttons", "embed", "modals", "scenarios", "selectMenus"],
+  },
 };
 
+// Note: MongoDB paths (utils.components.modals, utils.components.embed, utils.components.buttons, utils.components.selectMenus, utils.components.scenarios) are not included in FieldMap
 export const GuildFieldMap: Record<string, string> = {
   "settings.prefix": "prefix",
   "settings.language": "language",
@@ -354,11 +355,6 @@ export const GuildFieldMap: Record<string, string> = {
   "utils.find_team.select_placeholder": "findTeamSelectPlaceholder",
   "utils.find_team.embed": "findTeamEmbed",
   "utils.find_team.games": "findTeamGames",
-  "utils.components.modals": "customModals",
-  "utils.components.embed": "customEmbeds",
-  "utils.components.buttons": "customButtons",
-  "utils.components.selectMenus": "customSelectMenus",
-  "utils.components.scenarios": "customScenarios",
   "utils.giveaways": "giveaways",
   "economy.currency.emoji": "currencyEmoji",
   "economy.currency.id": "currencyId",

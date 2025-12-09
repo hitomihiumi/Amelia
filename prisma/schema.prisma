@@ -49,12 +49,8 @@ model Guild {
   findTeamEmbed             Json    @default("{\"title\":null,\"description\":null,\"color\":null,\"thumbnail\":null,\"image\":null,\"footer\":null}")
   findTeamGames             Json    @default("[]")
 
-  // Custom Components
-  customModals      Json @default("[]")
-  customEmbeds      Json @default("[]")
-  customButtons     Json @default("[]")
-  customSelectMenus Json @default("[]")
-  customScenarios   Json @default("[]")
+  // Custom Components are stored in MongoDB for better performance
+  // See: utils.components in DBGuild.ts
 
   // Giveaways
   giveaways Json @default("[]")

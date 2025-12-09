@@ -107,6 +107,7 @@ export const UserPathMap: PathMap = {
   },
 };
 
+// Note: MongoDB paths () are not included in FieldMap
 export const UserFieldMap: Record<string, string> = {
   "custom.balance.number": "balanceNumber",
   "custom.balance.mode": "balanceMode",

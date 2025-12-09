@@ -5,6 +5,7 @@ import { Client } from "discord.js";
 import { DBUser } from "./DBUser";
 import { DBHistory } from "./DBHistory";
 import { GuildPathMap, GuildFieldMap } from "./mappings/GuildMapping";
+import { TempCache } from "./TempCache";
 
 /**
  * Type-safe paths for Guild data access
@@ -68,18 +69,65 @@ type PathValue<T extends GuildPath> = T extends "settings.prefix"
                             : any;
 
 /**
+ * Default values for MongoDB-stored fields (components)
+ */
+const MONGODB_DEFAULTS = {
+  components: {
+    modals: [],
+    embed: [],
+    buttons: [],
+    selectMenus: [],
+    scenarios: [],
+  },
+};
+
+/**
  * Database Guild wrapper with type-safe access
+ * Automatically routes utils.components fields to MongoDB for better performance
  */
 export class DBGuild {
   public client: Client;
   public guild: DiscordGuild;
   public history: DBHistory;
   private data: PrismaGuild | null = null;
+  private mongoCache: TempCache<typeof GuildPathMap>;
 
   constructor(client: Client, guild: DiscordGuild) {
     this.client = client;
     this.guild = guild;
     this.history = new DBHistory(client, guild);
+    // Use persistent MongoDB collection for guild components data
+    this.mongoCache = new TempCache("guild_data", guild.id, GuildPathMap);
+  }
+
+  /**
+   * Check if a path should be stored in MongoDB (components)
+   */
+  private isMongoDBPath(path: string): boolean {
+    return path.startsWith("utils.components");
+  }
+
+  /**
+   * Initialize MongoDB data with defaults for components
+   */
+  private async ensureMongoDBData(path: string): Promise<void> {
+    if (!path.startsWith("utils.components")) return;
+
+    const hasComponents = await this.mongoCache.has("utils.components.modals");
+    if (!hasComponents) {
+      // Initialize all component fields
+      await this.mongoCache.set("utils.components.modals", MONGODB_DEFAULTS.components.modals);
+      await this.mongoCache.set("utils.components.embed", MONGODB_DEFAULTS.components.embed);
+      await this.mongoCache.set("utils.components.buttons", MONGODB_DEFAULTS.components.buttons);
+      await this.mongoCache.set(
+        "utils.components.selectMenus",
+        MONGODB_DEFAULTS.components.selectMenus,
+      );
+      await this.mongoCache.set(
+        "utils.components.scenarios",
+        MONGODB_DEFAULTS.components.scenarios,
+      );
+    }
   }
 
   /**
@@ -102,8 +150,31 @@ export class DBGuild {
   /**
    * Get value by path with type inference
    * Supports parent paths (e.g., "utils.join_to_create" returns all JTC fields)
+   * Automatically routes utils.components to MongoDB for better performance
    */
   public async get<T extends GuildPath>(path: T): Promise<PathValue<T>> {
+    // Route to MongoDB for components paths
+    if (this.isMongoDBPath(path)) {
+      await this.ensureMongoDBData(path);
+
+      // Check if this is the parent path "utils.components"
+      if (path === "utils.components") {
+        const result: any = {
+          modals: (await this.mongoCache.get("utils.components.modals")) || [],
+          embed: (await this.mongoCache.get("utils.components.embed")) || [],
+          buttons: (await this.mongoCache.get("utils.components.buttons")) || [],
+          selectMenus: (await this.mongoCache.get("utils.components.selectMenus")) || [],
+          scenarios: (await this.mongoCache.get("utils.components.scenarios")) || [],
+        };
+        return result as PathValue<T>;
+      }
+
+      // Leaf path: get single value from MongoDB
+      const value = await this.mongoCache.get(path);
+      return (value ?? []) as PathValue<T>;
+    }
+
+    // PostgreSQL path
     await this.ensureGuild();
 
     const data = await prisma.guild.findUnique({
@@ -161,8 +232,39 @@ export class DBGuild {
 
   /**
    * Set value by path with type safety
+   * Automatically routes utils.components to MongoDB for better performance
    */
   public async set<T extends GuildPath>(path: T, value: PathValue<T>): Promise<void> {
+    // Route to MongoDB for components paths
+    if (this.isMongoDBPath(path)) {
+      await this.ensureMongoDBData(path);
+
+      // Check if this is the parent path "utils.components"
+      if (path === "utils.components" && typeof value === "object" && value !== null) {
+        const components = value as any;
+        if (components.modals !== undefined) {
+          await this.mongoCache.set("utils.components.modals", components.modals);
+        }
+        if (components.embed !== undefined) {
+          await this.mongoCache.set("utils.components.embed", components.embed);
+        }
+        if (components.buttons !== undefined) {
+          await this.mongoCache.set("utils.components.buttons", components.buttons);
+        }
+        if (components.selectMenus !== undefined) {
+          await this.mongoCache.set("utils.components.selectMenus", components.selectMenus);
+        }
+        if (components.scenarios !== undefined) {
+          await this.mongoCache.set("utils.components.scenarios", components.scenarios);
+        }
+        return;
+      }
+
+      await this.mongoCache.set(path, value);
+      return;
+    }
+
+    // PostgreSQL path
     await this.ensureGuild();
 
     // Check if this is a parent path (has children)
@@ -267,6 +369,13 @@ export class DBGuild {
    * Push to array
    */
   public async push(path: string, value: any): Promise<void> {
+    // Route to MongoDB for components paths
+    if (this.isMongoDBPath(path)) {
+      await this.ensureMongoDBData(path);
+      await this.mongoCache.push(path, value);
+      return;
+    }
+
     const current = await this.get(path as any);
     if (Array.isArray(current)) {
       await this.set(path as any, [...current, value]);
@@ -277,6 +386,12 @@ export class DBGuild {
    * Delete field
    */
   public async delete(path: string): Promise<void> {
+    // Route to MongoDB for components paths
+    if (this.isMongoDBPath(path)) {
+      await this.mongoCache.delete(path);
+      return;
+    }
+
     await this.set(path as any, null as any);
   }
 
@@ -284,15 +399,28 @@ export class DBGuild {
    * Check if path exists
    */
   public async has(path: string): Promise<boolean> {
+    // Route to MongoDB for components paths
+    if (this.isMongoDBPath(path)) {
+      return await this.mongoCache.has(path);
+    }
+
     const value = await this.get(path as any);
     return value !== null && value !== undefined;
   }
 
   /**
-   * Get all guild data
+   * Get all guild data (PostgreSQL + MongoDB components)
    */
-  public async all(): Promise<PrismaGuild> {
-    return await this.ensureGuild();
+  public async all(): Promise<PrismaGuild & { components?: any }> {
+    const pgData = await this.ensureGuild();
+
+    // Get components from MongoDB
+    const components = await this.get("utils.components" as any);
+
+    return {
+      ...pgData,
+      components,
+    };
   }
 
   /**
