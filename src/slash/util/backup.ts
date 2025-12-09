@@ -129,15 +129,29 @@ module.exports = {
             .setDescription(t(client, lang, "commands.backup.embeds.main.description") as string)
             .addFields(
               {
-                name: t(client, lang, "commands.backup.embeds.main.fields.backups_count.name") as string,
-                value: (t(client, lang, "commands.backup.embeds.main.fields.backups_count.value") as string).replace("{0}", String(backups.length)),
+                name: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.main.fields.backups_count.name",
+                ) as string,
+                value: (
+                  t(
+                    client,
+                    lang,
+                    "commands.backup.embeds.main.fields.backups_count.value",
+                  ) as string
+                ).replace("{0}", String(backups.length)),
                 inline: true,
               },
               {
                 name: t(client, lang, "commands.backup.embeds.main.fields.warning.name") as string,
-                value: t(client, lang, "commands.backup.embeds.main.fields.warning.value") as string,
+                value: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.main.fields.warning.value",
+                ) as string,
                 inline: false,
-              }
+              },
             );
           break;
 
@@ -148,19 +162,27 @@ module.exports = {
             .addFields(
               {
                 name: t(client, lang, "commands.backup.embeds.create.fields.roles.name") as string,
-                value: (t(client, lang, "commands.backup.embeds.create.fields.roles.value") as string).replace("{0}", String(interaction.guild!.roles.cache.size)),
+                value: (
+                  t(client, lang, "commands.backup.embeds.create.fields.roles.value") as string
+                ).replace("{0}", String(interaction.guild!.roles.cache.size)),
                 inline: true,
               },
               {
-                name: t(client, lang, "commands.backup.embeds.create.fields.channels.name") as string,
-                value: (t(client, lang, "commands.backup.embeds.create.fields.channels.value") as string).replace("{0}", String(interaction.guild!.channels.cache.size)),
+                name: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.create.fields.channels.name",
+                ) as string,
+                value: (
+                  t(client, lang, "commands.backup.embeds.create.fields.channels.value") as string
+                ).replace("{0}", String(interaction.guild!.channels.cache.size)),
                 inline: true,
               },
               {
                 name: t(client, lang, "commands.backup.embeds.create.fields.info.name") as string,
                 value: t(client, lang, "commands.backup.embeds.create.fields.info.value") as string,
                 inline: false,
-              }
+              },
             );
           break;
 
@@ -179,7 +201,10 @@ module.exports = {
             const pageBackups = backups.slice(startIndex, startIndex + BACKUPS_PER_PAGE);
 
             const backupsList = pageBackups
-              .map((b, i) => `**${startIndex + i + 1}.** ${b.name}\n└ ${b.roleCount} ${t(client, lang, "commands.backup.embeds.list.roles") as string}, ${b.channelCount} ${t(client, lang, "commands.backup.embeds.list.channels") as string} • <t:${Math.floor(b.createdAt.getTime() / 1000)}:R>`)
+              .map(
+                (b, i) =>
+                  `**${startIndex + i + 1}.** ${b.name}\n└ ${b.roleCount} ${t(client, lang, "commands.backup.embeds.list.roles") as string}, ${b.channelCount} ${t(client, lang, "commands.backup.embeds.list.channels") as string} • <t:${Math.floor(b.createdAt.getTime() / 1000)}:R>`,
+              )
               .join("\n\n");
 
             embed.addFields({
@@ -194,29 +219,53 @@ module.exports = {
             const backup = backups.find((b) => b.id === selectedBackupId);
             if (backup) {
               embed
-                .setTitle((t(client, lang, "commands.backup.embeds.view.title") as string).replace("{0}", backup.name))
-                .setDescription(backup.description || t(client, lang, "commands.backup.embeds.view.no_description") as string)
+                .setTitle(
+                  (t(client, lang, "commands.backup.embeds.view.title") as string).replace(
+                    "{0}",
+                    backup.name,
+                  ),
+                )
+                .setDescription(
+                  backup.description ||
+                    (t(client, lang, "commands.backup.embeds.view.no_description") as string),
+                )
                 .addFields(
                   {
-                    name: t(client, lang, "commands.backup.embeds.view.fields.created.name") as string,
+                    name: t(
+                      client,
+                      lang,
+                      "commands.backup.embeds.view.fields.created.name",
+                    ) as string,
                     value: `<t:${Math.floor(backup.createdAt.getTime() / 1000)}:F>`,
                     inline: true,
                   },
                   {
-                    name: t(client, lang, "commands.backup.embeds.view.fields.created_by.name") as string,
+                    name: t(
+                      client,
+                      lang,
+                      "commands.backup.embeds.view.fields.created_by.name",
+                    ) as string,
                     value: `<@${backup.createdBy}>`,
                     inline: true,
                   },
                   {
-                    name: t(client, lang, "commands.backup.embeds.view.fields.roles.name") as string,
+                    name: t(
+                      client,
+                      lang,
+                      "commands.backup.embeds.view.fields.roles.name",
+                    ) as string,
                     value: String(backup.roleCount),
                     inline: true,
                   },
                   {
-                    name: t(client, lang, "commands.backup.embeds.view.fields.channels.name") as string,
+                    name: t(
+                      client,
+                      lang,
+                      "commands.backup.embeds.view.fields.channels.name",
+                    ) as string,
                     value: String(backup.channelCount),
                     inline: true,
-                  }
+                  },
                 );
             }
           }
@@ -225,38 +274,82 @@ module.exports = {
         case "restore_confirm":
           embed
             .setTitle(t(client, lang, "commands.backup.embeds.restore_confirm.title") as string)
-            .setDescription(t(client, lang, "commands.backup.embeds.restore_confirm.description") as string)
+            .setDescription(
+              t(client, lang, "commands.backup.embeds.restore_confirm.description") as string,
+            )
             .setColor(0xff0000)
             .addFields(
               {
-                name: t(client, lang, "commands.backup.embeds.restore_confirm.fields.warning.name") as string,
-                value: t(client, lang, "commands.backup.embeds.restore_confirm.fields.warning.value") as string,
+                name: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.restore_confirm.fields.warning.name",
+                ) as string,
+                value: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.restore_confirm.fields.warning.value",
+                ) as string,
               },
               {
-                name: t(client, lang, "commands.backup.embeds.restore_confirm.fields.actions.name") as string,
-                value: t(client, lang, "commands.backup.embeds.restore_confirm.fields.actions.value") as string,
-              }
+                name: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.restore_confirm.fields.actions.name",
+                ) as string,
+                value: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.restore_confirm.fields.actions.value",
+                ) as string,
+              },
             );
           break;
 
         case "brutal_confirm":
           embed
             .setTitle(t(client, lang, "commands.backup.embeds.brutal_confirm.title") as string)
-            .setDescription(t(client, lang, "commands.backup.embeds.brutal_confirm.description") as string)
+            .setDescription(
+              t(client, lang, "commands.backup.embeds.brutal_confirm.description") as string,
+            )
             .setColor(0xff0000)
             .addFields(
               {
-                name: t(client, lang, "commands.backup.embeds.brutal_confirm.fields.warning.name") as string,
-                value: t(client, lang, "commands.backup.embeds.brutal_confirm.fields.warning.value") as string,
+                name: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.brutal_confirm.fields.warning.name",
+                ) as string,
+                value: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.brutal_confirm.fields.warning.value",
+                ) as string,
               },
               {
-                name: t(client, lang, "commands.backup.embeds.brutal_confirm.fields.deletion.name") as string,
-                value: t(client, lang, "commands.backup.embeds.brutal_confirm.fields.deletion.value") as string,
+                name: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.brutal_confirm.fields.deletion.name",
+                ) as string,
+                value: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.brutal_confirm.fields.deletion.value",
+                ) as string,
               },
               {
-                name: t(client, lang, "commands.backup.embeds.brutal_confirm.fields.actions.name") as string,
-                value: t(client, lang, "commands.backup.embeds.brutal_confirm.fields.actions.value") as string,
-              }
+                name: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.brutal_confirm.fields.actions.name",
+                ) as string,
+                value: t(
+                  client,
+                  lang,
+                  "commands.backup.embeds.brutal_confirm.fields.actions.value",
+                ) as string,
+              },
             );
           break;
       }
@@ -273,20 +366,46 @@ module.exports = {
             new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
               new StringSelectMenuBuilder()
                 .setCustomId("NI_backup:menu")
-                .setPlaceholder(t(client, lang, "commands.backup.select_menus.main.placeholder") as string)
+                .setPlaceholder(
+                  t(client, lang, "commands.backup.select_menus.main.placeholder") as string,
+                )
                 .setOptions(
                   new StringSelectMenuOptionBuilder()
-                    .setLabel(t(client, lang, "commands.backup.select_menus.main.options.create.label") as string)
-                    .setDescription(t(client, lang, "commands.backup.select_menus.main.options.create.description") as string)
+                    .setLabel(
+                      t(
+                        client,
+                        lang,
+                        "commands.backup.select_menus.main.options.create.label",
+                      ) as string,
+                    )
+                    .setDescription(
+                      t(
+                        client,
+                        lang,
+                        "commands.backup.select_menus.main.options.create.description",
+                      ) as string,
+                    )
                     .setValue("create")
                     .setEmoji("💾"),
                   new StringSelectMenuOptionBuilder()
-                    .setLabel(t(client, lang, "commands.backup.select_menus.main.options.list.label") as string)
-                    .setDescription(t(client, lang, "commands.backup.select_menus.main.options.list.description") as string)
+                    .setLabel(
+                      t(
+                        client,
+                        lang,
+                        "commands.backup.select_menus.main.options.list.label",
+                      ) as string,
+                    )
+                    .setDescription(
+                      t(
+                        client,
+                        lang,
+                        "commands.backup.select_menus.main.options.list.description",
+                      ) as string,
+                    )
                     .setValue("list")
-                    .setEmoji("📋")
-                )
-            )
+                    .setEmoji("📋"),
+                ),
+            ),
           );
           break;
 
@@ -301,8 +420,8 @@ module.exports = {
               new ButtonBuilder()
                 .setCustomId("NI_backup:back")
                 .setLabel(t(client, lang, "commands.backup.buttons.back") as string)
-                .setStyle(ButtonStyle.Secondary)
-            )
+                .setStyle(ButtonStyle.Secondary),
+            ),
           );
           break;
 
@@ -313,18 +432,20 @@ module.exports = {
 
             const selectMenu = new StringSelectMenuBuilder()
               .setCustomId("NI_backup:select")
-              .setPlaceholder(t(client, lang, "commands.backup.select_menus.list.placeholder") as string)
+              .setPlaceholder(
+                t(client, lang, "commands.backup.select_menus.list.placeholder") as string,
+              )
               .setOptions(
                 pageBackups.map((b, i) =>
                   new StringSelectMenuOptionBuilder()
                     .setLabel(`${startIndex + i + 1}. ${b.name}`)
                     .setDescription(`${b.roleCount} roles, ${b.channelCount} channels`)
-                    .setValue(b.id)
-                )
+                    .setValue(b.id),
+                ),
               );
 
             components.push(
-              new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(selectMenu)
+              new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(selectMenu),
             );
           }
 
@@ -349,8 +470,8 @@ module.exports = {
               new ButtonBuilder()
                 .setCustomId("NI_backup:back")
                 .setLabel(t(client, lang, "commands.backup.buttons.back") as string)
-                .setStyle(ButtonStyle.Secondary)
-            )
+                .setStyle(ButtonStyle.Secondary),
+            ),
           );
           break;
 
@@ -375,8 +496,8 @@ module.exports = {
               new ButtonBuilder()
                 .setCustomId("NI_backup:back_to_list")
                 .setLabel(t(client, lang, "commands.backup.buttons.back") as string)
-                .setStyle(ButtonStyle.Secondary)
-            )
+                .setStyle(ButtonStyle.Secondary),
+            ),
           );
           break;
 
@@ -391,8 +512,8 @@ module.exports = {
               new ButtonBuilder()
                 .setCustomId("NI_backup:cancel_restore")
                 .setLabel(t(client, lang, "commands.backup.buttons.cancel") as string)
-                .setStyle(ButtonStyle.Secondary)
-            )
+                .setStyle(ButtonStyle.Secondary),
+            ),
           );
           break;
 
@@ -407,8 +528,8 @@ module.exports = {
               new ButtonBuilder()
                 .setCustomId("NI_backup:cancel_restore")
                 .setLabel(t(client, lang, "commands.backup.buttons.cancel") as string)
-                .setStyle(ButtonStyle.Secondary)
-            )
+                .setStyle(ButtonStyle.Secondary),
+            ),
           );
           break;
       }
@@ -474,21 +595,31 @@ module.exports = {
                   .setTextInputComponent(
                     new TextInputBuilder()
                       .setCustomId("NI_backup:name")
-                      .setPlaceholder(t(client, lang, "commands.backup.modals.create.name.placeholder") as string)
+                      .setPlaceholder(
+                        t(client, lang, "commands.backup.modals.create.name.placeholder") as string,
+                      )
                       .setStyle(TextInputStyle.Short)
                       .setRequired(true)
-                      .setMaxLength(100)
+                      .setMaxLength(100),
                   ),
                 new LabelBuilder()
-                  .setLabel(t(client, lang, "commands.backup.modals.create.description.label") as string)
+                  .setLabel(
+                    t(client, lang, "commands.backup.modals.create.description.label") as string,
+                  )
                   .setTextInputComponent(
                     new TextInputBuilder()
                       .setCustomId("NI_backup:description")
-                      .setPlaceholder(t(client, lang, "commands.backup.modals.create.description.placeholder") as string)
+                      .setPlaceholder(
+                        t(
+                          client,
+                          lang,
+                          "commands.backup.modals.create.description.placeholder",
+                        ) as string,
+                      )
                       .setStyle(TextInputStyle.Paragraph)
                       .setRequired(false)
-                      .setMaxLength(500)
-                  )
+                      .setMaxLength(500),
+                  ),
               );
 
             await i.showModal(createModal);
@@ -496,21 +627,25 @@ module.exports = {
             try {
               const modalSubmit = await i.awaitModalSubmit({
                 time: 5 * 60 * 1000,
-                filter: (si: any) => si.user.id === interaction.user.id && si.customId === "NI_backup:create_modal",
+                filter: (si: any) =>
+                  si.user.id === interaction.user.id && si.customId === "NI_backup:create_modal",
               });
 
               await modalSubmit.deferUpdate();
 
               const backupName = modalSubmit.fields.getTextInputValue("NI_backup:name");
-              const backupDescription = modalSubmit.fields.getTextInputValue("NI_backup:description") || null;
+              const backupDescription =
+                modalSubmit.fields.getTextInputValue("NI_backup:description") || null;
 
               // Create backup
               const rolesData: RoleBackupData[] = [];
               const channelsData: ChannelBackupData[] = [];
 
               // Backup roles (exclude @everyone and managed roles)
-              const roles = interaction.guild!.roles.cache
-                .filter((role) => role.id !== interaction.guild!.id && !role.managed)
+              const roles = interaction
+                .guild!.roles.cache.filter(
+                  (role) => role.id !== interaction.guild!.id && !role.managed,
+                )
                 .sort((a, b) => b.position - a.position);
 
               for (const [, role] of roles) {
@@ -528,12 +663,14 @@ module.exports = {
               }
 
               // Backup channels
-              const channels = interaction.guild!.channels.cache
-                .filter((channel) => !channel.isThread()) // Exclude threads
+              const channels = interaction
+                .guild!.channels.cache.filter((channel) => !channel.isThread()) // Exclude threads
                 .sort((a, b) => {
                   // Sort categories first, then by position
-                  if (a.type === ChannelType.GuildCategory && b.type !== ChannelType.GuildCategory) return -1;
-                  if (a.type !== ChannelType.GuildCategory && b.type === ChannelType.GuildCategory) return 1;
+                  if (a.type === ChannelType.GuildCategory && b.type !== ChannelType.GuildCategory)
+                    return -1;
+                  if (a.type !== ChannelType.GuildCategory && b.type === ChannelType.GuildCategory)
+                    return 1;
                   const aPos = "position" in a ? a.position : 0;
                   const bPos = "position" in b ? b.position : 0;
                   return aPos - bPos;
@@ -599,11 +736,17 @@ module.exports = {
               currentView = "main";
 
               await modalSubmit.followUp({
-                content: (t(client, lang, "commands.backup.messages.created") as string).replace("{0}", backupName),
+                content: (t(client, lang, "commands.backup.messages.created") as string).replace(
+                  "{0}",
+                  backupName,
+                ),
                 flags: MessageFlagsBitField.Flags.Ephemeral,
               });
 
-              await interaction.editReply({ embeds: [buildEmbed()], components: buildComponents() });
+              await interaction.editReply({
+                embeds: [buildEmbed()],
+                components: buildComponents(),
+              });
             } catch (error) {
               // Modal timed out
             }
@@ -670,7 +813,7 @@ module.exports = {
                 try {
                   // Check if role with same name and color already exists
                   const existingRole = interaction.guild!.roles.cache.find(
-                    (r) => r.name === roleData.name && r.hexColor === roleData.color
+                    (r) => r.name === roleData.name && r.hexColor === roleData.color,
                   );
 
                   if (existingRole) {
@@ -679,7 +822,10 @@ module.exports = {
 
                     // Update role permissions if different
                     if (existingRole.permissions.bitfield.toString() !== roleData.permissions) {
-                      await existingRole.setPermissions(BigInt(roleData.permissions), `Backup restore: ${backup.name}`);
+                      await existingRole.setPermissions(
+                        BigInt(roleData.permissions),
+                        `Backup restore: ${backup.name}`,
+                      );
                     }
 
                     // Assign role to members who don't have it
@@ -732,7 +878,7 @@ module.exports = {
                 try {
                   // Check if category with same name already exists
                   const existingCategory = interaction.guild!.channels.cache.find(
-                    (c) => c.type === ChannelType.GuildCategory && c.name === channelData.name
+                    (c) => c.type === ChannelType.GuildCategory && c.name === channelData.name,
                   );
 
                   if (existingCategory) {
@@ -763,17 +909,22 @@ module.exports = {
               }
 
               // Create other channels
-              const otherChannels = channelsData.filter((c) => c.type !== ChannelType.GuildCategory);
+              const otherChannels = channelsData.filter(
+                (c) => c.type !== ChannelType.GuildCategory,
+              );
               for (const channelData of otherChannels) {
                 try {
                   // Get parent ID from map or backup
-                  const parentId = channelData.parentId ? channelIdMap.get(channelData.parentId) || channelData.parentId : null;
+                  const parentId = channelData.parentId
+                    ? channelIdMap.get(channelData.parentId) || channelData.parentId
+                    : null;
 
                   // Check if channel with same name, type and parent already exists
                   const existingChannel = interaction.guild!.channels.cache.find(
-                    (c) => c.name === channelData.name &&
-                           c.type === channelData.type &&
-                           c.parentId === parentId
+                    (c) =>
+                      c.name === channelData.name &&
+                      c.type === channelData.type &&
+                      c.parentId === parentId,
                   );
 
                   if (existingChannel) {
@@ -789,7 +940,6 @@ module.exports = {
                     deny: BigInt(perm.deny),
                   }));
 
-
                   const options: any = {
                     name: channelData.name,
                     type: channelData.type,
@@ -802,8 +952,10 @@ module.exports = {
                   if (channelData.topic) options.topic = channelData.topic;
                   if (channelData.nsfw !== undefined) options.nsfw = channelData.nsfw;
                   if (channelData.bitrate) options.bitrate = channelData.bitrate;
-                  if (channelData.userLimit !== undefined) options.userLimit = channelData.userLimit;
-                  if (channelData.rateLimitPerUser !== undefined) options.rateLimitPerUser = channelData.rateLimitPerUser;
+                  if (channelData.userLimit !== undefined)
+                    options.userLimit = channelData.userLimit;
+                  if (channelData.rateLimitPerUser !== undefined)
+                    options.rateLimitPerUser = channelData.rateLimitPerUser;
 
                   await interaction.guild!.channels.create(options);
                 } catch (error) {
@@ -815,11 +967,17 @@ module.exports = {
               selectedBackupId = null;
 
               await i.followUp({
-                content: (t(client, lang, "commands.backup.messages.restored") as string).replace("{0}", backup.name),
+                content: (t(client, lang, "commands.backup.messages.restored") as string).replace(
+                  "{0}",
+                  backup.name,
+                ),
                 flags: MessageFlagsBitField.Flags.Ephemeral,
               });
 
-              await interaction.editReply({ embeds: [buildEmbed()], components: buildComponents() });
+              await interaction.editReply({
+                embeds: [buildEmbed()],
+                components: buildComponents(),
+              });
             } catch (error) {
               console.error("Backup restore failed:", error);
               await i.followUp({
@@ -866,7 +1024,8 @@ module.exports = {
               for (const [, role] of interaction.guild!.roles.cache) {
                 if (role.id === interaction.guild!.id) continue; // @everyone
                 if (role.managed) continue; // Bot roles, integration roles, etc.
-                if (role.position >= interaction.guild!.members.me!.roles.highest.position) continue; // Can't delete roles above bot
+                if (role.position >= interaction.guild!.members.me!.roles.highest.position)
+                  continue; // Can't delete roles above bot
                 try {
                   await role.delete(`Brutal backup restore: ${backup.name}`);
                 } catch (error) {
@@ -938,7 +1097,9 @@ module.exports = {
               }
 
               // Create other channels
-              const otherChannels = channelsData.filter((c) => c.type !== ChannelType.GuildCategory);
+              const otherChannels = channelsData.filter(
+                (c) => c.type !== ChannelType.GuildCategory,
+              );
               for (const channelData of otherChannels) {
                 try {
                   const permissionOverwrites = channelData.permissionOverwrites.map((perm) => ({
@@ -948,7 +1109,9 @@ module.exports = {
                     deny: BigInt(perm.deny),
                   }));
 
-                  const parentId = channelData.parentId ? channelIdMap.get(channelData.parentId) : undefined;
+                  const parentId = channelData.parentId
+                    ? channelIdMap.get(channelData.parentId)
+                    : undefined;
 
                   const options: any = {
                     name: channelData.name,
@@ -962,8 +1125,10 @@ module.exports = {
                   if (channelData.topic) options.topic = channelData.topic;
                   if (channelData.nsfw !== undefined) options.nsfw = channelData.nsfw;
                   if (channelData.bitrate) options.bitrate = channelData.bitrate;
-                  if (channelData.userLimit !== undefined) options.userLimit = channelData.userLimit;
-                  if (channelData.rateLimitPerUser !== undefined) options.rateLimitPerUser = channelData.rateLimitPerUser;
+                  if (channelData.userLimit !== undefined)
+                    options.userLimit = channelData.userLimit;
+                  if (channelData.rateLimitPerUser !== undefined)
+                    options.rateLimitPerUser = channelData.rateLimitPerUser;
 
                   await interaction.guild!.channels.create(options);
                 } catch (error) {
@@ -975,15 +1140,24 @@ module.exports = {
               selectedBackupId = null;
 
               await i.followUp({
-                content: (t(client, lang, "commands.backup.messages.brutal_restored") as string).replace("{0}", backup.name),
+                content: (
+                  t(client, lang, "commands.backup.messages.brutal_restored") as string
+                ).replace("{0}", backup.name),
                 flags: MessageFlagsBitField.Flags.Ephemeral,
               });
 
-              await interaction.editReply({ embeds: [buildEmbed()], components: buildComponents() });
+              await interaction.editReply({
+                embeds: [buildEmbed()],
+                components: buildComponents(),
+              });
             } catch (error) {
               console.error("Brutal backup restore failed:", error);
               await i.followUp({
-                content: t(client, lang, "commands.backup.messages.brutal_restore_failed") as string,
+                content: t(
+                  client,
+                  lang,
+                  "commands.backup.messages.brutal_restore_failed",
+                ) as string,
                 flags: MessageFlagsBitField.Flags.Ephemeral,
               });
             }
@@ -1001,4 +1175,3 @@ module.exports = {
     });
   },
 } as SlashCommand;
-

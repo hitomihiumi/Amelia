@@ -1488,7 +1488,13 @@ export interface TranslationSchema {
         edit: {
           title: string;
           description: string;
-          fields: { name: string; title: string; color: string; fields_count: string; timestamp: string };
+          fields: {
+            name: string;
+            title: string;
+            color: string;
+            fields_count: string;
+            timestamp: string;
+          };
         };
         fields: { title: string; description: string };
         field_edit: {
@@ -1513,26 +1519,49 @@ export interface TranslationSchema {
         edit: {
           placeholder: string;
           options: {
-            name: string; title: string; description: string; color: string;
-            thumbnail: string; image: string; author: string; footer: string;
-            fields: string; timestamp: string;
+            name: string;
+            title: string;
+            description: string;
+            color: string;
+            thumbnail: string;
+            image: string;
+            author: string;
+            footer: string;
+            fields: string;
+            timestamp: string;
           };
         };
         fields: { placeholder: string; add: string };
       };
       buttons: {
-        preview: string; save: string; delete: string; back: string; clear: string;
-        field_name: string; field_value: string; field_inline: string;
-        author_name: string; author_icon: string; author_url: string;
-        footer_text: string; footer_icon: string;
+        preview: string;
+        save: string;
+        delete: string;
+        back: string;
+        clear: string;
+        field_name: string;
+        field_value: string;
+        field_inline: string;
+        author_name: string;
+        author_icon: string;
+        author_url: string;
+        footer_text: string;
+        footer_icon: string;
       };
       modals: {
-        title: { label: string }; description: { label: string };
-        color: { label: string }; name: { label: string };
-        thumbnail: { label: string }; image: { label: string };
-        author_name: { label: string }; author_icon: { label: string }; author_url: { label: string };
-        footer_text: { label: string }; footer_icon: { label: string };
-        field_name: { label: string }; field_value: { label: string };
+        title: { label: string };
+        description: { label: string };
+        color: { label: string };
+        name: { label: string };
+        thumbnail: { label: string };
+        image: { label: string };
+        author_name: { label: string };
+        author_icon: { label: string };
+        author_url: { label: string };
+        footer_text: { label: string };
+        footer_icon: { label: string };
+        field_name: { label: string };
+        field_value: { label: string };
         search: { title: string; label: string };
       };
       messages: { max_fields: string };
@@ -1544,7 +1573,14 @@ export interface TranslationSchema {
         edit: {
           title: string;
           description: string;
-          fields: { name: string; label: string; style: string; emoji: string; url: string; disabled: string };
+          fields: {
+            name: string;
+            label: string;
+            style: string;
+            emoji: string;
+            url: string;
+            disabled: string;
+          };
         };
         emoji: { title: string; description: string };
       };
@@ -1555,11 +1591,21 @@ export interface TranslationSchema {
         emoji: { placeholder: string };
       };
       buttons: {
-        name: string; label: string; emoji: string; url: string; disabled: string;
-        preview: string; save: string; delete: string; back: string; clear_emoji: string;
+        name: string;
+        label: string;
+        emoji: string;
+        url: string;
+        disabled: string;
+        preview: string;
+        save: string;
+        delete: string;
+        back: string;
+        clear_emoji: string;
       };
       modals: {
-        label: { label: string }; url: { label: string }; name: { label: string };
+        label: { label: string };
+        url: { label: string };
+        name: { label: string };
         search: { title: string; label: string };
       };
       messages: { preview: string };
@@ -1571,13 +1617,26 @@ export interface TranslationSchema {
         edit: {
           title: string;
           description: string;
-          fields: { name: string; placeholder: string; options_count: string; min_values: string; max_values: string; disabled: string };
+          fields: {
+            name: string;
+            placeholder: string;
+            options_count: string;
+            min_values: string;
+            max_values: string;
+            disabled: string;
+          };
         };
         options: { title: string; description: string };
         option_edit: {
           title: string;
           description: string;
-          fields: { label: string; value: string; description: string; emoji: string; default: string };
+          fields: {
+            label: string;
+            value: string;
+            description: string;
+            emoji: string;
+            default: string;
+          };
         };
         emoji: { title: string; description: string };
       };
@@ -1588,14 +1647,28 @@ export interface TranslationSchema {
         emoji: { placeholder: string };
       };
       buttons: {
-        name: string; placeholder: string; minmax: string; disabled: string;
-        options: string; preview: string; save: string; delete: string; back: string;
-        opt_label: string; opt_value: string; opt_description: string;
-        opt_emoji: string; clear_emoji: string; opt_default: string;
+        name: string;
+        placeholder: string;
+        minmax: string;
+        disabled: string;
+        options: string;
+        preview: string;
+        save: string;
+        delete: string;
+        back: string;
+        opt_label: string;
+        opt_value: string;
+        opt_description: string;
+        opt_emoji: string;
+        clear_emoji: string;
+        opt_default: string;
       };
       modals: {
-        name: { label: string }; placeholder: { label: string };
-        opt_label: { label: string }; opt_value: { label: string }; opt_description: { label: string };
+        name: { label: string };
+        placeholder: { label: string };
+        opt_label: { label: string };
+        opt_value: { label: string };
+        opt_description: { label: string };
         minmax: { title: string; min_label: string; max_label: string };
         search: { title: string; label: string };
       };
@@ -1611,19 +1684,222 @@ export interface TranslationSchema {
         preview: { title: string; description: string };
       };
       fields: {
-        content: string; embeds: string; buttons: string; selectmenus: string; channel: string;
-        not_set: string; none: string; selected: string;
+        content: string;
+        embeds: string;
+        buttons: string;
+        selectmenus: string;
+        channel: string;
+        not_set: string;
+        none: string;
+        selected: string;
       };
       buttons: {
-        edit_content: string; select_embeds: string; select_buttons: string;
-        select_menus: string; select_channel: string;
-        clear_content: string; clear_embeds: string; clear_buttons: string; clear_menus: string;
-        preview: string; send: string; back: string;
+        edit_content: string;
+        select_embeds: string;
+        select_buttons: string;
+        select_menus: string;
+        select_channel: string;
+        clear_content: string;
+        clear_embeds: string;
+        clear_buttons: string;
+        clear_menus: string;
+        preview: string;
+        send: string;
+        back: string;
       };
       messages: {
-        sent: string; no_channel: string;
-        no_content: string; channel_not_found: string;
+        sent: string;
+        no_channel: string;
+        no_content: string;
+        channel_not_found: string;
         send_failed: string;
+      };
+    };
+    scenario: {
+      embeds: {
+        main: { title: string; description: string };
+        list: { title: string; description: string };
+        edit: {
+          title: string;
+          fields: { status: string; steps: string; trigger: string; cooldown: string; id: string };
+        };
+        trigger: {
+          title: string;
+          description: string;
+          fields: { type: string; component_id: string };
+        };
+        steps: {
+          title: string;
+          description: string;
+          fields: { no_steps: string; add_step: string };
+        };
+        step_edit: {
+          title: string;
+          description: string;
+          fields: {
+            action_type: string;
+            conditions: string;
+            stop_on_failure: string;
+            on_success: string;
+            on_failure: string;
+          };
+        };
+        action: {
+          title: string;
+          description: string;
+          fields: {
+            content: string;
+            ephemeral: string;
+            channel: string;
+            embed_id: string;
+            modal_id: string;
+            role: string;
+            thread_name: string;
+            auto_archive: string;
+            dm_content: string;
+            dm_embed: string;
+            variable_name: string;
+            variable_value: string;
+            delete_original: string;
+            current_channel: string;
+          };
+        };
+        conditions: {
+          title: string;
+          description_and: string;
+          description_or: string;
+          fields: { no_conditions: string };
+        };
+        condition_edit: {
+          title: string;
+          fields: { type: string; field: string; operator: string; value: string };
+        };
+        restrictions: {
+          title: string;
+          description: string;
+          fields: {
+            cooldown: string;
+            max_executions: string;
+            execution_period: string;
+            allowed_roles: string;
+            denied_roles: string;
+            everyone: string;
+            unlimited: string;
+            na: string;
+          };
+        };
+        select_component: { title: string; description: string };
+        select_role: { title: string; description: string };
+        select_channel: { title: string; description: string };
+      };
+      select_menus: {
+        base: { placeholder: string; options: { create: string; edit: string } };
+        list: { placeholder: string; no_scenarios: string };
+        edit: {
+          placeholder: string;
+          options: {
+            name: string;
+            description: string;
+            trigger: string;
+            steps: string;
+            restrictions: string;
+            enable: string;
+            disable: string;
+          };
+        };
+        trigger_type: { placeholder: string };
+        trigger_component: { placeholder: string };
+        steps: { placeholder: string; add: string };
+        action_type: { placeholder: string };
+        action_component: { placeholder: string };
+        conditions: { placeholder: string; add: string };
+        condition_type: { placeholder: string };
+        condition_operator: { placeholder: string };
+        condition_logic: { placeholder: string; and: string; or: string };
+        next_step: { placeholder: string; continue: string };
+        fail_step: { placeholder: string };
+      };
+      buttons: {
+        save: string;
+        delete: string;
+        back: string;
+        step_name: string;
+        step_action: string;
+        step_conditions: string;
+        stop_on_fail: string;
+        action_content: string;
+        action_ephemeral: string;
+        action_channel: string;
+        action_select_modal: string;
+        action_select_embed: string;
+        action_select_role: string;
+        action_thread_name: string;
+        action_dm_content: string;
+        action_dm_embed: string;
+        action_var_name: string;
+        action_var_value: string;
+        action_delete_original: string;
+        condition_field: string;
+        condition_value: string;
+        cooldown: string;
+        max_uses: string;
+        period: string;
+      };
+      modals: {
+        name: { title: string; label: string };
+        description: { title: string; label: string };
+        search: { title: string; label: string };
+        step_name: { title: string; label: string };
+        action_content: { title: string; label: string };
+        thread_name: { title: string; label: string };
+        dm_content: { title: string; label: string };
+        var_name: { title: string; label: string };
+        var_value: { title: string; label: string };
+        condition_value: { title: string; label: string };
+        condition_field: { title: string; label: string };
+        cooldown: { title: string; label: string };
+        max_executions: { title: string; label: string };
+        execution_period: { title: string; label: string };
+      };
+      messages: {
+        max_scenarios: string;
+        max_steps: string;
+        no_trigger: string;
+        no_steps: string;
+      };
+      action_types: {
+        reply: string;
+        send_message: string;
+        send_embed: string;
+        show_modal: string;
+        add_role: string;
+        remove_role: string;
+        create_thread: string;
+        send_dm: string;
+        set_variable: string;
+        edit_message: string;
+        delete_message: string;
+      };
+      trigger_types: {
+        button: string;
+        select_menu: string;
+        modal_submit: string;
+      };
+      condition_operators: {
+        equals: string;
+        not_equals: string;
+        contains: string;
+        not_contains: string;
+        starts_with: string;
+        ends_with: string;
+        greater_than: string;
+        less_than: string;
+        has_role: string;
+        not_has_role: string;
+        in_channel: string;
+        not_in_channel: string;
+        is_empty: string;
+        is_not_empty: string;
       };
     };
   };

@@ -1,4 +1,9 @@
-import { SelectMenuCustom, SelectMenuOptionCustom, SlashCommand, SCENARIO_LIMITS } from "../../types/helpers";
+import {
+  SelectMenuCustom,
+  SelectMenuOptionCustom,
+  SlashCommand,
+  SCENARIO_LIMITS,
+} from "../../types/helpers";
 import {
   Client,
   EmbedBuilder,
@@ -13,12 +18,13 @@ import {
   ButtonStyle,
   ChatInputCommandInteraction,
   MessageFlagsBitField,
+  LabelBuilder,
 } from "discord.js";
 import { Guild, customUtil } from "../../helpers";
 import { generateID } from "../../handlers/functions";
 import fuse from "fuse.js";
 import { t } from "../../i18n/helpers";
-import { defaultPermissions } from "../../helpers/permissions";
+import { defaultPermissions } from "../../helpers";
 
 type ViewType = "main" | "list" | "edit" | "options" | "option_edit" | "emoji";
 
@@ -40,7 +46,7 @@ module.exports = {
     await interaction.deferReply({ flags: [MessageFlagsBitField.Flags.Ephemeral] });
 
     const guild = new Guild(client, interaction.guild);
-    const lang = (await guild.get("settings.language")) as string;
+    const lang = await guild.get("settings.language");
 
     let page = 0;
     let emojiPage = 0;
@@ -63,7 +69,7 @@ module.exports = {
         _search,
         interaction.guild!,
         emojiPage,
-        EMOJIS_PER_PAGE
+        EMOJIS_PER_PAGE,
       );
       await interaction.editReply({ embeds: [embed], components });
     };
@@ -107,7 +113,7 @@ module.exports = {
             if (i.values[0] === "add") {
               if (_schema.options.length >= SCENARIO_LIMITS.MAX_SELECT_MENU_OPTIONS) {
                 await i.reply({
-                  content: t(client, lang, "commands.selectmenu.messages.max_options") as string,
+                  content: t(client, lang, "commands.selectmenu.messages.max_options"),
                   flags: MessageFlagsBitField.Flags.Ephemeral,
                 });
                 return;
@@ -202,17 +208,18 @@ module.exports = {
             await i.deferUpdate();
             if (_schema.options.length === 0) {
               await i.followUp({
-                content: t(client, lang, "commands.selectmenu.messages.no_options") as string,
+                content: t(client, lang, "commands.selectmenu.messages.no_options"),
                 flags: MessageFlagsBitField.Flags.Ephemeral,
               });
               return;
             }
             const customMenu = new customUtil.CustomSelectMenu(_schema);
-            const previewRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-              customMenu.getPreviewSelectMenu()
-            );
+            const previewRow =
+              new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+                customMenu.getPreviewSelectMenu(),
+              );
             await i.followUp({
-              content: t(client, lang, "commands.selectmenu.messages.preview") as string,
+              content: t(client, lang, "commands.selectmenu.messages.preview"),
               components: [previewRow],
               flags: MessageFlagsBitField.Flags.Ephemeral,
             });
@@ -237,7 +244,13 @@ module.exports = {
           }
 
           case "NI_select:minmax": {
-            const result = await showMinMaxModal(i, client, lang, _schema.minValues, _schema.maxValues);
+            const result = await showMinMaxModal(
+              i,
+              client,
+              lang,
+              _schema.minValues,
+              _schema.maxValues,
+            );
             if (result.submitted) {
               _schema.minValues = Math.max(0, Math.min(result.min, _schema.options.length || 1));
               _schema.maxValues = Math.max(1, Math.min(result.max, _schema.options.length || 1));
@@ -284,7 +297,13 @@ module.exports = {
 
           // Option edit buttons
           case "NI_select:opt_label": {
-            const result = await showTextModal(i, "opt_label", client, lang, _schema.options[currentOptionIndex]?.label);
+            const result = await showTextModal(
+              i,
+              "opt_label",
+              client,
+              lang,
+              _schema.options[currentOptionIndex]?.label,
+            );
             if (result.submitted && _schema.options[currentOptionIndex]) {
               _schema.options[currentOptionIndex].label = result.value || "Option";
               await updateMessage();
@@ -293,16 +312,29 @@ module.exports = {
           }
 
           case "NI_select:opt_value": {
-            const result = await showTextModal(i, "opt_value", client, lang, _schema.options[currentOptionIndex]?.value);
+            const result = await showTextModal(
+              i,
+              "opt_value",
+              client,
+              lang,
+              _schema.options[currentOptionIndex]?.value,
+            );
             if (result.submitted && _schema.options[currentOptionIndex]) {
-              _schema.options[currentOptionIndex].value = result.value || `option_${currentOptionIndex}`;
+              _schema.options[currentOptionIndex].value =
+                result.value || `option_${currentOptionIndex}`;
               await updateMessage();
             }
             break;
           }
 
           case "NI_select:opt_description": {
-            const result = await showTextModal(i, "opt_description", client, lang, _schema.options[currentOptionIndex]?.description);
+            const result = await showTextModal(
+              i,
+              "opt_description",
+              client,
+              lang,
+              _schema.options[currentOptionIndex]?.description,
+            );
             if (result.submitted && _schema.options[currentOptionIndex]) {
               _schema.options[currentOptionIndex].description = result.value || undefined;
               await updateMessage();
@@ -334,7 +366,8 @@ module.exports = {
                   opt.default = idx === currentOptionIndex ? !opt.default : false;
                 });
               } else {
-                _schema.options[currentOptionIndex].default = !_schema.options[currentOptionIndex].default;
+                _schema.options[currentOptionIndex].default =
+                  !_schema.options[currentOptionIndex].default;
               }
             }
             await updateMessage();
@@ -421,65 +454,65 @@ function buildEmbed(
   lang: string,
   schema: SelectMenuCustom,
   view: ViewType,
-  optionIndex: number
+  optionIndex: number,
 ): EmbedBuilder {
   const embed = new EmbedBuilder().setColor(client.holder.colors.default);
 
   switch (view) {
     case "main":
       embed
-        .setTitle(t(client, lang, "commands.selectmenu.embeds.base.title") as string)
-        .setDescription(t(client, lang, "commands.selectmenu.embeds.base.description") as string);
+        .setTitle(t(client, lang, "commands.selectmenu.embeds.base.title"))
+        .setDescription(t(client, lang, "commands.selectmenu.embeds.base.description"));
       break;
 
     case "list":
       embed
-        .setTitle(t(client, lang, "commands.selectmenu.embeds.list.title") as string)
-        .setDescription(t(client, lang, "commands.selectmenu.embeds.list.description") as string);
+        .setTitle(t(client, lang, "commands.selectmenu.embeds.list.title"))
+        .setDescription(t(client, lang, "commands.selectmenu.embeds.list.description"));
       break;
 
     case "edit":
       embed
-        .setTitle(t(client, lang, "commands.selectmenu.embeds.edit.title") as string)
-        .setDescription(t(client, lang, "commands.selectmenu.embeds.edit.description") as string)
+        .setTitle(t(client, lang, "commands.selectmenu.embeds.edit.title"))
+        .setDescription(t(client, lang, "commands.selectmenu.embeds.edit.description"))
         .addFields(
           {
-            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.name") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.name"),
             value: schema.name || "Unnamed",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.placeholder") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.placeholder"),
             value: schema.placeholder || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.options_count") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.options_count"),
             value: String(schema.options.length),
             inline: true,
           },
           {
-            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.min_values") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.min_values"),
             value: String(schema.minValues || 1),
             inline: true,
           },
           {
-            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.max_values") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.max_values"),
             value: String(schema.maxValues || 1),
             inline: true,
           },
           {
-            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.disabled") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.edit.fields.disabled"),
             value: schema.disabled ? "✅" : "❌",
             inline: true,
-          }
+          },
         );
       break;
 
     case "options":
       embed
-        .setTitle(t(client, lang, "commands.selectmenu.embeds.options.title") as string)
-        .setDescription(t(client, lang, "commands.selectmenu.embeds.options.description") as string);
+        .setTitle(t(client, lang, "commands.selectmenu.embeds.options.title"))
+        .setDescription(t(client, lang, "commands.selectmenu.embeds.options.description"));
       if (schema.options.length > 0) {
         schema.options.forEach((opt, index) => {
           embed.addFields({
@@ -494,41 +527,41 @@ function buildEmbed(
     case "option_edit":
       const option = schema.options[optionIndex];
       embed
-        .setTitle(t(client, lang, "commands.selectmenu.embeds.option_edit.title") as string)
-        .setDescription(t(client, lang, "commands.selectmenu.embeds.option_edit.description") as string)
+        .setTitle(t(client, lang, "commands.selectmenu.embeds.option_edit.title"))
+        .setDescription(t(client, lang, "commands.selectmenu.embeds.option_edit.description"))
         .addFields(
           {
-            name: t(client, lang, "commands.selectmenu.embeds.option_edit.fields.label") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.option_edit.fields.label"),
             value: option?.label || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.selectmenu.embeds.option_edit.fields.value") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.option_edit.fields.value"),
             value: option?.value || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.selectmenu.embeds.option_edit.fields.description") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.option_edit.fields.description"),
             value: option?.description || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.selectmenu.embeds.option_edit.fields.emoji") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.option_edit.fields.emoji"),
             value: option?.emoji ? String(option.emoji) : "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.selectmenu.embeds.option_edit.fields.default") as string,
+            name: t(client, lang, "commands.selectmenu.embeds.option_edit.fields.default"),
             value: option?.default ? "✅" : "❌",
             inline: true,
-          }
+          },
         );
       break;
 
     case "emoji":
       embed
-        .setTitle(t(client, lang, "commands.selectmenu.embeds.emoji.title") as string)
-        .setDescription(t(client, lang, "commands.selectmenu.embeds.emoji.description") as string);
+        .setTitle(t(client, lang, "commands.selectmenu.embeds.emoji.title"))
+        .setDescription(t(client, lang, "commands.selectmenu.embeds.emoji.description"));
       break;
   }
 
@@ -546,7 +579,7 @@ function buildComponents(
   search: string,
   guild: any,
   emojiPage: number,
-  emojisPerPage: number
+  emojisPerPage: number,
 ): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
   const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
 
@@ -556,18 +589,18 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_select:base")
-            .setPlaceholder(t(client, lang, "commands.selectmenu.select_menus.base.placeholder") as string)
+            .setPlaceholder(t(client, lang, "commands.selectmenu.select_menus.base.placeholder"))
             .setOptions(
               new StringSelectMenuOptionBuilder()
                 .setValue("create")
-                .setLabel(t(client, lang, "commands.selectmenu.select_menus.base.options.create") as string)
+                .setLabel(t(client, lang, "commands.selectmenu.select_menus.base.options.create"))
                 .setEmoji("➕"),
               new StringSelectMenuOptionBuilder()
                 .setValue("edit")
-                .setLabel(t(client, lang, "commands.selectmenu.select_menus.base.options.edit") as string)
-                .setEmoji("📝")
-            )
-        )
+                .setLabel(t(client, lang, "commands.selectmenu.select_menus.base.options.edit"))
+                .setEmoji("📝"),
+            ),
+        ),
       );
       break;
 
@@ -580,7 +613,7 @@ function buildComponents(
 
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId("NI_select:select")
-        .setPlaceholder(t(client, lang, "commands.selectmenu.select_menus.list.placeholder") as string);
+        .setPlaceholder(t(client, lang, "commands.selectmenu.select_menus.list.placeholder"));
 
       if (menuList.length > 0) {
         menuList.slice(page * 25, page * 25 + 25).forEach((menu) => {
@@ -588,7 +621,7 @@ function buildComponents(
             new StringSelectMenuOptionBuilder()
               .setValue(menu.id)
               .setLabel(menu.name || "Unnamed")
-              .setDescription(`${menu.options.length} options`)
+              .setDescription(`${menu.options.length} options`),
           );
         });
       } else {
@@ -596,14 +629,12 @@ function buildComponents(
           .addOptions(
             new StringSelectMenuOptionBuilder()
               .setValue("none")
-              .setLabel(t(client, lang, "commands.selectmenu.select_menus.list.no_menus") as string)
+              .setLabel(t(client, lang, "commands.selectmenu.select_menus.list.no_menus")),
           )
           .setDisabled(true);
       }
 
-      rows.push(
-        new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(selectMenu)
-      );
+      rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(selectMenu));
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
@@ -629,8 +660,8 @@ function buildComponents(
           new ButtonBuilder()
             .setCustomId("NI_select:back")
             .setEmoji("🔙")
-            .setStyle(ButtonStyle.Secondary)
-        )
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
 
@@ -639,67 +670,67 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_select:name")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.name") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.name"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("🏷️"),
           new ButtonBuilder()
             .setCustomId("NI_select:placeholder")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.placeholder") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.placeholder"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("💭"),
           new ButtonBuilder()
             .setCustomId("NI_select:minmax")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.minmax") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.minmax"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("🔢"),
           new ButtonBuilder()
             .setCustomId("NI_select:disabled")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.disabled") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.disabled"))
             .setStyle(schema.disabled ? ButtonStyle.Success : ButtonStyle.Secondary)
-            .setEmoji("🚫")
-        )
+            .setEmoji("🚫"),
+        ),
       );
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_select:options")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.options") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.options"))
             .setStyle(ButtonStyle.Primary)
             .setEmoji("📋"),
           new ButtonBuilder()
             .setCustomId("NI_select:preview")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.preview") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.preview"))
             .setStyle(ButtonStyle.Primary)
-            .setEmoji("👁️")
-        )
+            .setEmoji("👁️"),
+        ),
       );
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_select:save")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.save") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.save"))
             .setStyle(ButtonStyle.Success)
             .setEmoji("💾"),
           new ButtonBuilder()
             .setCustomId("NI_select:delete")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.delete") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.delete"))
             .setStyle(ButtonStyle.Danger)
             .setEmoji("🗑️"),
           new ButtonBuilder()
             .setCustomId("NI_select:back")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.back") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.back"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔙")
-        )
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
     case "options":
       const optionsMenu = new StringSelectMenuBuilder()
         .setCustomId("NI_select:options_select")
-        .setPlaceholder(t(client, lang, "commands.selectmenu.select_menus.options.placeholder") as string);
+        .setPlaceholder(t(client, lang, "commands.selectmenu.select_menus.options.placeholder"));
 
       if (schema.options.length > 0) {
         schema.options.forEach((opt, index) => {
@@ -707,7 +738,7 @@ function buildComponents(
             new StringSelectMenuOptionBuilder()
               .setValue(String(index))
               .setLabel(`${index + 1}. ${opt.label}`)
-              .setDescription(opt.description || opt.value)
+              .setDescription(opt.description || opt.value),
           );
         });
       }
@@ -716,8 +747,8 @@ function buildComponents(
         optionsMenu.addOptions(
           new StringSelectMenuOptionBuilder()
             .setValue("add")
-            .setLabel(t(client, lang, "commands.selectmenu.select_menus.options.add") as string)
-            .setEmoji("➕")
+            .setLabel(t(client, lang, "commands.selectmenu.select_menus.options.add"))
+            .setEmoji("➕"),
         );
       }
 
@@ -725,23 +756,23 @@ function buildComponents(
         optionsMenu.addOptions(
           new StringSelectMenuOptionBuilder()
             .setValue("add")
-            .setLabel(t(client, lang, "commands.selectmenu.select_menus.options.add") as string)
-            .setEmoji("➕")
+            .setLabel(t(client, lang, "commands.selectmenu.select_menus.options.add"))
+            .setEmoji("➕"),
         );
       }
 
       rows.push(
-        new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(optionsMenu)
+        new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(optionsMenu),
       );
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_select:back")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.back") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.back"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔙")
-        )
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
@@ -750,41 +781,43 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_select:opt_label")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.opt_label") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.opt_label"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("📝"),
           new ButtonBuilder()
             .setCustomId("NI_select:opt_value")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.opt_value") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.opt_value"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("🔑"),
           new ButtonBuilder()
             .setCustomId("NI_select:opt_description")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.opt_description") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.opt_description"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("📄")
-        )
+            .setEmoji("📄"),
+        ),
       );
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_select:opt_emoji")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.opt_emoji") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.opt_emoji"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("😀"),
           new ButtonBuilder()
             .setCustomId("NI_select:opt_emoji_clear")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.clear_emoji") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.clear_emoji"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("🗑️")
             .setDisabled(!schema.options[optionIndex]?.emoji),
           new ButtonBuilder()
             .setCustomId("NI_select:opt_default")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.opt_default") as string)
-            .setStyle(schema.options[optionIndex]?.default ? ButtonStyle.Success : ButtonStyle.Secondary)
-            .setEmoji("⭐")
-        )
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.opt_default"))
+            .setStyle(
+              schema.options[optionIndex]?.default ? ButtonStyle.Success : ButtonStyle.Secondary,
+            )
+            .setEmoji("⭐"),
+        ),
       );
 
       rows.push(
@@ -801,15 +834,15 @@ function buildComponents(
             .setDisabled(optionIndex >= schema.options.length - 1),
           new ButtonBuilder()
             .setCustomId("NI_select:opt_delete")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.delete") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.delete"))
             .setStyle(ButtonStyle.Danger)
             .setEmoji("🗑️"),
           new ButtonBuilder()
             .setCustomId("NI_select:back")
-            .setLabel(t(client, lang, "commands.selectmenu.buttons.back") as string)
+            .setLabel(t(client, lang, "commands.selectmenu.buttons.back"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔙")
-        )
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
@@ -821,19 +854,19 @@ function buildComponents(
       if (pageEmojis.length > 0) {
         const emojiSelect = new StringSelectMenuBuilder()
           .setCustomId("NI_select:emoji_select")
-          .setPlaceholder(t(client, lang, "commands.selectmenu.select_menus.emoji.placeholder") as string);
+          .setPlaceholder(t(client, lang, "commands.selectmenu.select_menus.emoji.placeholder"));
 
         pageEmojis.forEach((emoji: any) => {
           emojiSelect.addOptions(
             new StringSelectMenuOptionBuilder()
               .setValue(emoji.id)
               .setLabel(emoji.name || "emoji")
-              .setEmoji({ id: emoji.id, animated: emoji.animated })
+              .setEmoji({ id: emoji.id, animated: emoji.animated }),
           );
         });
 
         rows.push(
-          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(emojiSelect)
+          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(emojiSelect),
         );
       }
 
@@ -857,8 +890,8 @@ function buildComponents(
           new ButtonBuilder()
             .setCustomId("NI_select:back")
             .setEmoji("🔙")
-            .setStyle(ButtonStyle.Secondary)
-        )
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
   }
@@ -871,14 +904,14 @@ async function showTextModal(
   field: string,
   client: Client,
   lang: string,
-  currentValue?: string
+  currentValue?: string,
 ): Promise<{ value: string | null; submitted: boolean }> {
   const labels: Record<string, string> = {
-    name: t(client, lang, "commands.selectmenu.modals.name.label") as string,
-    placeholder: t(client, lang, "commands.selectmenu.modals.placeholder.label") as string,
-    opt_label: t(client, lang, "commands.selectmenu.modals.opt_label.label") as string,
-    opt_value: t(client, lang, "commands.selectmenu.modals.opt_value.label") as string,
-    opt_description: t(client, lang, "commands.selectmenu.modals.opt_description.label") as string,
+    name: t(client, lang, "commands.selectmenu.modals.name.label"),
+    placeholder: t(client, lang, "commands.selectmenu.modals.placeholder.label"),
+    opt_label: t(client, lang, "commands.selectmenu.modals.opt_label.label"),
+    opt_value: t(client, lang, "commands.selectmenu.modals.opt_value.label"),
+    opt_description: t(client, lang, "commands.selectmenu.modals.opt_description.label"),
   };
 
   const modalId = `NI_select:modal:${field}:${Date.now()}`;
@@ -886,16 +919,15 @@ async function showTextModal(
   const modal = new ModalBuilder()
     .setTitle(labels[field] || field)
     .setCustomId(modalId)
-    .setComponents(
-      new ActionRowBuilder<any>().setComponents(
+    .setLabelComponents(
+      new LabelBuilder().setLabel(labels[field] || field).setTextInputComponent(
         new TextInputBuilder()
           .setCustomId("NI_select:input")
-          .setLabel(labels[field] || field)
           .setStyle(TextInputStyle.Short)
           .setRequired(field !== "opt_description")
           .setValue(currentValue || "")
-          .setMaxLength(100)
-      )
+          .setMaxLength(100),
+      ),
     );
 
   await interaction.showModal(modal);
@@ -919,32 +951,34 @@ async function showMinMaxModal(
   client: Client,
   lang: string,
   minValue?: number,
-  maxValue?: number
+  maxValue?: number,
 ): Promise<{ min: number; max: number; submitted: boolean }> {
   const modalId = `NI_select:modal:minmax:${Date.now()}`;
 
   const modal = new ModalBuilder()
-    .setTitle(t(client, lang, "commands.selectmenu.modals.minmax.title") as string)
+    .setTitle(t(client, lang, "commands.selectmenu.modals.minmax.title"))
     .setCustomId(modalId)
-    .setComponents(
-      new ActionRowBuilder<any>().setComponents(
-        new TextInputBuilder()
-          .setCustomId("NI_select:min")
-          .setLabel(t(client, lang, "commands.selectmenu.modals.minmax.min_label") as string)
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true)
-          .setValue(String(minValue || 1))
-          .setMaxLength(2)
-      ),
-      new ActionRowBuilder<any>().setComponents(
-        new TextInputBuilder()
-          .setCustomId("NI_select:max")
-          .setLabel(t(client, lang, "commands.selectmenu.modals.minmax.max_label") as string)
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true)
-          .setValue(String(maxValue || 1))
-          .setMaxLength(2)
-      )
+    .setLabelComponents(
+      new LabelBuilder()
+        .setLabel(t(client, lang, "commands.selectmenu.modals.minmax.min_label"))
+        .setTextInputComponent(
+          new TextInputBuilder()
+            .setCustomId("NI_select:min")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true)
+            .setValue(String(minValue || 1))
+            .setMaxLength(2),
+        ),
+      new LabelBuilder()
+        .setLabel(t(client, lang, "commands.selectmenu.modals.minmax.max_label"))
+        .setTextInputComponent(
+          new TextInputBuilder()
+            .setCustomId("NI_select:max")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true)
+            .setValue(String(maxValue || 1))
+            .setMaxLength(2),
+        ),
     );
 
   await interaction.showModal(modal);
@@ -967,22 +1001,23 @@ async function showMinMaxModal(
 async function showSearchModal(
   interaction: any,
   client: Client,
-  lang: string
+  lang: string,
 ): Promise<{ value: string | null; submitted: boolean }> {
   const modalId = `NI_select:modal:search:${Date.now()}`;
 
   const modal = new ModalBuilder()
-    .setTitle(t(client, lang, "commands.selectmenu.modals.search.title") as string)
+    .setTitle(t(client, lang, "commands.selectmenu.modals.search.title"))
     .setCustomId(modalId)
-    .setComponents(
-      new ActionRowBuilder<any>().setComponents(
-        new TextInputBuilder()
-          .setCustomId("NI_select:input")
-          .setLabel(t(client, lang, "commands.selectmenu.modals.search.label") as string)
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-          .setMaxLength(100)
-      )
+    .setLabelComponents(
+      new LabelBuilder()
+        .setLabel(t(client, lang, "commands.selectmenu.modals.search.label"))
+        .setTextInputComponent(
+          new TextInputBuilder()
+            .setCustomId("NI_select:input")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(false)
+            .setMaxLength(100),
+        ),
     );
 
   await interaction.showModal(modal);
@@ -1000,4 +1035,3 @@ async function showSearchModal(
     return { value: null, submitted: false };
   }
 }
-

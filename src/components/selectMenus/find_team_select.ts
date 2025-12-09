@@ -7,13 +7,13 @@ import {
   TextInputBuilder,
   TextInputStyle,
   ActionRowBuilder,
-  ModalActionRowComponentBuilder,
   MessageFlags,
   EmbedBuilder,
   TextChannel,
   ButtonBuilder,
   ButtonStyle,
   MessageActionRowComponentBuilder,
+  LabelBuilder,
 } from "discord.js";
 import { t } from "../../i18n/helpers";
 
@@ -57,7 +57,6 @@ module.exports = {
       game.modal.fields.forEach((field: IModalField) => {
         const textInput = new TextInputBuilder()
           .setCustomId(`field_${field.id}`)
-          .setLabel(field.name)
           .setStyle(field.type === "long" ? TextInputStyle.Paragraph : TextInputStyle.Short)
           .setRequired(field.required);
 
@@ -65,23 +64,24 @@ module.exports = {
         if (field.min && field.min > 0) textInput.setMinLength(field.min);
         if (field.max && field.max > 0) textInput.setMaxLength(field.max);
 
-        modal.addComponents(
-          new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(textInput),
+        modal.addLabelComponents(
+          new LabelBuilder().setLabel(field.name).setTextInputComponent(textInput),
         );
       });
     } else {
       // Add a default field if no custom fields are configured
-      modal.addComponents(
-        new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-          new TextInputBuilder()
-            .setCustomId("field_default")
-            .setLabel("Description")
-            .setStyle(TextInputStyle.Paragraph)
-            .setPlaceholder("Describe what you're looking for...")
-            .setRequired(true)
-            .setMinLength(10)
-            .setMaxLength(1000),
-        ),
+      modal.addLabelComponents(
+        new LabelBuilder()
+          .setLabel("Description")
+          .setTextInputComponent(
+            new TextInputBuilder()
+              .setCustomId("field_default")
+              .setStyle(TextInputStyle.Paragraph)
+              .setPlaceholder("Describe what you're looking for...")
+              .setRequired(true)
+              .setMinLength(10)
+              .setMaxLength(1000),
+          ),
       );
     }
 

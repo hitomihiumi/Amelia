@@ -7,8 +7,8 @@ import {
   MessageFlagsBitField,
 } from "discord.js";
 import { Guild } from "../helpers";
-import { ScenarioRunner } from "../helpers/custom/ScenarioRunner";
-import { ScenarioCustom, ButtonCustom, SelectMenuCustom } from "../types/helpers";
+import { ScenarioRunner } from "../helpers";
+import { ScenarioCustom } from "../types/helpers";
 import { t } from "../i18n/helpers";
 
 /**
@@ -17,7 +17,7 @@ import { t } from "../i18n/helpers";
  */
 export async function handleScenarioInteraction(
   client: Client,
-  interaction: Interaction
+  interaction: Interaction,
 ): Promise<boolean> {
   // Only handle button, select menu, and modal interactions
   if (
@@ -40,8 +40,8 @@ export async function handleScenarioInteraction(
 
   try {
     const guild = new Guild(client, interaction.guild);
-    const lang = (await guild.get("settings.language")) as string || "en";
-    const scenarios = (await guild.get("utils.components.scenarios")) as ScenarioCustom[];
+    const lang = (await guild.get("settings.language")) || "en";
+    const scenarios = await guild.get("utils.components.scenarios");
 
     // Determine trigger type
     let triggerType: "button" | "select_menu" | "modal_submit";
@@ -58,7 +58,7 @@ export async function handleScenarioInteraction(
       (s) =>
         s.enabled &&
         s.trigger.type === triggerType &&
-        s.trigger.componentId === interaction.customId
+        s.trigger.componentId === interaction.customId,
     );
 
     if (matchingScenario) {
@@ -67,7 +67,7 @@ export async function handleScenarioInteraction(
         client,
         interaction as ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction,
         matchingScenario,
-        guild
+        guild,
       );
 
       if (!result.success && result.error) {
@@ -84,7 +84,11 @@ export async function handleScenarioInteraction(
     }
 
     // Check if this is a custom component without a trigger
-    const isCustomComponent = await checkIfCustomComponent(guild, interaction.customId, triggerType);
+    const isCustomComponent = await checkIfCustomComponent(
+      guild,
+      interaction.customId,
+      triggerType,
+    );
 
     if (isCustomComponent) {
       // This is a custom component but no scenario is assigned to it
@@ -110,14 +114,14 @@ export async function handleScenarioInteraction(
 async function checkIfCustomComponent(
   guild: Guild,
   componentId: string,
-  triggerType: "button" | "select_menu" | "modal_submit"
+  triggerType: "button" | "select_menu" | "modal_submit",
 ): Promise<boolean> {
   try {
     if (triggerType === "button") {
-      const buttons = (await guild.get("utils.components.buttons")) as ButtonCustom[];
+      const buttons = await guild.get("utils.components.buttons");
       return buttons?.some((b) => b.id === componentId) || false;
     } else if (triggerType === "select_menu") {
-      const selectMenus = (await guild.get("utils.components.selectMenus")) as SelectMenuCustom[];
+      const selectMenus = await guild.get("utils.components.selectMenus");
       return selectMenus?.some((s) => s.id === componentId) || false;
     }
     // Modal submissions are handled differently - they're created on the fly
@@ -132,14 +136,14 @@ async function checkIfCustomComponent(
  */
 export async function getGuildScenarios(
   client: Client,
-  guildId: string
+  guildId: string,
 ): Promise<ScenarioCustom[]> {
   try {
     const discordGuild = client.guilds.cache.get(guildId);
     if (!discordGuild) return [];
 
     const guild = new Guild(client, discordGuild);
-    return (await guild.get("utils.components.scenarios")) as ScenarioCustom[];
+    return await guild.get("utils.components.scenarios");
   } catch {
     return [];
   }
@@ -151,9 +155,8 @@ export async function getGuildScenarios(
 export async function findScenarioByComponentId(
   client: Client,
   guildId: string,
-  componentId: string
+  componentId: string,
 ): Promise<ScenarioCustom | undefined> {
   const scenarios = await getGuildScenarios(client, guildId);
   return scenarios.find((s) => s.trigger.componentId === componentId);
 }
-

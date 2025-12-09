@@ -33,9 +33,7 @@ export class CustomSelectMenu {
     // Add options
     if (this.data.options.length > 0) {
       const options = this.data.options.map((opt) => {
-        const option = new StringSelectMenuOptionBuilder()
-          .setLabel(opt.label)
-          .setValue(opt.value);
+        const option = new StringSelectMenuOptionBuilder().setLabel(opt.label).setValue(opt.value);
 
         if (opt.description) {
           option.setDescription(opt.description);
@@ -104,7 +102,9 @@ export class CustomSelectMenu {
     }
 
     if (data.options.length > SCENARIO_LIMITS.MAX_SELECT_MENU_OPTIONS) {
-      errors.push(`Select menu cannot have more than ${SCENARIO_LIMITS.MAX_SELECT_MENU_OPTIONS} options`);
+      errors.push(
+        `Select menu cannot have more than ${SCENARIO_LIMITS.MAX_SELECT_MENU_OPTIONS} options`,
+      );
     }
 
     if (data.minValues !== undefined && data.maxValues !== undefined) {
@@ -161,4 +161,3 @@ export class CustomSelectMenu {
     return { valid: errors.length === 0, errors };
   }
 }
-

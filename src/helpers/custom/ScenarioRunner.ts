@@ -93,7 +93,7 @@ export class ScenarioRunner {
     client: Client,
     interaction: ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction,
     scenario: ScenarioCustom,
-    guildWrapper: Guild
+    guildWrapper: Guild,
   ): Promise<{ success: boolean; error?: string }> {
     // Check if scenario is enabled
     if (!scenario.enabled) {
@@ -133,7 +133,10 @@ export class ScenarioRunner {
       const timePassed = (Date.now() - cooldownEntry.timestamp) / 1000;
       if (timePassed < scenario.cooldown) {
         const remaining = Math.ceil(scenario.cooldown - timePassed);
-        return { success: false, error: `Please wait ${remaining} seconds before using this again` };
+        return {
+          success: false,
+          error: `Please wait ${remaining} seconds before using this again`,
+        };
       }
     }
 
@@ -229,7 +232,7 @@ export class ScenarioRunner {
       if (this.context.visitedSteps.has(currentStep.id)) {
         // Allow re-visiting steps but track count
         const visitCount = Array.from(this.context.visitedSteps).filter(
-          (id) => id === currentStep!.id
+          (id) => id === currentStep!.id,
         ).length;
         if (visitCount > 5) {
           return { success: false, error: "Potential infinite loop detected" };
@@ -244,7 +247,7 @@ export class ScenarioRunner {
       if (currentStep.conditions && currentStep.conditions.length > 0) {
         conditionsPassed = this.evaluateConditions(
           currentStep.conditions,
-          currentStep.conditionLogic || "and"
+          currentStep.conditionLogic || "and",
         );
       }
 
@@ -282,10 +285,7 @@ export class ScenarioRunner {
   /**
    * Evaluate conditions based on logic (AND/OR)
    */
-  private evaluateConditions(
-    conditions: ScenarioCondition[],
-    logic: "and" | "or"
-  ): boolean {
+  private evaluateConditions(conditions: ScenarioCondition[], logic: "and" | "or"): boolean {
     const results = conditions.map((condition) => this.evaluateCondition(condition));
 
     if (logic === "and") {
@@ -366,7 +366,7 @@ export class ScenarioRunner {
    * Execute a scenario action
    */
   private async executeAction(
-    action: ScenarioAction
+    action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     const interaction = this.context.interaction;
 
@@ -465,13 +465,15 @@ export class ScenarioRunner {
   }
 
   private async actionShowModal(
-    action: ScenarioAction
+    action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     if (!action.modalId) {
       return { success: false, error: "Modal ID is required" };
     }
 
-    const modals = (await this.context.guildWrapper.get("utils.components.modals")) as ModalCustom[];
+    const modals = (await this.context.guildWrapper.get(
+      "utils.components.modals",
+    )) as ModalCustom[];
     const modalData = modals.find((m) => m.id === action.modalId);
 
     if (!modalData) {
@@ -490,7 +492,7 @@ export class ScenarioRunner {
   }
 
   private async actionSendMessage(
-    action: ScenarioAction
+    action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     const content = action.content ? this.substituteVariables(action.content) : undefined;
 
@@ -528,7 +530,7 @@ export class ScenarioRunner {
   }
 
   private async actionSendEmbed(
-    action: ScenarioAction
+    action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     if (!action.embedId) {
       return { success: false, error: "Embed ID is required" };
@@ -574,7 +576,7 @@ export class ScenarioRunner {
   }
 
   private async actionAddRole(
-    action: ScenarioAction
+    action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     if (!action.roleId) {
       return { success: false, error: "Role ID is required" };
@@ -594,7 +596,7 @@ export class ScenarioRunner {
   }
 
   private async actionRemoveRole(
-    action: ScenarioAction
+    action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     if (!action.roleId) {
       return { success: false, error: "Role ID is required" };
@@ -614,7 +616,7 @@ export class ScenarioRunner {
   }
 
   private async actionCreateThread(
-    action: ScenarioAction
+    action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     if (!action.threadName) {
       return { success: false, error: "Thread name is required" };
@@ -645,7 +647,7 @@ export class ScenarioRunner {
   }
 
   private async actionSendDM(
-    action: ScenarioAction
+    action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     const content = action.dmContent ? this.substituteVariables(action.dmContent) : undefined;
 
@@ -660,7 +662,9 @@ export class ScenarioRunner {
       }
 
       if (action.dmEmbedId) {
-        const embeds = (await this.context.guildWrapper.get("utils.components.embed")) as EmbedCustom[];
+        const embeds = (await this.context.guildWrapper.get(
+          "utils.components.embed",
+        )) as EmbedCustom[];
         const embedData = embeds.find((e) => e.id === action.dmEmbedId);
 
         if (embedData) {
@@ -681,9 +685,7 @@ export class ScenarioRunner {
     }
   }
 
-  private actionSetVariable(
-    action: ScenarioAction
-  ): { success: boolean; error?: string } {
+  private actionSetVariable(action: ScenarioAction): { success: boolean; error?: string } {
     if (!action.variableName) {
       return { success: false, error: "Variable name is required" };
     }
@@ -692,9 +694,7 @@ export class ScenarioRunner {
       return { success: false, error: "Variable name too long" };
     }
 
-    const value = action.variableValue
-      ? this.substituteVariables(action.variableValue)
-      : "";
+    const value = action.variableValue ? this.substituteVariables(action.variableValue) : "";
 
     if (value.length > SCENARIO_LIMITS.MAX_VARIABLE_VALUE_LENGTH) {
       return { success: false, error: "Variable value too long" };
@@ -709,7 +709,7 @@ export class ScenarioRunner {
   }
 
   private async actionEditMessage(
-    action: ScenarioAction
+    action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     const interaction = this.context.interaction;
 
@@ -725,7 +725,9 @@ export class ScenarioRunner {
       }
 
       if (action.embedId) {
-        const embeds = (await this.context.guildWrapper.get("utils.components.embed")) as EmbedCustom[];
+        const embeds = (await this.context.guildWrapper.get(
+          "utils.components.embed",
+        )) as EmbedCustom[];
         const embedData = embeds.find((e) => e.id === action.embedId);
 
         if (embedData) {
@@ -742,7 +744,7 @@ export class ScenarioRunner {
   }
 
   private async actionDeleteMessage(
-    action: ScenarioAction
+    action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     const interaction = this.context.interaction;
 
@@ -789,4 +791,3 @@ export class ScenarioRunner {
 
 // Setup periodic cleanup
 setInterval(() => ScenarioRunner.cleanupCooldowns(), 60 * 60 * 1000); // Every hour
-

@@ -12,8 +12,7 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "checkJs": false,
-    "incremental": true,
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "incremental": true
   },
   "include": ["src/**/*", "src/**/*.js", "src/**/*.ts", "src/**/*.tsx", "src/**/*.json"],
   "exclude": ["node_modules", "dist", "test", "_example"]

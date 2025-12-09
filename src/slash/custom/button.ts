@@ -13,6 +13,7 @@ import {
   ButtonStyle,
   ChatInputCommandInteraction,
   MessageFlagsBitField,
+  LabelBuilder,
 } from "discord.js";
 import { Guild, customUtil } from "../../helpers";
 import { generateID } from "../../handlers/functions";
@@ -48,7 +49,7 @@ module.exports = {
     await interaction.deferReply({ flags: [MessageFlagsBitField.Flags.Ephemeral] });
 
     const guild = new Guild(client, interaction.guild);
-    const lang = (await guild.get("settings.language")) as string;
+    const lang = await guild.get("settings.language");
 
     let page = 0;
     let emojiPage = 0;
@@ -69,7 +70,7 @@ module.exports = {
         _search,
         interaction.guild!,
         emojiPage,
-        EMOJIS_PER_PAGE
+        EMOJIS_PER_PAGE,
       );
       await interaction.editReply({ embeds: [embed], components });
     };
@@ -187,11 +188,12 @@ module.exports = {
           case "NI_button:preview":
             await i.deferUpdate();
             const customButton = new customUtil.CustomButton(_schema);
-            const previewRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-              customButton.getPreviewButton()
-            );
+            const previewRow =
+              new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+                customButton.getPreviewButton(),
+              );
             await i.followUp({
-              content: t(client, lang, "commands.button.messages.preview") as string,
+              content: t(client, lang, "commands.button.messages.preview"),
               components: [previewRow],
               flags: MessageFlagsBitField.Flags.Ephemeral,
             });
@@ -315,65 +317,65 @@ function buildEmbed(
   client: Client,
   lang: string,
   schema: ButtonCustom,
-  view: ViewType
+  view: ViewType,
 ): EmbedBuilder {
   const embed = new EmbedBuilder().setColor(client.holder.colors.default);
 
   switch (view) {
     case "main":
       embed
-        .setTitle(t(client, lang, "commands.button.embeds.base.title") as string)
-        .setDescription(t(client, lang, "commands.button.embeds.base.description") as string);
+        .setTitle(t(client, lang, "commands.button.embeds.base.title"))
+        .setDescription(t(client, lang, "commands.button.embeds.base.description"));
       break;
 
     case "list":
       embed
-        .setTitle(t(client, lang, "commands.button.embeds.list.title") as string)
-        .setDescription(t(client, lang, "commands.button.embeds.list.description") as string);
+        .setTitle(t(client, lang, "commands.button.embeds.list.title"))
+        .setDescription(t(client, lang, "commands.button.embeds.list.description"));
       break;
 
     case "edit":
       embed
-        .setTitle(t(client, lang, "commands.button.embeds.edit.title") as string)
-        .setDescription(t(client, lang, "commands.button.embeds.edit.description") as string)
+        .setTitle(t(client, lang, "commands.button.embeds.edit.title"))
+        .setDescription(t(client, lang, "commands.button.embeds.edit.description"))
         .addFields(
           {
-            name: t(client, lang, "commands.button.embeds.edit.fields.name") as string,
+            name: t(client, lang, "commands.button.embeds.edit.fields.name"),
             value: schema.name || "Unnamed",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.button.embeds.edit.fields.label") as string,
+            name: t(client, lang, "commands.button.embeds.edit.fields.label"),
             value: schema.label || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.button.embeds.edit.fields.style") as string,
+            name: t(client, lang, "commands.button.embeds.edit.fields.style"),
             value: schema.style,
             inline: true,
           },
           {
-            name: t(client, lang, "commands.button.embeds.edit.fields.emoji") as string,
+            name: t(client, lang, "commands.button.embeds.edit.fields.emoji"),
             value: schema.emoji ? String(schema.emoji) : "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.button.embeds.edit.fields.url") as string,
+            name: t(client, lang, "commands.button.embeds.edit.fields.url"),
             value: schema.url || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.button.embeds.edit.fields.disabled") as string,
+            name: t(client, lang, "commands.button.embeds.edit.fields.disabled"),
             value: schema.disabled ? "✅" : "❌",
             inline: true,
-          }
+          },
         );
       break;
 
     case "emoji":
       embed
-        .setTitle(t(client, lang, "commands.button.embeds.emoji.title") as string)
-        .setDescription(t(client, lang, "commands.button.embeds.emoji.description") as string);
+        .setTitle(t(client, lang, "commands.button.embeds.emoji.title"))
+        .setDescription(t(client, lang, "commands.button.embeds.emoji.description"));
       break;
   }
 
@@ -390,7 +392,7 @@ function buildComponents(
   search: string,
   guild: any,
   emojiPage: number,
-  emojisPerPage: number
+  emojisPerPage: number,
 ): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
   const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
 
@@ -400,18 +402,18 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_button:base")
-            .setPlaceholder(t(client, lang, "commands.button.select_menus.base.placeholder") as string)
+            .setPlaceholder(t(client, lang, "commands.button.select_menus.base.placeholder"))
             .setOptions(
               new StringSelectMenuOptionBuilder()
                 .setValue("create")
-                .setLabel(t(client, lang, "commands.button.select_menus.base.options.create") as string)
+                .setLabel(t(client, lang, "commands.button.select_menus.base.options.create"))
                 .setEmoji("➕"),
               new StringSelectMenuOptionBuilder()
                 .setValue("edit")
-                .setLabel(t(client, lang, "commands.button.select_menus.base.options.edit") as string)
-                .setEmoji("📝")
-            )
-        )
+                .setLabel(t(client, lang, "commands.button.select_menus.base.options.edit"))
+                .setEmoji("📝"),
+            ),
+        ),
       );
       break;
 
@@ -424,7 +426,7 @@ function buildComponents(
 
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId("NI_button:select")
-        .setPlaceholder(t(client, lang, "commands.button.select_menus.list.placeholder") as string);
+        .setPlaceholder(t(client, lang, "commands.button.select_menus.list.placeholder"));
 
       if (buttonList.length > 0) {
         buttonList.slice(page * 25, page * 25 + 25).forEach((button) => {
@@ -432,7 +434,7 @@ function buildComponents(
             new StringSelectMenuOptionBuilder()
               .setValue(button.id)
               .setLabel(button.name || "Unnamed")
-              .setDescription(`${button.label} (${button.style})`)
+              .setDescription(`${button.label} (${button.style})`),
           );
         });
       } else {
@@ -440,14 +442,12 @@ function buildComponents(
           .addOptions(
             new StringSelectMenuOptionBuilder()
               .setValue("none")
-              .setLabel(t(client, lang, "commands.button.select_menus.list.no_buttons") as string)
+              .setLabel(t(client, lang, "commands.button.select_menus.list.no_buttons")),
           )
           .setDisabled(true);
       }
 
-      rows.push(
-        new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(selectMenu)
-      );
+      rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(selectMenu));
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
@@ -473,8 +473,8 @@ function buildComponents(
           new ButtonBuilder()
             .setCustomId("NI_button:back")
             .setEmoji("🔙")
-            .setStyle(ButtonStyle.Secondary)
-        )
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
 
@@ -484,17 +484,17 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_button:style")
-            .setPlaceholder(t(client, lang, "commands.button.select_menus.style.placeholder") as string)
+            .setPlaceholder(t(client, lang, "commands.button.select_menus.style.placeholder"))
             .setOptions(
               STYLE_OPTIONS.map((opt) =>
                 new StringSelectMenuOptionBuilder()
                   .setValue(opt.value)
                   .setLabel(opt.label)
                   .setEmoji(opt.emoji)
-                  .setDefault(schema.style === opt.value)
-              )
-            )
-        )
+                  .setDefault(schema.style === opt.value),
+              ),
+            ),
+        ),
       );
 
       // Edit buttons row 1
@@ -502,26 +502,26 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_button:name")
-            .setLabel(t(client, lang, "commands.button.buttons.name") as string)
+            .setLabel(t(client, lang, "commands.button.buttons.name"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("🏷️"),
           new ButtonBuilder()
             .setCustomId("NI_button:label")
-            .setLabel(t(client, lang, "commands.button.buttons.label") as string)
+            .setLabel(t(client, lang, "commands.button.buttons.label"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("📝"),
           new ButtonBuilder()
             .setCustomId("NI_button:emoji")
-            .setLabel(t(client, lang, "commands.button.buttons.emoji") as string)
+            .setLabel(t(client, lang, "commands.button.buttons.emoji"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("😀"),
           new ButtonBuilder()
             .setCustomId("NI_button:url")
-            .setLabel(t(client, lang, "commands.button.buttons.url") as string)
+            .setLabel(t(client, lang, "commands.button.buttons.url"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("🔗")
-            .setDisabled(schema.style !== "LINK")
-        )
+            .setDisabled(schema.style !== "LINK"),
+        ),
       );
 
       // Edit buttons row 2
@@ -529,15 +529,15 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_button:disabled")
-            .setLabel(t(client, lang, "commands.button.buttons.disabled") as string)
+            .setLabel(t(client, lang, "commands.button.buttons.disabled"))
             .setStyle(schema.disabled ? ButtonStyle.Success : ButtonStyle.Secondary)
             .setEmoji("🚫"),
           new ButtonBuilder()
             .setCustomId("NI_button:preview")
-            .setLabel(t(client, lang, "commands.button.buttons.preview") as string)
+            .setLabel(t(client, lang, "commands.button.buttons.preview"))
             .setStyle(ButtonStyle.Primary)
-            .setEmoji("👁️")
-        )
+            .setEmoji("👁️"),
+        ),
       );
 
       // Action buttons
@@ -545,20 +545,20 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_button:save")
-            .setLabel(t(client, lang, "commands.button.buttons.save") as string)
+            .setLabel(t(client, lang, "commands.button.buttons.save"))
             .setStyle(ButtonStyle.Success)
             .setEmoji("💾"),
           new ButtonBuilder()
             .setCustomId("NI_button:delete")
-            .setLabel(t(client, lang, "commands.button.buttons.delete") as string)
+            .setLabel(t(client, lang, "commands.button.buttons.delete"))
             .setStyle(ButtonStyle.Danger)
             .setEmoji("🗑️"),
           new ButtonBuilder()
             .setCustomId("NI_button:back")
-            .setLabel(t(client, lang, "commands.button.buttons.back") as string)
+            .setLabel(t(client, lang, "commands.button.buttons.back"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔙")
-        )
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
@@ -570,19 +570,19 @@ function buildComponents(
       if (pageEmojis.length > 0) {
         const emojiSelect = new StringSelectMenuBuilder()
           .setCustomId("NI_button:emoji_select")
-          .setPlaceholder(t(client, lang, "commands.button.select_menus.emoji.placeholder") as string);
+          .setPlaceholder(t(client, lang, "commands.button.select_menus.emoji.placeholder"));
 
         pageEmojis.forEach((emoji: any) => {
           emojiSelect.addOptions(
             new StringSelectMenuOptionBuilder()
               .setValue(emoji.id)
               .setLabel(emoji.name || "emoji")
-              .setEmoji({ id: emoji.id, animated: emoji.animated })
+              .setEmoji({ id: emoji.id, animated: emoji.animated }),
           );
         });
 
         rows.push(
-          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(emojiSelect)
+          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(emojiSelect),
         );
       }
 
@@ -605,14 +605,14 @@ function buildComponents(
             .setDisabled(emojiPage >= Math.ceil(guildEmojis.length / emojisPerPage) - 1),
           new ButtonBuilder()
             .setCustomId("NI_button:emoji_clear")
-            .setLabel(t(client, lang, "commands.button.buttons.clear_emoji") as string)
+            .setLabel(t(client, lang, "commands.button.buttons.clear_emoji"))
             .setStyle(ButtonStyle.Danger)
             .setEmoji("🗑️"),
           new ButtonBuilder()
             .setCustomId("NI_button:back")
             .setEmoji("🔙")
-            .setStyle(ButtonStyle.Secondary)
-        )
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
   }
@@ -625,12 +625,12 @@ async function showTextModal(
   field: string,
   client: Client,
   lang: string,
-  currentValue?: string
+  currentValue?: string,
 ): Promise<{ value: string | null; submitted: boolean }> {
   const labels: Record<string, string> = {
-    label: t(client, lang, "commands.button.modals.label.label") as string,
-    url: t(client, lang, "commands.button.modals.url.label") as string,
-    name: t(client, lang, "commands.button.modals.name.label") as string,
+    label: t(client, lang, "commands.button.modals.label.label"),
+    url: t(client, lang, "commands.button.modals.url.label"),
+    name: t(client, lang, "commands.button.modals.name.label"),
   };
 
   const modalId = `NI_button:modal:${field}:${Date.now()}`;
@@ -646,8 +646,8 @@ async function showTextModal(
           .setStyle(TextInputStyle.Short)
           .setRequired(field !== "url")
           .setValue(currentValue || "")
-          .setMaxLength(field === "url" ? 512 : 80)
-      )
+          .setMaxLength(field === "url" ? 512 : 80),
+      ),
     );
 
   await interaction.showModal(modal);
@@ -669,22 +669,23 @@ async function showTextModal(
 async function showSearchModal(
   interaction: any,
   client: Client,
-  lang: string
+  lang: string,
 ): Promise<{ value: string | null; submitted: boolean }> {
   const modalId = `NI_button:modal:search:${Date.now()}`;
 
   const modal = new ModalBuilder()
-    .setTitle(t(client, lang, "commands.button.modals.search.title") as string)
+    .setTitle(t(client, lang, "commands.button.modals.search.title"))
     .setCustomId(modalId)
-    .setComponents(
-      new ActionRowBuilder<any>().setComponents(
-        new TextInputBuilder()
-          .setCustomId("NI_button:input")
-          .setLabel(t(client, lang, "commands.button.modals.search.label") as string)
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-          .setMaxLength(100)
-      )
+    .setLabelComponents(
+      new LabelBuilder()
+        .setLabel(t(client, lang, "commands.button.modals.search.label"))
+        .setTextInputComponent(
+          new TextInputBuilder()
+            .setCustomId("NI_button:input")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(false)
+            .setMaxLength(100),
+        ),
     );
 
   await interaction.showModal(modal);
@@ -702,4 +703,3 @@ async function showSearchModal(
     return { value: null, submitted: false };
   }
 }
-

@@ -203,4 +203,3 @@ export const VARIABLE_PLACEHOLDERS = {
   TIME: "{time}",
   TIMESTAMP: "{timestamp}",
 } as const;
-

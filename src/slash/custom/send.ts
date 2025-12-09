@@ -1,9 +1,4 @@
-import {
-  SlashCommand,
-  EmbedCustom,
-  ButtonCustom,
-  SelectMenuCustom,
-} from "../../types/helpers";
+import { SlashCommand, EmbedCustom, ButtonCustom, SelectMenuCustom } from "../../types/helpers";
 import {
   Client,
   EmbedBuilder,
@@ -18,12 +13,22 @@ import {
   TextChannel,
   ChannelSelectMenuBuilder,
   ChannelType,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  LabelBuilder,
 } from "discord.js";
 import { Guild, customUtil } from "../../helpers";
 import { t } from "../../i18n/helpers";
-import { defaultPermissions } from "../../helpers/permissions";
+import { defaultPermissions } from "../../helpers";
 
-type ViewType = "main" | "select_embeds" | "select_buttons" | "select_selectmenus" | "select_channel" | "preview";
+type ViewType =
+  | "main"
+  | "select_embeds"
+  | "select_buttons"
+  | "select_selectmenus"
+  | "select_channel"
+  | "preview";
 
 interface MessageComposition {
   content: string | null;
@@ -51,7 +56,7 @@ module.exports = {
     await interaction.deferReply({ flags: [MessageFlagsBitField.Flags.Ephemeral] });
 
     const guild = new Guild(client, interaction.guild);
-    const lang = (await guild.get("settings.language")) as string;
+    const lang = await guild.get("settings.language");
 
     let currentView: ViewType = "main";
     let composition: MessageComposition = {
@@ -77,7 +82,7 @@ module.exports = {
         embedPage,
         buttonPage,
         selectMenuPage,
-        ITEMS_PER_PAGE
+        ITEMS_PER_PAGE,
       );
       await interaction.editReply({ embeds: [embed], components });
     };
@@ -98,7 +103,7 @@ module.exports = {
             case "NI_send:main_menu":
               switch (i.values[0]) {
                 case "content":
-                  const contentResult = await showContentModal(i);
+                  const contentResult = await showContentModal(i, client, lang);
                   if (contentResult.submitted) {
                     composition.content = contentResult.value;
                     await updateMessage();
@@ -220,7 +225,7 @@ module.exports = {
               // Validate
               if (!composition.channelId) {
                 await i.followUp({
-                  content: "❌ Please select a channel to send the message to.",
+                  content: `❌ ${t(client, lang, "commands.send.messages.no_channel")}`,
                   flags: MessageFlagsBitField.Flags.Ephemeral,
                 });
                 return;
@@ -228,16 +233,18 @@ module.exports = {
 
               if (!composition.content && composition.embeds.length === 0) {
                 await i.followUp({
-                  content: "❌ Please add content or at least one embed.",
+                  content: `❌ ${t(client, lang, "commands.send.messages.no_content")}`,
                   flags: MessageFlagsBitField.Flags.Ephemeral,
                 });
                 return;
               }
 
-              const channel = interaction.guild?.channels.cache.get(composition.channelId) as TextChannel;
+              const channel = interaction.guild?.channels.cache.get(
+                composition.channelId,
+              ) as TextChannel;
               if (!channel) {
                 await i.followUp({
-                  content: "❌ Channel not found or inaccessible.",
+                  content: `❌ ${t(client, lang, "commands.send.messages.channel_not_found")}`,
                   flags: MessageFlagsBitField.Flags.Ephemeral,
                 });
                 return;
@@ -277,9 +284,10 @@ module.exports = {
                 // Add select menus (one per row)
                 for (const menu of composition.selectMenus.slice(0, 5 - rows.length)) {
                   const customMenu = new customUtil.CustomSelectMenu(menu);
-                  const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-                    customMenu.getSelectMenu()
-                  );
+                  const row =
+                    new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+                      customMenu.getSelectMenu(),
+                    );
                   rows.push(row);
                 }
 
@@ -290,7 +298,7 @@ module.exports = {
                 await channel.send(messagePayload);
 
                 await i.followUp({
-                  content: `✅ Message sent to <#${composition.channelId}>!`,
+                  content: `✅ ${t(client, lang, "commands.send.messages.sent").replace("{0}", `<#${composition.channelId}>`)}`,
                   flags: MessageFlagsBitField.Flags.Ephemeral,
                 });
 
@@ -307,7 +315,7 @@ module.exports = {
               } catch (error) {
                 console.error("[Send Command] Error:", error);
                 await i.followUp({
-                  content: "❌ Failed to send message. Check bot permissions.",
+                  content: `❌ ${t(client, lang, "commands.send.messages.send_failed")}`,
                   flags: MessageFlagsBitField.Flags.Ephemeral,
                 });
               }
@@ -394,21 +402,26 @@ async function getSelectMenus(guild: Guild): Promise<SelectMenuCustom[]> {
   return (await guild.get("utils.components.selectMenus")) as SelectMenuCustom[];
 }
 
-async function showContentModal(interaction: any): Promise<{ value: string | null; submitted: boolean }> {
+async function showContentModal(
+  interaction: any,
+  client: Client,
+  lang: string,
+): Promise<{ value: string | null; submitted: boolean }> {
   const modalId = `NI_send:modal:content:${Date.now()}`;
 
-  const modal = new (await import("discord.js")).ModalBuilder()
-    .setTitle("Edit Message Content")
+  const modal = new ModalBuilder()
+    .setTitle(t(client, lang, "commands.send.buttons.edit_content"))
     .setCustomId(modalId)
-    .setComponents(
-      new ActionRowBuilder<any>().setComponents(
-        new (await import("discord.js")).TextInputBuilder()
-          .setCustomId("NI_send:input")
-          .setLabel("Message content")
-          .setStyle((await import("discord.js")).TextInputStyle.Paragraph)
-          .setRequired(false)
-          .setMaxLength(2000)
-      )
+    .setLabelComponents(
+      new LabelBuilder()
+        .setLabel(t(client, lang, "commands.send.fields.content"))
+        .setTextInputComponent(
+          new TextInputBuilder()
+            .setCustomId("NI_send:input")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(false)
+            .setMaxLength(2000),
+        ),
     );
 
   await interaction.showModal(modal);
@@ -432,98 +445,120 @@ async function buildEmbed(
   lang: string,
   composition: MessageComposition,
   view: ViewType,
-  guild: Guild
+  guild: Guild,
 ): Promise<EmbedBuilder> {
   const embed = new EmbedBuilder().setColor(client.holder.colors.default);
 
   switch (view) {
     case "main":
       embed
-        .setTitle("📤 Message Composer")
-        .setDescription("Create and send messages with custom embeds, buttons, and select menus.")
+        .setTitle(t(client, lang, "commands.send.embeds.main.title"))
+        .setDescription(t(client, lang, "commands.send.embeds.main.description"))
         .addFields(
           {
-            name: "📝 Content",
-            value: composition.content ? `\`${composition.content.substring(0, 50)}${composition.content.length > 50 ? "..." : ""}\`` : "Not set",
+            name: `📝 ${t(client, lang, "commands.send.fields.content")}`,
+            value: composition.content
+              ? `\`${composition.content.substring(0, 50)}${composition.content.length > 50 ? "..." : ""}\``
+              : t(client, lang, "commands.send.fields.not_set"),
             inline: true,
           },
           {
-            name: "📋 Embeds",
-            value: composition.embeds.length > 0 ? `${composition.embeds.length} selected` : "None",
+            name: `📋 ${t(client, lang, "commands.send.fields.embeds")}`,
+            value:
+              composition.embeds.length > 0
+                ? `${composition.embeds.length} ${t(client, lang, "commands.send.fields.selected")}`
+                : t(client, lang, "commands.send.fields.none"),
             inline: true,
           },
           {
-            name: "🔘 Buttons",
-            value: composition.buttons.length > 0 ? `${composition.buttons.length} selected` : "None",
+            name: `🔘 ${t(client, lang, "commands.send.fields.buttons")}`,
+            value:
+              composition.buttons.length > 0
+                ? `${composition.buttons.length} ${t(client, lang, "commands.send.fields.selected")}`
+                : t(client, lang, "commands.send.fields.none"),
             inline: true,
           },
           {
-            name: "📋 Select Menus",
-            value: composition.selectMenus.length > 0 ? `${composition.selectMenus.length} selected` : "None",
+            name: `📋 ${t(client, lang, "commands.send.fields.selectmenus")}`,
+            value:
+              composition.selectMenus.length > 0
+                ? `${composition.selectMenus.length} ${t(client, lang, "commands.send.fields.selected")}`
+                : t(client, lang, "commands.send.fields.none"),
             inline: true,
           },
           {
-            name: "📢 Channel",
-            value: composition.channelId ? `<#${composition.channelId}>` : "Not set",
+            name: `📢 ${t(client, lang, "commands.send.fields.channel")}`,
+            value: composition.channelId
+              ? `<#${composition.channelId}>`
+              : t(client, lang, "commands.send.fields.not_set"),
             inline: true,
-          }
+          },
         );
       break;
 
     case "select_embeds":
       embed
-        .setTitle("📋 Select Embeds")
-        .setDescription("Choose embeds to include in your message (max 10).");
+        .setTitle(t(client, lang, "commands.send.embeds.select_embeds.title"))
+        .setDescription(t(client, lang, "commands.send.embeds.select_embeds.description"));
       break;
 
     case "select_buttons":
       embed
-        .setTitle("🔘 Select Buttons")
-        .setDescription("Choose buttons to include in your message (max 25, 5 per row).");
+        .setTitle(t(client, lang, "commands.send.embeds.select_buttons.title"))
+        .setDescription(t(client, lang, "commands.send.embeds.select_buttons.description"));
       break;
 
     case "select_selectmenus":
       embed
-        .setTitle("📋 Select Menus")
-        .setDescription("Choose select menus to include in your message (max 5, one per row).");
+        .setTitle(t(client, lang, "commands.send.embeds.select_selectmenus.title"))
+        .setDescription(t(client, lang, "commands.send.embeds.select_selectmenus.description"));
       break;
 
     case "select_channel":
       embed
-        .setTitle("📢 Select Channel")
-        .setDescription("Choose the channel to send the message to.");
+        .setTitle(t(client, lang, "commands.send.embeds.select_channel.title"))
+        .setDescription(t(client, lang, "commands.send.embeds.select_channel.description"));
       break;
 
     case "preview":
       embed
-        .setTitle("👁️ Preview")
-        .setDescription("This is a preview of your message composition.\n\n**Note:** The actual message will be sent to the selected channel.");
+        .setTitle(t(client, lang, "commands.send.embeds.preview.title"))
+        .setDescription(t(client, lang, "commands.send.embeds.preview.description"));
 
       if (composition.content) {
         embed.addFields({
-          name: "Content",
+          name: t(client, lang, "commands.send.fields.content"),
           value: composition.content.substring(0, 1024),
         });
       }
 
       if (composition.embeds.length > 0) {
         embed.addFields({
-          name: "Embeds",
-          value: composition.embeds.map((e) => `• ${e.name || e.title || "Unnamed"}`).join("\n").substring(0, 1024),
+          name: t(client, lang, "commands.send.fields.embeds"),
+          value: composition.embeds
+            .map((e) => `• ${e.name || e.title || "Unnamed"}`)
+            .join("\n")
+            .substring(0, 1024),
         });
       }
 
       if (composition.buttons.length > 0) {
         embed.addFields({
-          name: "Buttons",
-          value: composition.buttons.map((b) => `• ${b.label || b.name || "Unnamed"}`).join("\n").substring(0, 1024),
+          name: t(client, lang, "commands.send.fields.buttons"),
+          value: composition.buttons
+            .map((b) => `• ${b.label || b.name || "Unnamed"}`)
+            .join("\n")
+            .substring(0, 1024),
         });
       }
 
       if (composition.selectMenus.length > 0) {
         embed.addFields({
-          name: "Select Menus",
-          value: composition.selectMenus.map((s) => `• ${s.name || "Unnamed"}`).join("\n").substring(0, 1024),
+          name: t(client, lang, "commands.send.fields.selectmenus"),
+          value: composition.selectMenus
+            .map((s) => `• ${s.name || "Unnamed"}`)
+            .join("\n")
+            .substring(0, 1024),
         });
       }
       break;
@@ -541,7 +576,7 @@ async function buildComponents(
   embedPage: number,
   buttonPage: number,
   selectMenuPage: number,
-  itemsPerPage: number
+  itemsPerPage: number,
 ): Promise<ActionRowBuilder<MessageActionRowComponentBuilder>[]> {
   const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
 
@@ -550,13 +585,28 @@ async function buildComponents(
       // Main menu select
       const mainSelect = new StringSelectMenuBuilder()
         .setCustomId("NI_send:main_menu")
-        .setPlaceholder("What would you like to do?")
+        .setPlaceholder(t(client, lang, "commands.send.embeds.main.title"))
         .addOptions(
-          new StringSelectMenuOptionBuilder().setLabel("Edit Content").setValue("content").setEmoji("📝"),
-          new StringSelectMenuOptionBuilder().setLabel("Select Embeds").setValue("embeds").setEmoji("📋"),
-          new StringSelectMenuOptionBuilder().setLabel("Select Buttons").setValue("buttons").setEmoji("🔘"),
-          new StringSelectMenuOptionBuilder().setLabel("Select Menus").setValue("selectmenus").setEmoji("📋"),
-          new StringSelectMenuOptionBuilder().setLabel("Select Channel").setValue("channel").setEmoji("📢")
+          new StringSelectMenuOptionBuilder()
+            .setLabel(t(client, lang, "commands.send.buttons.edit_content"))
+            .setValue("content")
+            .setEmoji("📝"),
+          new StringSelectMenuOptionBuilder()
+            .setLabel(t(client, lang, "commands.send.buttons.select_embeds"))
+            .setValue("embeds")
+            .setEmoji("📋"),
+          new StringSelectMenuOptionBuilder()
+            .setLabel(t(client, lang, "commands.send.buttons.select_buttons"))
+            .setValue("buttons")
+            .setEmoji("🔘"),
+          new StringSelectMenuOptionBuilder()
+            .setLabel(t(client, lang, "commands.send.buttons.select_menus"))
+            .setValue("selectmenus")
+            .setEmoji("📋"),
+          new StringSelectMenuOptionBuilder()
+            .setLabel(t(client, lang, "commands.send.buttons.select_channel"))
+            .setValue("channel")
+            .setEmoji("📢"),
         );
       rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(mainSelect));
 
@@ -564,24 +614,24 @@ async function buildComponents(
       const clearRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
         new ButtonBuilder()
           .setCustomId("NI_send:clear_content")
-          .setLabel("Clear Content")
+          .setLabel(t(client, lang, "commands.send.buttons.clear_content"))
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(!composition.content),
         new ButtonBuilder()
           .setCustomId("NI_send:clear_embeds")
-          .setLabel("Clear Embeds")
+          .setLabel(t(client, lang, "commands.send.buttons.clear_embeds"))
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(composition.embeds.length === 0),
         new ButtonBuilder()
           .setCustomId("NI_send:clear_buttons")
-          .setLabel("Clear Buttons")
+          .setLabel(t(client, lang, "commands.send.buttons.clear_buttons"))
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(composition.buttons.length === 0),
         new ButtonBuilder()
           .setCustomId("NI_send:clear_selectmenus")
-          .setLabel("Clear Menus")
+          .setLabel(t(client, lang, "commands.send.buttons.clear_menus"))
           .setStyle(ButtonStyle.Secondary)
-          .setDisabled(composition.selectMenus.length === 0)
+          .setDisabled(composition.selectMenus.length === 0),
       );
       rows.push(clearRow);
 
@@ -589,15 +639,17 @@ async function buildComponents(
       const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
         new ButtonBuilder()
           .setCustomId("NI_send:preview")
-          .setLabel("Preview")
+          .setLabel(t(client, lang, "commands.send.buttons.preview"))
           .setStyle(ButtonStyle.Primary)
           .setEmoji("👁️"),
         new ButtonBuilder()
           .setCustomId("NI_send:send")
-          .setLabel("Send Message")
+          .setLabel(t(client, lang, "commands.send.buttons.send"))
           .setStyle(ButtonStyle.Success)
           .setEmoji("📤")
-          .setDisabled(!composition.channelId || (!composition.content && composition.embeds.length === 0))
+          .setDisabled(
+            !composition.channelId || (!composition.content && composition.embeds.length === 0),
+          ),
       );
       rows.push(actionRow);
       break;
@@ -611,7 +663,7 @@ async function buildComponents(
       if (pageEmbeds.length > 0) {
         const select = new StringSelectMenuBuilder()
           .setCustomId("NI_send:select_embeds")
-          .setPlaceholder("Select embeds (max 10)")
+          .setPlaceholder(t(client, lang, "commands.send.embeds.select_embeds.title"))
           .setMinValues(0)
           .setMaxValues(Math.min(10, pageEmbeds.length));
 
@@ -621,7 +673,7 @@ async function buildComponents(
             new StringSelectMenuOptionBuilder()
               .setLabel(emb.name || emb.title || "Unnamed")
               .setValue(emb.id)
-              .setDefault(isSelected)
+              .setDefault(isSelected),
           );
         }
 
@@ -642,8 +694,8 @@ async function buildComponents(
           .setDisabled(start + itemsPerPage >= embeds.length),
         new ButtonBuilder()
           .setCustomId("NI_send:back")
-          .setLabel("Back")
-          .setStyle(ButtonStyle.Danger)
+          .setLabel(t(client, lang, "commands.send.buttons.back"))
+          .setStyle(ButtonStyle.Danger),
       );
       rows.push(navRow);
       break;
@@ -657,7 +709,7 @@ async function buildComponents(
       if (pageButtons.length > 0) {
         const select = new StringSelectMenuBuilder()
           .setCustomId("NI_send:select_buttons")
-          .setPlaceholder("Select buttons (max 25)")
+          .setPlaceholder(t(client, lang, "commands.send.embeds.select_buttons.title"))
           .setMinValues(0)
           .setMaxValues(Math.min(25, pageButtons.length));
 
@@ -667,7 +719,7 @@ async function buildComponents(
             new StringSelectMenuOptionBuilder()
               .setLabel(btn.label || btn.name || "Unnamed")
               .setValue(btn.id)
-              .setDefault(isSelected)
+              .setDefault(isSelected),
           );
         }
 
@@ -675,7 +727,7 @@ async function buildComponents(
       }
 
       // Pagination and back
-      const navRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+      const navRow2 = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
         new ButtonBuilder()
           .setCustomId("NI_send:button_prev")
           .setLabel("◀")
@@ -688,10 +740,10 @@ async function buildComponents(
           .setDisabled(start + itemsPerPage >= buttons.length),
         new ButtonBuilder()
           .setCustomId("NI_send:back")
-          .setLabel("Back")
-          .setStyle(ButtonStyle.Danger)
+          .setLabel(t(client, lang, "commands.send.buttons.back"))
+          .setStyle(ButtonStyle.Danger),
       );
-      rows.push(navRow);
+      rows.push(navRow2);
       break;
     }
 
@@ -703,7 +755,7 @@ async function buildComponents(
       if (pageMenus.length > 0) {
         const select = new StringSelectMenuBuilder()
           .setCustomId("NI_send:select_selectmenus")
-          .setPlaceholder("Select menus (max 5)")
+          .setPlaceholder(t(client, lang, "commands.send.embeds.select_selectmenus.title"))
           .setMinValues(0)
           .setMaxValues(Math.min(5, pageMenus.length));
 
@@ -713,7 +765,7 @@ async function buildComponents(
             new StringSelectMenuOptionBuilder()
               .setLabel(menu.name || "Unnamed")
               .setValue(menu.id)
-              .setDefault(isSelected)
+              .setDefault(isSelected),
           );
         }
 
@@ -721,7 +773,7 @@ async function buildComponents(
       }
 
       // Pagination and back
-      const navRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+      const navRow3 = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
         new ButtonBuilder()
           .setCustomId("NI_send:selectmenu_prev")
           .setLabel("◀")
@@ -734,25 +786,27 @@ async function buildComponents(
           .setDisabled(start + itemsPerPage >= selectMenus.length),
         new ButtonBuilder()
           .setCustomId("NI_send:back")
-          .setLabel("Back")
-          .setStyle(ButtonStyle.Danger)
+          .setLabel(t(client, lang, "commands.send.buttons.back"))
+          .setStyle(ButtonStyle.Danger),
       );
-      rows.push(navRow);
+      rows.push(navRow3);
       break;
     }
 
     case "select_channel": {
       const channelSelect = new ChannelSelectMenuBuilder()
         .setCustomId("NI_send:select_channel")
-        .setPlaceholder("Select a channel")
+        .setPlaceholder(t(client, lang, "commands.send.embeds.select_channel.description"))
         .setChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement);
-      rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(channelSelect));
+      rows.push(
+        new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(channelSelect),
+      );
 
       const backRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
         new ButtonBuilder()
           .setCustomId("NI_send:back")
-          .setLabel("Back")
-          .setStyle(ButtonStyle.Danger)
+          .setLabel(t(client, lang, "commands.send.buttons.back"))
+          .setStyle(ButtonStyle.Danger),
       );
       rows.push(backRow);
       break;
@@ -762,14 +816,16 @@ async function buildComponents(
       const backRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
         new ButtonBuilder()
           .setCustomId("NI_send:back")
-          .setLabel("Back")
+          .setLabel(t(client, lang, "commands.send.buttons.back"))
           .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
           .setCustomId("NI_send:send")
-          .setLabel("Send Message")
+          .setLabel(t(client, lang, "commands.send.buttons.send"))
           .setStyle(ButtonStyle.Success)
           .setEmoji("📤")
-          .setDisabled(!composition.channelId || (!composition.content && composition.embeds.length === 0))
+          .setDisabled(
+            !composition.channelId || (!composition.content && composition.embeds.length === 0),
+          ),
       );
       rows.push(backRow);
       break;
@@ -778,4 +834,3 @@ async function buildComponents(
 
   return rows;
 }
-

@@ -14,13 +14,12 @@ import {
   ChatInputCommandInteraction,
   MessageFlagsBitField,
   LabelBuilder,
-  ColorResolvable,
 } from "discord.js";
 import { Guild, customUtil } from "../../helpers";
 import { generateID } from "../../handlers/functions";
 import fuse from "fuse.js";
 import { t } from "../../i18n/helpers";
-import { defaultPermissions } from "../../helpers/permissions";
+import { defaultPermissions } from "../../helpers";
 
 type ViewType = "main" | "list" | "edit" | "fields" | "field_edit" | "author" | "footer";
 
@@ -42,7 +41,7 @@ module.exports = {
     await interaction.deferReply({ flags: [MessageFlagsBitField.Flags.Ephemeral] });
 
     const guild = new Guild(client, interaction.guild);
-    const lang = (await guild.get("settings.language")) as string;
+    const lang = await guild.get("settings.language");
 
     let page = 0;
     let currentView: ViewType = "main";
@@ -60,7 +59,7 @@ module.exports = {
         currentFieldIndex,
         await getEmbeds(guild),
         page,
-        _search
+        _search,
       );
       await interaction.editReply({ embeds: [embed], components });
     };
@@ -108,7 +107,13 @@ module.exports = {
               case "name":
               case "thumbnail":
               case "image": {
-                const result = await showTextModal(i, i.values[0], client, lang, (_schema as any)[i.values[0]]);
+                const result = await showTextModal(
+                  i,
+                  i.values[0],
+                  client,
+                  lang,
+                  (_schema as any)[i.values[0]],
+                );
                 if (result.submitted) {
                   if (i.values[0] === "color") {
                     if (result.value && /^#[0-9A-Fa-f]{6}$/.test(result.value)) {
@@ -148,7 +153,7 @@ module.exports = {
             if (i.values[0] === "add") {
               if ((_schema.fields?.length || 0) >= SCENARIO_LIMITS.MAX_EMBED_FIELDS) {
                 await i.reply({
-                  content: t(client, lang, "commands.embed.messages.max_fields") as string,
+                  content: t(client, lang, "commands.embed.messages.max_fields"),
                   flags: MessageFlagsBitField.Flags.Ephemeral,
                 });
                 return;
@@ -170,7 +175,7 @@ module.exports = {
         // Handle modal submissions for text inputs
         if (
           ["title", "description", "color", "name", "thumbnail", "image"].includes(
-            i.customId.split(":").pop() || ""
+            i.customId.split(":").pop() || "",
           )
         ) {
           return; // Modal will be handled separately
@@ -184,7 +189,11 @@ module.exports = {
             await i.deferUpdate();
             if (currentView === "field_edit") {
               currentView = "fields";
-            } else if (currentView === "fields" || currentView === "author" || currentView === "footer") {
+            } else if (
+              currentView === "fields" ||
+              currentView === "author" ||
+              currentView === "footer"
+            ) {
               currentView = "edit";
             } else if (currentView === "edit" || currentView === "list") {
               currentView = "main";
@@ -253,7 +262,13 @@ module.exports = {
 
           // Author buttons
           case "NI_embed:author_name": {
-            const result = await showTextModal(i, "author_name", client, lang, _schema.author?.name);
+            const result = await showTextModal(
+              i,
+              "author_name",
+              client,
+              lang,
+              _schema.author?.name,
+            );
             if (result.submitted) {
               _schema.author = _schema.author || { name: "" };
               _schema.author.name = result.value || "";
@@ -262,7 +277,13 @@ module.exports = {
             break;
           }
           case "NI_embed:author_icon": {
-            const result = await showTextModal(i, "author_icon", client, lang, _schema.author?.icon_url);
+            const result = await showTextModal(
+              i,
+              "author_icon",
+              client,
+              lang,
+              _schema.author?.icon_url,
+            );
             if (result.submitted) {
               _schema.author = _schema.author || { name: "" };
               _schema.author.icon_url = result.value || undefined;
@@ -287,7 +308,13 @@ module.exports = {
 
           // Footer buttons
           case "NI_embed:footer_text": {
-            const result = await showTextModal(i, "footer_text", client, lang, _schema.footer?.text);
+            const result = await showTextModal(
+              i,
+              "footer_text",
+              client,
+              lang,
+              _schema.footer?.text,
+            );
             if (result.submitted) {
               _schema.footer = _schema.footer || { text: "" };
               _schema.footer.text = result.value || "";
@@ -296,7 +323,13 @@ module.exports = {
             break;
           }
           case "NI_embed:footer_icon": {
-            const result = await showTextModal(i, "footer_icon", client, lang, _schema.footer?.icon_url);
+            const result = await showTextModal(
+              i,
+              "footer_icon",
+              client,
+              lang,
+              _schema.footer?.icon_url,
+            );
             if (result.submitted) {
               _schema.footer = _schema.footer || { text: "" };
               _schema.footer.icon_url = result.value || undefined;
@@ -317,7 +350,7 @@ module.exports = {
               "field_name",
               client,
               lang,
-              _schema.fields?.[currentFieldIndex]?.name
+              _schema.fields?.[currentFieldIndex]?.name,
             );
             if (result.submitted && _schema.fields?.[currentFieldIndex]) {
               _schema.fields[currentFieldIndex].name = result.value || "Field";
@@ -331,7 +364,7 @@ module.exports = {
               "field_value",
               client,
               lang,
-              _schema.fields?.[currentFieldIndex]?.value
+              _schema.fields?.[currentFieldIndex]?.value,
             );
             if (result.submitted && _schema.fields?.[currentFieldIndex]) {
               _schema.fields[currentFieldIndex].value = result.value || "Value";
@@ -342,8 +375,7 @@ module.exports = {
           case "NI_embed:field_inline":
             await i.deferUpdate();
             if (_schema.fields?.[currentFieldIndex]) {
-              _schema.fields[currentFieldIndex].inline =
-                !_schema.fields[currentFieldIndex].inline;
+              _schema.fields[currentFieldIndex].inline = !_schema.fields[currentFieldIndex].inline;
             }
             await updateMessage();
             break;
@@ -411,60 +443,60 @@ function buildEmbed(
   lang: string,
   schema: EmbedCustom,
   view: ViewType,
-  fieldIndex: number
+  fieldIndex: number,
 ): EmbedBuilder {
   const embed = new EmbedBuilder().setColor(client.holder.colors.default);
 
   switch (view) {
     case "main":
       embed
-        .setTitle(t(client, lang, "commands.embed.embeds.base.title") as string)
-        .setDescription(t(client, lang, "commands.embed.embeds.base.description") as string);
+        .setTitle(t(client, lang, "commands.embed.embeds.base.title"))
+        .setDescription(t(client, lang, "commands.embed.embeds.base.description"));
       break;
 
     case "list":
       embed
-        .setTitle(t(client, lang, "commands.embed.embeds.list.title") as string)
-        .setDescription(t(client, lang, "commands.embed.embeds.list.description") as string);
+        .setTitle(t(client, lang, "commands.embed.embeds.list.title"))
+        .setDescription(t(client, lang, "commands.embed.embeds.list.description"));
       break;
 
     case "edit":
       embed
-        .setTitle(t(client, lang, "commands.embed.embeds.edit.title") as string)
-        .setDescription(t(client, lang, "commands.embed.embeds.edit.description") as string)
+        .setTitle(t(client, lang, "commands.embed.embeds.edit.title"))
+        .setDescription(t(client, lang, "commands.embed.embeds.edit.description"))
         .addFields(
           {
-            name: t(client, lang, "commands.embed.embeds.edit.fields.name") as string,
+            name: t(client, lang, "commands.embed.embeds.edit.fields.name"),
             value: schema.name || "Unnamed",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.embed.embeds.edit.fields.title") as string,
+            name: t(client, lang, "commands.embed.embeds.edit.fields.title"),
             value: schema.title || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.embed.embeds.edit.fields.color") as string,
+            name: t(client, lang, "commands.embed.embeds.edit.fields.color"),
             value: String(schema.color) || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.embed.embeds.edit.fields.fields_count") as string,
+            name: t(client, lang, "commands.embed.embeds.edit.fields.fields_count"),
             value: String(schema.fields?.length || 0),
             inline: true,
           },
           {
-            name: t(client, lang, "commands.embed.embeds.edit.fields.timestamp") as string,
+            name: t(client, lang, "commands.embed.embeds.edit.fields.timestamp"),
             value: schema.timestamp ? "✅" : "❌",
             inline: true,
-          }
+          },
         );
       break;
 
     case "fields":
       embed
-        .setTitle(t(client, lang, "commands.embed.embeds.fields.title") as string)
-        .setDescription(t(client, lang, "commands.embed.embeds.fields.description") as string);
+        .setTitle(t(client, lang, "commands.embed.embeds.fields.title"))
+        .setDescription(t(client, lang, "commands.embed.embeds.fields.description"));
       if (schema.fields && schema.fields.length > 0) {
         schema.fields.forEach((field, index) => {
           embed.addFields({
@@ -478,65 +510,65 @@ function buildEmbed(
     case "field_edit":
       const field = schema.fields?.[fieldIndex];
       embed
-        .setTitle(t(client, lang, "commands.embed.embeds.field_edit.title") as string)
-        .setDescription(t(client, lang, "commands.embed.embeds.field_edit.description") as string)
+        .setTitle(t(client, lang, "commands.embed.embeds.field_edit.title"))
+        .setDescription(t(client, lang, "commands.embed.embeds.field_edit.description"))
         .addFields(
           {
-            name: t(client, lang, "commands.embed.embeds.field_edit.fields.name") as string,
+            name: t(client, lang, "commands.embed.embeds.field_edit.fields.name"),
             value: field?.name || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.embed.embeds.field_edit.fields.value") as string,
+            name: t(client, lang, "commands.embed.embeds.field_edit.fields.value"),
             value: field?.value?.substring(0, 100) || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.embed.embeds.field_edit.fields.inline") as string,
+            name: t(client, lang, "commands.embed.embeds.field_edit.fields.inline"),
             value: field?.inline ? "✅" : "❌",
             inline: true,
-          }
+          },
         );
       break;
 
     case "author":
       embed
-        .setTitle(t(client, lang, "commands.embed.embeds.author.title") as string)
-        .setDescription(t(client, lang, "commands.embed.embeds.author.description") as string)
+        .setTitle(t(client, lang, "commands.embed.embeds.author.title"))
+        .setDescription(t(client, lang, "commands.embed.embeds.author.description"))
         .addFields(
           {
-            name: t(client, lang, "commands.embed.embeds.author.fields.name") as string,
+            name: t(client, lang, "commands.embed.embeds.author.fields.name"),
             value: schema.author?.name || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.embed.embeds.author.fields.icon") as string,
+            name: t(client, lang, "commands.embed.embeds.author.fields.icon"),
             value: schema.author?.icon_url ? "✅ Set" : "❌ Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.embed.embeds.author.fields.url") as string,
+            name: t(client, lang, "commands.embed.embeds.author.fields.url"),
             value: schema.author?.url ? "✅ Set" : "❌ Not set",
             inline: true,
-          }
+          },
         );
       break;
 
     case "footer":
       embed
-        .setTitle(t(client, lang, "commands.embed.embeds.footer.title") as string)
-        .setDescription(t(client, lang, "commands.embed.embeds.footer.description") as string)
+        .setTitle(t(client, lang, "commands.embed.embeds.footer.title"))
+        .setDescription(t(client, lang, "commands.embed.embeds.footer.description"))
         .addFields(
           {
-            name: t(client, lang, "commands.embed.embeds.footer.fields.text") as string,
+            name: t(client, lang, "commands.embed.embeds.footer.fields.text"),
             value: schema.footer?.text || "Not set",
             inline: true,
           },
           {
-            name: t(client, lang, "commands.embed.embeds.footer.fields.icon") as string,
+            name: t(client, lang, "commands.embed.embeds.footer.fields.icon"),
             value: schema.footer?.icon_url ? "✅ Set" : "❌ Not set",
             inline: true,
-          }
+          },
         );
       break;
   }
@@ -552,7 +584,7 @@ function buildComponents(
   fieldIndex: number,
   allEmbeds: EmbedCustom[],
   page: number,
-  search: string
+  search: string,
 ): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
   const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
 
@@ -562,18 +594,18 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_embed:base")
-            .setPlaceholder(t(client, lang, "commands.embed.select_menus.base.placeholder") as string)
+            .setPlaceholder(t(client, lang, "commands.embed.select_menus.base.placeholder"))
             .setOptions(
               new StringSelectMenuOptionBuilder()
                 .setValue("create")
-                .setLabel(t(client, lang, "commands.embed.select_menus.base.options.create") as string)
+                .setLabel(t(client, lang, "commands.embed.select_menus.base.options.create"))
                 .setEmoji("➕"),
               new StringSelectMenuOptionBuilder()
                 .setValue("edit")
-                .setLabel(t(client, lang, "commands.embed.select_menus.base.options.edit") as string)
-                .setEmoji("📝")
-            )
-        )
+                .setLabel(t(client, lang, "commands.embed.select_menus.base.options.edit"))
+                .setEmoji("📝"),
+            ),
+        ),
       );
       break;
 
@@ -586,7 +618,7 @@ function buildComponents(
 
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId("NI_embed:select")
-        .setPlaceholder(t(client, lang, "commands.embed.select_menus.list.placeholder") as string);
+        .setPlaceholder(t(client, lang, "commands.embed.select_menus.list.placeholder"));
 
       if (embedList.length > 0) {
         embedList.slice(page * 25, page * 25 + 25).forEach((embed) => {
@@ -594,7 +626,7 @@ function buildComponents(
             new StringSelectMenuOptionBuilder()
               .setValue(embed.id)
               .setLabel(embed.name || "Unnamed")
-              .setDescription(`ID: ${embed.id}`)
+              .setDescription(`ID: ${embed.id}`),
           );
         });
       } else {
@@ -602,14 +634,12 @@ function buildComponents(
           .addOptions(
             new StringSelectMenuOptionBuilder()
               .setValue("none")
-              .setLabel(t(client, lang, "commands.embed.select_menus.list.no_embeds") as string)
+              .setLabel(t(client, lang, "commands.embed.select_menus.list.no_embeds")),
           )
           .setDisabled(true);
       }
 
-      rows.push(
-        new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(selectMenu)
-      );
+      rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(selectMenu));
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
@@ -635,8 +665,8 @@ function buildComponents(
           new ButtonBuilder()
             .setCustomId("NI_embed:back")
             .setEmoji("🔙")
-            .setStyle(ButtonStyle.Secondary)
-        )
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
 
@@ -645,82 +675,82 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_embed:edit_menu")
-            .setPlaceholder(t(client, lang, "commands.embed.select_menus.edit.placeholder") as string)
+            .setPlaceholder(t(client, lang, "commands.embed.select_menus.edit.placeholder"))
             .setOptions(
               new StringSelectMenuOptionBuilder()
                 .setValue("name")
-                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.name") as string)
+                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.name"))
                 .setEmoji("🏷️"),
               new StringSelectMenuOptionBuilder()
                 .setValue("title")
-                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.title") as string)
+                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.title"))
                 .setEmoji("📝"),
               new StringSelectMenuOptionBuilder()
                 .setValue("description")
-                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.description") as string)
+                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.description"))
                 .setEmoji("📄"),
               new StringSelectMenuOptionBuilder()
                 .setValue("color")
-                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.color") as string)
+                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.color"))
                 .setEmoji("🎨"),
               new StringSelectMenuOptionBuilder()
                 .setValue("thumbnail")
-                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.thumbnail") as string)
+                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.thumbnail"))
                 .setEmoji("🖼️"),
               new StringSelectMenuOptionBuilder()
                 .setValue("image")
-                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.image") as string)
+                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.image"))
                 .setEmoji("📷"),
               new StringSelectMenuOptionBuilder()
                 .setValue("author")
-                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.author") as string)
+                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.author"))
                 .setEmoji("👤"),
               new StringSelectMenuOptionBuilder()
                 .setValue("footer")
-                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.footer") as string)
+                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.footer"))
                 .setEmoji("📎"),
               new StringSelectMenuOptionBuilder()
                 .setValue("fields")
-                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.fields") as string)
+                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.fields"))
                 .setEmoji("📋"),
               new StringSelectMenuOptionBuilder()
                 .setValue("timestamp")
-                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.timestamp") as string)
-                .setEmoji("🕐")
-            )
-        )
+                .setLabel(t(client, lang, "commands.embed.select_menus.edit.options.timestamp"))
+                .setEmoji("🕐"),
+            ),
+        ),
       );
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_embed:preview")
-            .setLabel(t(client, lang, "commands.embed.buttons.preview") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.preview"))
             .setStyle(ButtonStyle.Primary)
             .setEmoji("👁️"),
           new ButtonBuilder()
             .setCustomId("NI_embed:save")
-            .setLabel(t(client, lang, "commands.embed.buttons.save") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.save"))
             .setStyle(ButtonStyle.Success)
             .setEmoji("💾"),
           new ButtonBuilder()
             .setCustomId("NI_embed:delete")
-            .setLabel(t(client, lang, "commands.embed.buttons.delete") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.delete"))
             .setStyle(ButtonStyle.Danger)
             .setEmoji("🗑️"),
           new ButtonBuilder()
             .setCustomId("NI_embed:back")
-            .setLabel(t(client, lang, "commands.embed.buttons.back") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.back"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔙")
-        )
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
     case "fields":
       const fieldsMenu = new StringSelectMenuBuilder()
         .setCustomId("NI_embed:fields_select")
-        .setPlaceholder(t(client, lang, "commands.embed.select_menus.fields.placeholder") as string);
+        .setPlaceholder(t(client, lang, "commands.embed.select_menus.fields.placeholder"));
 
       if (schema.fields && schema.fields.length > 0) {
         schema.fields.forEach((field, index) => {
@@ -728,7 +758,7 @@ function buildComponents(
             new StringSelectMenuOptionBuilder()
               .setValue(String(index))
               .setLabel(`${index + 1}. ${field.name}`)
-              .setDescription(field.value.substring(0, 50))
+              .setDescription(field.value.substring(0, 50)),
           );
         });
       }
@@ -737,33 +767,30 @@ function buildComponents(
         fieldsMenu.addOptions(
           new StringSelectMenuOptionBuilder()
             .setValue("add")
-            .setLabel(t(client, lang, "commands.embed.select_menus.fields.add") as string)
-            .setEmoji("➕")
+            .setLabel(t(client, lang, "commands.embed.select_menus.fields.add"))
+            .setEmoji("➕"),
         );
       }
 
       if (fieldsMenu.options.length === 0) {
-        fieldsMenu
-          .addOptions(
-            new StringSelectMenuOptionBuilder()
-              .setValue("add")
-              .setLabel(t(client, lang, "commands.embed.select_menus.fields.add") as string)
-              .setEmoji("➕")
-          );
+        fieldsMenu.addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setValue("add")
+            .setLabel(t(client, lang, "commands.embed.select_menus.fields.add"))
+            .setEmoji("➕"),
+        );
       }
 
-      rows.push(
-        new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(fieldsMenu)
-      );
+      rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(fieldsMenu));
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_embed:back")
-            .setLabel(t(client, lang, "commands.embed.buttons.back") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.back"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔙")
-        )
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
@@ -772,20 +799,22 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_embed:field_name")
-            .setLabel(t(client, lang, "commands.embed.buttons.field_name") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.field_name"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("📝"),
           new ButtonBuilder()
             .setCustomId("NI_embed:field_value")
-            .setLabel(t(client, lang, "commands.embed.buttons.field_value") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.field_value"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("📄"),
           new ButtonBuilder()
             .setCustomId("NI_embed:field_inline")
-            .setLabel(t(client, lang, "commands.embed.buttons.field_inline") as string)
-            .setStyle(schema.fields?.[fieldIndex]?.inline ? ButtonStyle.Success : ButtonStyle.Secondary)
-            .setEmoji("↔️")
-        )
+            .setLabel(t(client, lang, "commands.embed.buttons.field_inline"))
+            .setStyle(
+              schema.fields?.[fieldIndex]?.inline ? ButtonStyle.Success : ButtonStyle.Secondary,
+            )
+            .setEmoji("↔️"),
+        ),
       );
 
       rows.push(
@@ -802,15 +831,15 @@ function buildComponents(
             .setDisabled(fieldIndex >= (schema.fields?.length || 1) - 1),
           new ButtonBuilder()
             .setCustomId("NI_embed:field_delete")
-            .setLabel(t(client, lang, "commands.embed.buttons.delete") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.delete"))
             .setStyle(ButtonStyle.Danger)
             .setEmoji("🗑️"),
           new ButtonBuilder()
             .setCustomId("NI_embed:back")
-            .setLabel(t(client, lang, "commands.embed.buttons.back") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.back"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔙")
-        )
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
@@ -819,35 +848,35 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_embed:author_name")
-            .setLabel(t(client, lang, "commands.embed.buttons.author_name") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.author_name"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("📝"),
           new ButtonBuilder()
             .setCustomId("NI_embed:author_icon")
-            .setLabel(t(client, lang, "commands.embed.buttons.author_icon") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.author_icon"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("🖼️"),
           new ButtonBuilder()
             .setCustomId("NI_embed:author_url")
-            .setLabel(t(client, lang, "commands.embed.buttons.author_url") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.author_url"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔗")
-        )
+            .setEmoji("🔗"),
+        ),
       );
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_embed:author_clear")
-            .setLabel(t(client, lang, "commands.embed.buttons.clear") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.clear"))
             .setStyle(ButtonStyle.Danger)
             .setEmoji("🗑️"),
           new ButtonBuilder()
             .setCustomId("NI_embed:back")
-            .setLabel(t(client, lang, "commands.embed.buttons.back") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.back"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔙")
-        )
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
@@ -856,30 +885,30 @@ function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_embed:footer_text")
-            .setLabel(t(client, lang, "commands.embed.buttons.footer_text") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.footer_text"))
             .setStyle(ButtonStyle.Secondary)
             .setEmoji("📝"),
           new ButtonBuilder()
             .setCustomId("NI_embed:footer_icon")
-            .setLabel(t(client, lang, "commands.embed.buttons.footer_icon") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.footer_icon"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🖼️")
-        )
+            .setEmoji("🖼️"),
+        ),
       );
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
             .setCustomId("NI_embed:footer_clear")
-            .setLabel(t(client, lang, "commands.embed.buttons.clear") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.clear"))
             .setStyle(ButtonStyle.Danger)
             .setEmoji("🗑️"),
           new ButtonBuilder()
             .setCustomId("NI_embed:back")
-            .setLabel(t(client, lang, "commands.embed.buttons.back") as string)
+            .setLabel(t(client, lang, "commands.embed.buttons.back"))
             .setStyle(ButtonStyle.Secondary)
-            .setEmoji("🔙")
-        )
+            .setEmoji("🔙"),
+        ),
       );
       break;
   }
@@ -892,22 +921,22 @@ async function showTextModal(
   field: string,
   client: Client,
   lang: string,
-  currentValue?: string
+  currentValue?: string,
 ): Promise<{ value: string | null; submitted: boolean }> {
   const labels: Record<string, string> = {
-    title: t(client, lang, "commands.embed.modals.title.label") as string,
-    description: t(client, lang, "commands.embed.modals.description.label") as string,
-    color: t(client, lang, "commands.embed.modals.color.label") as string,
-    name: t(client, lang, "commands.embed.modals.name.label") as string,
-    thumbnail: t(client, lang, "commands.embed.modals.thumbnail.label") as string,
-    image: t(client, lang, "commands.embed.modals.image.label") as string,
-    author_name: t(client, lang, "commands.embed.modals.author_name.label") as string,
-    author_icon: t(client, lang, "commands.embed.modals.author_icon.label") as string,
-    author_url: t(client, lang, "commands.embed.modals.author_url.label") as string,
-    footer_text: t(client, lang, "commands.embed.modals.footer_text.label") as string,
-    footer_icon: t(client, lang, "commands.embed.modals.footer_icon.label") as string,
-    field_name: t(client, lang, "commands.embed.modals.field_name.label") as string,
-    field_value: t(client, lang, "commands.embed.modals.field_value.label") as string,
+    title: t(client, lang, "commands.embed.modals.title.label"),
+    description: t(client, lang, "commands.embed.modals.description.label"),
+    color: t(client, lang, "commands.embed.modals.color.label"),
+    name: t(client, lang, "commands.embed.modals.name.label"),
+    thumbnail: t(client, lang, "commands.embed.modals.thumbnail.label"),
+    image: t(client, lang, "commands.embed.modals.image.label"),
+    author_name: t(client, lang, "commands.embed.modals.author_name.label"),
+    author_icon: t(client, lang, "commands.embed.modals.author_icon.label"),
+    author_url: t(client, lang, "commands.embed.modals.author_url.label"),
+    footer_text: t(client, lang, "commands.embed.modals.footer_text.label"),
+    footer_icon: t(client, lang, "commands.embed.modals.footer_icon.label"),
+    field_name: t(client, lang, "commands.embed.modals.field_name.label"),
+    field_value: t(client, lang, "commands.embed.modals.field_value.label"),
   };
 
   const isLong = ["description", "field_value"].includes(field);
@@ -916,16 +945,15 @@ async function showTextModal(
   const modal = new ModalBuilder()
     .setTitle(labels[field] || field)
     .setCustomId(modalId)
-    .setComponents(
-      new ActionRowBuilder<any>().setComponents(
+    .setLabelComponents(
+      new LabelBuilder().setLabel(labels[field] || field).setTextInputComponent(
         new TextInputBuilder()
           .setCustomId("NI_embed:input")
-          .setLabel(labels[field] || field)
           .setStyle(isLong ? TextInputStyle.Paragraph : TextInputStyle.Short)
           .setRequired(false)
           .setValue(currentValue || "")
-          .setMaxLength(isLong ? 4000 : 256)
-      )
+          .setMaxLength(isLong ? 4000 : 256),
+      ),
     );
 
   await interaction.showModal(modal);
@@ -947,22 +975,23 @@ async function showTextModal(
 async function showSearchModal(
   interaction: any,
   client: Client,
-  lang: string
+  lang: string,
 ): Promise<{ value: string | null; submitted: boolean }> {
   const modalId = `NI_embed:modal:search:${Date.now()}`;
 
   const modal = new ModalBuilder()
-    .setTitle(t(client, lang, "commands.embed.modals.search.title") as string)
+    .setTitle(t(client, lang, "commands.embed.modals.search.title"))
     .setCustomId(modalId)
-    .setComponents(
-      new ActionRowBuilder<any>().setComponents(
-        new TextInputBuilder()
-          .setCustomId("NI_embed:input")
-          .setLabel(t(client, lang, "commands.embed.modals.search.label") as string)
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-          .setMaxLength(100)
-      )
+    .setLabelComponents(
+      new LabelBuilder()
+        .setLabel(t(client, lang, "commands.embed.modals.search.label"))
+        .setTextInputComponent(
+          new TextInputBuilder()
+            .setCustomId("NI_embed:input")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(false)
+            .setMaxLength(100),
+        ),
     );
 
   await interaction.showModal(modal);
@@ -980,4 +1009,3 @@ async function showSearchModal(
     return { value: null, submitted: false };
   }
 }
-

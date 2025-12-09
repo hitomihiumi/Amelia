@@ -30,12 +30,13 @@ import {
   RoleSelectMenuBuilder,
   ChannelSelectMenuBuilder,
   ChannelType,
+  LabelBuilder,
 } from "discord.js";
 import { Guild } from "../../helpers";
 import { generateID } from "../../handlers/functions";
 import fuse from "fuse.js";
 import { t } from "../../i18n/helpers";
-import { defaultPermissions } from "../../helpers/permissions";
+import { defaultPermissions } from "../../helpers";
 
 type ViewType =
   | "main"
@@ -175,7 +176,7 @@ module.exports = {
     await interaction.deferReply({ flags: [MessageFlagsBitField.Flags.Ephemeral] });
 
     const guild = new Guild(client, interaction.guild);
-    const lang = (await guild.get("settings.language")) as string;
+    const lang = await guild.get("settings.language");
 
     // State variables
     let page = 0;
@@ -184,11 +185,25 @@ module.exports = {
     let currentStepIndex = 0;
     let currentConditionIndex = 0;
     let _search = "";
-    let selectingFor: "trigger" | "action_modal" | "action_embed" | "action_role" | "action_channel" | "dm_embed" = "trigger";
+    let selectingFor:
+      | "trigger"
+      | "action_modal"
+      | "action_embed"
+      | "action_role"
+      | "action_channel"
+      | "dm_embed" = "trigger";
 
     // Update message function
     const updateMessage = async (files: any[] = []) => {
-      const embed = await buildEmbed(client, lang, _schema, currentView, currentStepIndex, currentConditionIndex, guild);
+      const embed = await buildEmbed(
+        client,
+        lang,
+        _schema,
+        currentView,
+        currentStepIndex,
+        currentConditionIndex,
+        guild,
+      );
       const components = await buildComponents(
         client,
         lang,
@@ -200,7 +215,7 @@ module.exports = {
         page,
         _search,
         guild,
-        selectingFor
+        selectingFor,
       );
       await interaction.editReply({ embeds: [embed], components, files });
     };
@@ -229,13 +244,27 @@ module.exports = {
             _search,
             selectingFor,
             updateMessage,
-            setSchema: (s: ScenarioCustom) => { _schema = s; },
-            setView: (v: ViewType) => { currentView = v; },
-            setStepIndex: (idx: number) => { currentStepIndex = idx; },
-            setConditionIndex: (idx: number) => { currentConditionIndex = idx; },
-            setPage: (p: number) => { page = p; },
-            setSearch: (s: string) => { _search = s; },
-            setSelectingFor: (f: typeof selectingFor) => { selectingFor = f; },
+            setSchema: (s: ScenarioCustom) => {
+              _schema = s;
+            },
+            setView: (v: ViewType) => {
+              currentView = v;
+            },
+            setStepIndex: (idx: number) => {
+              currentStepIndex = idx;
+            },
+            setConditionIndex: (idx: number) => {
+              currentConditionIndex = idx;
+            },
+            setPage: (p: number) => {
+              page = p;
+            },
+            setSearch: (s: string) => {
+              _search = s;
+            },
+            setSelectingFor: (f: typeof selectingFor) => {
+              selectingFor = f;
+            },
           });
         }
 
@@ -253,12 +282,24 @@ module.exports = {
             page,
             selectingFor,
             updateMessage,
-            setSchema: (s: ScenarioCustom) => { _schema = s; },
-            setView: (v: ViewType) => { currentView = v; },
-            setStepIndex: (idx: number) => { currentStepIndex = idx; },
-            setConditionIndex: (idx: number) => { currentConditionIndex = idx; },
-            setPage: (p: number) => { page = p; },
-            setSelectingFor: (f: typeof selectingFor) => { selectingFor = f; },
+            setSchema: (s: ScenarioCustom) => {
+              _schema = s;
+            },
+            setView: (v: ViewType) => {
+              currentView = v;
+            },
+            setStepIndex: (idx: number) => {
+              currentStepIndex = idx;
+            },
+            setConditionIndex: (idx: number) => {
+              currentConditionIndex = idx;
+            },
+            setPage: (p: number) => {
+              page = p;
+            },
+            setSelectingFor: (f: typeof selectingFor) => {
+              selectingFor = f;
+            },
           });
         }
 
@@ -308,7 +349,13 @@ interface HandlerContext {
   currentConditionIndex: number;
   page: number;
   _search?: string;
-  selectingFor: "trigger" | "action_modal" | "action_embed" | "action_role" | "action_channel" | "dm_embed";
+  selectingFor:
+    | "trigger"
+    | "action_modal"
+    | "action_embed"
+    | "action_role"
+    | "action_channel"
+    | "dm_embed";
   updateMessage: (files?: any[]) => Promise<void>;
   setSchema: (s: ScenarioCustom) => void;
   setView: (v: ViewType) => void;
@@ -316,12 +363,27 @@ interface HandlerContext {
   setConditionIndex: (idx: number) => void;
   setPage: (p: number) => void;
   setSearch?: (s: string) => void;
-  setSelectingFor: (f: "trigger" | "action_modal" | "action_embed" | "action_role" | "action_channel" | "dm_embed") => void;
+  setSelectingFor: (
+    f: "trigger" | "action_modal" | "action_embed" | "action_role" | "action_channel" | "dm_embed",
+  ) => void;
 }
 
 // String Select Menu Handler
 async function handleStringSelectMenu(i: any, ctx: HandlerContext) {
-  const { client, lang, guild, _schema, updateMessage, setSchema, setView, setStepIndex, setConditionIndex, setPage, setSearch, setSelectingFor } = ctx;
+  const {
+    client,
+    lang,
+    guild,
+    _schema,
+    updateMessage,
+    setSchema,
+    setView,
+    setStepIndex,
+    setConditionIndex,
+    setPage,
+    setSearch,
+    setSelectingFor,
+  } = ctx;
 
   switch (i.customId) {
     case "NI_scenario:base":
@@ -329,7 +391,7 @@ async function handleStringSelectMenu(i: any, ctx: HandlerContext) {
         const scenarios = await getScenarios(guild);
         if (scenarios.length >= SCENARIO_LIMITS.MAX_SCENARIOS_PER_GUILD) {
           await i.reply({
-            content: `❌ Maximum ${SCENARIO_LIMITS.MAX_SCENARIOS_PER_GUILD} scenarios per guild`,
+            content: `❌ ${(t(client, lang, "commands.scenario.messages.max_scenarios")).replace("{0}", String(SCENARIO_LIMITS.MAX_SCENARIOS_PER_GUILD))}`,
             flags: MessageFlagsBitField.Flags.Ephemeral,
           });
           return;
@@ -385,8 +447,7 @@ async function handleStringSelectMenu(i: any, ctx: HandlerContext) {
         case "description": {
           const result = await showTextModal(i, "description", client, lang, _schema.description);
           if (result.submitted) {
-            _schema.description = result.value || "";
-            _schema.updatedAt = Date.now();
+            _schema.description = result.value || "N\\A";
             setSchema({ ..._schema });
             await updateMessage();
           }
@@ -421,7 +482,7 @@ async function handleStringSelectMenu(i: any, ctx: HandlerContext) {
       if (i.values[0] === "add") {
         if (_schema.steps.length >= SCENARIO_LIMITS.MAX_STEPS_PER_SCENARIO) {
           await i.reply({
-            content: `❌ Maximum ${SCENARIO_LIMITS.MAX_STEPS_PER_SCENARIO} steps per scenario`,
+            content: `❌ ${(t(client, lang, "commands.scenario.messages.max_steps")).replace("{0}", String(SCENARIO_LIMITS.MAX_STEPS_PER_SCENARIO))}`,
             flags: MessageFlagsBitField.Flags.Ephemeral,
           });
           return;
@@ -465,7 +526,8 @@ async function handleStringSelectMenu(i: any, ctx: HandlerContext) {
     case "NI_scenario:conditions_select":
       await i.deferUpdate();
       if (i.values[0] === "add") {
-        _schema.steps[ctx.currentStepIndex].conditions = _schema.steps[ctx.currentStepIndex].conditions || [];
+        _schema.steps[ctx.currentStepIndex].conditions =
+          _schema.steps[ctx.currentStepIndex].conditions || [];
         _schema.steps[ctx.currentStepIndex].conditions!.push(conditionDefault());
         setConditionIndex(_schema.steps[ctx.currentStepIndex].conditions!.length - 1);
         setSchema({ ..._schema });
@@ -479,14 +541,16 @@ async function handleStringSelectMenu(i: any, ctx: HandlerContext) {
 
     case "NI_scenario:condition_type":
       await i.deferUpdate();
-      _schema.steps[ctx.currentStepIndex].conditions![ctx.currentConditionIndex].type = i.values[0] as any;
+      _schema.steps[ctx.currentStepIndex].conditions![ctx.currentConditionIndex].type = i
+        .values[0] as any;
       setSchema({ ..._schema });
       await updateMessage();
       break;
 
     case "NI_scenario:condition_operator":
       await i.deferUpdate();
-      _schema.steps[ctx.currentStepIndex].conditions![ctx.currentConditionIndex].operator = i.values[0] as ScenarioConditionOperator;
+      _schema.steps[ctx.currentStepIndex].conditions![ctx.currentConditionIndex].operator = i
+        .values[0] as ScenarioConditionOperator;
       setSchema({ ..._schema });
       await updateMessage();
       break;
@@ -500,14 +564,16 @@ async function handleStringSelectMenu(i: any, ctx: HandlerContext) {
 
     case "NI_scenario:next_step":
       await i.deferUpdate();
-      _schema.steps[ctx.currentStepIndex].onSuccess = i.values[0] === "none" ? undefined : i.values[0];
+      _schema.steps[ctx.currentStepIndex].onSuccess =
+        i.values[0] === "none" ? undefined : i.values[0];
       setSchema({ ..._schema });
       await updateMessage();
       break;
 
     case "NI_scenario:fail_step":
       await i.deferUpdate();
-      _schema.steps[ctx.currentStepIndex].onFailure = i.values[0] === "none" ? undefined : i.values[0];
+      _schema.steps[ctx.currentStepIndex].onFailure =
+        i.values[0] === "none" ? undefined : i.values[0];
       setSchema({ ..._schema });
       await updateMessage();
       break;
@@ -516,7 +582,21 @@ async function handleStringSelectMenu(i: any, ctx: HandlerContext) {
 
 // Button Handler
 async function handleButton(i: any, ctx: HandlerContext) {
-  const { client, lang, guild, interaction, _schema, currentView, updateMessage, setSchema, setView, setStepIndex, setConditionIndex, setPage, setSelectingFor } = ctx;
+  const {
+    client,
+    lang,
+    guild,
+    interaction,
+    _schema,
+    currentView,
+    updateMessage,
+    setSchema,
+    setView,
+    setStepIndex,
+    setConditionIndex,
+    setPage,
+    setSelectingFor,
+  } = ctx;
 
   switch (i.customId) {
     case "NI_scenario:back":
@@ -529,9 +609,17 @@ async function handleButton(i: any, ctx: HandlerContext) {
         setView("step_edit");
       } else if (currentView === "step_edit") {
         setView("steps");
-      } else if (currentView === "steps" || currentView === "trigger" || currentView === "restrictions") {
+      } else if (
+        currentView === "steps" ||
+        currentView === "trigger" ||
+        currentView === "restrictions"
+      ) {
         setView("edit");
-      } else if (currentView === "select_component" || currentView === "select_role" || currentView === "select_channel") {
+      } else if (
+        currentView === "select_component" ||
+        currentView === "select_role" ||
+        currentView === "select_channel"
+      ) {
         setView("action");
       } else if (currentView === "edit" || currentView === "list") {
         setView("main");
@@ -544,14 +632,14 @@ async function handleButton(i: any, ctx: HandlerContext) {
       await i.deferUpdate();
       if (!_schema.trigger.componentId) {
         await i.followUp({
-          content: "❌ Please set a trigger component",
+          content: `❌ ${t(client, lang, "commands.scenario.messages.no_trigger")}`,
           flags: MessageFlagsBitField.Flags.Ephemeral,
         });
         return;
       }
       if (_schema.steps.length === 0) {
         await i.followUp({
-          content: "❌ Please add at least one step",
+          content: `❌ ${t(client, lang, "commands.scenario.messages.no_steps")}`,
           flags: MessageFlagsBitField.Flags.Ephemeral,
         });
         return;
@@ -620,9 +708,16 @@ async function handleButton(i: any, ctx: HandlerContext) {
       break;
 
     case "NI_scenario:step_name": {
-      const result = await showTextModal(i, "step_name", client, lang, _schema.steps[ctx.currentStepIndex]?.name);
+      const result = await showTextModal(
+        i,
+        "step_name",
+        client,
+        lang,
+        _schema.steps[ctx.currentStepIndex]?.name,
+      );
       if (result.submitted && _schema.steps[ctx.currentStepIndex]) {
-        _schema.steps[ctx.currentStepIndex].name = result.value || `Step ${ctx.currentStepIndex + 1}`;
+        _schema.steps[ctx.currentStepIndex].name =
+          result.value || `Step ${ctx.currentStepIndex + 1}`;
         _schema.updatedAt = Date.now();
         setSchema({ ..._schema });
         await updateMessage();
@@ -634,7 +729,9 @@ async function handleButton(i: any, ctx: HandlerContext) {
       await i.deferUpdate();
       _schema.steps.splice(ctx.currentStepIndex, 1);
       // Reorder steps
-      _schema.steps.forEach((step, idx) => { step.order = idx; });
+      _schema.steps.forEach((step, idx) => {
+        step.order = idx;
+      });
       setSchema({ ..._schema });
       setView("steps");
       await updateMessage();
@@ -646,7 +743,9 @@ async function handleButton(i: any, ctx: HandlerContext) {
         const temp = _schema.steps[ctx.currentStepIndex];
         _schema.steps[ctx.currentStepIndex] = _schema.steps[ctx.currentStepIndex - 1];
         _schema.steps[ctx.currentStepIndex - 1] = temp;
-        _schema.steps.forEach((step, idx) => { step.order = idx; });
+        _schema.steps.forEach((step, idx) => {
+          step.order = idx;
+        });
         setStepIndex(ctx.currentStepIndex - 1);
         setSchema({ ..._schema });
       }
@@ -659,7 +758,9 @@ async function handleButton(i: any, ctx: HandlerContext) {
         const temp = _schema.steps[ctx.currentStepIndex];
         _schema.steps[ctx.currentStepIndex] = _schema.steps[ctx.currentStepIndex + 1];
         _schema.steps[ctx.currentStepIndex + 1] = temp;
-        _schema.steps.forEach((step, idx) => { step.order = idx; });
+        _schema.steps.forEach((step, idx) => {
+          step.order = idx;
+        });
         setStepIndex(ctx.currentStepIndex + 1);
         setSchema({ ..._schema });
       }
@@ -668,14 +769,21 @@ async function handleButton(i: any, ctx: HandlerContext) {
 
     case "NI_scenario:step_stop_failure":
       await i.deferUpdate();
-      _schema.steps[ctx.currentStepIndex].stopOnFailure = !_schema.steps[ctx.currentStepIndex].stopOnFailure;
+      _schema.steps[ctx.currentStepIndex].stopOnFailure =
+        !_schema.steps[ctx.currentStepIndex].stopOnFailure;
       setSchema({ ..._schema });
       await updateMessage();
       break;
 
     // Action buttons
     case "NI_scenario:action_content": {
-      const result = await showTextModal(i, "action_content", client, lang, _schema.steps[ctx.currentStepIndex]?.action?.content);
+      const result = await showTextModal(
+        i,
+        "action_content",
+        client,
+        lang,
+        _schema.steps[ctx.currentStepIndex]?.action?.content,
+      );
       if (result.submitted && _schema.steps[ctx.currentStepIndex]) {
         _schema.steps[ctx.currentStepIndex].action.content = result.value || undefined;
         _schema.updatedAt = Date.now();
@@ -687,7 +795,8 @@ async function handleButton(i: any, ctx: HandlerContext) {
 
     case "NI_scenario:action_ephemeral":
       await i.deferUpdate();
-      _schema.steps[ctx.currentStepIndex].action.ephemeral = !_schema.steps[ctx.currentStepIndex].action.ephemeral;
+      _schema.steps[ctx.currentStepIndex].action.ephemeral =
+        !_schema.steps[ctx.currentStepIndex].action.ephemeral;
       setSchema({ ..._schema });
       await updateMessage();
       break;
@@ -721,7 +830,13 @@ async function handleButton(i: any, ctx: HandlerContext) {
       break;
 
     case "NI_scenario:action_thread_name": {
-      const result = await showTextModal(i, "thread_name", client, lang, _schema.steps[ctx.currentStepIndex]?.action?.threadName);
+      const result = await showTextModal(
+        i,
+        "thread_name",
+        client,
+        lang,
+        _schema.steps[ctx.currentStepIndex]?.action?.threadName,
+      );
       if (result.submitted && _schema.steps[ctx.currentStepIndex]) {
         _schema.steps[ctx.currentStepIndex].action.threadName = result.value || undefined;
         _schema.updatedAt = Date.now();
@@ -732,7 +847,13 @@ async function handleButton(i: any, ctx: HandlerContext) {
     }
 
     case "NI_scenario:action_dm_content": {
-      const result = await showTextModal(i, "dm_content", client, lang, _schema.steps[ctx.currentStepIndex]?.action?.dmContent);
+      const result = await showTextModal(
+        i,
+        "dm_content",
+        client,
+        lang,
+        _schema.steps[ctx.currentStepIndex]?.action?.dmContent,
+      );
       if (result.submitted && _schema.steps[ctx.currentStepIndex]) {
         _schema.steps[ctx.currentStepIndex].action.dmContent = result.value || undefined;
         _schema.updatedAt = Date.now();
@@ -750,7 +871,13 @@ async function handleButton(i: any, ctx: HandlerContext) {
       break;
 
     case "NI_scenario:action_var_name": {
-      const result = await showTextModal(i, "var_name", client, lang, _schema.steps[ctx.currentStepIndex]?.action?.variableName);
+      const result = await showTextModal(
+        i,
+        "var_name",
+        client,
+        lang,
+        _schema.steps[ctx.currentStepIndex]?.action?.variableName,
+      );
       if (result.submitted && _schema.steps[ctx.currentStepIndex]) {
         _schema.steps[ctx.currentStepIndex].action.variableName = result.value || undefined;
         _schema.updatedAt = Date.now();
@@ -761,7 +888,13 @@ async function handleButton(i: any, ctx: HandlerContext) {
     }
 
     case "NI_scenario:action_var_value": {
-      const result = await showTextModal(i, "var_value", client, lang, _schema.steps[ctx.currentStepIndex]?.action?.variableValue);
+      const result = await showTextModal(
+        i,
+        "var_value",
+        client,
+        lang,
+        _schema.steps[ctx.currentStepIndex]?.action?.variableValue,
+      );
       if (result.submitted && _schema.steps[ctx.currentStepIndex]) {
         _schema.steps[ctx.currentStepIndex].action.variableValue = result.value || undefined;
         _schema.updatedAt = Date.now();
@@ -773,16 +906,27 @@ async function handleButton(i: any, ctx: HandlerContext) {
 
     case "NI_scenario:action_delete_original":
       await i.deferUpdate();
-      _schema.steps[ctx.currentStepIndex].action.deleteOriginal = !_schema.steps[ctx.currentStepIndex].action.deleteOriginal;
+      _schema.steps[ctx.currentStepIndex].action.deleteOriginal =
+        !_schema.steps[ctx.currentStepIndex].action.deleteOriginal;
       setSchema({ ..._schema });
       await updateMessage();
       break;
 
     // Condition buttons
     case "NI_scenario:condition_value": {
-      const result = await showTextModal(i, "condition_value", client, lang, _schema.steps[ctx.currentStepIndex]?.conditions?.[ctx.currentConditionIndex]?.value);
-      if (result.submitted && _schema.steps[ctx.currentStepIndex]?.conditions?.[ctx.currentConditionIndex]) {
-        _schema.steps[ctx.currentStepIndex].conditions![ctx.currentConditionIndex].value = result.value || "";
+      const result = await showTextModal(
+        i,
+        "condition_value",
+        client,
+        lang,
+        _schema.steps[ctx.currentStepIndex]?.conditions?.[ctx.currentConditionIndex]?.value,
+      );
+      if (
+        result.submitted &&
+        _schema.steps[ctx.currentStepIndex]?.conditions?.[ctx.currentConditionIndex]
+      ) {
+        _schema.steps[ctx.currentStepIndex].conditions![ctx.currentConditionIndex].value =
+          result.value || "";
         _schema.updatedAt = Date.now();
         setSchema({ ..._schema });
         await updateMessage();
@@ -791,9 +935,19 @@ async function handleButton(i: any, ctx: HandlerContext) {
     }
 
     case "NI_scenario:condition_field": {
-      const result = await showTextModal(i, "condition_field", client, lang, _schema.steps[ctx.currentStepIndex]?.conditions?.[ctx.currentConditionIndex]?.field);
-      if (result.submitted && _schema.steps[ctx.currentStepIndex]?.conditions?.[ctx.currentConditionIndex]) {
-        _schema.steps[ctx.currentStepIndex].conditions![ctx.currentConditionIndex].field = result.value || undefined;
+      const result = await showTextModal(
+        i,
+        "condition_field",
+        client,
+        lang,
+        _schema.steps[ctx.currentStepIndex]?.conditions?.[ctx.currentConditionIndex]?.field,
+      );
+      if (
+        result.submitted &&
+        _schema.steps[ctx.currentStepIndex]?.conditions?.[ctx.currentConditionIndex]
+      ) {
+        _schema.steps[ctx.currentStepIndex].conditions![ctx.currentConditionIndex].field =
+          result.value || undefined;
         _schema.updatedAt = Date.now();
         setSchema({ ..._schema });
         await updateMessage();
@@ -811,7 +965,13 @@ async function handleButton(i: any, ctx: HandlerContext) {
 
     // Restrictions buttons
     case "NI_scenario:cooldown": {
-      const result = await showTextModal(i, "cooldown", client, lang, String(_schema.cooldown || 0));
+      const result = await showTextModal(
+        i,
+        "cooldown",
+        client,
+        lang,
+        String(_schema.cooldown || 0),
+      );
       if (result.submitted) {
         _schema.cooldown = parseInt(result.value || "0") || 0;
         _schema.updatedAt = Date.now();
@@ -822,7 +982,13 @@ async function handleButton(i: any, ctx: HandlerContext) {
     }
 
     case "NI_scenario:max_executions": {
-      const result = await showTextModal(i, "max_executions", client, lang, String(_schema.maxExecutionsPerUser || 0));
+      const result = await showTextModal(
+        i,
+        "max_executions",
+        client,
+        lang,
+        String(_schema.maxExecutionsPerUser || 0),
+      );
       if (result.submitted) {
         _schema.maxExecutionsPerUser = parseInt(result.value || "0") || undefined;
         _schema.updatedAt = Date.now();
@@ -833,7 +999,13 @@ async function handleButton(i: any, ctx: HandlerContext) {
     }
 
     case "NI_scenario:execution_period": {
-      const result = await showTextModal(i, "execution_period", client, lang, String(_schema.executionPeriod || 0));
+      const result = await showTextModal(
+        i,
+        "execution_period",
+        client,
+        lang,
+        String(_schema.executionPeriod || 0),
+      );
       if (result.submitted) {
         _schema.executionPeriod = parseInt(result.value || "0") || undefined;
         _schema.updatedAt = Date.now();
@@ -853,23 +1025,40 @@ async function showTextModal(
   field: string,
   client: Client,
   lang: string,
-  currentValue?: string
+  currentValue?: string,
 ): Promise<{ value: string | null; submitted: boolean }> {
   const titles: Record<string, string> = {
-    name: "Edit Scenario Name",
-    description: "Edit Description",
-    search: "Search Scenarios",
-    step_name: "Edit Step Name",
-    action_content: "Edit Message Content",
-    thread_name: "Edit Thread Name",
-    dm_content: "Edit DM Content",
-    var_name: "Edit Variable Name",
-    var_value: "Edit Variable Value",
-    condition_value: "Edit Condition Value",
-    condition_field: "Edit Field Name",
-    cooldown: "Edit Cooldown (seconds)",
-    max_executions: "Max Executions per User",
-    execution_period: "Execution Period (seconds)",
+    name: t(client, lang, "commands.scenario.modals.name.title"),
+    description: t(client, lang, "commands.scenario.modals.description.title"),
+    search: t(client, lang, "commands.scenario.modals.search.title"),
+    step_name: t(client, lang, "commands.scenario.modals.step_name.title"),
+    action_content: t(client, lang, "commands.scenario.modals.action_content.title"),
+    thread_name: t(client, lang, "commands.scenario.modals.thread_name.title"),
+    dm_content: t(client, lang, "commands.scenario.modals.dm_content.title"),
+    var_name: t(client, lang, "commands.scenario.modals.var_name.title"),
+    var_value: t(client, lang, "commands.scenario.modals.var_value.title"),
+    condition_value: t(client, lang, "commands.scenario.modals.condition_value.title"),
+    condition_field: t(client, lang, "commands.scenario.modals.condition_field.title"),
+    cooldown: t(client, lang, "commands.scenario.modals.cooldown.title"),
+    max_executions: t(client, lang, "commands.scenario.modals.max_executions.title"),
+    execution_period: t(client, lang, "commands.scenario.modals.execution_period.title"),
+  };
+
+  const labels: Record<string, string> = {
+    name: t(client, lang, "commands.scenario.modals.name.label"),
+    description: t(client, lang, "commands.scenario.modals.description.label"),
+    search: t(client, lang, "commands.scenario.modals.search.label"),
+    step_name: t(client, lang, "commands.scenario.modals.step_name.label"),
+    action_content: t(client, lang, "commands.scenario.modals.action_content.label"),
+    thread_name: t(client, lang, "commands.scenario.modals.thread_name.label"),
+    dm_content: t(client, lang, "commands.scenario.modals.dm_content.label"),
+    var_name: t(client, lang, "commands.scenario.modals.var_name.label"),
+    var_value: t(client, lang, "commands.scenario.modals.var_value.label"),
+    condition_value: t(client, lang, "commands.scenario.modals.condition_value.label"),
+    condition_field: t(client, lang, "commands.scenario.modals.condition_field.label"),
+    cooldown: t(client, lang, "commands.scenario.modals.cooldown.label"),
+    max_executions: t(client, lang, "commands.scenario.modals.max_executions.label"),
+    execution_period: t(client, lang, "commands.scenario.modals.execution_period.label"),
   };
 
   const isLong = ["description", "action_content", "dm_content", "var_value"].includes(field);
@@ -878,16 +1067,15 @@ async function showTextModal(
   const modal = new ModalBuilder()
     .setTitle(titles[field] || field)
     .setCustomId(modalId)
-    .setComponents(
-      new ActionRowBuilder<any>().setComponents(
+    .setLabelComponents(
+      new LabelBuilder().setLabel(labels[field] || field).setTextInputComponent(
         new TextInputBuilder()
           .setCustomId("NI_scenario:input")
-          .setLabel(titles[field] || field)
           .setStyle(isLong ? TextInputStyle.Paragraph : TextInputStyle.Short)
           .setRequired(false)
           .setValue(currentValue || "")
-          .setMaxLength(isLong ? 2000 : 100)
-      )
+          .setMaxLength(isLong ? 2000 : 100),
+      ),
     );
 
   await interaction.showModal(modal);
@@ -909,22 +1097,24 @@ async function showTextModal(
 async function showSearchModal(
   interaction: any,
   client: Client,
-  lang: string
+  lang: string,
 ): Promise<{ value: string | null; submitted: boolean }> {
   const modalId = `NI_scenario:modal:search:${Date.now()}`;
 
   const modal = new ModalBuilder()
-    .setTitle("Search Scenarios")
+    .setTitle(t(client, lang, "commands.scenario.modals.search.title"))
     .setCustomId(modalId)
-    .setComponents(
-      new ActionRowBuilder<any>().setComponents(
-        new TextInputBuilder()
-          .setCustomId("NI_scenario:input")
-          .setLabel("Search query")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-          .setMaxLength(100)
-      )
+    .setLabelComponents(
+      new LabelBuilder()
+        .setLabel(t(client, lang, "commands.scenario.modals.search.label"))
+        .setTextInputComponent(
+          new TextInputBuilder()
+            .setCustomId("NI_scenario:input")
+
+            .setStyle(TextInputStyle.Short)
+            .setRequired(false)
+            .setMaxLength(100),
+        ),
     );
 
   await interaction.showModal(modal);
@@ -951,53 +1141,91 @@ async function buildEmbed(
   view: ViewType,
   stepIndex: number,
   conditionIndex: number,
-  guild: Guild
+  guild: Guild,
 ): Promise<EmbedBuilder> {
   const embed = new EmbedBuilder().setColor(client.holder.colors.default);
 
   switch (view) {
     case "main":
       embed
-        .setTitle("📜 Scenario Builder")
-        .setDescription("Create custom interaction flows that trigger on button clicks, select menu selections, or modal submissions.\n\n**Features:**\n• Chain multiple actions\n• Add conditional logic\n• Use variables and placeholders");
+        .setTitle(t(client, lang, "commands.scenario.embeds.main.title"))
+        .setDescription(t(client, lang, "commands.scenario.embeds.main.description"));
       break;
 
     case "list":
       embed
-        .setTitle("📋 Your Scenarios")
-        .setDescription("Select a scenario to edit or create a new one.");
+        .setTitle(t(client, lang, "commands.scenario.embeds.list.title"))
+        .setDescription(t(client, lang, "commands.scenario.embeds.list.description"));
       break;
 
     case "edit":
       embed
-        .setTitle(`✏️ Editing: ${schema.name}`)
-        .setDescription(schema.description || "No description")
+        .setTitle(
+          t(client, lang, "commands.scenario.embeds.edit.title").replace("{0}", schema.name),
+        )
+        .setDescription(schema.description || "N\\A")
         .addFields(
-          { name: "Status", value: schema.enabled ? "✅ Enabled" : "❌ Disabled", inline: true },
-          { name: "Steps", value: String(schema.steps.length), inline: true },
-          { name: "Trigger", value: schema.trigger.componentId ? `${schema.trigger.type}: \`${schema.trigger.componentId}\`` : "Not set", inline: true },
-          { name: "Cooldown", value: schema.cooldown ? `${schema.cooldown}s` : "None", inline: true },
-          { name: "ID", value: `\`${schema.id}\``, inline: true }
+          {
+            name: t(client, lang, "commands.scenario.embeds.edit.fields.status"),
+            value: schema.enabled ? "✅" : "❌",
+            inline: true,
+          },
+          {
+            name: t(client, lang, "commands.scenario.embeds.edit.fields.steps"),
+            value: String(schema.steps.length),
+            inline: true,
+          },
+          {
+            name: t(client, lang, "commands.scenario.embeds.edit.fields.trigger"),
+            value: schema.trigger.componentId
+              ? `${schema.trigger.type}: \`${schema.trigger.componentId}\``
+              : t(client, lang, "commands.send.fields.not_set"),
+            inline: true,
+          },
+          {
+            name: t(client, lang, "commands.scenario.embeds.edit.fields.cooldown"),
+            value: schema.cooldown
+              ? `${schema.cooldown}s`
+              : t(client, lang, "commands.send.fields.none"),
+            inline: true,
+          },
+          {
+            name: t(client, lang, "commands.scenario.embeds.edit.fields.id"),
+            value: `\`${schema.id}\``,
+            inline: true,
+          },
         );
       break;
 
     case "trigger":
       embed
-        .setTitle("🎯 Trigger Configuration")
-        .setDescription("Configure what triggers this scenario.")
+        .setTitle(t(client, lang, "commands.scenario.embeds.trigger.title"))
+        .setDescription(t(client, lang, "commands.scenario.embeds.trigger.description"))
         .addFields(
-          { name: "Type", value: TRIGGER_TYPES.find(t => t.value === schema.trigger.type)?.label || schema.trigger.type, inline: true },
-          { name: "Component ID", value: schema.trigger.componentId || "Not set", inline: true }
+          {
+            name: t(client, lang, "commands.scenario.embeds.trigger.fields.type"),
+            value:
+              t(client, lang, `commands.scenario.trigger_types.${schema.trigger.type}`) ||
+              schema.trigger.type,
+            inline: true,
+          },
+          {
+            name: t(client, lang, "commands.scenario.embeds.trigger.fields.component_id"),
+            value: schema.trigger.componentId || t(client, lang, "commands.send.fields.not_set"),
+            inline: true,
+          },
         );
       break;
 
     case "steps":
       embed
-        .setTitle("📝 Steps")
-        .setDescription("Manage scenario steps. Steps are executed in order unless you specify branching.");
+        .setTitle(t(client, lang, "commands.scenario.embeds.steps.title"))
+        .setDescription(t(client, lang, "commands.scenario.embeds.steps.description"));
       if (schema.steps.length > 0) {
         schema.steps.forEach((step, idx) => {
-          const actionLabel = ACTION_TYPES.find(a => a.value === step.action.type)?.label || step.action.type;
+          const actionLabel =
+            t(client, lang, `commands.scenario.action_types.${step.action.type}`) ||
+            step.action.type;
           embed.addFields({
             name: `${idx + 1}. ${step.name || `Step ${idx + 1}`}`,
             value: `Action: ${actionLabel}\nConditions: ${step.conditions?.length || 0}`,
@@ -1005,23 +1233,55 @@ async function buildEmbed(
           });
         });
       } else {
-        embed.addFields({ name: "No steps", value: "Add a step to get started" });
+        embed.addFields({
+          name: t(client, lang, "commands.scenario.embeds.steps.fields.no_steps"),
+          value: t(client, lang, "commands.scenario.embeds.steps.fields.add_step"),
+        });
       }
       break;
 
     case "step_edit":
       const step = schema.steps[stepIndex];
       if (step) {
-        const actionLabel = ACTION_TYPES.find(a => a.value === step.action.type)?.label || step.action.type;
+        const actionLabel =
+          t(client, lang, `commands.scenario.action_types.${step.action.type}`) || step.action.type;
         embed
-          .setTitle(`📝 Step ${stepIndex + 1}: ${step.name || "Unnamed"}`)
-          .setDescription("Configure this step's action and conditions.")
+          .setTitle(
+            t(client, lang, "commands.scenario.embeds.step_edit.title")
+              .replace("{0}", String(stepIndex + 1))
+              .replace("{1}", step.name || "Unnamed"),
+          )
+          .setDescription(t(client, lang, "commands.scenario.embeds.step_edit.description"))
           .addFields(
-            { name: "Action Type", value: actionLabel, inline: true },
-            { name: "Conditions", value: String(step.conditions?.length || 0), inline: true },
-            { name: "Stop on Failure", value: step.stopOnFailure ? "✅" : "❌", inline: true },
-            { name: "On Success", value: step.onSuccess ? `Go to step with ID: ${step.onSuccess}` : "Continue to next", inline: true },
-            { name: "On Failure", value: step.onFailure ? `Go to step with ID: ${step.onFailure}` : "Continue to next", inline: true }
+            {
+              name: t(client, lang, "commands.scenario.embeds.step_edit.fields.action_type"),
+              value: actionLabel,
+              inline: true,
+            },
+            {
+              name: t(client, lang, "commands.scenario.embeds.step_edit.fields.conditions"),
+              value: String(step.conditions?.length || 0),
+              inline: true,
+            },
+            {
+              name: t(client, lang, "commands.scenario.embeds.step_edit.fields.stop_on_failure"),
+              value: step.stopOnFailure ? "✅" : "❌",
+              inline: true,
+            },
+            {
+              name: t(client, lang, "commands.scenario.embeds.step_edit.fields.on_success"),
+              value: step.onSuccess
+                ? `Step ID: ${step.onSuccess}`
+                : t(client, lang, "commands.scenario.select_menus.next_step.continue"),
+              inline: true,
+            },
+            {
+              name: t(client, lang, "commands.scenario.embeds.step_edit.fields.on_failure"),
+              value: step.onFailure
+                ? `Step ID: ${step.onFailure}`
+                : t(client, lang, "commands.scenario.select_menus.next_step.continue"),
+              inline: true,
+            },
           );
       }
       break;
@@ -1030,54 +1290,124 @@ async function buildEmbed(
       const currentStep = schema.steps[stepIndex];
       if (currentStep) {
         const action = currentStep.action;
-        const actionInfo = ACTION_TYPES.find(a => a.value === action.type);
+        const actionLabel =
+          t(client, lang, `commands.scenario.action_types.${action.type}`) || action.type;
         embed
-          .setTitle(`⚡ Action: ${actionInfo?.label || action.type}`)
-          .setDescription("Configure the action parameters.");
+          .setTitle(
+            t(client, lang, "commands.scenario.embeds.action.title").replace("{0}", actionLabel),
+          )
+          .setDescription(t(client, lang, "commands.scenario.embeds.action.description"));
+
+        const notSet = t(client, lang, "commands.send.fields.not_set");
+        const currentChannel = t(
+          client,
+          lang,
+          "commands.scenario.embeds.action.fields.current_channel",
+        );
 
         switch (action.type) {
           case "reply":
           case "send_message":
             embed.addFields(
-              { name: "Content", value: action.content || "Not set", inline: false },
-              { name: "Ephemeral", value: action.ephemeral ? "✅" : "❌", inline: true },
-              { name: "Channel", value: action.channelId ? `<#${action.channelId}>` : "Current channel", inline: true }
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.content"),
+                value: action.content || notSet,
+                inline: false,
+              },
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.ephemeral"),
+                value: action.ephemeral ? "✅" : "❌",
+                inline: true,
+              },
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.channel"),
+                value: action.channelId ? `<#${action.channelId}>` : currentChannel,
+                inline: true,
+              },
             );
             break;
           case "send_embed":
             embed.addFields(
-              { name: "Embed ID", value: action.embedId || "Not set", inline: true },
-              { name: "Ephemeral", value: action.ephemeral ? "✅" : "❌", inline: true },
-              { name: "Channel", value: action.channelId ? `<#${action.channelId}>` : "Current channel", inline: true }
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.embed_id"),
+                value: action.embedId || notSet,
+                inline: true,
+              },
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.ephemeral"),
+                value: action.ephemeral ? "✅" : "❌",
+                inline: true,
+              },
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.channel"),
+                value: action.channelId ? `<#${action.channelId}>` : currentChannel,
+                inline: true,
+              },
             );
             break;
           case "show_modal":
-            embed.addFields({ name: "Modal ID", value: action.modalId || "Not set", inline: true });
+            embed.addFields({
+              name: t(client, lang, "commands.scenario.embeds.action.fields.modal_id"),
+              value: action.modalId || notSet,
+              inline: true,
+            });
             break;
           case "add_role":
           case "remove_role":
-            embed.addFields({ name: "Role", value: action.roleId ? `<@&${action.roleId}>` : "Not set", inline: true });
+            embed.addFields({
+              name: t(client, lang, "commands.scenario.embeds.action.fields.role"),
+              value: action.roleId ? `<@&${action.roleId}>` : notSet,
+              inline: true,
+            });
             break;
           case "create_thread":
             embed.addFields(
-              { name: "Thread Name", value: action.threadName || "Not set", inline: true },
-              { name: "Auto-Archive", value: `${action.autoArchiveDuration || 1440} minutes`, inline: true }
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.thread_name"),
+                value: action.threadName || notSet,
+                inline: true,
+              },
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.auto_archive"),
+                value: `${action.autoArchiveDuration || 1440} minutes`,
+                inline: true,
+              },
             );
             break;
           case "send_dm":
             embed.addFields(
-              { name: "DM Content", value: action.dmContent || "Not set", inline: false },
-              { name: "DM Embed", value: action.dmEmbedId || "None", inline: true }
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.dm_content"),
+                value: action.dmContent || notSet,
+                inline: false,
+              },
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.dm_embed"),
+                value: action.dmEmbedId || t(client, lang, "commands.send.fields.none"),
+                inline: true,
+              },
             );
             break;
           case "set_variable":
             embed.addFields(
-              { name: "Variable Name", value: action.variableName || "Not set", inline: true },
-              { name: "Variable Value", value: action.variableValue || "Not set", inline: true }
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.variable_name"),
+                value: action.variableName || notSet,
+                inline: true,
+              },
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.variable_value"),
+                value: action.variableValue || notSet,
+                inline: true,
+              },
             );
             break;
           case "delete_message":
-            embed.addFields({ name: "Delete Original", value: action.deleteOriginal ? "✅" : "❌", inline: true });
+            embed.addFields({
+              name: t(client, lang, "commands.scenario.embeds.action.fields.delete_original"),
+              value: action.deleteOriginal ? "✅" : "❌",
+              inline: true,
+            });
             break;
         }
       }
@@ -1085,67 +1415,132 @@ async function buildEmbed(
 
     case "conditions":
       const condStep = schema.steps[stepIndex];
+      const condLogic =
+        condStep?.conditionLogic === "or"
+          ? t(client, lang, "commands.scenario.embeds.conditions.description_or")
+          : t(client, lang, "commands.scenario.embeds.conditions.description_and");
       embed
-        .setTitle("🔀 Conditions")
-        .setDescription(`Logic: **${condStep?.conditionLogic?.toUpperCase() || "AND"}** - ${condStep?.conditionLogic === "or" ? "Any condition must pass" : "All conditions must pass"}`);
+        .setTitle(t(client, lang, "commands.scenario.embeds.conditions.title"))
+        .setDescription(condLogic);
       if (condStep?.conditions && condStep.conditions.length > 0) {
         condStep.conditions.forEach((cond, idx) => {
-          const opLabel = CONDITION_OPERATORS.find(o => o.value === cond.operator)?.label || cond.operator;
+          const opLabel =
+            t(client, lang, `commands.scenario.condition_operators.${cond.operator}`) ||
+            cond.operator;
           embed.addFields({
-            name: `Condition ${idx + 1}`,
-            value: `Type: ${cond.type}${cond.field ? ` (${cond.field})` : ""}\nOperator: ${opLabel}\nValue: ${cond.value || "Not set"}`,
+            name: `${t(client, lang, "commands.scenario.embeds.condition_edit.title")}`.replace(
+              "{0}",
+              String(idx + 1),
+            ),
+            value: `${t(client, lang, "commands.scenario.embeds.condition_edit.fields.type")}: ${cond.type}${cond.field ? ` (${cond.field})` : ""}\n${t(client, lang, "commands.scenario.embeds.condition_edit.fields.operator")}: ${opLabel}\n${t(client, lang, "commands.scenario.embeds.condition_edit.fields.value")}: ${cond.value || t(client, lang, "commands.send.fields.not_set")}`,
             inline: true,
           });
         });
       } else {
-        embed.addFields({ name: "No conditions", value: "This step will always execute" });
+        embed.addFields({
+          name: "ℹ️",
+          value: t(client, lang, "commands.scenario.embeds.conditions.fields.no_conditions"),
+        });
       }
       break;
 
     case "condition_edit":
       const condition = schema.steps[stepIndex]?.conditions?.[conditionIndex];
       if (condition) {
-        const opLabel = CONDITION_OPERATORS.find(o => o.value === condition.operator)?.label || condition.operator;
+        const opLabel =
+          t(client, lang, `commands.scenario.condition_operators.${condition.operator}`) ||
+          condition.operator;
         embed
-          .setTitle(`🔀 Condition ${conditionIndex + 1}`)
+          .setTitle(
+            t(client, lang, "commands.scenario.embeds.condition_edit.title").replace(
+              "{0}",
+              String(conditionIndex + 1),
+            ),
+          )
           .addFields(
-            { name: "Type", value: condition.type, inline: true },
-            { name: "Field", value: condition.field || "N/A", inline: true },
-            { name: "Operator", value: opLabel, inline: true },
-            { name: "Value", value: condition.value || "Not set", inline: true }
+            {
+              name: t(client, lang, "commands.scenario.embeds.condition_edit.fields.type"),
+              value: condition.type,
+              inline: true,
+            },
+            {
+              name: t(client, lang, "commands.scenario.embeds.condition_edit.fields.field"),
+              value: condition.field || "N/A",
+              inline: true,
+            },
+            {
+              name: t(client, lang, "commands.scenario.embeds.condition_edit.fields.operator"),
+              value: opLabel,
+              inline: true,
+            },
+            {
+              name: t(client, lang, "commands.scenario.embeds.condition_edit.fields.value"),
+              value: condition.value || t(client, lang, "commands.send.fields.not_set"),
+              inline: true,
+            },
           );
       }
       break;
 
     case "restrictions":
       embed
-        .setTitle("🔒 Restrictions")
-        .setDescription("Configure who can use this scenario and how often.")
+        .setTitle(t(client, lang, "commands.scenario.embeds.restrictions.title"))
+        .setDescription(t(client, lang, "commands.scenario.embeds.restrictions.description"))
         .addFields(
-          { name: "Cooldown", value: schema.cooldown ? `${schema.cooldown} seconds` : "None", inline: true },
-          { name: "Max Executions", value: schema.maxExecutionsPerUser ? String(schema.maxExecutionsPerUser) : "Unlimited", inline: true },
-          { name: "Execution Period", value: schema.executionPeriod ? `${schema.executionPeriod} seconds` : "N/A", inline: true },
-          { name: "Allowed Roles", value: schema.allowedRoles?.length ? schema.allowedRoles.map(r => `<@&${r}>`).join(", ") : "Everyone", inline: false },
-          { name: "Denied Roles", value: schema.deniedRoles?.length ? schema.deniedRoles.map(r => `<@&${r}>`).join(", ") : "None", inline: false }
+          {
+            name: t(client, lang, "commands.scenario.embeds.restrictions.fields.cooldown"),
+            value: schema.cooldown
+              ? `${schema.cooldown}s`
+              : t(client, lang, "commands.send.fields.none"),
+            inline: true,
+          },
+          {
+            name: t(client, lang, "commands.scenario.embeds.restrictions.fields.max_executions"),
+            value: schema.maxExecutionsPerUser
+              ? String(schema.maxExecutionsPerUser)
+              : t(client, lang, "commands.scenario.embeds.restrictions.fields.unlimited"),
+            inline: true,
+          },
+          {
+            name: t(client, lang, "commands.scenario.embeds.restrictions.fields.execution_period"),
+            value: schema.executionPeriod
+              ? `${schema.executionPeriod}s`
+              : t(client, lang, "commands.scenario.embeds.restrictions.fields.na"),
+            inline: true,
+          },
+          {
+            name: t(client, lang, "commands.scenario.embeds.restrictions.fields.allowed_roles"),
+            value: schema.allowedRoles?.length
+              ? schema.allowedRoles.map((r) => `<@&${r}>`).join(", ")
+              : t(client, lang, "commands.scenario.embeds.restrictions.fields.everyone"),
+            inline: false,
+          },
+          {
+            name: t(client, lang, "commands.scenario.embeds.restrictions.fields.denied_roles"),
+            value: schema.deniedRoles?.length
+              ? schema.deniedRoles.map((r) => `<@&${r}>`).join(", ")
+              : t(client, lang, "commands.send.fields.none"),
+            inline: false,
+          },
         );
       break;
 
     case "select_component":
       embed
-        .setTitle("🔍 Select Component")
-        .setDescription("Select a component to use.");
+        .setTitle(t(client, lang, "commands.scenario.embeds.select_component.title"))
+        .setDescription(t(client, lang, "commands.scenario.embeds.select_component.description"));
       break;
 
     case "select_role":
       embed
-        .setTitle("👥 Select Role")
-        .setDescription("Select a role for this action.");
+        .setTitle(t(client, lang, "commands.scenario.embeds.select_role.title"))
+        .setDescription(t(client, lang, "commands.scenario.embeds.select_role.description"));
       break;
 
     case "select_channel":
       embed
-        .setTitle("📺 Select Channel")
-        .setDescription("Select a channel for this action.");
+        .setTitle(t(client, lang, "commands.scenario.embeds.select_channel.title"))
+        .setDescription(t(client, lang, "commands.scenario.embeds.select_channel.description"));
       break;
   }
 
@@ -1164,7 +1559,7 @@ async function buildComponents(
   page: number,
   search: string,
   guild: Guild,
-  selectingFor: string
+  selectingFor: string,
 ): Promise<ActionRowBuilder<MessageActionRowComponentBuilder>[]> {
   const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
 
@@ -1174,12 +1569,18 @@ async function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_scenario:base")
-            .setPlaceholder("What would you like to do?")
+            .setPlaceholder(t(client, lang, "commands.scenario.select_menus.base.placeholder"))
             .setOptions(
-              new StringSelectMenuOptionBuilder().setValue("create").setLabel("Create Scenario").setEmoji("➕"),
-              new StringSelectMenuOptionBuilder().setValue("edit").setLabel("Edit Scenario").setEmoji("📝")
-            )
-        )
+              new StringSelectMenuOptionBuilder()
+                .setValue("create")
+                .setLabel(t(client, lang, "commands.scenario.select_menus.base.options.create"))
+                .setEmoji("➕"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("edit")
+                .setLabel(t(client, lang, "commands.scenario.select_menus.base.options.edit"))
+                .setEmoji("📝"),
+            ),
+        ),
       );
       break;
 
@@ -1187,35 +1588,59 @@ async function buildComponents(
       let scenarioList = [...allScenarios];
       if (search) {
         const fuseSearch = new fuse(scenarioList, { keys: ["name", "description"] });
-        scenarioList = fuseSearch.search(search).map(r => r.item);
+        scenarioList = fuseSearch.search(search).map((r) => r.item);
       }
 
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId("NI_scenario:select")
-        .setPlaceholder("Select a scenario");
+        .setPlaceholder(t(client, lang, "commands.scenario.select_menus.list.placeholder"));
 
       if (scenarioList.length > 0) {
-        scenarioList.slice(page * 25, page * 25 + 25).forEach(s => {
+        scenarioList.slice(page * 25, page * 25 + 25).forEach((s) => {
           selectMenu.addOptions(
             new StringSelectMenuOptionBuilder()
               .setValue(s.id)
               .setLabel(s.name)
-              .setDescription(`${s.enabled ? "✅" : "❌"} | ${s.steps.length} steps`)
+              .setDescription(`${s.enabled ? "✅" : "❌"} | ${s.steps.length} steps`),
           );
         });
       } else {
-        selectMenu.addOptions(new StringSelectMenuOptionBuilder().setValue("none").setLabel("No scenarios found")).setDisabled(true);
+        selectMenu
+          .addOptions(
+            new StringSelectMenuOptionBuilder()
+              .setValue("none")
+              .setLabel(t(client, lang, "commands.scenario.select_menus.list.no_scenarios")),
+          )
+          .setDisabled(true);
       }
 
       rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(selectMenu));
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:page_prev").setEmoji("⬅️").setStyle(ButtonStyle.Primary).setDisabled(page === 0),
-          new ButtonBuilder().setCustomId("NI_scenario:page_info").setLabel(`${page + 1}/${Math.ceil(allScenarios.length / 25) || 1}`).setStyle(ButtonStyle.Secondary).setDisabled(true),
-          new ButtonBuilder().setCustomId("NI_scenario:search").setEmoji("🔍").setStyle(ButtonStyle.Secondary),
-          new ButtonBuilder().setCustomId("NI_scenario:page_next").setEmoji("➡️").setStyle(ButtonStyle.Primary).setDisabled(page >= Math.ceil(allScenarios.length / 25) - 1),
-          new ButtonBuilder().setCustomId("NI_scenario:back").setEmoji("🔙").setStyle(ButtonStyle.Secondary)
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:page_prev")
+            .setEmoji("⬅️")
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(page === 0),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:page_info")
+            .setLabel(`${page + 1}/${Math.ceil(allScenarios.length / 25) || 1}`)
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(true),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:search")
+            .setEmoji("🔍")
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:page_next")
+            .setEmoji("➡️")
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(page >= Math.ceil(allScenarios.length / 25) - 1),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setEmoji("🔙")
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
 
@@ -1224,23 +1649,61 @@ async function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_scenario:edit_menu")
-            .setPlaceholder("What do you want to edit?")
+            .setPlaceholder(t(client, lang, "commands.scenario.select_menus.edit.placeholder"))
             .setOptions(
-              new StringSelectMenuOptionBuilder().setValue("name").setLabel("Name").setEmoji("🏷️"),
-              new StringSelectMenuOptionBuilder().setValue("description").setLabel("Description").setEmoji("📄"),
-              new StringSelectMenuOptionBuilder().setValue("trigger").setLabel("Trigger").setEmoji("🎯"),
-              new StringSelectMenuOptionBuilder().setValue("steps").setLabel("Steps").setEmoji("📝"),
-              new StringSelectMenuOptionBuilder().setValue("restrictions").setLabel("Restrictions").setEmoji("🔒"),
-              new StringSelectMenuOptionBuilder().setValue("toggle").setLabel(schema.enabled ? "Disable" : "Enable").setEmoji(schema.enabled ? "❌" : "✅")
-            )
-        )
+              new StringSelectMenuOptionBuilder()
+                .setValue("name")
+                .setLabel(t(client, lang, "commands.scenario.select_menus.edit.options.name"))
+                .setEmoji("🏷️"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("description")
+                .setLabel(
+                  t(client, lang, "commands.scenario.select_menus.edit.options.description"),
+                )
+                .setEmoji("📄"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("trigger")
+                .setLabel(t(client, lang, "commands.scenario.select_menus.edit.options.trigger"))
+                .setEmoji("🎯"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("steps")
+                .setLabel(t(client, lang, "commands.scenario.select_menus.edit.options.steps"))
+                .setEmoji("📝"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("restrictions")
+                .setLabel(
+                  t(client, lang, "commands.scenario.select_menus.edit.options.restrictions"),
+                )
+                .setEmoji("🔒"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("toggle")
+                .setLabel(
+                  schema.enabled
+                    ? t(client, lang, "commands.scenario.select_menus.edit.options.disable")
+                    : t(client, lang, "commands.scenario.select_menus.edit.options.enable"),
+                )
+                .setEmoji(schema.enabled ? "❌" : "✅"),
+            ),
+        ),
       );
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:save").setLabel("Save").setStyle(ButtonStyle.Success).setEmoji("💾"),
-          new ButtonBuilder().setCustomId("NI_scenario:delete").setLabel("Delete").setStyle(ButtonStyle.Danger).setEmoji("🗑️"),
-          new ButtonBuilder().setCustomId("NI_scenario:back").setLabel("Back").setStyle(ButtonStyle.Secondary).setEmoji("🔙")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:save")
+            .setLabel(t(client, lang, "commands.scenario.buttons.save"))
+            .setStyle(ButtonStyle.Success)
+            .setEmoji("💾"),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:delete")
+            .setLabel(t(client, lang, "commands.scenario.buttons.delete"))
+            .setStyle(ButtonStyle.Danger)
+            .setEmoji("🗑️"),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setLabel(t(client, lang, "commands.scenario.buttons.back"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
@@ -1249,9 +1712,21 @@ async function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_scenario:trigger_type")
-            .setPlaceholder("Select trigger type")
-            .setOptions(TRIGGER_TYPES.map(t => new StringSelectMenuOptionBuilder().setValue(t.value).setLabel(t.label).setEmoji(t.emoji).setDefault(schema.trigger.type === t.value)))
-        )
+            .setPlaceholder(
+              t(client, lang, "commands.scenario.select_menus.trigger_type.placeholder"),
+            )
+            .setOptions(
+              TRIGGER_TYPES.map((tt) =>
+                new StringSelectMenuOptionBuilder()
+                  .setValue(tt.value)
+                  .setLabel(
+                    t(client, lang, `commands.scenario.trigger_types.${tt.value}`) || tt.label,
+                  )
+                  .setEmoji(tt.emoji)
+                  .setDefault(schema.trigger.type === tt.value),
+              ),
+            ),
+        ),
       );
 
       // Component selection based on trigger type
@@ -1259,76 +1734,155 @@ async function buildComponents(
       if (components.length > 0) {
         const compSelect = new StringSelectMenuBuilder()
           .setCustomId("NI_scenario:trigger_component")
-          .setPlaceholder("Select component ID");
-        components.slice(0, 25).forEach(c => {
-          compSelect.addOptions(new StringSelectMenuOptionBuilder().setValue(c.id).setLabel(c.name).setDescription(`ID: ${c.id}`).setDefault(schema.trigger.componentId === c.id));
+          .setPlaceholder(
+            t(client, lang, "commands.scenario.select_menus.trigger_component.placeholder"),
+          );
+        components.slice(0, 25).forEach((c) => {
+          compSelect.addOptions(
+            new StringSelectMenuOptionBuilder()
+              .setValue(c.id)
+              .setLabel(c.name)
+              .setDescription(`ID: ${c.id}`)
+              .setDefault(schema.trigger.componentId === c.id),
+          );
         });
-        rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(compSelect));
+        rows.push(
+          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(compSelect),
+        );
       }
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:back").setLabel("Back").setStyle(ButtonStyle.Secondary).setEmoji("🔙")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setLabel(t(client, lang, "commands.scenario.buttons.back"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
     case "steps":
       const stepsMenu = new StringSelectMenuBuilder()
         .setCustomId("NI_scenario:steps_select")
-        .setPlaceholder("Select or add a step");
+        .setPlaceholder(t(client, lang, "commands.scenario.select_menus.steps.placeholder"));
 
-      schema.steps.forEach((step, idx) => {
-        stepsMenu.addOptions(new StringSelectMenuOptionBuilder().setValue(String(idx)).setLabel(`${idx + 1}. ${step.name || `Step ${idx + 1}`}`).setDescription(ACTION_TYPES.find(a => a.value === step.action.type)?.label || step.action.type));
+      schema.steps.forEach((stp, idx) => {
+        const actionLabel =
+          t(client, lang, `commands.scenario.action_types.${stp.action.type}`) || stp.action.type;
+        stepsMenu.addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setValue(String(idx))
+            .setLabel(`${idx + 1}. ${stp.name || `Step ${idx + 1}`}`)
+            .setDescription(actionLabel),
+        );
       });
 
       if (schema.steps.length < SCENARIO_LIMITS.MAX_STEPS_PER_SCENARIO) {
-        stepsMenu.addOptions(new StringSelectMenuOptionBuilder().setValue("add").setLabel("Add Step").setEmoji("➕"));
+        stepsMenu.addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setValue("add")
+            .setLabel(t(client, lang, "commands.scenario.select_menus.steps.add"))
+            .setEmoji("➕"),
+        );
       }
 
       if (stepsMenu.options.length === 0) {
-        stepsMenu.addOptions(new StringSelectMenuOptionBuilder().setValue("add").setLabel("Add Step").setEmoji("➕"));
+        stepsMenu.addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setValue("add")
+            .setLabel(t(client, lang, "commands.scenario.select_menus.steps.add"))
+            .setEmoji("➕"),
+        );
       }
 
       rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(stepsMenu));
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:back").setLabel("Back").setStyle(ButtonStyle.Secondary).setEmoji("🔙")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setLabel(t(client, lang, "commands.scenario.buttons.back"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
     case "step_edit":
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:step_name").setLabel("Name").setStyle(ButtonStyle.Secondary).setEmoji("🏷️"),
-          new ButtonBuilder().setCustomId("NI_scenario:step_action").setLabel("Action").setStyle(ButtonStyle.Primary).setEmoji("⚡"),
-          new ButtonBuilder().setCustomId("NI_scenario:step_conditions").setLabel("Conditions").setStyle(ButtonStyle.Primary).setEmoji("🔀")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:step_name")
+            .setLabel(t(client, lang, "commands.scenario.buttons.step_name"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🏷️"),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:step_action")
+            .setLabel(t(client, lang, "commands.scenario.buttons.step_action"))
+            .setStyle(ButtonStyle.Primary)
+            .setEmoji("⚡"),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:step_conditions")
+            .setLabel(t(client, lang, "commands.scenario.buttons.step_conditions"))
+            .setStyle(ButtonStyle.Primary)
+            .setEmoji("🔀"),
+        ),
       );
 
       // Next step selection
       const nextStepMenu = new StringSelectMenuBuilder()
         .setCustomId("NI_scenario:next_step")
-        .setPlaceholder("On success: go to...")
-        .addOptions(new StringSelectMenuOptionBuilder().setValue("none").setLabel("Continue to next step").setDefault(!schema.steps[stepIndex]?.onSuccess));
+        .setPlaceholder(t(client, lang, "commands.scenario.select_menus.next_step.placeholder"))
+        .addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setValue("none")
+            .setLabel(t(client, lang, "commands.scenario.select_menus.next_step.continue"))
+            .setDefault(!schema.steps[stepIndex]?.onSuccess),
+        );
       schema.steps.forEach((s, idx) => {
         if (idx !== stepIndex) {
-          nextStepMenu.addOptions(new StringSelectMenuOptionBuilder().setValue(s.id).setLabel(`${idx + 1}. ${s.name || `Step ${idx + 1}`}`).setDefault(schema.steps[stepIndex]?.onSuccess === s.id));
+          nextStepMenu.addOptions(
+            new StringSelectMenuOptionBuilder()
+              .setValue(s.id)
+              .setLabel(`${idx + 1}. ${s.name || `Step ${idx + 1}`}`)
+              .setDefault(schema.steps[stepIndex]?.onSuccess === s.id),
+          );
         }
       });
       if (nextStepMenu.options.length > 1) {
-        rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(nextStepMenu));
+        rows.push(
+          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(nextStepMenu),
+        );
       }
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:step_up").setEmoji("⬆️").setStyle(ButtonStyle.Primary).setDisabled(stepIndex === 0),
-          new ButtonBuilder().setCustomId("NI_scenario:step_down").setEmoji("⬇️").setStyle(ButtonStyle.Primary).setDisabled(stepIndex >= schema.steps.length - 1),
-          new ButtonBuilder().setCustomId("NI_scenario:step_stop_failure").setLabel("Stop on Fail").setStyle(schema.steps[stepIndex]?.stopOnFailure ? ButtonStyle.Success : ButtonStyle.Secondary),
-          new ButtonBuilder().setCustomId("NI_scenario:step_delete").setLabel("Delete").setStyle(ButtonStyle.Danger).setEmoji("🗑️"),
-          new ButtonBuilder().setCustomId("NI_scenario:back").setEmoji("🔙").setStyle(ButtonStyle.Secondary)
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:step_up")
+            .setEmoji("⬆️")
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(stepIndex === 0),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:step_down")
+            .setEmoji("⬇️")
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(stepIndex >= schema.steps.length - 1),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:step_stop_failure")
+            .setLabel(t(client, lang, "commands.scenario.buttons.stop_on_fail"))
+            .setStyle(
+              schema.steps[stepIndex]?.stopOnFailure ? ButtonStyle.Success : ButtonStyle.Secondary,
+            ),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:step_delete")
+            .setLabel(t(client, lang, "commands.scenario.buttons.delete"))
+            .setStyle(ButtonStyle.Danger)
+            .setEmoji("🗑️"),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setEmoji("🔙")
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
 
@@ -1340,9 +1894,19 @@ async function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_scenario:action_type")
-            .setPlaceholder("Select action type")
-            .setOptions(ACTION_TYPES.map(a => new StringSelectMenuOptionBuilder().setValue(a.value).setLabel(a.label).setEmoji(a.emoji).setDefault(actionType === a.value)))
-        )
+            .setPlaceholder(
+              t(client, lang, "commands.scenario.select_menus.action_type.placeholder"),
+            )
+            .setOptions(
+              ACTION_TYPES.map((a) =>
+                new StringSelectMenuOptionBuilder()
+                  .setValue(a.value)
+                  .setLabel(t(client, lang, `commands.scenario.action_types.${a.value}`) || a.label)
+                  .setEmoji(a.emoji)
+                  .setDefault(actionType === a.value),
+              ),
+            ),
+        ),
       );
 
       // Action-specific buttons
@@ -1351,89 +1915,201 @@ async function buildComponents(
         case "reply":
         case "send_message":
           actionButtons.push(
-            new ButtonBuilder().setCustomId("NI_scenario:action_content").setLabel("Content").setStyle(ButtonStyle.Secondary).setEmoji("📝"),
-            new ButtonBuilder().setCustomId("NI_scenario:action_ephemeral").setLabel("Ephemeral").setStyle(schema.steps[stepIndex]?.action?.ephemeral ? ButtonStyle.Success : ButtonStyle.Secondary).setEmoji("👁️")
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_content")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_content"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("📝"),
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_ephemeral")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_ephemeral"))
+              .setStyle(
+                schema.steps[stepIndex]?.action?.ephemeral
+                  ? ButtonStyle.Success
+                  : ButtonStyle.Secondary,
+              )
+              .setEmoji("👁️"),
           );
           if (actionType === "send_message") {
-            actionButtons.push(new ButtonBuilder().setCustomId("NI_scenario:action_select_channel").setLabel("Channel").setStyle(ButtonStyle.Secondary).setEmoji("📺"));
+            actionButtons.push(
+              new ButtonBuilder()
+                .setCustomId("NI_scenario:action_select_channel")
+                .setLabel(t(client, lang, "commands.scenario.buttons.action_channel"))
+                .setStyle(ButtonStyle.Secondary)
+                .setEmoji("📺"),
+            );
           }
           break;
         case "send_embed":
           actionButtons.push(
-            new ButtonBuilder().setCustomId("NI_scenario:action_select_embed").setLabel("Select Embed").setStyle(ButtonStyle.Secondary).setEmoji("📋"),
-            new ButtonBuilder().setCustomId("NI_scenario:action_ephemeral").setLabel("Ephemeral").setStyle(schema.steps[stepIndex]?.action?.ephemeral ? ButtonStyle.Success : ButtonStyle.Secondary).setEmoji("👁️"),
-            new ButtonBuilder().setCustomId("NI_scenario:action_select_channel").setLabel("Channel").setStyle(ButtonStyle.Secondary).setEmoji("📺")
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_select_embed")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_select_embed"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("📋"),
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_ephemeral")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_ephemeral"))
+              .setStyle(
+                schema.steps[stepIndex]?.action?.ephemeral
+                  ? ButtonStyle.Success
+                  : ButtonStyle.Secondary,
+              )
+              .setEmoji("👁️"),
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_select_channel")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_channel"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("📺"),
           );
           break;
         case "show_modal":
-          actionButtons.push(new ButtonBuilder().setCustomId("NI_scenario:action_select_modal").setLabel("Select Modal").setStyle(ButtonStyle.Secondary).setEmoji("📝"));
+          actionButtons.push(
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_select_modal")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_select_modal"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("📝"),
+          );
           break;
         case "add_role":
         case "remove_role":
-          actionButtons.push(new ButtonBuilder().setCustomId("NI_scenario:action_select_role").setLabel("Select Role").setStyle(ButtonStyle.Secondary).setEmoji("👥"));
+          actionButtons.push(
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_select_role")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_select_role"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("👥"),
+          );
           break;
         case "create_thread":
-          actionButtons.push(new ButtonBuilder().setCustomId("NI_scenario:action_thread_name").setLabel("Thread Name").setStyle(ButtonStyle.Secondary).setEmoji("🧵"));
+          actionButtons.push(
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_thread_name")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_thread_name"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("🧵"),
+          );
           break;
         case "send_dm":
           actionButtons.push(
-            new ButtonBuilder().setCustomId("NI_scenario:action_dm_content").setLabel("DM Content").setStyle(ButtonStyle.Secondary).setEmoji("✉️"),
-            new ButtonBuilder().setCustomId("NI_scenario:action_dm_embed").setLabel("DM Embed").setStyle(ButtonStyle.Secondary).setEmoji("📋")
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_dm_content")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_dm_content"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("✉️"),
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_dm_embed")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_dm_embed"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("📋"),
           );
           break;
         case "set_variable":
           actionButtons.push(
-            new ButtonBuilder().setCustomId("NI_scenario:action_var_name").setLabel("Variable Name").setStyle(ButtonStyle.Secondary).setEmoji("📦"),
-            new ButtonBuilder().setCustomId("NI_scenario:action_var_value").setLabel("Variable Value").setStyle(ButtonStyle.Secondary).setEmoji("✏️")
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_var_name")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_var_name"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("📦"),
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_var_value")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_var_value"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("✏️"),
           );
           break;
         case "delete_message":
-          actionButtons.push(new ButtonBuilder().setCustomId("NI_scenario:action_delete_original").setLabel("Delete Original").setStyle(schema.steps[stepIndex]?.action?.deleteOriginal ? ButtonStyle.Success : ButtonStyle.Secondary).setEmoji("🗑️"));
+          actionButtons.push(
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_delete_original")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_delete_original"))
+              .setStyle(
+                schema.steps[stepIndex]?.action?.deleteOriginal
+                  ? ButtonStyle.Success
+                  : ButtonStyle.Secondary,
+              )
+              .setEmoji("🗑️"),
+          );
           break;
       }
 
       if (actionButtons.length > 0) {
-        rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(...actionButtons.slice(0, 5)));
+        rows.push(
+          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+            ...actionButtons.slice(0, 5),
+          ),
+        );
       }
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:back").setLabel("Back").setStyle(ButtonStyle.Secondary).setEmoji("🔙")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setLabel(t(client, lang, "commands.scenario.buttons.back"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
     case "conditions":
       const conditionsMenu = new StringSelectMenuBuilder()
         .setCustomId("NI_scenario:conditions_select")
-        .setPlaceholder("Select or add condition");
+        .setPlaceholder(t(client, lang, "commands.scenario.select_menus.conditions.placeholder"));
 
       const stepConditions = schema.steps[stepIndex]?.conditions || [];
       stepConditions.forEach((cond, idx) => {
-        const opLabel = CONDITION_OPERATORS.find(o => o.value === cond.operator)?.label || cond.operator;
-        conditionsMenu.addOptions(new StringSelectMenuOptionBuilder().setValue(String(idx)).setLabel(`${idx + 1}. ${cond.type} ${opLabel}`).setDescription(cond.value || "No value"));
+        const opLabel =
+          t(client, lang, `commands.scenario.condition_operators.${cond.operator}`) ||
+          cond.operator;
+        conditionsMenu.addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setValue(String(idx))
+            .setLabel(`${idx + 1}. ${cond.type} ${opLabel}`)
+            .setDescription(cond.value || t(client, lang, "commands.send.fields.not_set")),
+        );
       });
-      conditionsMenu.addOptions(new StringSelectMenuOptionBuilder().setValue("add").setLabel("Add Condition").setEmoji("➕"));
+      conditionsMenu.addOptions(
+        new StringSelectMenuOptionBuilder()
+          .setValue("add")
+          .setLabel(t(client, lang, "commands.scenario.select_menus.conditions.add"))
+          .setEmoji("➕"),
+      );
 
-      rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(conditionsMenu));
+      rows.push(
+        new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(conditionsMenu),
+      );
 
       // Logic toggle
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_scenario:condition_logic")
-            .setPlaceholder("Condition logic")
-            .setOptions(
-              new StringSelectMenuOptionBuilder().setValue("and").setLabel("AND - All must pass").setDefault(schema.steps[stepIndex]?.conditionLogic !== "or"),
-              new StringSelectMenuOptionBuilder().setValue("or").setLabel("OR - Any must pass").setDefault(schema.steps[stepIndex]?.conditionLogic === "or")
+            .setPlaceholder(
+              t(client, lang, "commands.scenario.select_menus.condition_logic.placeholder"),
             )
-        )
+            .setOptions(
+              new StringSelectMenuOptionBuilder()
+                .setValue("and")
+                .setLabel(t(client, lang, "commands.scenario.select_menus.condition_logic.and"))
+                .setDefault(schema.steps[stepIndex]?.conditionLogic !== "or"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("or")
+                .setLabel(t(client, lang, "commands.scenario.select_menus.condition_logic.or"))
+                .setDefault(schema.steps[stepIndex]?.conditionLogic === "or"),
+            ),
+        ),
       );
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:back").setLabel("Back").setStyle(ButtonStyle.Secondary).setEmoji("🔙")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setLabel(t(client, lang, "commands.scenario.buttons.back"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
@@ -1443,16 +2119,36 @@ async function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_scenario:condition_type")
-            .setPlaceholder("Condition type")
-            .setOptions(
-              new StringSelectMenuOptionBuilder().setValue("user").setLabel("User").setDescription("Check user properties"),
-              new StringSelectMenuOptionBuilder().setValue("input").setLabel("Input").setDescription("Check modal input value"),
-              new StringSelectMenuOptionBuilder().setValue("variable").setLabel("Variable").setDescription("Check custom variable"),
-              new StringSelectMenuOptionBuilder().setValue("selected").setLabel("Selected").setDescription("Check selected value"),
-              new StringSelectMenuOptionBuilder().setValue("role").setLabel("Role").setDescription("Check user roles"),
-              new StringSelectMenuOptionBuilder().setValue("channel").setLabel("Channel").setDescription("Check current channel")
+            .setPlaceholder(
+              t(client, lang, "commands.scenario.select_menus.condition_type.placeholder"),
             )
-        )
+            .setOptions(
+              new StringSelectMenuOptionBuilder()
+                .setValue("user")
+                .setLabel("User")
+                .setDescription("Check user properties"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("input")
+                .setLabel("Input")
+                .setDescription("Check modal input value"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("variable")
+                .setLabel("Variable")
+                .setDescription("Check custom variable"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("selected")
+                .setLabel("Selected")
+                .setDescription("Check selected value"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("role")
+                .setLabel("Role")
+                .setDescription("Check user roles"),
+              new StringSelectMenuOptionBuilder()
+                .setValue("channel")
+                .setLabel("Channel")
+                .setDescription("Check current channel"),
+            ),
+        ),
       );
 
       // Operator selection
@@ -1460,33 +2156,77 @@ async function buildComponents(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new StringSelectMenuBuilder()
             .setCustomId("NI_scenario:condition_operator")
-            .setPlaceholder("Operator")
-            .setOptions(CONDITION_OPERATORS.map(o => new StringSelectMenuOptionBuilder().setValue(o.value).setLabel(o.label).setDefault(schema.steps[stepIndex]?.conditions?.[conditionIndex]?.operator === o.value)))
-        )
+            .setPlaceholder(
+              t(client, lang, "commands.scenario.select_menus.condition_operator.placeholder"),
+            )
+            .setOptions(
+              CONDITION_OPERATORS.map((o) =>
+                new StringSelectMenuOptionBuilder()
+                  .setValue(o.value)
+                  .setLabel(
+                    t(client, lang, `commands.scenario.condition_operators.${o.value}`) || o.label,
+                  )
+                  .setDefault(
+                    schema.steps[stepIndex]?.conditions?.[conditionIndex]?.operator === o.value,
+                  ),
+              ),
+            ),
+        ),
       );
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:condition_field").setLabel("Field").setStyle(ButtonStyle.Secondary).setEmoji("📋"),
-          new ButtonBuilder().setCustomId("NI_scenario:condition_value").setLabel("Value").setStyle(ButtonStyle.Secondary).setEmoji("✏️"),
-          new ButtonBuilder().setCustomId("NI_scenario:condition_delete").setLabel("Delete").setStyle(ButtonStyle.Danger).setEmoji("🗑️"),
-          new ButtonBuilder().setCustomId("NI_scenario:back").setEmoji("🔙").setStyle(ButtonStyle.Secondary)
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:condition_field")
+            .setLabel(t(client, lang, "commands.scenario.buttons.condition_field"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("📋"),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:condition_value")
+            .setLabel(t(client, lang, "commands.scenario.buttons.condition_value"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("✏️"),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:condition_delete")
+            .setLabel(t(client, lang, "commands.scenario.buttons.delete"))
+            .setStyle(ButtonStyle.Danger)
+            .setEmoji("🗑️"),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setEmoji("🔙")
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
       break;
 
     case "restrictions":
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:cooldown").setLabel("Cooldown").setStyle(ButtonStyle.Secondary).setEmoji("⏱️"),
-          new ButtonBuilder().setCustomId("NI_scenario:max_executions").setLabel("Max Uses").setStyle(ButtonStyle.Secondary).setEmoji("🔢"),
-          new ButtonBuilder().setCustomId("NI_scenario:execution_period").setLabel("Period").setStyle(ButtonStyle.Secondary).setEmoji("📅")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:cooldown")
+            .setLabel(t(client, lang, "commands.scenario.buttons.cooldown"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("⏱️"),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:max_executions")
+            .setLabel(t(client, lang, "commands.scenario.buttons.max_uses"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔢"),
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:execution_period")
+            .setLabel(t(client, lang, "commands.scenario.buttons.period"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("📅"),
+        ),
       );
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:back").setLabel("Back").setStyle(ButtonStyle.Secondary).setEmoji("🔙")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setLabel(t(client, lang, "commands.scenario.buttons.back"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
@@ -1494,52 +2234,76 @@ async function buildComponents(
       let componentList: { id: string; name: string }[] = [];
       if (selectingFor === "action_modal") {
         const modals = await getModals(guild);
-        componentList = modals.map(m => ({ id: m.id, name: m.title }));
+        componentList = modals.map((m) => ({ id: m.id, name: m.title }));
       } else if (selectingFor === "action_embed" || selectingFor === "dm_embed") {
         const embeds = await getEmbeds(guild);
-        componentList = embeds.map(e => ({ id: e.id, name: e.name || e.title || "Unnamed" }));
+        componentList = embeds.map((e) => ({ id: e.id, name: e.name || e.title || "Unnamed" }));
       }
 
       if (componentList.length > 0) {
         const compMenu = new StringSelectMenuBuilder()
           .setCustomId("NI_scenario:action_component")
-          .setPlaceholder("Select component");
-        componentList.slice(0, 25).forEach(c => {
-          compMenu.addOptions(new StringSelectMenuOptionBuilder().setValue(c.id).setLabel(c.name).setDescription(`ID: ${c.id}`));
+          .setPlaceholder(
+            t(client, lang, "commands.scenario.select_menus.action_component.placeholder"),
+          );
+        componentList.slice(0, 25).forEach((c) => {
+          compMenu.addOptions(
+            new StringSelectMenuOptionBuilder()
+              .setValue(c.id)
+              .setLabel(c.name)
+              .setDescription(`ID: ${c.id}`),
+          );
         });
         rows.push(new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(compMenu));
       }
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:back").setLabel("Back").setStyle(ButtonStyle.Secondary).setEmoji("🔙")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setLabel(t(client, lang, "commands.scenario.buttons.back"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
     case "select_role":
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new RoleSelectMenuBuilder().setCustomId("NI_scenario:role_select").setPlaceholder("Select a role")
-        )
+          new RoleSelectMenuBuilder()
+            .setCustomId("NI_scenario:role_select")
+            .setPlaceholder(t(client, lang, "commands.scenario.embeds.select_role.description")),
+        ),
       );
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:back").setLabel("Back").setStyle(ButtonStyle.Secondary).setEmoji("🔙")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setLabel(t(client, lang, "commands.scenario.buttons.back"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔙"),
+        ),
       );
       break;
 
     case "select_channel":
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ChannelSelectMenuBuilder().setCustomId("NI_scenario:channel_select").setPlaceholder("Select a channel").setChannelTypes(ChannelType.GuildText)
-        )
+          new ChannelSelectMenuBuilder()
+            .setCustomId("NI_scenario:channel_select")
+            .setPlaceholder(t(client, lang, "commands.scenario.embeds.select_channel.description"))
+            .setChannelTypes(ChannelType.GuildText),
+        ),
       );
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-          new ButtonBuilder().setCustomId("NI_scenario:back").setLabel("Back").setStyle(ButtonStyle.Secondary).setEmoji("🔙")
-        )
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:back")
+            .setLabel(t(client, lang, "commands.scenario.buttons.back"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("🔙"),
+        ),
       );
       break;
   }
@@ -1548,19 +2312,21 @@ async function buildComponents(
 }
 
 // Helper to get components based on trigger type
-async function getComponentsForTrigger(type: ScenarioTriggerType, guild: Guild): Promise<{ id: string; name: string }[]> {
+async function getComponentsForTrigger(
+  type: ScenarioTriggerType,
+  guild: Guild,
+): Promise<{ id: string; name: string }[]> {
   switch (type) {
     case "button":
       const buttons = await getButtons(guild);
-      return buttons.map(b => ({ id: b.id, name: b.name || b.label }));
+      return buttons.map((b) => ({ id: b.id, name: b.name || b.label }));
     case "select_menu":
       const menus = await getSelectMenus(guild);
-      return menus.map(m => ({ id: m.id, name: m.name || m.placeholder || "Unnamed" }));
+      return menus.map((m) => ({ id: m.id, name: m.name || m.placeholder || "Unnamed" }));
     case "modal_submit":
       const modals = await getModals(guild);
-      return modals.map(m => ({ id: m.id, name: m.title }));
+      return modals.map((m) => ({ id: m.id, name: m.title }));
     default:
       return [];
   }
 }
-

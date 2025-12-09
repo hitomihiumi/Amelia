@@ -12,419 +12,322 @@ export interface PathMap {
 
 export const GuildPathMap: PathMap = {
   "settings.prefix": {
-    "field": "prefix"
+    field: "prefix",
   },
   "settings.language": {
-    "field": "language"
+    field: "language",
   },
   "utils.join_to_create.enabled": {
-    "field": "jtcEnabled"
+    field: "jtcEnabled",
   },
   "utils.join_to_create.channel": {
-    "field": "jtcChannel"
+    field: "jtcChannel",
   },
   "utils.join_to_create.category": {
-    "field": "jtcCategory"
+    field: "jtcCategory",
   },
   "utils.join_to_create.default_name": {
-    "field": "jtcDefaultName"
+    field: "jtcDefaultName",
   },
   "utils.counter.enabled": {
-    "field": "counterEnabled"
+    field: "counterEnabled",
   },
   "utils.counter.category": {
-    "field": "counterCategory"
+    field: "counterCategory",
   },
   "utils.counter.channels": {
-    "field": "counterChannels"
+    field: "counterChannels",
   },
   "utils.levels.enabled": {
-    "field": "levelsEnabled"
+    field: "levelsEnabled",
   },
   "utils.levels.ignore_channels": {
-    "field": "levelsIgnoreChannels"
+    field: "levelsIgnoreChannels",
   },
   "utils.levels.ignore_roles": {
-    "field": "levelsIgnoreRoles"
+    field: "levelsIgnoreRoles",
   },
   "utils.levels.level_roles": {
-    "field": "levelsRoles"
+    field: "levelsRoles",
   },
   "utils.levels.message.enabled": {
-    "field": "levelsMessageEnabled"
+    field: "levelsMessageEnabled",
   },
   "utils.levels.message.channel": {
-    "field": "levelsMessageChannel"
+    field: "levelsMessageChannel",
   },
   "utils.levels.message.content": {
-    "field": "levelsMessageContent"
+    field: "levelsMessageContent",
   },
   "utils.levels.message.delete": {
-    "field": "levelsMessageDelete"
+    field: "levelsMessageDelete",
   },
   "utils.find_team.enabled": {
-    "field": "findTeamEnabled"
+    field: "findTeamEnabled",
   },
   "utils.find_team.channel": {
-    "field": "findTeamChannel"
+    field: "findTeamChannel",
   },
   "utils.find_team.send_channel": {
-    "field": "findTeamSendChannel"
+    field: "findTeamSendChannel",
   },
   "utils.find_team.select_placeholder": {
-    "field": "findTeamSelectPlaceholder"
+    field: "findTeamSelectPlaceholder",
   },
   "utils.find_team.embed": {
-    "field": "findTeamEmbed"
+    field: "findTeamEmbed",
   },
   "utils.find_team.games": {
-    "field": "findTeamGames"
+    field: "findTeamGames",
   },
   "utils.components.modals": {
-    "field": "customModals"
+    field: "customModals",
   },
   "utils.components.embed": {
-    "field": "customEmbeds"
+    field: "customEmbeds",
   },
   "utils.components.buttons": {
-    "field": "customButtons"
+    field: "customButtons",
   },
   "utils.components.selectMenus": {
-    "field": "customSelectMenus"
+    field: "customSelectMenus",
   },
   "utils.components.scenarios": {
-    "field": "customScenarios"
+    field: "customScenarios",
   },
   "utils.giveaways": {
-    "field": "giveaways"
+    field: "giveaways",
   },
   "economy.currency.emoji": {
-    "field": "currencyEmoji"
+    field: "currencyEmoji",
   },
   "economy.currency.id": {
-    "field": "currencyId"
+    field: "currencyId",
   },
   "economy.shop.roles": {
-    "field": "shopRoles"
+    field: "shopRoles",
   },
   "economy.income.work.enabled": {
-    "field": "workEnabled"
+    field: "workEnabled",
   },
   "economy.income.work.cooldown": {
-    "field": "workCooldown"
+    field: "workCooldown",
   },
   "economy.income.work.min": {
-    "field": "workMin"
+    field: "workMin",
   },
   "economy.income.work.max": {
-    "field": "workMax"
+    field: "workMax",
   },
   "economy.income.timely.enabled": {
-    "field": "timelyEnabled"
+    field: "timelyEnabled",
   },
   "economy.income.timely.amount": {
-    "field": "timelyAmount"
+    field: "timelyAmount",
   },
   "economy.income.daily.enabled": {
-    "field": "dailyEnabled"
+    field: "dailyEnabled",
   },
   "economy.income.daily.amount": {
-    "field": "dailyAmount"
+    field: "dailyAmount",
   },
   "economy.income.weekly.enabled": {
-    "field": "weeklyEnabled"
+    field: "weeklyEnabled",
   },
   "economy.income.weekly.amount": {
-    "field": "weeklyAmount"
+    field: "weeklyAmount",
   },
   "economy.income.level_up.enabled": {
-    "field": "levelUpEnabled"
+    field: "levelUpEnabled",
   },
   "economy.income.level_up.amount": {
-    "field": "levelUpAmount"
+    field: "levelUpAmount",
   },
   "economy.income.bump.enabled": {
-    "field": "bumpEnabled"
+    field: "bumpEnabled",
   },
   "economy.income.bump.amount": {
-    "field": "bumpAmount"
+    field: "bumpAmount",
   },
   "economy.income.rob.enabled": {
-    "field": "robEnabled"
+    field: "robEnabled",
   },
   "economy.income.rob.cooldown": {
-    "field": "robCooldown"
+    field: "robCooldown",
   },
   "economy.income.rob.income": {
-    "field": "robIncome"
+    field: "robIncome",
   },
   "economy.income.rob.punishment": {
-    "field": "robPunishment"
+    field: "robPunishment",
   },
   "moderation.moderation_roles": {
-    "field": "moderationRoles"
+    field: "moderationRoles",
   },
   "moderation.auto_moderation.invite.enabled": {
-    "field": "inviteEnabled"
+    field: "inviteEnabled",
   },
   "moderation.auto_moderation.invite.ignore_channels": {
-    "field": "inviteIgnoreChannels"
+    field: "inviteIgnoreChannels",
   },
   "moderation.auto_moderation.invite.ignore_roles": {
-    "field": "inviteIgnoreRoles"
+    field: "inviteIgnoreRoles",
   },
   "moderation.auto_moderation.invite.delete_message": {
-    "field": "inviteDeleteMessage"
+    field: "inviteDeleteMessage",
   },
   "moderation.auto_moderation.invite.moderation_immune": {
-    "field": "inviteModerationImmune"
+    field: "inviteModerationImmune",
   },
   "moderation.auto_moderation.invite.punishment": {
-    "field": "invitePunishment"
+    field: "invitePunishment",
   },
   "moderation.auto_moderation.links.enabled": {
-    "field": "linksEnabled"
+    field: "linksEnabled",
   },
   "moderation.auto_moderation.links.ignore_channels": {
-    "field": "linksIgnoreChannels"
+    field: "linksIgnoreChannels",
   },
   "moderation.auto_moderation.links.ignore_roles": {
-    "field": "linksIgnoreRoles"
+    field: "linksIgnoreRoles",
   },
   "moderation.auto_moderation.links.ignore_links": {
-    "field": "linksIgnoreLinks"
+    field: "linksIgnoreLinks",
   },
   "moderation.auto_moderation.links.delete_message": {
-    "field": "linksDeleteMessage"
+    field: "linksDeleteMessage",
   },
   "moderation.auto_moderation.links.moderation_immune": {
-    "field": "linksModerationImmune"
+    field: "linksModerationImmune",
   },
   "moderation.auto_moderation.links.punishment": {
-    "field": "linksPunishment"
+    field: "linksPunishment",
   },
   "permissions.commands": {
-    "field": "commandPermissions"
+    field: "commandPermissions",
   },
   "temp.join_to_create.map": {
-    "field": "jtcTempMap"
+    field: "jtcTempMap",
   },
-  "settings": {
-    "field": "",
-    "children": [
-      "language",
-      "prefix"
-    ]
+  settings: {
+    field: "",
+    children: ["language", "prefix"],
   },
-  "utils": {
-    "field": "",
-    "children": [
-      "components",
-      "counter",
-      "find_team",
-      "giveaways",
-      "join_to_create",
-      "levels"
-    ]
+  utils: {
+    field: "",
+    children: ["components", "counter", "find_team", "giveaways", "join_to_create", "levels"],
   },
   "utils.join_to_create": {
-    "field": "",
-    "children": [
-      "category",
-      "channel",
-      "default_name",
-      "enabled"
-    ]
+    field: "",
+    children: ["category", "channel", "default_name", "enabled"],
   },
   "utils.counter": {
-    "field": "",
-    "children": [
-      "category",
-      "channels",
-      "enabled"
-    ]
+    field: "",
+    children: ["category", "channels", "enabled"],
   },
   "utils.levels": {
-    "field": "",
-    "children": [
-      "enabled",
-      "ignore_channels",
-      "ignore_roles",
-      "level_roles",
-      "message"
-    ]
+    field: "",
+    children: ["enabled", "ignore_channels", "ignore_roles", "level_roles", "message"],
   },
   "utils.levels.message": {
-    "field": "",
-    "children": [
-      "channel",
-      "content",
-      "delete",
-      "enabled"
-    ]
+    field: "",
+    children: ["channel", "content", "delete", "enabled"],
   },
   "utils.find_team": {
-    "field": "",
-    "children": [
-      "channel",
-      "embed",
-      "enabled",
-      "games",
-      "select_placeholder",
-      "send_channel"
-    ]
+    field: "",
+    children: ["channel", "embed", "enabled", "games", "select_placeholder", "send_channel"],
   },
   "utils.components": {
-    "field": "",
-    "children": [
-      "buttons",
-      "embed",
-      "modals",
-      "scenarios",
-      "selectMenus"
-    ]
+    field: "",
+    children: ["buttons", "embed", "modals", "scenarios", "selectMenus"],
   },
-  "economy": {
-    "field": "",
-    "children": [
-      "currency",
-      "income",
-      "shop"
-    ]
+  economy: {
+    field: "",
+    children: ["currency", "income", "shop"],
   },
   "economy.currency": {
-    "field": "",
-    "children": [
-      "emoji",
-      "id"
-    ]
+    field: "",
+    children: ["emoji", "id"],
   },
   "economy.shop": {
-    "field": "",
-    "children": [
-      "roles"
-    ]
+    field: "",
+    children: ["roles"],
   },
   "economy.income": {
-    "field": "",
-    "children": [
-      "bump",
-      "daily",
-      "level_up",
-      "rob",
-      "timely",
-      "weekly",
-      "work"
-    ]
+    field: "",
+    children: ["bump", "daily", "level_up", "rob", "timely", "weekly", "work"],
   },
   "economy.income.work": {
-    "field": "",
-    "children": [
-      "cooldown",
-      "enabled",
-      "max",
-      "min"
-    ]
+    field: "",
+    children: ["cooldown", "enabled", "max", "min"],
   },
   "economy.income.timely": {
-    "field": "",
-    "children": [
-      "amount",
-      "enabled"
-    ]
+    field: "",
+    children: ["amount", "enabled"],
   },
   "economy.income.daily": {
-    "field": "",
-    "children": [
-      "amount",
-      "enabled"
-    ]
+    field: "",
+    children: ["amount", "enabled"],
   },
   "economy.income.weekly": {
-    "field": "",
-    "children": [
-      "amount",
-      "enabled"
-    ]
+    field: "",
+    children: ["amount", "enabled"],
   },
   "economy.income.level_up": {
-    "field": "",
-    "children": [
-      "amount",
-      "enabled"
-    ]
+    field: "",
+    children: ["amount", "enabled"],
   },
   "economy.income.bump": {
-    "field": "",
-    "children": [
-      "amount",
-      "enabled"
-    ]
+    field: "",
+    children: ["amount", "enabled"],
   },
   "economy.income.rob": {
-    "field": "",
-    "children": [
-      "cooldown",
-      "enabled",
-      "income",
-      "punishment"
-    ]
+    field: "",
+    children: ["cooldown", "enabled", "income", "punishment"],
   },
-  "moderation": {
-    "field": "",
-    "children": [
-      "auto_moderation",
-      "moderation_roles"
-    ]
+  moderation: {
+    field: "",
+    children: ["auto_moderation", "moderation_roles"],
   },
   "moderation.auto_moderation": {
-    "field": "",
-    "children": [
-      "invite",
-      "links"
-    ]
+    field: "",
+    children: ["invite", "links"],
   },
   "moderation.auto_moderation.invite": {
-    "field": "",
-    "children": [
+    field: "",
+    children: [
       "delete_message",
       "enabled",
       "ignore_channels",
       "ignore_roles",
       "moderation_immune",
-      "punishment"
-    ]
+      "punishment",
+    ],
   },
   "moderation.auto_moderation.links": {
-    "field": "",
-    "children": [
+    field: "",
+    children: [
       "delete_message",
       "enabled",
       "ignore_channels",
       "ignore_links",
       "ignore_roles",
       "moderation_immune",
-      "punishment"
-    ]
+      "punishment",
+    ],
   },
-  "permissions": {
-    "field": "",
-    "children": [
-      "commands"
-    ]
+  permissions: {
+    field: "",
+    children: ["commands"],
   },
-  "temp": {
-    "field": "",
-    "children": [
-      "join_to_create"
-    ]
+  temp: {
+    field: "",
+    children: ["join_to_create"],
   },
   "temp.join_to_create": {
-    "field": "",
-    "children": [
-      "map"
-    ]
-  }
+    field: "",
+    children: ["map"],
+  },
 };
 
 export const GuildFieldMap: Record<string, string> = {
@@ -493,5 +396,5 @@ export const GuildFieldMap: Record<string, string> = {
   "moderation.auto_moderation.links.moderation_immune": "linksModerationImmune",
   "moderation.auto_moderation.links.punishment": "linksPunishment",
   "permissions.commands": "commandPermissions",
-  "temp.join_to_create.map": "jtcTempMap"
+  "temp.join_to_create.map": "jtcTempMap",
 };

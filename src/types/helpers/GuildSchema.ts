@@ -1,5 +1,12 @@
 import { EmojiResolvable } from "discord.js";
-import { EmbedCustom, ModalCustom, IModalField, ButtonCustom, SelectMenuCustom, ScenarioCustom } from "./";
+import {
+  EmbedCustom,
+  ModalCustom,
+  IModalField,
+  ButtonCustom,
+  SelectMenuCustom,
+  ScenarioCustom,
+} from "./";
 import { SchemaKey, LiteralSchemaKey } from "./SchemaKeys";
 
 export interface GuildSchema {
