@@ -21,6 +21,31 @@ export function t(client: Client, lang: string, key: TranslationKey, ...args: an
 }
 
 /**
+ * Helper for getting translation objects (not strings) from the client
+ * @param client - Discord client
+ * @param lang - Language code
+ * @param path - Path to translation object
+ * @returns Translation object
+ */
+export function tObject<T = any>(client: Client, lang: string, path: string): T {
+  const i18n = client.holder.i18n.get(lang) || client.holder.i18n.getDefault();
+  const translations = i18n.getAll();
+
+  const keys = path.split(".");
+  let current: any = translations;
+
+  for (const key of keys) {
+    if (current && typeof current === "object" && key in current) {
+      current = current[key];
+    } else {
+      return {} as T;
+    }
+  }
+
+  return current as T;
+}
+
+/**
  * Helper for getting the i18n object
  * @param client - Discord client
  * @param lang - Language code

@@ -19,7 +19,7 @@ export interface VariableContext {
     name: string;
     icon: string | null;
   };
-  input?: Record<string, string>;
+  input?: Array<{ value: string; label: string }>;
   selected?: {
     value: string;
     label: string;
@@ -68,11 +68,16 @@ export class CustomEmbed {
         .replace(/{guild\.icon}/g, context.guild.icon || "");
     }
 
-    // Input variables (from modal)
+    // Input variables (by index: {input.0}, {input.0.label}, {input.1}, etc.)
     if (context.input) {
-      for (const [key, value] of Object.entries(context.input)) {
-        result = result.replace(new RegExp(`{input\\.${key}}`, "g"), value);
-      }
+      context.input.forEach((field, index) => {
+        // Replace {input.N} with field value
+        result = result.replace(new RegExp(`\\{input\\.${index}\\}`, "g"), field.value);
+        // Replace {input.N.label} with field label
+        result = result.replace(new RegExp(`\\{input\\.${index}\\.label\\}`, "g"), field.label);
+        // Replace {input.N.value} with field value (explicit)
+        result = result.replace(new RegExp(`\\{input\\.${index}\\.value\\}`, "g"), field.value);
+      });
     }
 
     // Selected value (from select menu)

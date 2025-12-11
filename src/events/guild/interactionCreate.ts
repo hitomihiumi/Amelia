@@ -14,7 +14,7 @@ module.exports = async (client: Client, interaction: any) => {
   let guild = interaction.guild ? new Guild(client, interaction.guild) : undefined;
   let lang = guild ? await guild.get(`settings.language`) : "en";
 
-  // Check for custom scenario interactions first (for non-prefixed custom IDs)
+  // Check for custom scenario interactions first (for custom IDs)
   if (
     interaction.guild &&
     (interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit()) &&

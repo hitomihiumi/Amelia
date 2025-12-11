@@ -123,8 +123,11 @@ async function checkIfCustomComponent(
     } else if (triggerType === "select_menu") {
       const selectMenus = await guild.get("utils.components.selectMenus");
       return selectMenus?.some((s) => s.id === componentId) || false;
+    } else if (triggerType === "modal_submit") {
+      // Check if this modal ID exists in custom modals
+      const modals = await guild.get("utils.components.modals");
+      return modals?.some((m) => m.id === componentId) || false;
     }
-    // Modal submissions are handled differently - they're created on the fly
     return false;
   } catch {
     return false;

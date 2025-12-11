@@ -45,7 +45,7 @@ interface ExecutionContext {
     name: string;
     icon: string | null;
   };
-  input?: Record<string, string>;
+  input?: Array<{ value: string; label: string }>;
   selected?: {
     value: string;
     label: string;
@@ -185,9 +185,14 @@ export class ScenarioRunner {
 
     // Add input/selected context based on interaction type
     if (interaction.isModalSubmit()) {
-      context.input = {};
-      interaction.fields.fields.forEach((field) => {
-        context.input![field.customId] = (field as any).value || "";
+      context.input = [];
+      // Convert fields to array and preserve order
+      const fieldsArray = Array.from(interaction.fields.fields.values());
+      fieldsArray.forEach((field) => {
+        context.input!.push({
+          value: (field as any).value || "",
+          label: (field as any).customId || "", // customId contains the field identifier
+        });
       });
     } else if (interaction.isStringSelectMenu()) {
       context.selected = {
@@ -307,7 +312,16 @@ export class ScenarioRunner {
         value = this.context.user?.id || "";
         break;
       case "input":
-        value = this.context.input?.[condition.field || ""] || "";
+        // field is now expected to be an index (0, 1, 2...) or "0.label" for label access
+        const fieldParts = (condition.field || "0").split(".");
+        const fieldIndex = parseInt(fieldParts[0], 10);
+        if (!isNaN(fieldIndex) && this.context.input?.[fieldIndex]) {
+          if (fieldParts[1] === "label") {
+            value = this.context.input[fieldIndex].label;
+          } else {
+            value = this.context.input[fieldIndex].value;
+          }
+        }
         break;
       case "variable":
         value = this.context.variables?.[condition.field || ""] || "";
@@ -433,11 +447,16 @@ export class ScenarioRunner {
         .replace(/{guild\.icon}/g, this.context.guildInfo.icon || "");
     }
 
-    // Input variables
+    // Input variables (by index: {input.0}, {input.0.label}, {input.1}, etc.)
     if (this.context.input) {
-      for (const [key, value] of Object.entries(this.context.input)) {
-        result = result.replace(new RegExp(`{input\\.${key}}`, "g"), value);
-      }
+      this.context.input.forEach((field, index) => {
+        // Replace {input.N} with field value
+        result = result.replace(new RegExp(`\\{input\\.${index}\\}`, "g"), field.value);
+        // Replace {input.N.label} with field label
+        result = result.replace(new RegExp(`\\{input\\.${index}\\.label\\}`, "g"), field.label);
+        // Replace {input.N.value} with field value (explicit)
+        result = result.replace(new RegExp(`\\{input\\.${index}\\.value\\}`, "g"), field.value);
+      });
     }
 
     // Selected variables

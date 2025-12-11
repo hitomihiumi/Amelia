@@ -18,7 +18,7 @@ import {
 import { Guild, customUtil } from "../../helpers";
 import { generateID } from "../../handlers/functions";
 import fuse from "fuse.js";
-import { t } from "../../i18n/helpers";
+import { t, tObject } from "../../i18n/helpers";
 import { defaultPermissions } from "../../helpers";
 
 type ViewType = "main" | "list" | "edit" | "fields" | "field_edit" | "author" | "footer";
@@ -405,6 +405,55 @@ module.exports = {
             }
             await updateMessage();
             break;
+
+          case "NI_embed:show_hints": {
+            // Build hints message using scenario hints (shared)
+            const hints = tObject<{
+              title: string;
+              description: string;
+              categories: Record<string, string>;
+              variables: Record<string, string>;
+            }>(client, lang, "commands.scenario.hints");
+
+            const hintsContent = [
+              `## ${hints.title}`,
+              hints.description,
+              "",
+              hints.categories.user,
+              hints.variables.user_id,
+              hints.variables.user_name,
+              hints.variables.user_displayName,
+              hints.variables.user_mention,
+              hints.variables.user_avatar,
+              "",
+              hints.categories.channel,
+              hints.variables.channel_id,
+              hints.variables.channel_name,
+              hints.variables.channel_mention,
+              "",
+              hints.categories.guild,
+              hints.variables.guild_id,
+              hints.variables.guild_name,
+              hints.variables.guild_icon,
+              "",
+              hints.categories.input,
+              hints.variables.input_field,
+              hints.variables.input_label,
+              "",
+              hints.categories.selected,
+              hints.variables.selected_value,
+              hints.variables.selected_label,
+              "",
+              hints.categories.variables,
+              hints.variables.var_custom,
+            ].join("\n");
+
+            await i.reply({
+              content: hintsContent,
+              flags: MessageFlagsBitField.Flags.Ephemeral,
+            });
+            break;
+          }
         }
       }
     });
@@ -728,6 +777,11 @@ function buildComponents(
             .setLabel(t(client, lang, "commands.embed.buttons.preview"))
             .setStyle(ButtonStyle.Primary)
             .setEmoji("👁️"),
+          new ButtonBuilder()
+            .setCustomId("NI_embed:show_hints")
+            .setLabel(t(client, lang, "commands.scenario.hints.button"))
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji("📝"),
           new ButtonBuilder()
             .setCustomId("NI_embed:save")
             .setLabel(t(client, lang, "commands.embed.buttons.save"))

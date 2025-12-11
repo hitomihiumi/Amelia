@@ -250,6 +250,9 @@ export interface TranslationSchema {
           };
         };
       };
+      messages: {
+        no_fields: string;
+      };
     };
 
     rank: {
@@ -1900,6 +1903,37 @@ export interface TranslationSchema {
         not_in_channel: string;
         is_empty: string;
         is_not_empty: string;
+      };
+      hints: {
+        title: string;
+        description: string;
+        categories: {
+          user: string;
+          channel: string;
+          guild: string;
+          input: string;
+          selected: string;
+          variables: string;
+        };
+        variables: {
+          user_id: string;
+          user_name: string;
+          user_displayName: string;
+          user_mention: string;
+          user_avatar: string;
+          channel_id: string;
+          channel_name: string;
+          channel_mention: string;
+          guild_id: string;
+          guild_name: string;
+          guild_icon: string;
+          input_field: string;
+          input_label: string;
+          selected_value: string;
+          selected_label: string;
+          var_custom: string;
+        };
+        button: string;
       };
     };
   };

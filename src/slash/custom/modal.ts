@@ -400,6 +400,12 @@ module.exports = {
               });
             });
         } else if (i.customId === "NI_modal:edit:preview") {
+          if (_schema.fields.length === 0) {
+            return await i.reply({
+              content: t(client, lang, "commands.modal.messages.no_fields"),
+            });
+          }
+
           await i.showModal(new customUtil.CustomModal(_schema).getModal());
         } else if (i.customId === "NI_modal:edit:save") {
           let modals = (await mostUsedQueries.getModals(guild)) as Array<ModalCustom>;

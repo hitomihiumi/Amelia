@@ -35,7 +35,7 @@ import {
 import { Guild } from "../../helpers";
 import { generateID } from "../../handlers/functions";
 import fuse from "fuse.js";
-import { t } from "../../i18n/helpers";
+import { t, tObject } from "../../i18n/helpers";
 import { defaultPermissions } from "../../helpers";
 
 type ViewType =
@@ -267,9 +267,8 @@ module.exports = {
             },
           });
         }
-
         // Handle buttons
-        if (i.isButton()) {
+        else if (i.isButton()) {
           await handleButton(i, {
             client,
             lang,
@@ -302,26 +301,24 @@ module.exports = {
             },
           });
         }
-
         // Handle role select menus
-        if (i.isRoleSelectMenu()) {
+        else if (i.isRoleSelectMenu()) {
+          await i.deferUpdate();
           const roleId = i.values[0];
           if (selectingFor === "action_role") {
             _schema.steps[currentStepIndex].action.roleId = roleId;
           }
           currentView = "action";
-          await i.deferUpdate();
           await updateMessage();
         }
-
         // Handle channel select menus
-        if (i.isChannelSelectMenu()) {
+        else if (i.isChannelSelectMenu()) {
+          await i.deferUpdate();
           const channelId = i.values[0];
           if (selectingFor === "action_channel") {
             _schema.steps[currentStepIndex].action.channelId = channelId;
           }
           currentView = "action";
-          await i.deferUpdate();
           await updateMessage();
         }
       } catch (error) {
@@ -696,14 +693,14 @@ async function handleButton(i: any, ctx: HandlerContext) {
 
     // Step edit buttons
     case "NI_scenario:step_action":
-      setView("action");
       await i.deferUpdate();
+      setView("action");
       await updateMessage();
       break;
 
     case "NI_scenario:step_conditions":
-      setView("conditions");
       await i.deferUpdate();
+      setView("conditions");
       await updateMessage();
       break;
 
@@ -1012,6 +1009,55 @@ async function handleButton(i: any, ctx: HandlerContext) {
         setSchema({ ..._schema });
         await updateMessage();
       }
+      break;
+    }
+
+    case "NI_scenario:show_hints": {
+      // Build hints message
+      const hints = tObject<{
+        title: string;
+        description: string;
+        categories: Record<string, string>;
+        variables: Record<string, string>;
+      }>(client, lang, "commands.scenario.hints");
+
+      const hintsContent = [
+        `## ${hints.title}`,
+        hints.description,
+        "",
+        hints.categories.user,
+        hints.variables.user_id,
+        hints.variables.user_name,
+        hints.variables.user_displayName,
+        hints.variables.user_mention,
+        hints.variables.user_avatar,
+        "",
+        hints.categories.channel,
+        hints.variables.channel_id,
+        hints.variables.channel_name,
+        hints.variables.channel_mention,
+        "",
+        hints.categories.guild,
+        hints.variables.guild_id,
+        hints.variables.guild_name,
+        hints.variables.guild_icon,
+        "",
+        hints.categories.input,
+        hints.variables.input_field,
+        hints.variables.input_label,
+        "",
+        hints.categories.selected,
+        hints.variables.selected_value,
+        hints.variables.selected_label,
+        "",
+        hints.categories.variables,
+        hints.variables.var_custom,
+      ].join("\n");
+
+      await i.reply({
+        content: hintsContent,
+        flags: MessageFlagsBitField.Flags.Ephemeral,
+      });
       break;
     }
   }
@@ -2044,6 +2090,11 @@ async function buildComponents(
 
       rows.push(
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+          new ButtonBuilder()
+            .setCustomId("NI_scenario:show_hints")
+            .setLabel(t(client, lang, "commands.scenario.hints.button"))
+            .setStyle(ButtonStyle.Primary)
+            .setEmoji("📝"),
           new ButtonBuilder()
             .setCustomId("NI_scenario:back")
             .setLabel(t(client, lang, "commands.scenario.buttons.back"))
