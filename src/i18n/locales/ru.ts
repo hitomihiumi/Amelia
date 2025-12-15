@@ -2001,7 +2001,8 @@ export const ru: TranslationSchema = {
           input_label: "`{input.0.label}` - Название первого поля модального окна",
           selected_value: "`{selected.value}` - Значение выбранной опции",
           selected_label: "`{selected.label}` - Название выбранной опции",
-          var_custom: "`{variables.name}` - Пользовательская переменная (замените name на имя переменной)",
+          var_custom:
+            "`{variables.name}` - Пользовательская переменная (замените name на имя переменной)",
         },
         button: "Показать переменные",
       },

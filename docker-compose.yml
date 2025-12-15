@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  bot:
+    image: ghcr.io/hitomihiumi/amelia:latest
+    container_name: amelia_bot
+    restart: always
+    env_file: .env
+    depends_on:
+      - postgres
+      - mongodb
+    volumes:
+      # Mount assets if you want to customize them locally, otherwise the image has them.
+      # - ./assets:/app/assets
+      - ./logs:/app/logs
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: amelia_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: amelia
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  mongodb:
+    image: mongo:6
+    container_name: amelia_mongodb
+    restart: always
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  postgres_data:
+  mongodb_data:
+

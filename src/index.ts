@@ -133,7 +133,9 @@ client.holder = {
 
   watcher.startWatching();
 
-  await client.login(Boolean(process.env.PRODACTION) ? process.env.DEV_TOKEN : process.env.TOKEN);
+  await client.login(
+    Boolean(process.env.NODE_ENV === "production") ? process.env.TOKEN : process.env.DEV_TOKEN,
+  );
 })();
 
 // Graceful shutdown handler
