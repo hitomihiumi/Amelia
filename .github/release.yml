@@ -1,9 +1,9 @@
 changelog:
   exclude:
-    - labels:
-        - ignore-for-release
-    - authors:
-        - bot
+    labels:
+      - ignore-for-release
+    authors:
+      - bot
   categories:
     - title: 'New Features'
       labels:
