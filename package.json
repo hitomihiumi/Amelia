@@ -1,6 +1,6 @@
 {
   "name": "amelia",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "main": "/dist/index.js",
   "scripts": {
     "test": "tsc && tsx ./scripts/post-build.ts && node --trace-warnings ./dist/index.js",
