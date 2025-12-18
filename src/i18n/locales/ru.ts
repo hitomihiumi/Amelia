@@ -468,15 +468,21 @@ export const ru: TranslationSchema = {
         placeholder: "Выберите язык",
         options: {
           en: {
-            description: "Установить язык на английский",
+            label: "English",
+            description: "Сменить язык на английский",
           },
           ru: {
-            description: "Установить язык на русский",
+            label: "Русский",
+            description: "Сменить язык на русский",
+          },
+          uk: {
+            label: "Українська",
+            description: "Сменить язык на украинский",
           },
         },
       },
       messages: {
-        success: "Язык сервера установлен на **{0}**",
+        success: "Язык сервера сменён на **{0}**",
       },
     },
 

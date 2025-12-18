@@ -6,6 +6,7 @@ export const manifest = {
   description: "Category sub-commands of various utilities",
   locale: {
     ru: "Категория саб-команд различных утилит",
+    uk: "Категорія саб-команд різних утиліт",
   },
   permissions: {
     user: PermissionsBitField.Flags.Administrator,

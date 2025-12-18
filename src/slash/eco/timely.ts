@@ -11,6 +11,7 @@ module.exports = {
   cooldown: 3,
   locale: {
     ru: "Получите свою ежечасную награду.",
+    uk: "Отримайте свою щогодинну нагороду.",
   },
   options: [],
   permissions: {
