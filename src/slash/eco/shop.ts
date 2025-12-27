@@ -22,6 +22,7 @@ module.exports = {
   cooldown: 5,
   locale: {
     ru: "Просмотр и покупка ролей в магазине.",
+    uk: "Перегляд та покупка ролей у магазині.",
   },
   options: [],
   permissions: {

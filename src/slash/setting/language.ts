@@ -1,5 +1,12 @@
 import { SlashCommand } from "../../types/helpers";
-import { Client, CommandInteraction, MessageFlagsBitField, PermissionsBitField } from "discord.js";
+import {
+  Client,
+  CommandInteraction,
+  MessageFlagsBitField,
+  PermissionsBitField,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+} from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
 import { t } from "../../i18n/helpers";
 
@@ -9,6 +16,7 @@ module.exports = {
   cooldown: 5,
   locale: {
     ru: "Настройка языка бота на сервере.",
+    uk: "Налаштування мови бота на сервері.",
   },
   options: [],
   permissions: {
@@ -29,23 +37,30 @@ module.exports = {
     });
 
     let row = client.holder.utils.fastRow([
-      client.holder.utils.fastStringSelect({
-        custom_id: "NI_language:select",
-        placeholder: t(client, lang, "commands.language.select_menus.placeholder"),
-        type: 3,
-        options: [
-          {
-            label: "English",
-            value: "en",
-            description: t(client, lang, "commands.language.select_menus.options.en.description"),
-          },
-          {
-            label: "Русский",
-            value: "ru",
-            description: t(client, lang, "commands.language.select_menus.options.ru.description"),
-          },
-        ],
-      }),
+      new StringSelectMenuBuilder()
+        .setCustomId("NI_language:select")
+        .setPlaceholder(t(client, lang, "commands.language.select_menus.placeholder"))
+        .addOptions(
+          client.holder.i18n.getCodes().map((code) => {
+            return new StringSelectMenuOptionBuilder()
+              .setLabel(
+                t(
+                  client,
+                  code,
+                  `commands.language.select_menus.options.${code as "en" | "ru" | "uk"}.label`,
+                ),
+              )
+              .setValue(code)
+              .setEmoji(client.holder.i18n.get(code)?.metadata.flag || "🏳️")
+              .setDescription(
+                t(
+                  client,
+                  lang,
+                  `commands.language.select_menus.options.${code as "en" | "ru" | "uk"}.description`,
+                ),
+              );
+          }),
+        ),
     ]);
 
     const msg = await interaction.editReply({ embeds: [embed], components: [row] });

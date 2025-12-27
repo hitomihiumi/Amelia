@@ -49,6 +49,7 @@ module.exports = {
   cooldown: 5,
   locale: {
     ru: "Настройка системы поиска напарников.",
+    uk: "Налаштування системи пошуку напарників.",
   },
   options: [],
   permissions: {

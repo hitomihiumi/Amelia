@@ -25,6 +25,7 @@ module.exports = {
   description: "Setting Join To Create",
   locale: {
     ru: "Настройка функционала Join To Create",
+    uk: "Налаштування функціоналу Join To Create",
   },
   cooldown: 5,
   permissions: {

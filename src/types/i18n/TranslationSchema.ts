@@ -484,9 +484,15 @@ export interface TranslationSchema {
         placeholder: string;
         options: {
           en: {
+            label: string;
             description: string;
           };
           ru: {
+            label: string;
+            description: string;
+          };
+          uk: {
+            label: string;
             description: string;
           };
         };

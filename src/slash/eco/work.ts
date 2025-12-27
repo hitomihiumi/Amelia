@@ -9,6 +9,7 @@ module.exports = {
   cooldown: 3,
   locale: {
     ru: "Работайте, чтобы заработать деньги.",
+    uk: "Працюйте, щоб заробити гроші.",
   },
   options: [],
   permissions: {

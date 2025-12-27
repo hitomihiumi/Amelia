@@ -6,10 +6,9 @@ export const manifest = {
   description: "Category sub-commands for economy",
   locale: {
     ru: "Категория экономических саб-команд",
+    uk: "Категорія економічних саб-команд",
   },
-  permissions: {
-    user: PermissionsBitField.Flags.Administrator,
-  },
+  permissions: {},
   commands: {},
   context: [InteractionContextType.Guild],
 } as Manifest;

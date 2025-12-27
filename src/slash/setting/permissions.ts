@@ -45,6 +45,7 @@ module.exports = {
   cooldown: 5,
   locale: {
     ru: "Панель управления доступностью команд",
+    uk: "Панель керування доступністю команд",
   },
   options: [],
   permissions: {

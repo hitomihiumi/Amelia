@@ -6,6 +6,7 @@ export const manifest = {
   description: "Category sub-commands for creating custom bot elements",
   locale: {
     ru: "Категория саб-команд для создания кастомных элементов бота",
+    uk: "Категорія саб-команд для створення кастомних елементів бота",
   },
   permissions: {
     user: PermissionsBitField.Flags.Administrator,

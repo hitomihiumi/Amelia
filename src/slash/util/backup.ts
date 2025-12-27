@@ -75,6 +75,7 @@ module.exports = {
   cooldown: 30,
   locale: {
     ru: "Создание и восстановление бэкапов сервера",
+    uk: "Створення та відновлення бекапів сервера",
   },
   options: [],
   permissions: {

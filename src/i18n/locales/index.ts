@@ -1,6 +1,7 @@
 import { I18n, I18nManager } from "../I18n";
 import { en } from "./en";
 import { ru } from "./ru";
+import { uk } from "./uk";
 
 /**
  * Initialize the translation system
@@ -31,9 +32,22 @@ export function initializeI18n(): I18nManager {
     enLang, // Fallback to English
   );
 
+  // Create Ukrainian language with fallback to English
+  const ukLang = new I18n(
+    {
+      name: "Ukrainian",
+      code: "uk",
+      flag: "🇺🇦",
+      nativeName: "Українська",
+    },
+    uk,
+    enLang, // Fallback to English
+  );
+
   // Register languages
   manager.register(enLang);
   manager.register(ruLang);
+  manager.register(ukLang);
 
   // Set English as the default language
   manager.setDefault("en");
@@ -42,4 +56,4 @@ export function initializeI18n(): I18nManager {
 }
 
 // Export languages for direct use (if needed)
-export { en, ru };
+export { en, ru, uk };

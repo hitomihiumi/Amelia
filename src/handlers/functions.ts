@@ -548,6 +548,24 @@ export function formatTime(
         forms: [" second", " seconds", " seconds"],
       },
     },
+    uk: {
+      day: {
+        short: "д",
+        forms: [" день", " дні", " днів"],
+      },
+      hour: {
+        short: "г",
+        forms: [" година", " години", " годин"],
+      },
+      minute: {
+        short: "хв",
+        forms: [" хвилина", " хвилини", " хвилин"],
+      },
+      second: {
+        short: "с",
+        forms: [" секунда", " секунди", " секунд"],
+      },
+    },
   };
 
   //@ts-ignore

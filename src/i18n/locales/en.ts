@@ -469,10 +469,16 @@ export const en: TranslationSchema = {
         placeholder: "Select a language",
         options: {
           en: {
+            label: "English",
             description: "Set language to English",
           },
           ru: {
+            label: "Русский",
             description: "Set language to Russian",
+          },
+          uk: {
+            label: "Українська",
+            description: "Set language to Ukrainian",
           },
         },
       },

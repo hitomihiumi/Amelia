@@ -28,6 +28,7 @@ module.exports = {
   cooldown: 5,
   locale: {
     ru: "Настройка системы уровней на сервере.",
+    uk: "Налаштування системи рівнів на сервері.",
   },
   options: [],
   permissions: {
