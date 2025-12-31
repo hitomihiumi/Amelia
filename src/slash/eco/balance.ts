@@ -64,7 +64,7 @@ module.exports = {
           }, 5000);
         });
     }
-    const attachment = new AttachmentBuilder(buffer, { name: "balance.jpg" });
+    const attachment = new AttachmentBuilder(buffer, { name: "balance.png" });
 
     return interaction.editReply({
       files: [attachment],
