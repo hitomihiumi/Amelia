@@ -1942,6 +1942,41 @@ export interface TranslationSchema {
         button: string;
       };
     };
+
+    leaderboard: {
+      embeds: {
+        footer: string;
+        level: {
+          title: string;
+          description: string;
+          field: {
+            name: string;
+            value: string;
+          };
+        };
+        voice: {
+          title: string;
+          description: string;
+          field: {
+            name: string;
+            value: string;
+          };
+        };
+        coins: {
+          title: string;
+          description: string;
+          field: {
+            name: string;
+            value: string;
+          };
+        };
+      };
+      buttons: {
+        level: string;
+        voice: string;
+        coins: string;
+      };
+    };
   };
 
   // Events

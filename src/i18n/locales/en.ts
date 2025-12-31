@@ -2015,6 +2015,41 @@ export const en: TranslationSchema = {
         button: "Show Variables",
       },
     },
+
+    leaderboard: {
+      embeds: {
+        footer: "Page {0} of {1} — Total Users: {2}",
+        level: {
+          title: "🏆 Level Leaderboard",
+          description: "Top sorted by level.",
+          field: {
+            name: "**#{0} {1}**",
+            value: "Level: `{0}` | XP: `{1}`",
+          },
+        },
+        voice: {
+          title: "🎤 Voice Activity Leaderboard",
+          description: "Top sorted by voice activity.",
+          field: {
+            name: "**#{0} {1}**",
+            value: "Time: `{0}`",
+          },
+        },
+        coins: {
+          title: "💰 Coin Leaderboard",
+          description: "Top sorted by coins.",
+          field: {
+            name: "**#{0} {1}**",
+            value: "Coins: `{0}`{1}",
+          },
+        },
+      },
+      buttons: {
+        level: "Level",
+        voice: "Voice",
+        coins: "Coins",
+      },
+    },
   },
 
   events: {
