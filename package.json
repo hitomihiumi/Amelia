@@ -1,6 +1,6 @@
 {
   "name": "amelia",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "main": "/dist/index.js",
   "scripts": {
     "test": "tsc && tsx ./scripts/post-build.ts && node --trace-warnings ./dist/index.js",
@@ -29,8 +29,7 @@
   "dependencies": {
     "@hitomihiumi/colors.ts": "^1.0.3",
     "@hitomihiumi/filewatcher": "^0.1.1",
-    "@napi-rs/canvas": "^0.1.77",
-    "@nmmty/lazycanvas": "^0.6.5",
+    "@nmmty/lazycanvas": "^1.0.0-dev.5",
     "@prisma/client": "^6.19.0",
     "body-parser": "^1.20.3",
     "chokidar": "^4.0.3",

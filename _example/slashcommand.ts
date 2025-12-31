@@ -8,6 +8,7 @@ module.exports = {
   cooldown: 5,
   locale: {
     ru: "",
+    uk: "",
   },
   options: [],
   permissions: {
