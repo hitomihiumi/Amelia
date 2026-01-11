@@ -150,14 +150,8 @@ module.exports = {
           type: 2,
         },
         {
-          custom_id: "NI_appearance:padding_x",
-          label: t(client, lang, "commands.appearance.buttons.icons_padding_x"),
-          style: ButtonStyle.Secondary,
-          type: 2,
-        },
-        {
-          custom_id: "NI_appearance:padding_y",
-          label: t(client, lang, "commands.appearance.buttons.icons_padding_y"),
+          custom_id: "NI_appearance:padding",
+          label: t(client, lang, "commands.appearance.buttons.icons_padding"),
           style: ButtonStyle.Secondary,
           type: 2,
         },
@@ -225,30 +219,24 @@ module.exports = {
               });
             });
         } else if (
-          i.customId === "NI_appearance:padding_x" ||
-          i.customId === "NI_appearance:padding_y"
+          i.customId === "NI_appearance:padding"
         ) {
-          const isX = i.customId === "NI_appearance:padding_x";
           const modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.appearance.modals.icons_padding.title"))
-            .setCustomId(isX ? "NI_appearance:modal:padding_x" : "NI_appearance:modal:padding_y")
+            .setCustomId("NI_appearance:modal:padding")
             .setLabelComponents(
               new LabelBuilder()
                 .setLabel(
                   t(
                     client,
                     lang,
-                    isX
-                      ? "commands.appearance.modals.icons_padding.x.label"
-                      : "commands.appearance.modals.icons_padding.y.label",
+                      "commands.appearance.modals.icons_padding.label"
                   ),
                 )
                 .setTextInputComponent(
                   new TextInputBuilder()
                     .setCustomId(
-                      isX
-                        ? "NI_appearance:text:padding_x_value"
-                        : "NI_appearance:text:padding_y_value",
+                      "NI_appearance:text:padding_value"
                     )
                     .setPlaceholder("0-10")
                     .setStyle(TextInputStyle.Short)
@@ -264,13 +252,12 @@ module.exports = {
               time: 5 * 60 * 1000,
               filter: (si: any) =>
                 si.user.id === interaction.user.id &&
-                si.customId ===
-                  (isX ? "NI_appearance:modal:padding_x" : "NI_appearance:modal:padding_y"),
+                si.customId === "NI_appearance:modal:padding",
             })
             .then(async (int) => {
               await int.deferUpdate();
               const padding_value = int.fields.getTextInputValue(
-                isX ? "NI_appearance:text:padding_x_value" : "NI_appearance:text:padding_y_value",
+                "NI_appearance:text:padding_value",
               );
               const padding_number = parseInt(padding_value);
               if (isNaN(padding_number)) {
@@ -288,13 +275,9 @@ module.exports = {
               }
 
               data = data as ProfileCardDisplayOptions;
-              if ("icons_padding" in data) {
-                if (isX) {
-                  data.icons_padding.x = padding_number;
-                } else {
-                  data.icons_padding.y = padding_number;
+                if ("icons_padding" in data) {
+                    data.icons_padding = padding_number;
                 }
-              }
               await mostUsedQueries[`set${opt}`](user, data);
 
               await int.editReply({

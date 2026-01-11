@@ -32,14 +32,14 @@ export class RankCard {
 
     const gradient = new Gradient()
       .setType("linear")
-      .setPoints({ x: 225, y: 202.5 }, { x: 705, y: 202.5 })
+      .setPoints({ x: 3, y: 202.5 }, { x: 478, y: 202.5 })
       .setStops(
         {
-          offset: Number(((isNaN(xpbar) ? 30 : xpbar) / 475).toFixed(2)) - 0.01,
+          offset: Number(((isNaN(xpbar) ? 30 : xpbar) / 475).toFixed(3)),
           color: "#ffffff",
         },
         {
-          offset: Number(((isNaN(xpbar) ? 30 : xpbar) / 475).toFixed(2)),
+          offset: Number(((isNaN(xpbar) ? 30 : xpbar) / 475).toFixed(3)) + 0.001,
           color: this.data.displayOptions.solid.second_component,
         },
       );
@@ -50,143 +50,236 @@ export class RankCard {
       return path;
     };
 
-    const scene = new Scene(736, 260);
+    const scene = new Scene(736, 260, { debug: true });
 
     scene.lazyCanvas.manager.fonts.add(fontMap.wdxllubrifont);
 
     scene.load(
-      <Div>
+      <MorphLayer
+          layout={{
+              width: 736,
+              height: 260,
+              padding: 0,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-start"
+          }}
+          size={{
+            width: 736,
+            height: 260,
+            radius: { all: 30 },
+          }}
+          color={this.data.displayOptions.solid.bg_color}
+      >
+        <Div
+            layout={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+            }}
+        >
+            <Path2DLayer
+                path2D={path(1.5)}
+                color={this.data.displayOptions.solid.first_component}
+                filter={Filters.blur(50)}
+                globalComposite={"source-atop"}
+            />
+            <Path2DLayer
+                path2D={path(1.75)}
+                color={this.data.displayOptions.solid.second_component}
+                filter={Filters.blur(40)}
+                globalComposite={"source-atop"}
+            />
+            <Path2DLayer
+                path2D={path(2)}
+                color={this.data.displayOptions.solid.third_component}
+                filter={Filters.blur(80)}
+            />
+        </Div>
+
+        <Div
+            layout={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                height: "100%",
+                padding: 20,
+                gap: 20
+            }}
+        >
+            <Div
+                layout={{
+                    position: "relative",
+                    width: 180,
+                    height: 180,
+                }}
+            >
+                <ImageLayer
+                    size={{ width: 180, height: 180, radius: { all: 90 } }}
+                    src={this.data.avatar}
+                />
+                <MorphLayer
+                    layout={{
+                        position: "absolute",
+                    }}
+                    size={{ width: 180, height: 180, radius: { all: 90 } }}
+                    color={this.data.displayOptions.solid.second_component}
+                    stroke={{
+                        width: 3,
+                    }}
+                />
+            </Div>
+            <Div
+                layout={{
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    justifyContent: "center",
+                    flexGrow: 1,
+                    gap: 10,
+                }}
+            >
+                <TextLayer
+                    text={this.data.globalName}
+                    font={{
+                        family: "WDXL Lubrifont",
+                        size: 64,
+                        weight: FontWeight.Regular,
+                    }}
+                    align={"start"}
+                    color={"#ffffff"}
+                    shadow={{
+                        color: "#000000",
+                        blur: 4,
+                    }}
+                />
+                <Div
+                    layout={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        width: "100%"
+                    }}
+                >
+                    <TextLayer
+                        text={this.data.username}
+                        font={{
+                            family: "WDXL Lubrifont",
+                            size: 32,
+                            weight: FontWeight.Regular,
+                        }}
+                        align={"start"}
+                        color={"#ffffff"}
+                        shadow={{
+                            color: "#000000",
+                            blur: 4,
+                        }}
+                    />
+                    <MorphLayer
+                        layout={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            position: "relative",
+                            width: 180,
+                            height: 35,
+                            margin: [0, 20, 0, 0],
+                        }}
+                        size={{ width: 180, height: 35, radius: { all: 17.5 } }}
+                        color={"#ffffff"}
+                    >
+                        <TextLayer
+                            layout={{
+                                position: "absolute"
+                            }}
+                            text={`${formatTime(this.data.data.voice_time, { locale: "en", short: true })}`}
+                            font={{
+                                family: "WDXL Lubrifont",
+                                size: 24,
+                                weight: FontWeight.Regular,
+                            }}
+                            align={"center"}
+                            baseline={"middle"}
+                            color={"#000000"}
+                        />
+                        <ImageLayer
+                            layout={{
+                                position: "absolute",
+                                left: 140
+                            }}
+                            size={{ width: 25, height: 25 }}
+                            src={assetsMap.microphone}
+                        />
+                    </MorphLayer>
+                </Div>
+                <MorphLayer
+                    layout={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        position: "relative",
+                        width: 481,
+                        height: 36,
+                    }}
+                    size={{ width: 481, height: 36, radius: { all: 18 } }}
+                    color={"#ffffff"}
+                >
+                    <MorphLayer
+                        layout={{
+                            position: "absolute",
+                            left: 3,
+                            top: 3,
+                        }}
+                        size={{ width: isNaN(xpbar) ? 30 : xpbar, height: 30, radius: { all: 15 } }}
+                        color={this.data.displayOptions.solid.second_component}
+                    />
+                    <TextLayer
+                        layout={{
+                            margin: [0, 0, 0, 20],
+                        }}
+                        text={`LEVEL ${this.data.data.level}`}
+                        font={{
+                            family: "WDXL Lubrifont",
+                            size: 16,
+                            weight: FontWeight.Regular,
+                        }}
+                        align={"left"}
+                        baseline={"middle"}
+                        color={gradient}
+                    />
+                    <TextLayer
+                        layout={{
+                            margin: [0, 20, 0, 0],
+                        }}
+                        text={`${this.data.data.xp}/${getNextLevelXP(this.data.data.level)}`}
+                        font={{
+                            family: "WDXL Lubrifont",
+                            size: 16,
+                            weight: FontWeight.Regular,
+                        }}
+                        align={"right"}
+                        baseline={"middle"}
+                        color={gradient}
+                    />
+                </MorphLayer>
+            </Div>
+        </Div>
+
         <MorphLayer
-          position={{ x: "50%", y: "50%" }}
-          size={{ width: 736, height: 260, radius: { all: 30 } }}
-          fillStyle={this.data.displayOptions.solid.bg_color}
+            layout={{
+                position: "absolute",
+                width: 733,
+                height: 257,
+                top: 1,
+                left: 1,
+            }}
+            size={{ width: 733, height: 257, radius: { all: 28 } }}
+            color={this.data.displayOptions.solid.second_component}
+            stroke={{
+                width: 3,
+            }}
         />
-        <Path2DLayer
-          path2D={path(1.5)}
-          fillStyle={this.data.displayOptions.solid.first_component}
-          filter={Filters.blur(50)}
-          globalComposite={"source-atop"}
-        />
-        <Path2DLayer
-          path2D={path(1.75)}
-          fillStyle={this.data.displayOptions.solid.second_component}
-          filter={Filters.blur(40)}
-          globalComposite={"source-atop"}
-        />
-        <Path2DLayer
-          path2D={path(2)}
-          fillStyle={this.data.displayOptions.solid.third_component}
-          filter={Filters.blur(80)}
-        />
-        <MorphLayer
-          position={{ x: "50%", y: "50%" }}
-          size={{ width: 733, height: 257, radius: { all: 28 } }}
-          fillStyle={this.data.displayOptions.solid.second_component}
-          stroke={{
-            width: 3,
-          }}
-        />
-        <ImageLayer
-          position={{ x: 114, y: 130 }}
-          size={{ width: 180, height: 180, radius: { all: 90 } }}
-          src={this.data.avatar}
-        />
-        <MorphLayer
-          position={{ x: 114, y: 130 }}
-          size={{ width: 180, height: 180, radius: { all: 90 } }}
-          fillStyle={this.data.displayOptions.solid.second_component}
-          stroke={{
-            width: 3,
-          }}
-        />
-        <TextLayer
-          position={{ x: 225, y: 120 }}
-          text={this.data.globalName}
-          font={{
-            family: "WDXL Lubrifont",
-            size: 64,
-            weight: FontWeight.Regular,
-          }}
-          align={"start"}
-          fillStyle={"#ffffff"}
-          shadow={{
-            color: "#000000",
-            blur: 4,
-          }}
-        />
-        <TextLayer
-          position={{ x: 225, y: 160 }}
-          text={this.data.username}
-          font={{
-            family: "WDXL Lubrifont",
-            size: 32,
-            weight: FontWeight.Regular,
-          }}
-          align={"start"}
-          fillStyle={"#ffffff"}
-          shadow={{
-            color: "#000000",
-            blur: 4,
-          }}
-        />
-        <MorphLayer
-          position={{ x: 465, y: 202.5 }}
-          size={{ width: 480, height: 35, radius: { all: 17.5 } }}
-          fillStyle={"#ffffff"}
-        />
-        <MorphLayer
-          position={{ x: 227.5, y: 202.5 }}
-          size={{ width: isNaN(xpbar) ? 30 : xpbar, height: 30, radius: { all: 15 } }}
-          fillStyle={this.data.displayOptions.solid.second_component}
-          centring={"start"}
-        />
-        <TextLayer
-          position={{ x: 245, y: 202.5 }}
-          text={`LEVEL ${this.data.data.level}`}
-          font={{
-            family: "WDXL Lubrifont",
-            size: 16,
-            weight: FontWeight.Regular,
-          }}
-          align={"left"}
-          baseline={"middle"}
-          fillStyle={gradient}
-        />
-        <TextLayer
-          position={{ x: 685, y: 202.5 }}
-          text={`${this.data.data.xp}/${getNextLevelXP(this.data.data.level)}`}
-          font={{
-            family: "WDXL Lubrifont",
-            size: 16,
-            weight: FontWeight.Regular,
-          }}
-          align={"right"}
-          baseline={"middle"}
-          fillStyle={gradient}
-        />
-        <MorphLayer
-          position={{ x: 615, y: 160 }}
-          size={{ width: 180, height: 35, radius: { all: 17.5 } }}
-          fillStyle={"#ffffff"}
-        />
-        <TextLayer
-          position={{ x: 615, y: 160 }}
-          text={`${formatTime(this.data.data.voice_time, { locale: "en", short: true })}`}
-          font={{
-            family: "WDXL Lubrifont",
-            size: 24,
-            weight: FontWeight.Regular,
-          }}
-          align={"center"}
-          baseline={"middle"}
-          fillStyle={"#000000"}
-        />
-        <ImageLayer
-          position={{ x: 685, y: 160 }}
-          size={{ width: 25, height: 25 }}
-          src={assetsMap.microphone}
-        />
-      </Div>,
+      </MorphLayer>,
     );
 
     return (await new Exporter(scene).export("buffer")) as Buffer;

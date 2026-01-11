@@ -421,8 +421,7 @@ export const uk: TranslationSchema = {
         mode: "Режим",
         url: "Встановити URL",
         reset: "Скидання",
-        icons_padding_x: "Відступ по X",
-        icons_padding_y: "Відступ по Y",
+        icons_padding: "Відступ іконок",
         bio: "Біографія",
       },
       modals: {
@@ -440,12 +439,7 @@ export const uk: TranslationSchema = {
         },
         icons_padding: {
           title: "Зміна відступу",
-          x: {
-            label: "Введіть відступ по X у пікселях",
-          },
-          y: {
-            label: "Введіть відступ по Y у пікселях",
-          },
+          label: "Введіть відступ у пікселях",
         },
       },
       messages: {

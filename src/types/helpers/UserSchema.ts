@@ -69,10 +69,7 @@ export const defaultDisplayOptions = {
     url: null,
   },
   profile: {
-    icons_padding: {
-      x: 10,
-      y: 10,
-    },
+    icons_padding: 10,
     mode: false,
     solid: {
       bg_color: "#000000",
@@ -123,10 +120,7 @@ export interface ProfileCardDisplayOptions extends DisplayOptions {
     name: keyof TranslationSchema["icons"];
     pos: [number, number];
   }>;
-  icons_padding: {
-    x: number;
-    y: number;
-  };
+  icons_padding: number;
 }
 
 export interface BalanceCardDisplayOptions extends DisplayOptions {

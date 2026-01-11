@@ -422,8 +422,7 @@ export const en: TranslationSchema = {
         mode: "Toggle Mode",
         url: "Set BG URL",
         reset: "Reset",
-        icons_padding_x: "Padding X",
-        icons_padding_y: "Padding Y",
+        icons_padding: "Icons padding",
         bio: "Set Bio",
       },
       modals: {
@@ -441,12 +440,7 @@ export const en: TranslationSchema = {
         },
         icons_padding: {
           title: "Set Icons Padding",
-          x: {
-            label: "Set padding for X in pixels",
-          },
-          y: {
-            label: "Set padding for Y in pixels",
-          },
+          label: "Set padding in pixels",
         },
       },
       messages: {
