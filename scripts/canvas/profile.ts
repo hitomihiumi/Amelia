@@ -30,5 +30,3 @@ async function main(nums: number[]) {
 }
 
 main([100, 200, 300, 500, 750, 1000, 1750, 1850, 1975]);
-
-

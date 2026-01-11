@@ -218,26 +218,16 @@ module.exports = {
                 files: [await imageUpdate(opt, interaction.user, data)],
               });
             });
-        } else if (
-          i.customId === "NI_appearance:padding"
-        ) {
+        } else if (i.customId === "NI_appearance:padding") {
           const modal = new ModalBuilder()
             .setTitle(t(client, lang, "commands.appearance.modals.icons_padding.title"))
             .setCustomId("NI_appearance:modal:padding")
             .setLabelComponents(
               new LabelBuilder()
-                .setLabel(
-                  t(
-                    client,
-                    lang,
-                      "commands.appearance.modals.icons_padding.label"
-                  ),
-                )
+                .setLabel(t(client, lang, "commands.appearance.modals.icons_padding.label"))
                 .setTextInputComponent(
                   new TextInputBuilder()
-                    .setCustomId(
-                      "NI_appearance:text:padding_value"
-                    )
+                    .setCustomId("NI_appearance:text:padding_value")
                     .setPlaceholder("0-10")
                     .setStyle(TextInputStyle.Short)
                     .setRequired(true)
@@ -251,8 +241,7 @@ module.exports = {
             .awaitModalSubmit({
               time: 5 * 60 * 1000,
               filter: (si: any) =>
-                si.user.id === interaction.user.id &&
-                si.customId === "NI_appearance:modal:padding",
+                si.user.id === interaction.user.id && si.customId === "NI_appearance:modal:padding",
             })
             .then(async (int) => {
               await int.deferUpdate();
@@ -275,9 +264,9 @@ module.exports = {
               }
 
               data = data as ProfileCardDisplayOptions;
-                if ("icons_padding" in data) {
-                    data.icons_padding = padding_number;
-                }
+              if ("icons_padding" in data) {
+                data.icons_padding = padding_number;
+              }
               await mostUsedQueries[`set${opt}`](user, data);
 
               await int.editReply({
