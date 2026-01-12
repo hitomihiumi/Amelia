@@ -50,7 +50,7 @@ export class RankCard {
       return path;
     };
 
-    const scene = new Scene(736, 260, { debug: true });
+    const scene = new Scene(736, 260);
 
     scene.lazyCanvas.manager.fonts.add(fontMap.wdxllubrifont);
 

@@ -99,9 +99,9 @@ export class ModalField {
             baseline="middle"
             color="#72767d"
             layout={{
-                position: "absolute",
-                left: 10,
-                top: 10,
+              position: "absolute",
+              left: 10,
+              top: 10,
             }}
           />
           <TextLayer
@@ -112,9 +112,9 @@ export class ModalField {
             baseline="middle"
             color="#72767d"
             layout={{
-                position: "absolute",
-                right: 10,
-                bottom: 10,
+              position: "absolute",
+              right: 10,
+              bottom: 10,
             }}
           />
         </MorphLayer>
@@ -162,7 +162,7 @@ export class ModalField {
           layout={{
             flexDirection: "row",
             alignItems: "flex-start",
-              padding: [0, 10, 0, 10],
+            padding: [0, 10, 0, 10],
             gap: 5,
             height: 18,
           }}

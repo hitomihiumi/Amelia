@@ -130,7 +130,7 @@ model User {
   profileUrl          String?
   profileColor        String?
   profileIcons        Json    @default("[]")
-  profileIconsPadding Json    @default("{\"x\":10,\"y\":10}")
+  profileIconsPadding Int     @default(10)
 
   rankMode  Boolean @default(false)
   rankSolid Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#ffffff\",\"second_component\":\"#C30F45\",\"third_component\":\"#422242\"}")
