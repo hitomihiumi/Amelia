@@ -433,8 +433,8 @@ const userSchemaMap: Record<string, SchemaField> = {
   },
   "custom.profile.icons_padding": {
     prismaField: "profileIconsPadding",
-    prismaType: "Json",
-    default: '"{\\"x\\":10,\\"y\\":10}"',
+    prismaType: "Int",
+    default: "10",
   },
 
   // Custom Rank
