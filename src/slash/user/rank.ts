@@ -65,7 +65,7 @@ module.exports = {
           }, 5000);
         });
     }
-    const attachment = new AttachmentBuilder(buffer, { name: "rank.jpg" });
+    const attachment = new AttachmentBuilder(buffer, { name: "rank.png" });
 
     return interaction.editReply({
       files: [attachment],

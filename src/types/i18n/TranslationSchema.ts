@@ -436,8 +436,7 @@ export interface TranslationSchema {
         mode: string;
         url: string;
         reset: string;
-        icons_padding_x: string;
-        icons_padding_y: string;
+        icons_padding: string;
         bio: string;
       };
       modals: {
@@ -455,12 +454,7 @@ export interface TranslationSchema {
         };
         icons_padding: {
           title: string;
-          x: {
-            label: string;
-          };
-          y: {
-            label: string;
-          };
+          label: string;
         };
       };
       messages: {
@@ -1940,6 +1934,41 @@ export interface TranslationSchema {
           var_custom: string;
         };
         button: string;
+      };
+    };
+
+    leaderboard: {
+      embeds: {
+        footer: string;
+        level: {
+          title: string;
+          description: string;
+          field: {
+            name: string;
+            value: string;
+          };
+        };
+        voice: {
+          title: string;
+          description: string;
+          field: {
+            name: string;
+            value: string;
+          };
+        };
+        coins: {
+          title: string;
+          description: string;
+          field: {
+            name: string;
+            value: string;
+          };
+        };
+      };
+      buttons: {
+        level: string;
+        voice: string;
+        coins: string;
       };
     };
   };

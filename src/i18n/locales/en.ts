@@ -422,8 +422,7 @@ export const en: TranslationSchema = {
         mode: "Toggle Mode",
         url: "Set BG URL",
         reset: "Reset",
-        icons_padding_x: "Padding X",
-        icons_padding_y: "Padding Y",
+        icons_padding: "Icons padding",
         bio: "Set Bio",
       },
       modals: {
@@ -441,12 +440,7 @@ export const en: TranslationSchema = {
         },
         icons_padding: {
           title: "Set Icons Padding",
-          x: {
-            label: "Set padding for X in pixels",
-          },
-          y: {
-            label: "Set padding for Y in pixels",
-          },
+          label: "Set padding in pixels",
         },
       },
       messages: {
@@ -2013,6 +2007,41 @@ export const en: TranslationSchema = {
           var_custom: "`{variables.name}` - Custom variable (replace name with your variable name)",
         },
         button: "Show Variables",
+      },
+    },
+
+    leaderboard: {
+      embeds: {
+        footer: "Page {0} of {1} — Total Users: {2}",
+        level: {
+          title: "🏆 Level Leaderboard",
+          description: "Top sorted by level.",
+          field: {
+            name: "**#{0} {1}**",
+            value: "Level: `{0}` | XP: `{1}`",
+          },
+        },
+        voice: {
+          title: "🎤 Voice Activity Leaderboard",
+          description: "Top sorted by voice activity.",
+          field: {
+            name: "**#{0} {1}**",
+            value: "Time: `{0}`",
+          },
+        },
+        coins: {
+          title: "💰 Coin Leaderboard",
+          description: "Top sorted by coins.",
+          field: {
+            name: "**#{0} {1}**",
+            value: "Coins: `{0}`{1}",
+          },
+        },
+      },
+      buttons: {
+        level: "Level",
+        voice: "Voice",
+        coins: "Coins",
       },
     },
   },

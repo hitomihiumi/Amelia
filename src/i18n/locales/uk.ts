@@ -421,8 +421,7 @@ export const uk: TranslationSchema = {
         mode: "Режим",
         url: "Встановити URL",
         reset: "Скидання",
-        icons_padding_x: "Відступ по X",
-        icons_padding_y: "Відступ по Y",
+        icons_padding: "Відступ іконок",
         bio: "Біографія",
       },
       modals: {
@@ -440,12 +439,7 @@ export const uk: TranslationSchema = {
         },
         icons_padding: {
           title: "Зміна відступу",
-          x: {
-            label: "Введіть відступ по X у пікселях",
-          },
-          y: {
-            label: "Введіть відступ по Y у пікселях",
-          },
+          label: "Введіть відступ у пікселях",
         },
       },
       messages: {
@@ -2017,6 +2011,41 @@ export const uk: TranslationSchema = {
           var_custom: "`{variables.name}` - Користувацька змінна (замініть name на ім'я змінної)",
         },
         button: "Показати змінні",
+      },
+    },
+
+    leaderboard: {
+      embeds: {
+        footer: "Сторінка {0} з {1} — Всього користувачів: {2}",
+        level: {
+          title: "🏆 Таблиця лідерів рівнів",
+          description: "Перегляньте топ користувачів за рівнями на цьому сервері.",
+          field: {
+            name: "**#{0} {1}**",
+            value: "Рівень: `{0}` | Досвід: `{1}` XP",
+          },
+        },
+        voice: {
+          title: "🎤 Таблиця лідерів голосового часу",
+          description: "Перегляньте топ користувачів за голосовим часом на цьому сервері.",
+          field: {
+            name: "**#{0} {1}**",
+            value: "Голосовий час: `{0}`",
+          },
+        },
+        coins: {
+          title: "💰 Таблиця лідерів монет",
+          description: "Перегляньте топ користувачів за кількістю монет на цьому сервері.",
+          field: {
+            name: "**#{0} {1}**",
+            value: "Монети: `{0}`{1}",
+          },
+        },
+      },
+      buttons: {
+        level: "Рівні",
+        voice: "Голос",
+        coins: "Монети",
       },
     },
   },
