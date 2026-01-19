@@ -185,7 +185,7 @@ export function commandLoader(client: Client) {
 
           client.holder.cmds.slashCommands.set(`${manifest.name}`, manifest);
           commands.push(command.toJSON());
-        } else {
+        } else if (dir.endsWith(".js")) {
           const pull = require(path.resolve(__dirname, `./../slash/${dir}`)) as SlashCommand;
 
           if (!pull.name || !pull.description) {

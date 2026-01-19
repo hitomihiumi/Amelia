@@ -1971,6 +1971,38 @@ export interface TranslationSchema {
         coins: string;
       };
     };
+    rp: {
+      embeds: {
+        hug: {
+          title: string;
+          description: string;
+        };
+        kiss: {
+          title: string;
+          description: string;
+        };
+        slap: {
+          title: string;
+          description: string;
+        };
+        pat: {
+          title: string;
+          description: string;
+        };
+        poke: {
+          title: string;
+          description: string;
+        };
+        tickle: {
+          title: string;
+          description: string;
+        };
+      };
+      messages: {
+        cannot_target_yourself: string;
+        no_target: string;
+      };
+    };
   };
 
   // Events

@@ -2044,6 +2044,38 @@ export const en: TranslationSchema = {
         coins: "Coins",
       },
     },
+    rp: {
+      embeds: {
+        kiss: {
+          title: "💋 Kiss Action",
+          description: "{0} kisses {1} 💋",
+        },
+        hug: {
+          title: "🤗 Hug Action",
+          description: "{0} hugs {1} 🤗",
+        },
+        slap: {
+          title: "🖐️ Slap Action",
+          description: "{0} slaps {1} 🖐️",
+        },
+        pat: {
+          title: "🐾 Pat Action",
+          description: "{0} pats {1} 🐾",
+        },
+        poke: {
+          title: "👉 Poke Action",
+          description: "{0} pokes {1} 👉",
+        },
+        tickle: {
+          title: "🤭 Tickle Action",
+          description: "{0} tickles {1} 🤭",
+        },
+      },
+      messages: {
+        no_target: "You need to mention a user to perform this action!",
+        cannot_target_yourself: "You cannot perform this action on yourself!",
+      },
+    },
   },
 
   events: {
