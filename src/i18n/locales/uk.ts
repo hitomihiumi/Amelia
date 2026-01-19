@@ -2048,6 +2048,38 @@ export const uk: TranslationSchema = {
         coins: "Монети",
       },
     },
+    rp: {
+      embeds: {
+        kiss: {
+          title: "💋 Поцілунок",
+          description: "{0} поцілував(ла) {1} 💋",
+        },
+        hug: {
+          title: "🤗 Обійми",
+          description: "{0} обійняв(ла) {1} 🤗",
+        },
+        slap: {
+          title: "👋 Ляпас",
+          description: "{0} дав(ла) ляпаса {1} 👋",
+        },
+        pat: {
+          title: "🐾 Погладжування",
+          description: "{0} погладив(ла) {1} 🐾",
+        },
+        poke: {
+          title: "👉 Тикання",
+          description: "{0} ткнув(ла) {1} 👉",
+        },
+        tickle: {
+          title: "😄 Лоскотання",
+          description: "{0} лоскотав(ла) {1} 😄",
+        },
+      },
+      messages: {
+        no_target: "Будь ласка, вкажіть користувача для цієї дії!",
+        cannot_target_yourself: "Ви не можете виконати цю дію на собі!",
+      },
+    },
   },
 
   events: {

@@ -2042,6 +2042,38 @@ export const ru: TranslationSchema = {
         coins: "Деньги",
       },
     },
+    rp: {
+      embeds: {
+        kiss: {
+          title: "💋 Поцелуй",
+          description: "{0} целует {1} 💋",
+        },
+        hug: {
+          title: "🤗 Объятия",
+          description: "{0} обнимает {1} 🤗",
+        },
+        slap: {
+          title: "🖐️ Шлепок",
+          description: "{0} шлёпает {1} 🖐️",
+        },
+        pat: {
+          title: "🐾 Поглаживание",
+          description: "{0} гладит {1} 🐾",
+        },
+        poke: {
+          title: "👉 Тыкание",
+          description: "{0} тыкает {1} 👉",
+        },
+        tickle: {
+          title: "🤭 Щекотка",
+          description: "{0} щекочет {1} 🤭",
+        },
+      },
+      messages: {
+        no_target: "Пожалуйста, укажите пользователя для этого действия!",
+        cannot_target_yourself: "Вы не можете выполнить это действие на себе!",
+      },
+    },
   },
 
   events: {
