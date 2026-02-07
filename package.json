@@ -30,7 +30,8 @@
     "@hitomihiumi/colors.ts": "^1.0.3",
     "@hitomihiumi/filewatcher": "^0.1.1",
     "@nmmty/lazycanvas": "^1.0.0-dev.9",
-    "@prisma/client": "^6.19.0",
+    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "^7.3.0",
     "body-parser": "^1.20.3",
     "chokidar": "^4.0.3",
     "discord-api-types": "^0.38.31",
@@ -39,6 +40,6 @@
     "fuse.js": "^7.1.0",
     "mongodb": "^7.0.0",
     "nekos.life": "^3.0.0",
-    "prisma": "^6.18.0"
+    "prisma": "^7.3.0"
   }
 }
