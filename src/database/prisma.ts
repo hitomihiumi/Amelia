@@ -1,4 +1,6 @@
+import 'dotenv/config'
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from '@prisma/adapter-pg'
 
 /**
  * Singleton Prisma Client instance
@@ -11,6 +13,7 @@ class DatabaseService {
   public static getInstance(): PrismaClient {
     if (!DatabaseService.instance) {
       DatabaseService.instance = new PrismaClient({
+        adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL || "" }, { schema: "public" }),
         log:
           (process.env.PRODACTION as unknown as Boolean) === false
             ? ["query", "error", "warn"]
