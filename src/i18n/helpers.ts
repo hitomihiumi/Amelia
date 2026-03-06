@@ -1,5 +1,6 @@
 import { Client } from "discord.js";
-import { TranslationKey } from "../types/i18n/TranslationSchema";
+import {LiteralTranslationKey, TranslationKey, TranslationSchema} from "../types/i18n/TranslationSchema";
+import {GetSchemaValueType} from "../types/helpers";
 
 /**
  * Helper for getting translations from the client
@@ -27,22 +28,10 @@ export function t(client: Client, lang: string, key: TranslationKey, ...args: an
  * @param path - Path to translation object
  * @returns Translation object
  */
-export function tObject<T = any>(client: Client, lang: string, path: string): T {
+export function tObject<T extends LiteralTranslationKey>(client: Client, lang: string, path: T): GetSchemaValueType<TranslationSchema, T> {
   const i18n = client.holder.i18n.get(lang) || client.holder.i18n.getDefault();
-  const translations = i18n.getAll();
 
-  const keys = path.split(".");
-  let current: any = translations;
-
-  for (const key of keys) {
-    if (current && typeof current === "object" && key in current) {
-      current = current[key];
-    } else {
-      return {} as T;
-    }
-  }
-
-  return current as T;
+  return i18n.getTree(path);
 }
 
 /**

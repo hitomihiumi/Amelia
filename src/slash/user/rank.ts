@@ -51,7 +51,7 @@ module.exports = {
         rank: 1,
       },
       displayOptions,
-    });
+    }, client);
 
     const buffer = await rank.render();
     if (!buffer) {

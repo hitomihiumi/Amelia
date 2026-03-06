@@ -2281,4 +2281,47 @@ export const ru: TranslationSchema = {
   icons: {
     empty: "Пустое место",
   },
+
+  time_units: {
+    day: {
+      short: "д",
+      forms: {
+        more_than_1_less_then_5: " дня",
+        more_than_5_less_then_10: " дней",
+        more_than_10_less_then_15: " дней",
+        singular: " день",
+        plural: " дней",
+      }
+    },
+    hour: {
+      short: "ч",
+      forms: {
+        more_than_1_less_then_5: " часа",
+        more_than_5_less_then_10: " часов",
+        more_than_10_less_then_15: " часов",
+        singular: " час",
+        plural: " часов",
+      }
+    },
+    minute: {
+      short: "м",
+      forms: {
+        more_than_1_less_then_5: " минуты",
+        more_than_5_less_then_10: " минут",
+        more_than_10_less_then_15: " минут",
+        singular: " минута",
+        plural: " минут",
+      }
+    },
+    second: {
+      short: "с",
+      forms: {
+        more_than_1_less_then_5: " секунды",
+        more_than_5_less_then_10: " секунд",
+        more_than_10_less_then_15: " секунд",
+        singular: " секунда",
+        plural: " секунд",
+      },
+    },
+  }
 };

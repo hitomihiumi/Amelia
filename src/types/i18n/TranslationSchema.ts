@@ -1,4 +1,4 @@
-import { SchemaKey } from "../helpers";
+import {LiteralSchemaKey, SchemaKey} from "../helpers";
 
 /**
  * Base structure of a language package
@@ -2212,9 +2212,53 @@ export interface TranslationSchema {
   icons: {
     empty: string;
   };
+
+  time_units: {
+    day: {
+      short: string;
+      forms: {
+        more_than_10_less_then_15: string;
+        more_than_1_less_then_5: string;
+        more_than_5_less_then_10: string;
+        singular: string;
+        plural: string;
+      }
+    },
+    hour: {
+      short: string;
+      forms: {
+        more_than_10_less_then_15: string;
+        more_than_1_less_then_5: string;
+        more_than_5_less_then_10: string;
+        singular: string;
+        plural: string;
+      }
+    },
+    minute: {
+      short: string;
+      forms: {
+        more_than_10_less_then_15: string;
+        more_than_1_less_then_5: string;
+        more_than_5_less_then_10: string;
+        singular: string;
+        plural: string;
+      }
+    },
+    second: {
+      short: string;
+      forms: {
+        more_than_10_less_then_15: string;
+        more_than_1_less_then_5: string;
+        more_than_5_less_then_10: string;
+        singular: string;
+        plural: string;
+      }
+    },
+  }
 }
 
 /**
  * Type-safe path to a translation
  */
 export type TranslationKey = SchemaKey<TranslationSchema>;
+export type LiteralTranslationKey = LiteralSchemaKey<TranslationSchema>;

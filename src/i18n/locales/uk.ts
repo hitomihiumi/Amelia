@@ -2285,6 +2285,49 @@ export const uk: TranslationSchema = {
   },
 
   icons: {
-    empty: "Пусте місце",
+    empty: "Порожнє місце",
   },
+
+  time_units: {
+    day: {
+      short: "д",
+      forms: {
+        more_than_1_less_then_5: " дні",
+        more_than_5_less_then_10: " днів",
+        more_than_10_less_then_15: " днів",
+        singular: " день",
+        plural: " днів",
+      },
+    },
+    hour: {
+      short: "г",
+      forms: {
+        more_than_1_less_then_5: " години",
+        more_than_5_less_then_10: " годин",
+        more_than_10_less_then_15: " годин",
+        singular: " година",
+        plural: " годин",
+      },
+    },
+    minute: {
+      short: "хв",
+      forms: {
+        more_than_1_less_then_5: " хвилини",
+        more_than_5_less_then_10: " хвилин",
+        more_than_10_less_then_15: " хвилин",
+        singular: " хвилина",
+        plural: " хвилин",
+      },
+    },
+    second: {
+      short: "с",
+      forms: {
+        more_than_1_less_then_5: " секунди",
+        more_than_5_less_then_10: " секунд",
+        more_than_10_less_then_15: " секунд",
+        singular: " секунда",
+        plural: " секунд",
+      },
+    },
+  }
 };

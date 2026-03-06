@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Guild } from "../helpers";
-import { Command, Component, Levels, SlashCommand } from "../types/helpers";
+import {Command, Component, GetSchemaValueType, Levels, SlashCommand} from "../types/helpers";
 import {
   Client,
   Collection,
@@ -26,7 +26,11 @@ import {
   GuildMember,
 } from "discord.js";
 import { APIEmbed, MessageFlags } from "discord-api-types/v10";
-import { t } from "../i18n/helpers";
+import { t, tObject } from "../i18n/helpers";
+import { en } from "../i18n/locales/en";
+import { ru } from "../i18n/locales/ru";
+import { uk } from "../i18n/locales/uk";
+import {TranslationSchema} from "../types/i18n/TranslationSchema";
 
 export function foldersCheck() {
   let folders = [
@@ -501,115 +505,90 @@ export function generateID(id?: string, type?: string) {
     : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
+type TimeUnits = GetSchemaValueType<TranslationSchema, "time_units">;
+type TimeUnitKey = keyof TimeUnits;
+type TimeUnit = TimeUnits[TimeUnitKey];
+
+function getTimeUnits(locale: string, client: Client): TimeUnits {
+  const localizedUnits = tObject(client, locale, "time_units");
+
+  return localizedUnits
+}
+
+function getSlavicTimeForm(value: number, unit: TimeUnit) {
+  const lastDigit = value % 10;
+  const lastTwoDigits = value % 100;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return unit.forms.more_than_10_less_then_15;
+  }
+
+  if (lastDigit === 1) {
+    return unit.forms.singular;
+  }
+
+  if (lastDigit >= 2 && lastDigit <= 4) {
+    return unit.forms.more_than_1_less_then_5;
+  }
+
+  if (lastDigit >= 5 && lastDigit <= 9) {
+    return unit.forms.more_than_5_less_then_10;
+  }
+
+  return unit.forms.plural;
+}
+
+function getTimeUnitSuffix(value: number, unit: TimeUnit, locale: string, short: boolean) {
+  if (short) {
+    return unit.short;
+  }
+
+  if (locale === "ru" || locale === "uk") {
+    return getSlavicTimeForm(value, unit);
+  }
+
+  return value === 1 ? unit.forms.singular : unit.forms.plural;
+}
+
+function formatTimeValue(value: number, unit: TimeUnit, locale: string, short: boolean) {
+  return `${value}${getTimeUnitSuffix(value, unit, locale, short)}`;
+}
+
+export function formatTime(ms: number, locale: string, client: Client, opts?: { full?: boolean; short?: boolean }): string;
 export function formatTime(
-  ms: number,
+  ms: number, locale: string, client: Client,
   opts?: {
-    locale?: string;
     full?: boolean;
     short?: boolean;
   },
 ) {
-  const { locale = "en", full = false, short = false } = opts || {};
+  const options = {
+    full: false,
+    short: false,
+    ...opts,
+  }
+  const units = getTimeUnits(locale, client);
+  const safeMs = Number.isFinite(ms) ? Math.max(0, ms) : 0;
 
-  const timeUnits = {
-    ru: {
-      day: {
-        short: "д",
-        forms: [" день", " дня", " дней"],
-      },
-      hour: {
-        short: "ч",
-        forms: [" час", " часа", " часов"],
-      },
-      minute: {
-        short: "м",
-        forms: [" минута", " минуты", " минут"],
-      },
-      second: {
-        short: "с",
-        forms: [" секунда", " секунды", " секунд"],
-      },
-    },
-    en: {
-      day: {
-        short: "d",
-        forms: [" day", " days", " days"],
-      },
-      hour: {
-        short: "h",
-        forms: [" hour", " hours", " hours"],
-      },
-      minute: {
-        short: "m",
-        forms: [" minute", " minutes", " minutes"],
-      },
-      second: {
-        short: "s",
-        forms: [" second", " seconds", " seconds"],
-      },
-    },
-    uk: {
-      day: {
-        short: "д",
-        forms: [" день", " дні", " днів"],
-      },
-      hour: {
-        short: "г",
-        forms: [" година", " години", " годин"],
-      },
-      minute: {
-        short: "хв",
-        forms: [" хвилина", " хвилини", " хвилин"],
-      },
-      second: {
-        short: "с",
-        forms: [" секунда", " секунди", " секунд"],
-      },
-    },
-  };
+  const days = Math.floor(safeMs / (24 * 60 * 60 * 1000));
+  const hours = Math.floor((safeMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+  const minutes = Math.floor((safeMs % (60 * 60 * 1000)) / (60 * 1000));
+  const seconds = Math.floor((safeMs % (60 * 1000)) / 1000);
 
-  //@ts-ignore
-  const units = timeUnits[locale] || timeUnits.ru;
-
-  const getRussianForm = (num: number, forms: string[]) => {
-    const lastDigit = num % 10;
-    const lastTwoDigits = num % 100;
-
-    if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return forms[2];
-    if (lastDigit === 1) return forms[0];
-    if (lastDigit >= 2 && lastDigit <= 4) return forms[1];
-    return forms[2];
-  };
-
-  const getForm = (num: number, unit: { short: string; forms: string[] }) => {
-    if (short) return unit.short;
-    if (locale === "ru") return getRussianForm(num, unit.forms);
-    return num === 1 ? unit.forms[0] : unit.forms[1];
-  };
-
-  const formatValue = (value: number, unit: { short: string; forms: string[] }) => {
-    return value + getForm(value, unit);
-  };
-
-  const days = Math.floor(ms / (24 * 60 * 60 * 1000));
-  const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-  const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
-  const seconds = Math.floor((ms % (60 * 1000)) / 1000);
-
-  if (!full) {
-    if (days > 0) return formatValue(days, units.day);
-    if (hours > 0) return formatValue(hours, units.hour);
-    if (minutes > 0) return formatValue(minutes, units.minute);
-    return formatValue(seconds, units.second);
+  if (!options.full) {
+    if (days > 0) return formatTimeValue(days, units.day, locale, options.short);
+    if (hours > 0) return formatTimeValue(hours, units.hour, locale, options.short);
+    if (minutes > 0) return formatTimeValue(minutes, units.minute, locale, options.short);
+    return formatTimeValue(seconds, units.second, locale, options.short);
   }
 
   const parts: string[] = [];
-  if (days > 0) parts.push(formatValue(days, units.day));
-  if (hours > 0) parts.push(formatValue(hours, units.hour));
-  if (minutes > 0) parts.push(formatValue(minutes, units.minute));
-  if (seconds > 0) parts.push(formatValue(seconds, units.second));
+  if (days > 0) parts.push(formatTimeValue(days, units.day, locale, options.short));
+  if (hours > 0) parts.push(formatTimeValue(hours, units.hour, locale, options.short));
+  if (minutes > 0) parts.push(formatTimeValue(minutes, units.minute, locale, options.short));
+  if (seconds > 0) parts.push(formatTimeValue(seconds, units.second, locale, options.short));
 
-  return parts.join(" ") || formatValue(0, units.second);
+  return parts.join(" ") || formatTimeValue(0, units.second, locale, options.short);
 }
 
 export function getNextLevelXP(level: number): number {

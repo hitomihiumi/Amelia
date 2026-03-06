@@ -1015,12 +1015,7 @@ async function handleButton(i: any, ctx: HandlerContext) {
 
     case "NI_scenario:show_hints": {
       // Build hints message
-      const hints = tObject<{
-        title: string;
-        description: string;
-        categories: Record<string, string>;
-        variables: Record<string, string>;
-      }>(client, lang, "commands.scenario.hints");
+      const hints = tObject(client, lang, "commands.scenario.hints");
 
       const hintsContent = [
         `## ${hints.title}`,

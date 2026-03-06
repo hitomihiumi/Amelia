@@ -48,6 +48,21 @@ export class I18n {
     return this.replaceVariables(value, args);
   }
 
+  public getTree(path: string): any {
+    const keys = path.split(".");
+    let current: any = this.translations;
+
+    for (const key of keys) {
+        if (current && typeof current === "object" && key in current) {
+            current = current[key];
+        } else {
+            return undefined;
+        }
+    }
+
+    return current;
+  }
+
   /**
    * Check if translation key exists
    * @param key - Translation key
