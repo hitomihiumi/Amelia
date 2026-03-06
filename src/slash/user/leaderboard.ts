@@ -291,7 +291,7 @@ function buildLeaderboardEmbed(
           client,
           lang,
           `commands.leaderboard.embeds.${sortBy}.field.value`,
-          formatTime(time, { locale: lang, full: true }),
+          formatTime(time, lang, client, { full: true }),
         ) + "\n";
     } else {
       const totalCoins =

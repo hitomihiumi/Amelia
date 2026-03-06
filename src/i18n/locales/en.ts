@@ -2281,6 +2281,49 @@ export const en: TranslationSchema = {
   },
 
   icons: {
-    empty: "No Icon Configured",
+    empty: "Empty slot",
   },
+
+  time_units: {
+    day: {
+      short: "d",
+      forms: {
+        more_than_1_less_then_5: " days",
+        more_than_5_less_then_10: " days",
+        more_than_10_less_then_15: " days",
+        singular: " day",
+        plural: " days",
+      },
+    },
+    hour: {
+      short: "h",
+      forms: {
+        more_than_1_less_then_5: " hours",
+        more_than_5_less_then_10: " hours",
+        more_than_10_less_then_15: " hours",
+        singular: " hour",
+        plural: " hours",
+      },
+    },
+    minute: {
+      short: "m",
+      forms: {
+        more_than_1_less_then_5: " minutes",
+        more_than_5_less_then_10: " minutes",
+        more_than_10_less_then_15: " minutes",
+        singular: " minute",
+        plural: " minutes",
+      },
+    },
+    second: {
+      short: "s",
+      forms: {
+        more_than_1_less_then_5: " seconds",
+        more_than_5_less_then_10: " seconds",
+        more_than_10_less_then_15: " seconds",
+        singular: " second",
+        plural: " seconds",
+      },
+    },
+  }
 };

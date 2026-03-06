@@ -16,12 +16,15 @@ import { ProfileCardDisplayOptions } from "../../types/helpers";
 import { assetsMap, fontMap, iconsMap } from "../assetsMap";
 import { formatTime, getNextLevelXP } from "../../handlers/functions";
 import { Path2D } from "@napi-rs/canvas";
+import { Client } from "discord.js";
 
 export class ProfileCard {
   data: ProfileCardOptions;
+  client: Client;
 
-  constructor(data: ProfileCardOptions) {
+  constructor(data: ProfileCardOptions, client: Client) {
     this.data = data;
+    this.client = client;
   }
 
   async render() {
@@ -221,7 +224,7 @@ export class ProfileCard {
                   layout={{
                     position: "absolute",
                   }}
-                  text={`${formatTime(this.data.data.voice_time, { locale: "en", short: true })}`}
+                  text={`${formatTime(this.data.data.voice_time, "en", this.client, { short: true })}`}
                   font={{
                     family: "WDXL Lubrifont",
                     size: 24,

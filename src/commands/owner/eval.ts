@@ -2,6 +2,7 @@ import { Command } from "../../types/helpers";
 import * as DJS from "discord.js";
 import { inspect } from "util";
 import { Guild, User } from "../../helpers";
+import { t, tObject } from "../../i18n/helpers";
 
 module.exports = {
   name: `eval`,

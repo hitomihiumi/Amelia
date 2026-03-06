@@ -215,7 +215,7 @@ module.exports = {
 
               await int.editReply({
                 embeds: [embedUpdate(opt, client, lang, data)],
-                files: [await imageUpdate(opt, interaction.user, data)],
+                files: [await imageUpdate(opt, interaction.user, client, data)],
               });
             });
         } else if (i.customId === "NI_appearance:padding") {
@@ -271,7 +271,7 @@ module.exports = {
 
               await int.editReply({
                 embeds: [embedUpdate(opt, client, lang, data)],
-                files: [await imageUpdate(opt, interaction.user, data)],
+                files: [await imageUpdate(opt, interaction.user, client, data)],
               });
             });
         }
@@ -289,7 +289,7 @@ module.exports = {
           await i.editReply({
             embeds: [embedUpdate(selected as "rank" | "profile" | "level_up", client, lang, data)],
             components: components,
-            files: [await imageUpdate(opt, interaction.user, data)],
+            files: [await imageUpdate(opt, interaction.user, client, data)],
           });
         } else if (i.customId === "NI_appearance:color_select") {
           const selected = i.values[0];
@@ -336,7 +336,7 @@ module.exports = {
 
               await int.editReply({
                 embeds: [embedUpdate(opt, client, lang, data)],
-                files: [await imageUpdate(opt, interaction.user, data)],
+                files: [await imageUpdate(opt, interaction.user, client, data)],
               });
             });
         } else if (i.customId === "NI_appearance:icons_select") {
@@ -372,7 +372,7 @@ module.exports = {
           await i.editReply({
             embeds: [embedUpdate(opt, client, lang, data)],
             components: [row, color, main_buttons, profile_buttons, profile_icons],
-            files: [await imageUpdate(opt, interaction.user, data)],
+            files: [await imageUpdate(opt, interaction.user, client, data)],
           });
         }
       }
@@ -440,6 +440,7 @@ function embedUpdate(
 async function imageUpdate(
   opt: "rank" | "profile" | "level_up",
   user: import("discord.js").User,
+  client: Client,
   displayOptions: RankCardDisplayOptions | ProfileCardDisplayOptions | LevelCardDisplayOptions,
 ) {
   let attachment: AttachmentBuilder;
@@ -458,7 +459,7 @@ async function imageUpdate(
           rank: 1,
         },
         displayOptions: displayOptions as RankCardDisplayOptions,
-      });
+      }, client);
       attachment = new AttachmentBuilder(await rank.render(), { name: "rank.png" });
       break;
     case "profile":
@@ -475,7 +476,7 @@ async function imageUpdate(
           rank: 1,
         },
         displayOptions: displayOptions as ProfileCardDisplayOptions,
-      });
+      }, client);
       attachment = new AttachmentBuilder(await profile.render(), { name: "profile.png" });
       break;
     case "level_up":

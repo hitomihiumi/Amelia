@@ -409,12 +409,7 @@ module.exports = {
 
           case "NI_embed:show_hints": {
             // Build hints message using scenario hints (shared)
-            const hints = tObject<{
-              title: string;
-              description: string;
-              categories: Record<string, string>;
-              variables: Record<string, string>;
-            }>(client, lang, "commands.scenario.hints");
+            const hints = tObject(client, lang, "commands.scenario.hints");
 
             const hintsContent = [
               `## ${hints.title}`,
