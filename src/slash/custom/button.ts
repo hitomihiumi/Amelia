@@ -33,11 +33,11 @@ const STYLE_OPTIONS: { value: ButtonCustom["style"]; label: string; emoji: strin
 
 module.exports = {
   name: "button",
-  description: "Menu for creating and configuring custom buttons",
+  description: "🔘 Menu for creating and configuring custom buttons",
   cooldown: 5,
   locale: {
-    ru: "Меню создания и настройки кастомных кнопок",
-    uk: "Меню створення та налаштування кастомних кнопок",
+    ru: "🔘 Меню создания и настройки кастомных кнопок",
+    uk: "🔘 Меню створення та налаштування кастомних кнопок",
   },
   options: [],
   permissions: {

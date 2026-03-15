@@ -42,11 +42,11 @@ function styleFor(sortBy: SortBy, check: SortBy) {
 
 module.exports = {
   name: "leaderboard",
-  description: "Show server user leaderboard",
+  description: "🎩 Show server user leaderboard",
   cooldown: 5,
   locale: {
-    ru: "Общий рейтинг пользователей сервера",
-    uk: "Загальний рейтинг користувачів сервера",
+    ru: "🎩 Общий рейтинг пользователей сервера",
+    uk: "🎩 Загальний рейтинг користувачів сервера",
   },
   options: [],
   permissions: {

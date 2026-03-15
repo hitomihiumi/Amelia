@@ -7,11 +7,11 @@ const WEEKLY_COOLDOWN = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 module.exports = {
   name: "weekly",
-  description: "Claim your weekly reward.",
+  description: "🕰️ Claim your weekly reward.",
   cooldown: 3,
   locale: {
-    ru: "Получите свою еженедельную награду.",
-    uk: "Отримайте свою щотижневу нагороду.",
+    ru: "🕰️ Получите свою еженедельную награду.",
+    uk: "🕰️ Отримайте свою щотижневу нагороду.",
   },
   options: [],
   permissions: {

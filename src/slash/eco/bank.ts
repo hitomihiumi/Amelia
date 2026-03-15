@@ -5,11 +5,11 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "bank",
-  description: "Deposit or withdraw money from your bank account.",
+  description: "🏦 Deposit or withdraw money from your bank account.",
   cooldown: 3,
   locale: {
-    ru: "Положить или снять деньги с банковского счёта.",
-    uk: "Покласти або зняти гроші з банківського рахунку.",
+    ru: "🏦 Положить или снять деньги с банковского счёта.",
+    uk: "🏦 Покласти або зняти гроші з банківського рахунку.",
   },
   options: [
     {

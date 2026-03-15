@@ -30,11 +30,11 @@ type ViewType = "main" | "list" | "edit" | "options" | "option_edit" | "emoji";
 
 module.exports = {
   name: "selectmenu",
-  description: "Menu for creating and configuring custom select menus",
+  description: "👆 Menu for creating and configuring custom select menus",
   cooldown: 5,
   locale: {
-    ru: "Меню создания и настройки кастомных селект меню",
-    uk: "Меню створення та налаштування кастомних селект меню",
+    ru: "👆 Меню создания и настройки кастомных селект меню",
+    uk: "👆 Меню створення та налаштування кастомних селект меню",
   },
   options: [],
   permissions: {

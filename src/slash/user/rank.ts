@@ -6,11 +6,11 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "rank",
-  description: "Shows your, or someone else's, level on the server",
+  description: "🎗️ Shows your, or someone else's, level on the server",
   cooldown: 5,
   locale: {
-    ru: "Показывает ваш, или чей-то, уровень на сервере",
-    uk: "Показує ваш, або чиїйсь, рівень на сервері",
+    ru: "🎗️ Показывает ваш, или чей-то, уровень на сервере",
+    uk: "🎗️ Показує ваш, або чиїйсь, рівень на сервері",
   },
   options: [
     {

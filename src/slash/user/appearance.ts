@@ -26,11 +26,11 @@ import { TranslationSchema } from "../../types/i18n/TranslationSchema";
 
 module.exports = {
   name: "appearance",
-  description: "Allows you to customize the appearance of the rank card and other elements.",
+  description: "🪞 Allows you to customize the appearance of the rank card and other elements.",
   cooldown: 5,
   locale: {
-    ru: "Позволяет настроить внешний вид рангаовой карточки и других элементов.",
-    uk: "Дозволяє налаштувати зовнішній вигляд картки рангу та інших елементів.",
+    ru: "🪞 Позволяет настроить внешний вид рангаовой карточки и других элементов.",
+    uk: "🪞 Дозволяє налаштувати зовнішній вигляд картки рангу та інших елементів.",
   },
   options: [],
   permissions: {

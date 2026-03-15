@@ -6,11 +6,11 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "balance",
-  description: "Shows your, or someone else's, balance",
+  description: "💳 Shows your, or someone else's, balance",
   cooldown: 5,
   locale: {
-    ru: "Отображает информацию о балансе",
-    uk: "Відображає інформацію про баланс",
+    ru: "💳 Отображает информацию о балансе",
+    uk: "💳 Відображає інформацію про баланс",
   },
   options: [
     {

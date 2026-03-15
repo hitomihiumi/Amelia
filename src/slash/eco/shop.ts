@@ -18,11 +18,11 @@ const ITEMS_PER_PAGE = 10;
 
 module.exports = {
   name: "shop",
-  description: "Browse and purchase roles from the shop.",
+  description: "🛒 Browse and purchase roles from the shop.",
   cooldown: 5,
   locale: {
-    ru: "Просмотр и покупка ролей в магазине.",
-    uk: "Перегляд та покупка ролей у магазині.",
+    ru: "🛒 Просмотр и покупка ролей в магазине.",
+    uk: "🛒 Перегляд та покупка ролей у магазині.",
   },
   options: [],
   permissions: {

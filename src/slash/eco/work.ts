@@ -5,11 +5,11 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "work",
-  description: "Work to earn some money.",
+  description: "⛏️ Work to earn some money.",
   cooldown: 3,
   locale: {
-    ru: "Работайте, чтобы заработать деньги.",
-    uk: "Працюйте, щоб заробити гроші.",
+    ru: "⛏️ Работайте, чтобы заработать деньги.",
+    uk: "⛏️ Працюйте, щоб заробити гроші.",
   },
   options: [],
   permissions: {

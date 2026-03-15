@@ -23,11 +23,11 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "modal",
-  description: "Menu for creating and configuring custom modals",
+  description: "🪟 Menu for creating and configuring custom modals",
   cooldown: 5,
   locale: {
-    ru: "Меню создания и настройки кастомных модальных окон",
-    uk: "Меню створення та налаштування кастомних модальних вікон",
+    ru: "🪟 Меню создания и настройки кастомных модальных окон",
+    uk: "🪟 Меню створення та налаштування кастомних модальних вікон",
   },
   options: [],
   permissions: {

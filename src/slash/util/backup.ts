@@ -71,11 +71,11 @@ interface BackupData {
 
 module.exports = {
   name: "backup",
-  description: "Create and restore server backups",
+  description: "📁 Create and restore server backups",
   cooldown: 30,
   locale: {
-    ru: "Создание и восстановление бэкапов сервера",
-    uk: "Створення та відновлення бекапів сервера",
+    ru: "📁 Создание и восстановление бэкапов сервера",
+    uk: "📁 Створення та відновлення бекапів сервера",
   },
   options: [],
   permissions: {

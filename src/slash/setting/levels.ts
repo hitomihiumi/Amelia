@@ -24,11 +24,11 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "levels",
-  description: "Setting up the leveling system on the server.",
+  description: "🎩 Setting up the leveling system on the server.",
   cooldown: 5,
   locale: {
-    ru: "Настройка системы уровней на сервере.",
-    uk: "Налаштування системи рівнів на сервері.",
+    ru: "🎩 Настройка системы уровней на сервере.",
+    uk: "🎩 Налаштування системи рівнів на сервері.",
   },
   options: [],
   permissions: {

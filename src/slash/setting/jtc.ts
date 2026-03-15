@@ -22,10 +22,10 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "jtc",
-  description: "Setting Join To Create",
+  description: "📞 Setting Join To Create",
   locale: {
-    ru: "Настройка функционала Join To Create",
-    uk: "Налаштування функціоналу Join To Create",
+    ru: "📞 Настройка функционала Join To Create",
+    uk: "📞 Налаштування функціоналу Join To Create",
   },
   cooldown: 5,
   permissions: {

@@ -6,11 +6,11 @@ import { ProfileCard } from "../../helpers/canvas/ProfileCard";
 
 module.exports = {
   name: "profile",
-  description: "Shows your, or someone else's, profile on the server",
+  description: "🖼️ Shows your, or someone else's, profile on the server",
   cooldown: 5,
   locale: {
-    ru: "Показывает ваш, или чей-то, профиль на сервере",
-    uk: "Показує ваш, або чиїсь, профіль на сервері",
+    ru: "🖼️ Показывает ваш, или чей-то, профиль на сервере",
+    uk: "🖼️ Показує ваш, або чиїсь, профіль на сервері",
   },
   options: [
     {

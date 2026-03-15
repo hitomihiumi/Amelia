@@ -7,11 +7,11 @@ const TIMELY_COOLDOWN = 60 * 60 * 1000; // 1 hour in milliseconds
 
 module.exports = {
   name: "timely",
-  description: "Claim your hourly reward.",
+  description: "⌚ Claim your hourly reward.",
   cooldown: 3,
   locale: {
-    ru: "Получите свою ежечасную награду.",
-    uk: "Отримайте свою щогодинну нагороду.",
+    ru: "⌚ Получите свою ежечасную награду.",
+    uk: "⌚ Отримайте свою щогодинну нагороду.",
   },
   options: [],
   permissions: {
