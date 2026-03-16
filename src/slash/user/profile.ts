@@ -1,7 +1,7 @@
 import { Level, ProfileCardDisplayOptions, SlashCommand } from "../../types/helpers";
 import { AttachmentBuilder, PermissionsBitField } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
-import { t } from "../../i18n/helpers";
+import {t, tObject} from "../../i18n/helpers";
 import { ProfileCard } from "../../helpers/canvas/ProfileCard";
 
 module.exports = {
@@ -51,7 +51,7 @@ module.exports = {
         rank: 1,
       },
       displayOptions,
-    }, client);
+    }, tObject(client, await guild.get(`settings.language`), "time_units"));
 
     const buffer = await profile.render();
     if (!buffer) {

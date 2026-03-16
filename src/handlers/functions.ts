@@ -509,12 +509,6 @@ type TimeUnits = GetSchemaValueType<TranslationSchema, "time_units">;
 type TimeUnitKey = keyof TimeUnits;
 type TimeUnit = TimeUnits[TimeUnitKey];
 
-function getTimeUnits(locale: string, client: Client): TimeUnits {
-  const localizedUnits = tObject(client, locale, "time_units");
-
-  return localizedUnits
-}
-
 function getSlavicTimeForm(value: number, unit: TimeUnit) {
   const lastDigit = value % 10;
   const lastTwoDigits = value % 100;
@@ -554,20 +548,12 @@ function formatTimeValue(value: number, unit: TimeUnit, locale: string, short: b
   return `${value}${getTimeUnitSuffix(value, unit, locale, short)}`;
 }
 
-export function formatTime(ms: number, locale: string, client: Client, opts?: { full?: boolean; short?: boolean }): string;
-export function formatTime(
-  ms: number, locale: string, client: Client,
-  opts?: {
-    full?: boolean;
-    short?: boolean;
-  },
-) {
+export function formatTime(ms: number, locale: string, units: TimeUnits, opts?: { full?: boolean; short?: boolean }): string {
   const options = {
     full: false,
     short: false,
     ...opts,
   }
-  const units = getTimeUnits(locale, client);
   const safeMs = Number.isFinite(ms) ? Math.max(0, ms) : 0;
 
   const days = Math.floor(safeMs / (24 * 60 * 60 * 1000));

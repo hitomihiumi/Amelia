@@ -2,7 +2,7 @@ import { Level, RankCardDisplayOptions, SlashCommand } from "../../types/helpers
 import { AttachmentBuilder, MessageFlags, PermissionsBitField } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
 import { RankCard } from "../../helpers/canvas/RankCard";
-import { t } from "../../i18n/helpers";
+import {t, tObject} from "../../i18n/helpers";
 
 module.exports = {
   name: "rank",
@@ -51,7 +51,7 @@ module.exports = {
         rank: 1,
       },
       displayOptions,
-    }, client);
+    }, tObject(client, await guild.get(`settings.language`), "time_units"));
 
     const buffer = await rank.render();
     if (!buffer) {
