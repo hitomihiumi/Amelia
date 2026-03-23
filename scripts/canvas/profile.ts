@@ -1,5 +1,6 @@
 import { ProfileCard } from "../../src/helpers/canvas/ProfileCard";
 import { defaultDisplayOptions } from "../../src/types/helpers";
+import { en } from "../../src/i18n/locales";
 
 async function main(nums: number[]) {
   for (const num of nums) {
@@ -21,7 +22,7 @@ async function main(nums: number[]) {
         bio: "",
         color: "#fff",
       },
-    });
+    }, en.time_units);
 
     profileCard.render().then((buffer) => {
       require("fs").writeFileSync(`profileCard-${num}.png`, buffer);

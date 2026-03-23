@@ -23,11 +23,11 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "modal",
-  description: "Menu for creating and configuring custom modals",
+  description: "🪟 Menu for creating and configuring custom modals",
   cooldown: 5,
   locale: {
-    ru: "Меню создания и настройки кастомных модальных окон",
-    uk: "Меню створення та налаштування кастомних модальних вікон",
+    ru: "🪟 Меню создания и настройки кастомных модальных окон",
+    uk: "🪟 Меню створення та налаштування кастомних модальних вікон",
   },
   options: [],
   permissions: {
@@ -297,6 +297,7 @@ module.exports = {
                 si.user.id === interaction.user.id && si.customId === "NI_modal:modal:jump",
             })
             .then(async (int) => {
+              await int.deferUpdate();
               let jump = parseInt(int.fields.getTextInputValue("NI_modal:text:jump")) - 1;
 
               page =
@@ -337,6 +338,7 @@ module.exports = {
                 si.user.id === interaction.user.id && si.customId === "NI_modal:modal:search",
             })
             .then(async (int) => {
+              await int.deferUpdate();
               _search = int.fields.getTextInputValue("NI_modal:text:search");
 
               page = 0;
@@ -379,6 +381,7 @@ module.exports = {
 
           await i.showModal(modal);
 
+          // TODO: исправить все проверки модальных окон, добавив проверку id сервера
           await i
             .awaitModalSubmit({
               time: 5 * 60 * 1000,
@@ -386,6 +389,7 @@ module.exports = {
                 si.user.id === interaction.user.id && si.customId === "NI_modal:modal:title",
             })
             .then(async (int) => {
+              await int.deferUpdate();
               _schema.title = int.fields.getTextInputValue("NI_modal:text:title");
 
               delete embed.data.fields;
@@ -537,6 +541,7 @@ module.exports = {
                 si.user.id === interaction.user.id && si.customId === "NI_modal:modal:label",
             })
             .then(async (int) => {
+              await int.deferUpdate();
               _schema.fields[field].name = int.fields.getTextInputValue("NI_modal:text:label");
 
               let fieldEmbed = await modalFieldEmbed(embed, client, lang, _schema, field);
@@ -575,6 +580,7 @@ module.exports = {
                 si.user.id === interaction.user.id && si.customId === "NI_modal:modal:placeholder",
             })
             .then(async (int) => {
+              await int.deferUpdate();
               _schema.fields[field].placeholder = int.fields.getTextInputValue(
                 "NI_modal:text:placeholder",
               );
@@ -641,6 +647,7 @@ module.exports = {
                 si.user.id === interaction.user.id && si.customId === "NI_modal:modal:sizes",
             })
             .then(async (int) => {
+              await int.deferUpdate();
               let min = parseInt(int.fields.getTextInputValue("NI_modal:text:min"));
               let max = parseInt(int.fields.getTextInputValue("NI_modal:text:max"));
 

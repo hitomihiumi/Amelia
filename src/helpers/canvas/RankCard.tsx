@@ -12,19 +12,19 @@ import {
   Scene,
   createElement,
 } from "@nmmty/lazycanvas";
-import { RankCardDisplayOptions } from "../../types/helpers";
+import {GetSchemaValueType, RankCardDisplayOptions} from "../../types/helpers";
 import { assetsMap, fontMap } from "../assetsMap";
 import { formatTime, getNextLevelXP } from "../../handlers/functions";
 import { Path2D } from "@napi-rs/canvas";
-import {Client} from "discord.js";
+import {TranslationSchema} from "../../types/i18n/TranslationSchema";
 
 export class RankCard {
   data: RankCardOptions;
-  client: Client;
+  units: GetSchemaValueType<TranslationSchema, "time_units">;
 
-  constructor(data: RankCardOptions, client: Client) {
+  constructor(data: RankCardOptions, units: GetSchemaValueType<TranslationSchema, "time_units">) {
     this.data = data;
-    this.client = client;
+    this.units = units;
   }
 
   async render() {
@@ -195,7 +195,7 @@ export class RankCard {
                   layout={{
                     position: "absolute",
                   }}
-                  text={`${formatTime(this.data.data.voice_time, "en", this.client, { short: true })}`}
+                  text={`${formatTime(this.data.data.voice_time, "en", this.units, { short: true })}`}
                   font={{
                     family: "WDXL Lubrifont",
                     size: 24,

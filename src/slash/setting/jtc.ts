@@ -22,10 +22,10 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "jtc",
-  description: "Setting Join To Create",
+  description: "📞 Setting Join To Create",
   locale: {
-    ru: "Настройка функционала Join To Create",
-    uk: "Налаштування функціоналу Join To Create",
+    ru: "📞 Настройка функционала Join To Create",
+    uk: "📞 Налаштування функціоналу Join To Create",
   },
   cooldown: 5,
   permissions: {
@@ -99,6 +99,7 @@ module.exports = {
             .setStyle(settings.enabled ? ButtonStyle.Danger : ButtonStyle.Success);
           row.components[1].data.disabled = !row.components[1].data.disabled;
           row.components[2].data.disabled = !row.components[2].data.disabled;
+          channel_row.components[0].data.disabled = !channel_row.components[0].data.disabled;
 
           embed = updateFields(embed, client, lang, settings, interaction);
 

@@ -1,5 +1,6 @@
 import { RankCard } from "../../src/helpers/canvas/RankCard";
 import { defaultDisplayOptions } from "../../src/types/helpers";
+import { en } from "../../src/i18n/locales";
 
 async function main(nums: number[]) {
   for (const num of nums) {
@@ -19,7 +20,7 @@ async function main(nums: number[]) {
         ...defaultDisplayOptions.rank,
         color: "#fff",
       },
-    });
+    }, en.time_units);
 
     rankCard.render().then((buffer) => {
       require("fs").writeFileSync(`rankCard-${num}.png`, buffer);

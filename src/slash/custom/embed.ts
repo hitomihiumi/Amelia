@@ -25,11 +25,11 @@ type ViewType = "main" | "list" | "edit" | "fields" | "field_edit" | "author" | 
 
 module.exports = {
   name: "embed",
-  description: "Menu for creating and configuring custom embeds",
+  description: "📋 Menu for creating and configuring custom embeds",
   cooldown: 5,
   locale: {
-    ru: "Меню создания и настройки кастомных эмбедов",
-    uk: "Меню створення та налаштування кастомних ембедів",
+    ru: "📋 Меню создания и настройки кастомных эмбедов",
+    uk: "📋 Меню створення та налаштування кастомних ембедів",
   },
   options: [],
   permissions: {

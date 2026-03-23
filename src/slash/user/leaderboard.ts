@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
 import { MongoDBService } from "../../database";
-import { t } from "../../i18n/helpers";
+import {t, tObject} from "../../i18n/helpers";
 import type { Filter } from "mongodb";
 import { formatTime } from "../../handlers/functions";
 
@@ -42,11 +42,11 @@ function styleFor(sortBy: SortBy, check: SortBy) {
 
 module.exports = {
   name: "leaderboard",
-  description: "Show server user leaderboard",
+  description: "🎩 Show server user leaderboard",
   cooldown: 5,
   locale: {
-    ru: "Общий рейтинг пользователей сервера",
-    uk: "Загальний рейтинг користувачів сервера",
+    ru: "🎩 Общий рейтинг пользователей сервера",
+    uk: "🎩 Загальний рейтинг користувачів сервера",
   },
   options: [],
   permissions: {
@@ -291,7 +291,7 @@ function buildLeaderboardEmbed(
           client,
           lang,
           `commands.leaderboard.embeds.${sortBy}.field.value`,
-          formatTime(time, lang, client, { full: true }),
+          formatTime(time, lang, tObject(client, lang, "time_units"), { full: true }),
         ) + "\n";
     } else {
       const totalCoins =

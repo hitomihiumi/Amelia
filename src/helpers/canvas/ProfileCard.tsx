@@ -12,19 +12,19 @@ import {
   Scene,
   createElement,
 } from "@nmmty/lazycanvas";
-import { ProfileCardDisplayOptions } from "../../types/helpers";
+import {GetSchemaValueType, ProfileCardDisplayOptions} from "../../types/helpers";
 import { assetsMap, fontMap, iconsMap } from "../assetsMap";
 import { formatTime, getNextLevelXP } from "../../handlers/functions";
 import { Path2D } from "@napi-rs/canvas";
-import { Client } from "discord.js";
+import {TranslationSchema} from "../../types/i18n/TranslationSchema";
 
 export class ProfileCard {
   data: ProfileCardOptions;
-  client: Client;
+  units: GetSchemaValueType<TranslationSchema, "time_units">;
 
-  constructor(data: ProfileCardOptions, client: Client) {
+  constructor(data: ProfileCardOptions, units: GetSchemaValueType<TranslationSchema, "time_units">) {
     this.data = data;
-    this.client = client;
+    this.units = units;
   }
 
   async render() {
@@ -224,7 +224,7 @@ export class ProfileCard {
                   layout={{
                     position: "absolute",
                   }}
-                  text={`${formatTime(this.data.data.voice_time, "en", this.client, { short: true })}`}
+                  text={`${formatTime(this.data.data.voice_time, "en", this.units, { short: true })}`}
                   font={{
                     family: "WDXL Lubrifont",
                     size: 24,

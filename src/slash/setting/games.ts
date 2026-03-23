@@ -45,11 +45,11 @@ type ViewType = "main" | "channels" | "embed" | "games" | "game_edit" | "field_e
 
 module.exports = {
   name: "games",
-  description: "Setting up the search for teammates.",
+  description: "🎮 Setting up the search for teammates.",
   cooldown: 5,
   locale: {
-    ru: "Настройка системы поиска напарников.",
-    uk: "Налаштування системи пошуку напарників.",
+    ru: "🎮 Настройка системы поиска напарников.",
+    uk: "🎮 Налаштування системи пошуку напарників.",
   },
   options: [],
   permissions: {

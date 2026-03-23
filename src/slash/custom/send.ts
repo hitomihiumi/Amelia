@@ -40,11 +40,11 @@ interface MessageComposition {
 
 module.exports = {
   name: "send",
-  description: "Compose and send messages with custom components",
+  description: "✈️ Compose and send messages with custom components",
   cooldown: 5,
   locale: {
-    ru: "Собрать и отправить сообщение с кастомными компонентами",
-    uk: "Зібрати та надіслати повідомлення з кастомними компонентами",
+    ru: "✈️ Собрать и отправить сообщение с кастомными компонентами",
+    uk: "✈️ Зібрати та надіслати повідомлення з кастомними компонентами",
   },
   options: [],
   permissions: {

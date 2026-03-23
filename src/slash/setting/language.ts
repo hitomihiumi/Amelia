@@ -12,11 +12,11 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "language",
-  description: "Setting the bot language on the server.",
+  description: "🌍 Setting the bot language on the server.",
   cooldown: 5,
   locale: {
-    ru: "Настройка языка бота на сервере.",
-    uk: "Налаштування мови бота на сервері.",
+    ru: "🌍 Настройка языка бота на сервере.",
+    uk: "🌍 Налаштування мови бота на сервері.",
   },
   options: [],
   permissions: {

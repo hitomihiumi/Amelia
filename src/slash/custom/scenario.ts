@@ -160,11 +160,11 @@ async function getSelectMenus(guild: Guild): Promise<SelectMenuCustom[]> {
 
 module.exports = {
   name: "scenario",
-  description: "Menu for creating and configuring custom scenarios",
+  description: "✍️ Menu for creating and configuring custom scenarios",
   cooldown: 5,
   locale: {
-    ru: "Меню создания и настройки сценариев взаимодействия",
-    uk: "Меню створення та налаштування сценаріїв взаємодії",
+    ru: "✍️ Меню создания и настройки сценариев взаимодействия",
+    uk: "✍️ Меню створення та налаштування сценаріїв взаємодії",
   },
   options: [],
   permissions: {

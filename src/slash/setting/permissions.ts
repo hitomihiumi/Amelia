@@ -41,11 +41,11 @@ const defaultPermissions = [
 
 module.exports = {
   name: "permissions",
-  description: "Control panel for command availability",
+  description: "⛔ Control panel for command availability",
   cooldown: 5,
   locale: {
-    ru: "Панель управления доступностью команд",
-    uk: "Панель керування доступністю команд",
+    ru: "⛔ Панель управления доступностью команд",
+    uk: "⛔ Панель керування доступністю команд",
   },
   options: [],
   permissions: {

@@ -35,11 +35,11 @@ type ViewType =
 
 module.exports = {
   name: "economy",
-  description: "Setting up the economy system on the server.",
+  description: "🏦 Setting up the economy system on the server.",
   cooldown: 5,
   locale: {
-    ru: "Настройка экономической системы на сервере.",
-    uk: "Налаштування економічної системи на сервері.",
+    ru: "🏦 Настройка экономической системы на сервере.",
+    uk: "🏦 Налаштування економічної системи на сервері.",
   },
   options: [],
   permissions: {

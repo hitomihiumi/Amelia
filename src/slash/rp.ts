@@ -10,11 +10,11 @@ type ActionType = "hug" | "kiss" | "pat" | "slap" | "poke" | "tickle";
 
 module.exports = {
   name: "rp",
-  description: "Interact with others members",
+  description: "✨ Interact with others members",
   cooldown: 5,
   locale: {
-    ru: "Взаимодействуйте с другими участниками",
-    uk: "Взаємодійте з іншими учасниками",
+    ru: "✨ Взаимодействуйте с другими участниками",
+    uk: "✨ Взаємодійте з іншими учасниками",
   },
   options: [
     {

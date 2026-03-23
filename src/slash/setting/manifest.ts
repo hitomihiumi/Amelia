@@ -3,10 +3,10 @@ import { InteractionContextType, PermissionsBitField } from "discord.js";
 
 export const manifest = {
   name: "setting",
-  description: "Category sub-commands for bot settings",
+  description: "⚙️ Category sub-commands for bot settings",
   locale: {
-    ru: "Категория саб-команд для настройки бота",
-    uk: "Категорія саб-команд для налаштування бота",
+    ru: "⚙️ Категория саб-команд для настройки бота",
+    uk: "⚙️ Категорія саб-команд для налаштування бота",
   },
   permissions: {
     user: PermissionsBitField.Flags.Administrator,

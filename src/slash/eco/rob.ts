@@ -5,11 +5,11 @@ import { t } from "../../i18n/helpers";
 
 module.exports = {
   name: "rob",
-  description: "Attempt to rob another user.",
+  description: "👺 Attempt to rob another user.",
   cooldown: 3,
   locale: {
-    ru: "Попытаться ограбить другого пользователя.",
-    uk: "Спробувати пограбувати іншого користувача.",
+    ru: "👺 Попытаться ограбить другого пользователя.",
+    uk: "👺 Спробувати пограбувати іншого користувача.",
   },
   options: [
     {

@@ -2003,6 +2003,17 @@ export interface TranslationSchema {
         no_target: string;
       };
     };
+    stats: {
+      total_guilds: string;
+      total_members: string;
+      total_shards: string;
+      github: {
+        stars: string;
+        forks: string;
+        issues: string;
+        watchers: string;
+      }
+    }
   };
 
   // Events
@@ -2217,42 +2228,38 @@ export interface TranslationSchema {
     day: {
       short: string;
       forms: {
-        more_than_10_less_then_15: string;
-        more_than_1_less_then_5: string;
-        more_than_5_less_then_10: string;
-        singular: string;
-        plural: string;
+        one: string;
+        few: string;
+        many: string;
+        other: string;
       }
     },
     hour: {
       short: string;
       forms: {
-        more_than_10_less_then_15: string;
-        more_than_1_less_then_5: string;
-        more_than_5_less_then_10: string;
-        singular: string;
-        plural: string;
+        one: string;
+        few: string;
+        many: string;
+        other: string;
       }
     },
     minute: {
       short: string;
       forms: {
-        more_than_10_less_then_15: string;
-        more_than_1_less_then_5: string;
-        more_than_5_less_then_10: string;
-        singular: string;
-        plural: string;
+        one: string;
+        few: string;
+        many: string;
+        other: string;
       }
     },
     second: {
       short: string;
       forms: {
-        more_than_10_less_then_15: string;
-        more_than_1_less_then_5: string;
-        more_than_5_less_then_10: string;
-        singular: string;
-        plural: string;
-      }
+        one: string;
+        few: string;
+        many: string;
+        other: string;
+      },
     },
   }
 }

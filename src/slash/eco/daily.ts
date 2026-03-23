@@ -7,11 +7,11 @@ const DAILY_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 module.exports = {
   name: "daily",
-  description: "Claim your daily reward.",
+  description: "⏰ Claim your daily reward.",
   cooldown: 3,
   locale: {
-    ru: "Получите свою ежедневную награду.",
-    uk: "Отримайте свою щоденну нагороду.",
+    ru: "⏰ Получите свою ежедневную награду.",
+    uk: "⏰ Отримайте свою щоденну нагороду.",
   },
   options: [],
   permissions: {
