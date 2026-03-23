@@ -104,7 +104,7 @@ export const en: TranslationSchema = {
         change_name: {
           title: "Change Default Name",
           label: "Default channel name",
-          placeholder: "e.g. {username}'s Channel",
+          placeholder: "e.g. %{VAR}%'s Channel",
         },
       },
       messages: {
@@ -2076,6 +2076,18 @@ export const en: TranslationSchema = {
         cannot_target_yourself: "You cannot perform this action on yourself!",
       },
     },
+
+    stats: {
+      total_guilds: "Total Servers",
+      total_members: "Total Users",
+      total_shards: "Total Shards",
+      github: {
+        stars: "Stars",
+        forks: "Forks",
+        issues: "Issues",
+        watchers: "Watchers",
+      },
+    },
   },
 
   events: {
@@ -2288,41 +2300,37 @@ export const en: TranslationSchema = {
     day: {
       short: "d",
       forms: {
-        more_than_1_less_then_5: " days",
-        more_than_5_less_then_10: " days",
-        more_than_10_less_then_15: " days",
-        singular: " day",
-        plural: " days",
+        one: " day",
+        few: " days",
+        many: " days",
+        other: " days",
       },
     },
     hour: {
       short: "h",
       forms: {
-        more_than_1_less_then_5: " hours",
-        more_than_5_less_then_10: " hours",
-        more_than_10_less_then_15: " hours",
-        singular: " hour",
-        plural: " hours",
+        one: " hour",
+        few: " hours",
+        many: " hours",
+        other: " hours",
       },
     },
     minute: {
       short: "m",
       forms: {
-        more_than_1_less_then_5: " minutes",
-        more_than_5_less_then_10: " minutes",
-        more_than_10_less_then_15: " minutes",
-        singular: " minute",
-        plural: " minutes",
+        one: " minute",
+        few: " minutes",
+        many: " minutes",
+        other: " minutes",
       },
     },
     second: {
       short: "s",
       forms: {
-        more_than_1_less_then_5: " seconds",
-        more_than_5_less_then_10: " seconds",
-        more_than_10_less_then_15: " seconds",
-        singular: " second",
-        plural: " seconds",
+        one: " second",
+        few: " seconds",
+        many: " seconds",
+        other: " seconds",
       },
     },
   }

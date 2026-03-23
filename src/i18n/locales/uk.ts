@@ -104,7 +104,7 @@ export const uk: TranslationSchema = {
         change_name: {
           title: "Змінити назву за замовчуванням",
           label: "Назва каналу за замовчуванням",
-          placeholder: "наприклад: Канал {username}",
+          placeholder: "наприклад: Канал %{VAR}%",
         },
       },
       messages: {
@@ -2080,6 +2080,18 @@ export const uk: TranslationSchema = {
         cannot_target_yourself: "Ви не можете виконати цю дію на собі!",
       },
     },
+
+    stats: {
+      total_guilds: "Всього серверів",
+      total_members: "Всього учасників",
+      total_shards: "Всього фрагментів",
+      github: {
+        stars: "Зірки",
+        forks: "Форки",
+        issues: "Проблеми",
+        watchers: "Спостерігачі",
+      },
+    }
   },
 
   events: {
@@ -2292,41 +2304,37 @@ export const uk: TranslationSchema = {
     day: {
       short: "д",
       forms: {
-        more_than_1_less_then_5: " дні",
-        more_than_5_less_then_10: " днів",
-        more_than_10_less_then_15: " днів",
-        singular: " день",
-        plural: " днів",
+        one: " день",
+        few: " дні",
+        many: " днів",
+        other: " днів",
       },
     },
     hour: {
       short: "г",
       forms: {
-        more_than_1_less_then_5: " години",
-        more_than_5_less_then_10: " годин",
-        more_than_10_less_then_15: " годин",
-        singular: " година",
-        plural: " годин",
+        one: " година",
+        few: " години",
+        many: " годин",
+        other: " годин",
       },
     },
     minute: {
       short: "хв",
       forms: {
-        more_than_1_less_then_5: " хвилини",
-        more_than_5_less_then_10: " хвилин",
-        more_than_10_less_then_15: " хвилин",
-        singular: " хвилина",
-        plural: " хвилин",
+        one: " хвилина",
+        few: " хвилини",
+        many: " хвилин",
+        other: " хвилин",
       },
     },
     second: {
       short: "с",
       forms: {
-        more_than_1_less_then_5: " секунди",
-        more_than_5_less_then_10: " секунд",
-        more_than_10_less_then_15: " секунд",
-        singular: " секунда",
-        plural: " секунд",
+        one: " секунда",
+        few: " секунди",
+        many: " секунд",
+        other: " секунд",
       },
     },
   }

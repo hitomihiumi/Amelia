@@ -99,6 +99,7 @@ module.exports = {
             .setStyle(settings.enabled ? ButtonStyle.Danger : ButtonStyle.Success);
           row.components[1].data.disabled = !row.components[1].data.disabled;
           row.components[2].data.disabled = !row.components[2].data.disabled;
+          channel_row.components[0].data.disabled = !channel_row.components[0].data.disabled;
 
           embed = updateFields(embed, client, lang, settings, interaction);
 

@@ -509,39 +509,16 @@ type TimeUnits = GetSchemaValueType<TranslationSchema, "time_units">;
 type TimeUnitKey = keyof TimeUnits;
 type TimeUnit = TimeUnits[TimeUnitKey];
 
-function getSlavicTimeForm(value: number, unit: TimeUnit) {
-  const lastDigit = value % 10;
-  const lastTwoDigits = value % 100;
-
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
-    return unit.forms.more_than_10_less_then_15;
-  }
-
-  if (lastDigit === 1) {
-    return unit.forms.singular;
-  }
-
-  if (lastDigit >= 2 && lastDigit <= 4) {
-    return unit.forms.more_than_1_less_then_5;
-  }
-
-  if (lastDigit >= 5 && lastDigit <= 9) {
-    return unit.forms.more_than_5_less_then_10;
-  }
-
-  return unit.forms.plural;
-}
-
 function getTimeUnitSuffix(value: number, unit: TimeUnit, locale: string, short: boolean) {
   if (short) {
     return unit.short;
   }
 
-  if (locale === "ru" || locale === "uk") {
-    return getSlavicTimeForm(value, unit);
-  }
+  const pr = new Intl.PluralRules(locale);
+  const rule = pr.select(value);
 
-  return value === 1 ? unit.forms.singular : unit.forms.plural;
+  // @ts-ignore
+  return unit.forms[rule] || unit.forms.other;
 }
 
 function formatTimeValue(value: number, unit: TimeUnit, locale: string, short: boolean) {
