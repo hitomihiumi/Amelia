@@ -186,12 +186,16 @@ export class ScenarioRunner {
     // Add input/selected context based on interaction type
     if (interaction.isModalSubmit()) {
       context.input = [];
+      const modal = await guildWrapper.get(`utils.components.modals`).then((modals) => (modals as ModalCustom[]).find((m) => m.id === interaction.customId));
+      if (!modal) {
+        return { success: false, error: "Modal configuration not found" };
+      }
       // Convert fields to array and preserve order
       const fieldsArray = Array.from(interaction.fields.fields.values());
       fieldsArray.forEach((field) => {
         context.input!.push({
           value: (field as any).value || "",
-          label: (field as any).customId || "", // customId contains the field identifier
+          label: modal.fields.filter(m => m.id === (field as any).customId)[0].name || "", // customId contains the field identifier
         });
       });
     } else if (interaction.isStringSelectMenu()) {
