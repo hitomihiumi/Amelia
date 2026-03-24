@@ -170,6 +170,7 @@ module.exports = {
 
               let name = int.fields.getTextInputValue("NI_jtc:change_name");
 
+              settings.default_name = name;
               await mostUsedQueries.setDefaultName(guild, name);
 
               embed = updateFields(embed, client, lang, settings, interaction);
