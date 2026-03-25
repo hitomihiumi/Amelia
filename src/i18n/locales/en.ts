@@ -2078,16 +2078,36 @@ export const en: TranslationSchema = {
     },
 
     stats: {
+      title: "Bot Stats",
       total_guilds: "Total Servers",
       total_members: "Total Users",
       total_shards: "Total Shards",
       github: {
+        title: "GitHub Statistics",
+        name: "Repository name",
         stars: "Stars",
         forks: "Forks",
         issues: "Issues",
-        watchers: "Watchers",
       },
-    },
+      system: {
+        title: "System Metrics",
+        cpu: "CPU Load",
+        ram: "RAM (Used / Total)",
+        uptime: "Uptime",
+        nodejs: "Node.js",
+        platform: "Platform",
+      },
+      version: {
+        title: "Versions",
+        current: "Current Version",
+        latest: "Latest Version",
+        latest_description: "A new version is available in the project repository",
+      },
+      buttons: {
+        invite: "Invite Bot",
+        github: "GitHub Repository",
+      }
+    }
   },
 
   events: {

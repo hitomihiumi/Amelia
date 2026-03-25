@@ -2082,15 +2082,35 @@ export const uk: TranslationSchema = {
     },
 
     stats: {
+      title: "Статистика бота",
       total_guilds: "Всього серверів",
       total_members: "Всього учасників",
       total_shards: "Всього фрагментів",
       github: {
+        title: "Статистика GitHub",
+        name: "Ім'я репозиторію",
         stars: "Зірки",
         forks: "Форки",
-        issues: "Проблеми",
-        watchers: "Спостерігачі",
+        issues: "Задачі",
       },
+      system: {
+        title: "Системні показники",
+        cpu: "Навантаження процесора",
+        ram: "ОЗП (Зайнято / Всього)",
+        uptime: "Час роботи (Uptime)",
+        nodejs: "Node.js",
+        platform: "Платформа",
+      },
+      version: {
+        title: "Версії",
+        current: "Поточна версія",
+        latest: "Остання версія",
+        latest_description: "Нова версія доступна в репозиторії проєкту",
+      },
+      buttons: {
+        invite: "Запросити бота",
+        github: "Репозиторій на GitHub",
+      }
     }
   },
 

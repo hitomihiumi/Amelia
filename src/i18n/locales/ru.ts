@@ -1330,7 +1330,7 @@ export const ru: TranslationSchema = {
           fields: {
             backups_count: {
               name: "Доступные бэкапы",
-              value: "{0} бэкапов",
+              value: "{0} бэкаков",
             },
             warning: {
               name: "⚠️ Важно",
@@ -2076,15 +2076,35 @@ export const ru: TranslationSchema = {
     },
 
     stats: {
+      title: "Статистика бота",
       total_guilds: "Всего серверов",
       total_members: "Всего участников",
       total_shards: "Всего осколков",
       github: {
+        title: "Статистика GitHub",
+        name: "Имя репозитория",
         stars: "Звезды",
         forks: "Форки",
-        issues: "Проблемы",
-        watchers: "Наблюдатели",
+        issues: "Задачи",
       },
+      system: {
+        title: "Системные показатели",
+        cpu: "Нагрузка процессора",
+        ram: "ОЗУ (Занято / Всего)",
+        uptime: "Время работы (Uptime)",
+        nodejs: "Node.js",
+        platform: "Платформа",
+      },
+      version: {
+        title: "Версии",
+        current: "Текущая версия",
+        latest: "Последняя версия",
+        latest_description: "Новая версия доступна в репозитории проекта",
+      },
+      buttons: {
+        invite: "Пригласить бота",
+        github: "Репозиторий на GitHub",
+      }
     }
   },
 
