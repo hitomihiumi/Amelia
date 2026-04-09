@@ -1754,7 +1754,10 @@ export interface TranslationSchema {
             content: string;
             ephemeral: string;
             channel: string;
-            embed_id: string;
+            embed_id: string; // legacy
+            embeds: string;
+            buttons: string;
+            select_menus: string;
             modal_id: string;
             role: string;
             thread_name: string;
@@ -1834,7 +1837,10 @@ export interface TranslationSchema {
         action_ephemeral: string;
         action_channel: string;
         action_select_modal: string;
-        action_select_embed: string;
+        action_select_embed: string; // legacy
+        action_select_embeds: string;
+        action_select_buttons: string;
+        action_select_menus: string;
         action_select_role: string;
         action_thread_name: string;
         action_dm_content: string;

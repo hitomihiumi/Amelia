@@ -1814,7 +1814,10 @@ export const uk: TranslationSchema = {
             content: "Вміст",
             ephemeral: "Ефемерне",
             channel: "Канал",
-            embed_id: "ID ембеду",
+            embed_id: "ID ембеду", // legacy
+            embeds: "Ембеди",
+            buttons: "Кнопки",
+            select_menus: "Селект меню",
             modal_id: "ID модального вікна",
             role: "Роль",
             thread_name: "Назва гілки",
@@ -1910,7 +1913,10 @@ export const uk: TranslationSchema = {
         action_ephemeral: "Ефемерне",
         action_channel: "Канал",
         action_select_modal: "Вибрати модальне вікно",
-        action_select_embed: "Вибрати ембед",
+        action_select_embed: "Вибрати ембед", // legacy
+        action_select_embeds: "Вибрати ембеди",
+        action_select_buttons: "Вибрати кнопки",
+        action_select_menus: "Вибрати меню",
         action_select_role: "Вибрати роль",
         action_thread_name: "Назва гілки",
         action_dm_content: "Вміст ЛС",

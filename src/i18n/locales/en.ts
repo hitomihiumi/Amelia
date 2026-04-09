@@ -1813,7 +1813,10 @@ export const en: TranslationSchema = {
             content: "Content",
             ephemeral: "Ephemeral",
             channel: "Channel",
-            embed_id: "Embed ID",
+            embed_id: "Embed ID", // legacy
+            embeds: "Embeds",
+            buttons: "Buttons",
+            select_menus: "Select Menus",
             modal_id: "Modal ID",
             role: "Role",
             thread_name: "Thread Name",
@@ -1906,7 +1909,10 @@ export const en: TranslationSchema = {
         action_ephemeral: "Ephemeral",
         action_channel: "Channel",
         action_select_modal: "Select Modal",
-        action_select_embed: "Select Embed",
+        action_select_embed: "Select Embed", // legacy
+        action_select_embeds: "Select Embeds",
+        action_select_buttons: "Select Buttons",
+        action_select_menus: "Select Menus",
         action_select_role: "Select Role",
         action_thread_name: "Thread Name",
         action_dm_content: "DM Content",

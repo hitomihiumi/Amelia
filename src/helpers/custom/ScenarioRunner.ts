@@ -6,6 +6,8 @@ import {
   SCENARIO_LIMITS,
   EmbedCustom,
   ModalCustom,
+  ButtonCustom,
+  SelectMenuCustom,
 } from "../../types/helpers";
 import {
   Client,
@@ -16,10 +18,16 @@ import {
   TextChannel,
   MessageFlags,
   ChannelType,
+  MessageCreateOptions,
+  MessageEditOptions,
+  ActionRowBuilder,
+  MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Guild } from "../Guild";
 import { CustomEmbed, VariableContext } from "./CustomEmbed";
 import { CustomModal } from "./CustomModal";
+import { CustomButton } from "./CustomButton";
+import { CustomSelectMenu } from "./CustomSelectMenu";
 
 interface ExecutionContext {
   client: Client;
@@ -386,7 +394,6 @@ export class ScenarioRunner {
   private async executeAction(
     action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
-    const interaction = this.context.interaction;
 
     try {
       switch (action.type) {
@@ -394,9 +401,8 @@ export class ScenarioRunner {
           return await this.actionShowModal(action);
         case "send_message":
         case "reply":
-          return await this.actionSendMessage(action);
         case "send_embed":
-          return await this.actionSendEmbed(action);
+          return await this.actionSendMessage(action);
         case "add_role":
           return await this.actionAddRole(action);
         case "remove_role":
@@ -517,81 +523,35 @@ export class ScenarioRunner {
   private async actionSendMessage(
     action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
-    const content = action.content ? this.substituteVariables(action.content) : undefined;
-
-    if (!content) {
-      return { success: false, error: "Message content is required" };
-    }
-
     const interaction = this.context.interaction;
+    const messagePayload = await this.buildMessagePayload(action);
+
+    if (!messagePayload.content && !messagePayload.embeds?.length && !messagePayload.components?.length) {
+      return { success: false, error: "Message content or embeds are required" };
+    }
 
     if (action.type === "reply") {
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp({
-          content,
+          ...messagePayload,
           flags: action.ephemeral ? MessageFlags.Ephemeral : undefined,
         });
       } else {
         await interaction.reply({
-          content,
+          ...messagePayload,
           flags: action.ephemeral ? MessageFlags.Ephemeral : undefined,
         });
       }
     } else {
       // Send to specific channel or current channel
       const channelId = action.channelId || interaction.channelId;
-      const channel = await this.context.client.channels.fetch(channelId!);
+      if (!channelId) return { success: false, error: "Channel ID not specified" };
+      const channel = await this.context.client.channels.fetch(channelId);
 
-      if (channel && "send" in channel) {
-        await channel.send({ content });
+      if (channel && channel.isTextBased()) {
+        await (channel as TextChannel).send(messagePayload);
       } else {
         return { success: false, error: "Channel not found or cannot send messages" };
-      }
-    }
-
-    return { success: true };
-  }
-
-  private async actionSendEmbed(
-    action: ScenarioAction,
-  ): Promise<{ success: boolean; error?: string }> {
-    if (!action.embedId) {
-      return { success: false, error: "Embed ID is required" };
-    }
-
-    const embeds = (await this.context.guildWrapper.get("utils.components.embed")) as EmbedCustom[];
-    const embedData = embeds.find((e) => e.id === action.embedId);
-
-    if (!embedData) {
-      return { success: false, error: "Embed not found" };
-    }
-
-    const customEmbed = new CustomEmbed(embedData);
-    const embed = customEmbed.getEmbed(this.toVariableContext());
-    const content = action.content ? this.substituteVariables(action.content) : undefined;
-
-    const interaction = this.context.interaction;
-
-    if (action.channelId) {
-      const channel = await this.context.client.channels.fetch(action.channelId);
-      if (channel && "send" in channel) {
-        await channel.send({ content, embeds: [embed] });
-      } else {
-        return { success: false, error: "Channel not found" };
-      }
-    } else {
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({
-          content,
-          embeds: [embed],
-          flags: action.ephemeral ? MessageFlags.Ephemeral : undefined,
-        });
-      } else {
-        await interaction.reply({
-          content,
-          embeds: [embed],
-          flags: action.ephemeral ? MessageFlags.Ephemeral : undefined,
-        });
       }
     }
 
@@ -672,40 +632,100 @@ export class ScenarioRunner {
   private async actionSendDM(
     action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
-    const content = action.dmContent ? this.substituteVariables(action.dmContent) : undefined;
-
     try {
       const user = this.context.interaction.user;
+      const messagePayload = await this.buildMessagePayload(action, true);
+
+      if (!messagePayload.content && !messagePayload.embeds?.length && !messagePayload.components?.length) {
+        return { success: false, error: "DM content or embeds are required" };
+      }
+      
       const dm = await user.createDM();
-
-      const messageOptions: any = {};
-
-      if (content) {
-        messageOptions.content = content;
-      }
-
-      if (action.dmEmbedId) {
-        const embeds = (await this.context.guildWrapper.get(
-          "utils.components.embed",
-        )) as EmbedCustom[];
-        const embedData = embeds.find((e) => e.id === action.dmEmbedId);
-
-        if (embedData) {
-          const customEmbed = new CustomEmbed(embedData);
-          messageOptions.embeds = [customEmbed.getEmbed(this.context)];
-        }
-      }
-
-      if (messageOptions.content || messageOptions.embeds) {
-        await dm.send(messageOptions);
-      } else {
-        return { success: false, error: "DM content or embed is required" };
-      }
+      await dm.send(messagePayload);
 
       return { success: true };
     } catch (error: any) {
+      if (error.code === 50007) { // Cannot send messages to this user
+        return { success: false, error: "User has DMs disabled" };
+      }
       return { success: false, error: `Failed to send DM: ${error.message}` };
     }
+  }
+  
+  // ============== HELPER METHODS ==============
+
+  private async buildMessagePayload(action: ScenarioAction, isDm: boolean = false): Promise<MessageCreateOptions> {
+    const _content = isDm ? (action.dmContent || action.content) : action.content;
+    const content = _content ? this.substituteVariables(_content) : undefined;
+    
+    let embedIds = action.embeds || [];
+    if (isDm && action.dmEmbedId && embedIds.length === 0) embedIds = [action.dmEmbedId];
+    if (!isDm && action.embedId && embedIds.length === 0) embedIds = [action.embedId];
+      
+    // Fetch embeds
+    const resolvedEmbeds: any[] = [];
+    if (embedIds.length > 0) {
+      const dbEmbeds = (await this.context.guildWrapper.get("utils.components.embed")) as EmbedCustom[] || [];
+      for (const eid of embedIds) {
+        const embedData = dbEmbeds.find((e) => e.id === eid);
+        if (embedData) {
+          const customEmbed = new CustomEmbed(embedData);
+          resolvedEmbeds.push(customEmbed.getEmbed(this.toVariableContext()));
+        }
+      }
+    }
+    
+    // Build components
+    const components: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
+    
+    if (action.buttons?.length || action.selectMenus?.length) {
+      const dbButtons = (await this.context.guildWrapper.get("utils.components.buttons")) as ButtonCustom[] || [];
+      const dbSelectMenus = (await this.context.guildWrapper.get("utils.components.selectMenus")) as SelectMenuCustom[] || [];
+      
+      let currentRow = new ActionRowBuilder<MessageActionRowComponentBuilder>();
+      
+      // Select Menus typically take up a whole row each
+      if (action.selectMenus?.length) {
+        for (const sid of action.selectMenus) {
+          const smData = dbSelectMenus.find((s) => s.id === sid);
+          if (smData) {
+            const customSelect = new CustomSelectMenu(smData);
+            const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+              customSelect.getSelectMenu()
+            );
+            components.push(row);
+          }
+        }
+      }
+      
+      // Buttons can be up to 5 per row
+      if (action.buttons?.length) {
+        for (const bid of action.buttons) {
+          const btnData = dbButtons.find((b) => b.id === bid);
+          if (btnData) {
+            const customButton = new CustomButton(btnData);
+            
+            if (currentRow.components.length >= 5) {
+              components.push(currentRow);
+              currentRow = new ActionRowBuilder<MessageActionRowComponentBuilder>();
+            }
+            
+            currentRow.addComponents(customButton.getButton());
+          }
+        }
+        
+        if (currentRow.components.length > 0) {
+          components.push(currentRow);
+        }
+      }
+    }
+
+    // Limit to 5 rows and 10 embeds per Discord limits
+    return {
+      content,
+      embeds: resolvedEmbeds.length > 0 ? resolvedEmbeds.slice(0, 10) : undefined,
+      components: components.length > 0 ? components.slice(0, 5) : undefined,
+    } as MessageCreateOptions;
   }
 
   private actionSetVariable(action: ScenarioAction): { success: boolean; error?: string } {
@@ -741,25 +761,8 @@ export class ScenarioRunner {
     }
 
     try {
-      const messageOptions: any = {};
-
-      if (action.content) {
-        messageOptions.content = this.substituteVariables(action.content);
-      }
-
-      if (action.embedId) {
-        const embeds = (await this.context.guildWrapper.get(
-          "utils.components.embed",
-        )) as EmbedCustom[];
-        const embedData = embeds.find((e) => e.id === action.embedId);
-
-        if (embedData) {
-          const customEmbed = new CustomEmbed(embedData);
-          messageOptions.embeds = [customEmbed.getEmbed(this.context)];
-        }
-      }
-
-      await interaction.message.edit(messageOptions);
+      const messagePayload = await this.buildMessagePayload(action);
+      await interaction.message.edit(messagePayload as MessageEditOptions);
       return { success: true };
     } catch (error: any) {
       return { success: false, error: `Failed to edit message: ${error.message}` };
