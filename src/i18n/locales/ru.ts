@@ -1810,7 +1810,10 @@ export const ru: TranslationSchema = {
             content: "Содержимое",
             ephemeral: "Эфемерное",
             channel: "Канал",
-            embed_id: "ID эмбеда",
+            embed_id: "ID эмбеда", // legacy
+            embeds: "Эмбеды",
+            buttons: "Кнопки",
+            select_menus: "Селект меню",
             modal_id: "ID модального окна",
             role: "Роль",
             thread_name: "Название ветки",
@@ -1903,7 +1906,10 @@ export const ru: TranslationSchema = {
         action_ephemeral: "Эфемерное",
         action_channel: "Канал",
         action_select_modal: "Выбрать модальное окно",
-        action_select_embed: "Выбрать эмбед",
+        action_select_embed: "Выбрать эмбед", // legacy
+        action_select_embeds: "Выбрать эмбеды",
+        action_select_buttons: "Выбрать кнопки",
+        action_select_menus: "Выбрать меню",
         action_select_role: "Выбрать роль",
         action_thread_name: "Название ветки",
         action_dm_content: "Содержимое ЛС",

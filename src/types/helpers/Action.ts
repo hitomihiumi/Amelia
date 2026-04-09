@@ -120,7 +120,10 @@ export interface ScenarioAction {
   // For send_message/send_embed/edit_message/reply
   channelId?: string; // null = same channel
   content?: string;
-  embedId?: string;
+  embeds?: string[];
+  buttons?: string[];
+  selectMenus?: string[];
+  embedId?: string; // Legacy
   ephemeral?: boolean;
   // For add_role/remove_role
   roleId?: string;
@@ -128,8 +131,8 @@ export interface ScenarioAction {
   threadName?: string;
   autoArchiveDuration?: 60 | 1440 | 4320 | 10080;
   // For send_dm
-  dmContent?: string;
-  dmEmbedId?: string;
+  dmContent?: string; // Legacy
+  dmEmbedId?: string; // Legacy
   // For set_variable
   variableName?: string;
   variableValue?: string;

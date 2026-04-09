@@ -56,12 +56,11 @@ type ViewType =
 const ACTION_TYPES: { value: ScenarioActionType; label: string; emoji: string }[] = [
   { value: "reply", label: "Reply to interaction", emoji: "💬" },
   { value: "send_message", label: "Send message to channel", emoji: "📤" },
-  { value: "send_embed", label: "Send embed", emoji: "📋" },
+  { value: "send_dm", label: "Send DM", emoji: "✉️" },
   { value: "show_modal", label: "Show modal", emoji: "📝" },
   { value: "add_role", label: "Add role", emoji: "➕" },
   { value: "remove_role", label: "Remove role", emoji: "➖" },
   { value: "create_thread", label: "Create thread", emoji: "🧵" },
-  { value: "send_dm", label: "Send DM", emoji: "✉️" },
   { value: "set_variable", label: "Set variable", emoji: "📦" },
   { value: "edit_message", label: "Edit message", emoji: "✏️" },
   { value: "delete_message", label: "Delete message", emoji: "🗑️" },
@@ -189,7 +188,9 @@ module.exports = {
     let selectingFor:
       | "trigger"
       | "action_modal"
-      | "action_embed"
+      | "action_embeds"
+      | "action_buttons"
+      | "action_menus"
       | "action_role"
       | "action_channel"
       | "dm_embed" = "trigger";
@@ -350,7 +351,9 @@ interface HandlerContext {
   selectingFor:
     | "trigger"
     | "action_modal"
-    | "action_embed"
+    | "action_embeds"
+    | "action_buttons"
+    | "action_menus"
     | "action_role"
     | "action_channel"
     | "dm_embed";
@@ -362,7 +365,7 @@ interface HandlerContext {
   setPage: (p: number) => void;
   setSearch?: (s: string) => void;
   setSelectingFor: (
-    f: "trigger" | "action_modal" | "action_embed" | "action_role" | "action_channel" | "dm_embed",
+    f: "trigger" | "action_modal" | "action_embeds" | "action_buttons" | "action_menus" | "action_role" | "action_channel" | "dm_embed",
   ) => void;
 }
 
@@ -511,10 +514,14 @@ async function handleStringSelectMenu(i: any, ctx: HandlerContext) {
       const actionType = _schema.steps[ctx.currentStepIndex].action.type;
       if (actionType === "show_modal") {
         _schema.steps[ctx.currentStepIndex].action.modalId = i.values[0];
-      } else if (actionType === "send_embed") {
-        _schema.steps[ctx.currentStepIndex].action.embedId = i.values[0];
-      } else if (actionType === "send_dm" && ctx.selectingFor === "dm_embed") {
-        _schema.steps[ctx.currentStepIndex].action.dmEmbedId = i.values[0];
+      } else if (ctx.selectingFor === "action_buttons") {
+        _schema.steps[ctx.currentStepIndex].action.buttons = i.values;
+      } else if (ctx.selectingFor === "action_menus") {
+        _schema.steps[ctx.currentStepIndex].action.selectMenus = i.values;
+      } else if (ctx.selectingFor === "action_embeds") {
+         _schema.steps[ctx.currentStepIndex].action.embeds = i.values;
+      } else if (ctx.selectingFor === "action_modal") {
+         _schema.steps[ctx.currentStepIndex].action.modalId = i.values[0];
       }
       setSchema({ ..._schema });
       setView("action");
@@ -806,9 +813,23 @@ async function handleButton(i: any, ctx: HandlerContext) {
       await updateMessage();
       break;
 
-    case "NI_scenario:action_select_embed":
+    case "NI_scenario:action_select_embeds":
       await i.deferUpdate();
-      setSelectingFor("action_embed");
+      setSelectingFor("action_embeds");
+      setView("select_component");
+      await updateMessage();
+      break;
+
+    case "NI_scenario:action_select_buttons":
+      await i.deferUpdate();
+      setSelectingFor("action_buttons");
+      setView("select_component");
+      await updateMessage();
+      break;
+
+    case "NI_scenario:action_select_menus":
+      await i.deferUpdate();
+      setSelectingFor("action_menus");
       setView("select_component");
       await updateMessage();
       break;
@@ -861,12 +882,6 @@ async function handleButton(i: any, ctx: HandlerContext) {
       break;
     }
 
-    case "NI_scenario:action_dm_embed":
-      await i.deferUpdate();
-      setSelectingFor("dm_embed");
-      setView("select_component");
-      await updateMessage();
-      break;
 
     case "NI_scenario:action_var_name": {
       const result = await showTextModal(
@@ -1357,22 +1372,18 @@ async function buildEmbed(
                 inline: false,
               },
               {
-                name: t(client, lang, "commands.scenario.embeds.action.fields.ephemeral"),
-                value: action.ephemeral ? "✅" : "❌",
+                name: t(client, lang, "commands.scenario.embeds.action.fields.embeds"),
+                value: action.embeds?.join ? action.embeds.join(",") : (action.embeds || notSet) as string,
                 inline: true,
               },
               {
-                name: t(client, lang, "commands.scenario.embeds.action.fields.channel"),
-                value: action.channelId ? `<#${action.channelId}>` : currentChannel,
+                name: t(client, lang, "commands.scenario.embeds.action.fields.buttons"),
+                value: action.buttons?.join ? action.buttons.join(",") : (action.buttons || notSet) as string,
                 inline: true,
               },
-            );
-            break;
-          case "send_embed":
-            embed.addFields(
               {
-                name: t(client, lang, "commands.scenario.embeds.action.fields.embed_id"),
-                value: action.embedId || notSet,
+                name: t(client, lang, "commands.scenario.embeds.action.fields.select_menus"),
+                value: action.selectMenus?.join ? action.selectMenus.join(",") : (action.selectMenus || notSet) as string,
                 inline: true,
               },
               {
@@ -1420,14 +1431,24 @@ async function buildEmbed(
             embed.addFields(
               {
                 name: t(client, lang, "commands.scenario.embeds.action.fields.dm_content"),
-                value: action.dmContent || notSet,
+                value: action.dmContent || action.content || notSet,
                 inline: false,
               },
               {
-                name: t(client, lang, "commands.scenario.embeds.action.fields.dm_embed"),
-                value: action.dmEmbedId || t(client, lang, "commands.send.fields.none"),
+                name: t(client, lang, "commands.scenario.embeds.action.fields.embeds"),
+                value: action.embeds?.join ? action.embeds.join(",") : (action.dmEmbedId || action.embeds || notSet) as string,
                 inline: true,
               },
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.buttons"),
+                value: action.buttons?.join ? action.buttons.join(",") : (action.buttons || notSet) as string,
+                inline: true,
+              },
+              {
+                name: t(client, lang, "commands.scenario.embeds.action.fields.select_menus"),
+                value: action.selectMenus?.join ? action.selectMenus.join(",") : (action.selectMenus || notSet) as string,
+                inline: true,
+              }
             );
             break;
           case "set_variable":
@@ -1956,22 +1977,44 @@ async function buildComponents(
       switch (actionType) {
         case "reply":
         case "send_message":
+        case "send_dm":
           actionButtons.push(
             new ButtonBuilder()
-              .setCustomId("NI_scenario:action_content")
-              .setLabel(t(client, lang, "commands.scenario.buttons.action_content"))
+              .setCustomId(actionType === "send_dm" ? "NI_scenario:action_dm_content" : "NI_scenario:action_content")
+              .setLabel(t(client, lang, actionType === "send_dm" ? "commands.scenario.buttons.action_dm_content" : "commands.scenario.buttons.action_content"))
               .setStyle(ButtonStyle.Secondary)
               .setEmoji("📝"),
             new ButtonBuilder()
-              .setCustomId("NI_scenario:action_ephemeral")
-              .setLabel(t(client, lang, "commands.scenario.buttons.action_ephemeral"))
-              .setStyle(
-                schema.steps[stepIndex]?.action?.ephemeral
-                  ? ButtonStyle.Success
-                  : ButtonStyle.Secondary,
-              )
-              .setEmoji("👁️"),
+              .setCustomId("NI_scenario:action_select_embeds")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_select_embeds"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("📚"),
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_select_buttons")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_select_buttons"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("🔘"),
+            new ButtonBuilder()
+              .setCustomId("NI_scenario:action_select_menus")
+              .setLabel(t(client, lang, "commands.scenario.buttons.action_select_menus"))
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji("📄")
           );
+
+          if (actionType === "reply") {
+            actionButtons.push(
+              new ButtonBuilder()
+                .setCustomId("NI_scenario:action_ephemeral")
+                .setLabel(t(client, lang, "commands.scenario.buttons.action_ephemeral"))
+                .setStyle(
+                  schema.steps[stepIndex]?.action?.ephemeral
+                    ? ButtonStyle.Success
+                    : ButtonStyle.Secondary,
+                )
+                .setEmoji("👁️")
+            );
+          }
+
           if (actionType === "send_message") {
             actionButtons.push(
               new ButtonBuilder()
@@ -1981,29 +2024,6 @@ async function buildComponents(
                 .setEmoji("📺"),
             );
           }
-          break;
-        case "send_embed":
-          actionButtons.push(
-            new ButtonBuilder()
-              .setCustomId("NI_scenario:action_select_embed")
-              .setLabel(t(client, lang, "commands.scenario.buttons.action_select_embed"))
-              .setStyle(ButtonStyle.Secondary)
-              .setEmoji("📋"),
-            new ButtonBuilder()
-              .setCustomId("NI_scenario:action_ephemeral")
-              .setLabel(t(client, lang, "commands.scenario.buttons.action_ephemeral"))
-              .setStyle(
-                schema.steps[stepIndex]?.action?.ephemeral
-                  ? ButtonStyle.Success
-                  : ButtonStyle.Secondary,
-              )
-              .setEmoji("👁️"),
-            new ButtonBuilder()
-              .setCustomId("NI_scenario:action_select_channel")
-              .setLabel(t(client, lang, "commands.scenario.buttons.action_channel"))
-              .setStyle(ButtonStyle.Secondary)
-              .setEmoji("📺"),
-          );
           break;
         case "show_modal":
           actionButtons.push(
@@ -2031,20 +2051,6 @@ async function buildComponents(
               .setLabel(t(client, lang, "commands.scenario.buttons.action_thread_name"))
               .setStyle(ButtonStyle.Secondary)
               .setEmoji("🧵"),
-          );
-          break;
-        case "send_dm":
-          actionButtons.push(
-            new ButtonBuilder()
-              .setCustomId("NI_scenario:action_dm_content")
-              .setLabel(t(client, lang, "commands.scenario.buttons.action_dm_content"))
-              .setStyle(ButtonStyle.Secondary)
-              .setEmoji("✉️"),
-            new ButtonBuilder()
-              .setCustomId("NI_scenario:action_dm_embed")
-              .setLabel(t(client, lang, "commands.scenario.buttons.action_dm_embed"))
-              .setStyle(ButtonStyle.Secondary)
-              .setEmoji("📋"),
           );
           break;
         case "set_variable":
@@ -2077,11 +2083,24 @@ async function buildComponents(
       }
 
       if (actionButtons.length > 0) {
-        rows.push(
-          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
-            ...actionButtons.slice(0, 5),
-          ),
-        );
+        if (actionButtons.length <= 5) {
+          rows.push(
+            new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+              ...actionButtons.slice(0, 5),
+            ),
+          );
+        } else {
+          rows.push(
+            new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+              ...actionButtons.slice(0, 4),
+            ),
+          );
+          rows.push(
+            new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+              ...actionButtons.slice(4),
+            ),
+          );
+        }
       }
 
       rows.push(
@@ -2279,12 +2298,34 @@ async function buildComponents(
 
     case "select_component":
       let componentList: { id: string; name: string }[] = [];
+      let minValues = 1;
+      let maxValues = 1;
+
       if (selectingFor === "action_modal") {
         const modals = await getModals(guild);
         componentList = modals.map((m) => ({ id: m.id, name: m.title }));
-      } else if (selectingFor === "action_embed" || selectingFor === "dm_embed") {
+      } else if (selectingFor === "action_embeds") {
         const embeds = await getEmbeds(guild);
         componentList = embeds.map((e) => ({ id: e.id, name: e.name || e.title || "Unnamed" }));
+        minValues = 0;
+        maxValues = 10;
+      } else if (selectingFor === "action_buttons") {
+        const buttons = await getButtons(guild);
+        componentList = buttons.map((b) => ({ id: b.id, name: b.name || b.label || "Unnamed" }));
+        minValues = 0;
+        maxValues = 25;
+      } else if (selectingFor === "action_menus") {
+        const menus = await getSelectMenus(guild);
+        componentList = menus.map((m) => ({ id: m.id, name: m.name || m.placeholder || "Unnamed" }));
+        minValues = 0;
+        maxValues = 5;
+      }
+
+      console.log(selectingFor, componentList)
+
+      componentList = componentList.slice(0, 25);
+      if (maxValues > componentList.length && componentList.length > 0) {
+        maxValues = componentList.length;
       }
 
       if (componentList.length > 0) {
@@ -2292,8 +2333,11 @@ async function buildComponents(
           .setCustomId("NI_scenario:action_component")
           .setPlaceholder(
             t(client, lang, "commands.scenario.select_menus.action_component.placeholder"),
-          );
-        componentList.slice(0, 25).forEach((c) => {
+          )
+          .setMinValues(minValues)
+          .setMaxValues(maxValues);
+
+        componentList.forEach((c) => {
           compMenu.addOptions(
             new StringSelectMenuOptionBuilder()
               .setValue(c.id)
