@@ -59,6 +59,10 @@ module.exports = async (client: Client, message: Message) => {
         return message.reply({
           content: t(client, lang, "events.message_create.level_up", message.member),
           files: [attachment],
+        }).then((msg) => {
+          setTimeout(async () => {
+            if (msg.deletable) await msg.delete();
+          }, 10000)
         });
       }
     }

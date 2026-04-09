@@ -32,6 +32,7 @@
     "@nmmty/lazycanvas": "^1.0.0-dev.9",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
+    "axios": "^1.13.6",
     "body-parser": "^1.20.3",
     "chokidar": "^4.0.3",
     "discord-api-types": "^0.38.31",

@@ -19,9 +19,9 @@ services:
     container_name: amelia_postgres
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: amelia
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-amelia}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -31,6 +31,9 @@ services:
     image: mongo:6
     container_name: amelia_mongodb
     restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-user}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-password}
     volumes:
       - mongodb_data:/data/db
     ports:

@@ -2004,14 +2004,34 @@ export interface TranslationSchema {
       };
     };
     stats: {
+      title: string;
       total_guilds: string;
       total_members: string;
       total_shards: string;
       github: {
+        title: string;
+        name: string;
         stars: string;
         forks: string;
         issues: string;
-        watchers: string;
+      };
+      system: {
+        title: string;
+        cpu: string;
+        ram: string;
+        uptime: string;
+        nodejs: string;
+        platform: string;
+      };
+      version: {
+        title: string;
+        current: string;
+        latest: string;
+        latest_description: string;
+      };
+      buttons: {
+        invite: string;
+        github: string;
       }
     }
   };
