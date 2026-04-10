@@ -6,7 +6,7 @@ services:
     container_name: amelia_migrate
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://amelia_bot:3d4d20a30abacdc519408b2725376be0c7634b18@postgres:5432/amelia?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-amelia}
     depends_on:
       postgres:
         condition: service_healthy
