@@ -13,7 +13,7 @@ import {
   ButtonStyle,
   ChatInputCommandInteraction,
   MessageFlagsBitField,
-  LabelBuilder,
+  LabelBuilder, TextChannel,
 } from "discord.js";
 import { Guild, customUtil } from "../../helpers";
 import { generateID } from "../../handlers/functions";
@@ -232,7 +232,29 @@ module.exports = {
             await i.deferUpdate();
             const customEmbed = new customUtil.CustomEmbed(_schema);
             await i.followUp({
-              embeds: [customEmbed.getEmbed()],
+              embeds: [customEmbed.getEmbed({
+                user: {
+                  id: interaction.user.id,
+                  name: interaction.user.username,
+                  displayName: interaction.user.displayName,
+                  mention: `<@${interaction.user.id}>`,
+                  avatar: interaction.user.displayAvatarURL(),
+                },
+                channel: interaction.channel
+                    ? {
+                      id: interaction.channel.id,
+                      name: (interaction.channel as TextChannel).name || "DM",
+                      mention: `<#${interaction.channel.id}>`,
+                    }
+                    : undefined,
+                guild: interaction.guild
+                    ? {
+                      id: interaction.guild.id,
+                      name: interaction.guild.name,
+                      icon: interaction.guild.iconURL(),
+                    }
+                    : undefined,
+              })],
               flags: MessageFlagsBitField.Flags.Ephemeral,
             });
             break;

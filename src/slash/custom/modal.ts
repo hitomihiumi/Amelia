@@ -660,8 +660,8 @@ module.exports = {
                 max = temp;
               }
 
-              if (min < 4000) min = 3999;
-              if (max < 4000) max = 4000;
+              if (min > 4000) min = 3999;
+              if (max > 4000) max = 4000;
 
               _schema.fields[field].min = min;
               _schema.fields[field].max = max;

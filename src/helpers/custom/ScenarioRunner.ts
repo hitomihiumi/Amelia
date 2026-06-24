@@ -48,7 +48,7 @@ interface ExecutionContext {
     name: string;
     mention: string;
   };
-  guildInfo?: {
+  guild?: {
     id: string;
     name: string;
     icon: string | null;
@@ -87,7 +87,7 @@ export class ScenarioRunner {
     return {
       user: this.context.user,
       channel: this.context.channel,
-      guild: this.context.guildInfo,
+      guild: this.context.guild,
       input: this.context.input,
       selected: this.context.selected,
       variables: this.context.variables,
@@ -181,7 +181,7 @@ export class ScenarioRunner {
             mention: `<#${interaction.channel.id}>`,
           }
         : undefined,
-      guildInfo: interaction.guild
+      guild: interaction.guild
         ? {
             id: interaction.guild.id,
             name: interaction.guild.name,
@@ -450,11 +450,11 @@ export class ScenarioRunner {
     }
 
     // Guild variables
-    if (this.context.guildInfo) {
+    if (this.context.guild) {
       result = result
-        .replace(/{guild\.id}/g, this.context.guildInfo.id)
-        .replace(/{guild\.name}/g, this.context.guildInfo.name)
-        .replace(/{guild\.icon}/g, this.context.guildInfo.icon || "");
+        .replace(/{guild\.id}/g, this.context.guild.id)
+        .replace(/{guild\.name}/g, this.context.guild.name)
+        .replace(/{guild\.icon}/g, this.context.guild.icon || "");
     }
 
     // Input variables (by index: {input.0}, {input.0.label}, {input.1}, etc.)
