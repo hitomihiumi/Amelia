@@ -149,6 +149,24 @@ export const GuildPathMap: PathMap = {
   "moderation.moderation_roles": {
     field: "moderationRoles",
   },
+  "moderation.log_channel": {
+    field: "modLogChannel",
+  },
+  "moderation.dm_notify": {
+    field: "modDmNotify",
+  },
+  "moderation.warn_expiry": {
+    field: "modWarnExpiry",
+  },
+  "moderation.warn_thresholds": {
+    field: "modWarnThresholds",
+  },
+  "moderation.forms.report": {
+    field: "modReportForm",
+  },
+  "moderation.forms.appeal": {
+    field: "modAppealForm",
+  },
   "moderation.auto_moderation.invite.enabled": {
     field: "inviteEnabled",
   },
@@ -283,7 +301,19 @@ export const GuildPathMap: PathMap = {
   },
   moderation: {
     field: "",
-    children: ["auto_moderation", "moderation_roles"],
+    children: [
+      "auto_moderation",
+      "dm_notify",
+      "forms",
+      "log_channel",
+      "moderation_roles",
+      "warn_expiry",
+      "warn_thresholds",
+    ],
+  },
+  "moderation.forms": {
+    field: "",
+    children: ["appeal", "report"],
   },
   "moderation.auto_moderation": {
     field: "",
@@ -378,6 +408,12 @@ export const GuildFieldMap: Record<string, string> = {
   "economy.income.rob.income": "robIncome",
   "economy.income.rob.punishment": "robPunishment",
   "moderation.moderation_roles": "moderationRoles",
+  "moderation.log_channel": "modLogChannel",
+  "moderation.dm_notify": "modDmNotify",
+  "moderation.warn_expiry": "modWarnExpiry",
+  "moderation.warn_thresholds": "modWarnThresholds",
+  "moderation.forms.report": "modReportForm",
+  "moderation.forms.appeal": "modAppealForm",
   "moderation.auto_moderation.invite.enabled": "inviteEnabled",
   "moderation.auto_moderation.invite.ignore_channels": "inviteIgnoreChannels",
   "moderation.auto_moderation.invite.ignore_roles": "inviteIgnoreRoles",

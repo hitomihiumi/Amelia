@@ -115,7 +115,7 @@ client.holder = {
     process.exit(1);
   }
 
-  ["antiCrash", "events", "commands", "components", "slash", "joinToCreate"]
+  ["antiCrash", "events", "commands", "components", "slash", "joinToCreate", "moderationScheduler"]
     .filter(Boolean)
     .forEach((handler: any) => {
       require(`./handlers/${handler}`)(client);

@@ -1,4 +1,4 @@
-import {LiteralSchemaKey, SchemaKey} from "../helpers";
+import { LiteralSchemaKey, SchemaKey } from "../helpers";
 
 /**
  * Base structure of a language package
@@ -2038,8 +2038,168 @@ export interface TranslationSchema {
       buttons: {
         invite: string;
         github: string;
-      }
-    }
+      };
+    };
+
+    mod: {
+      warn: {
+        success: string;
+      };
+      unwarn: {
+        success: string;
+      };
+      mute: {
+        success: string;
+        already: string;
+      };
+      unmute: {
+        success: string;
+        not_muted: string;
+      };
+      kick: {
+        success: string;
+      };
+      ban: {
+        success: string;
+        temporary: string;
+        already: string;
+      };
+      unban: {
+        success: string;
+      };
+      note: {
+        success: string;
+      };
+      case: {
+        not_found: string;
+      };
+      cases: {
+        title: string;
+        empty: string;
+        entry: string;
+        footer: string;
+      };
+      purge: {
+        success: string;
+        empty: string;
+        too_old: string;
+      };
+      slowmode: {
+        success: string;
+        disabled: string;
+      };
+      link: {
+        title: string;
+        report: string;
+        appeal: string;
+        disabled: string;
+        not_configured: string;
+      };
+    };
+  };
+  // Moderation system
+  moderation: {
+    types: {
+      warn: string;
+      mute: string;
+      kick: string;
+      ban: string;
+      note: string;
+      unwarn: string;
+      unmute: string;
+      unban: string;
+      purge: string;
+    };
+    sources: {
+      command: string;
+      automod: string;
+      dashboard: string;
+      submission: string;
+    };
+    case: {
+      title: string;
+      user: string;
+      moderator: string;
+      reason: string;
+      duration: string;
+      expires: string;
+      source: string;
+      status: string;
+      evidence: string;
+      active: string;
+      revoked: string;
+      expired: string;
+      permanent: string;
+      no_reason: string;
+    };
+    dm: {
+      applied: string;
+      revoked: string;
+      reason: string;
+      duration: string;
+      case: string;
+      appeal: string;
+    };
+    errors: {
+      no_permission: string;
+      hierarchy: string;
+      self: string;
+      bot: string;
+      owner: string;
+      member_not_found: string;
+      user_not_found: string;
+      invalid_duration: string;
+      case_not_found: string;
+      case_inactive: string;
+      not_banned: string;
+      action_failed: string;
+    };
+    submission: {
+      title: string;
+      kinds: {
+        report: string;
+        appeal: string;
+      };
+      author: string;
+      target: string;
+      case: string;
+      status: string;
+      response: string;
+      handled_by: string;
+      anonymous: string;
+      statuses: {
+        pending: string;
+        in_review: string;
+        approved: string;
+        rejected: string;
+      };
+      buttons: {
+        claim: string;
+        approve: string;
+        reject: string;
+      };
+      modal: {
+        approve_title: string;
+        reject_title: string;
+        response_label: string;
+        response_placeholder: string;
+      };
+      dm: {
+        approved: string;
+        rejected: string;
+        response: string;
+      };
+      already_handled: string;
+      not_found: string;
+      claimed: string;
+    };
+    automod: {
+      invite_reason: string;
+      links_reason: string;
+    };
+    escalation: {
+      reason: string;
+    };
   };
 
   // Events
@@ -2258,8 +2418,8 @@ export interface TranslationSchema {
         few: string;
         many: string;
         other: string;
-      }
-    },
+      };
+    };
     hour: {
       short: string;
       forms: {
@@ -2267,8 +2427,8 @@ export interface TranslationSchema {
         few: string;
         many: string;
         other: string;
-      }
-    },
+      };
+    };
     minute: {
       short: string;
       forms: {
@@ -2276,8 +2436,8 @@ export interface TranslationSchema {
         few: string;
         many: string;
         other: string;
-      }
-    },
+      };
+    };
     second: {
       short: string;
       forms: {
@@ -2285,9 +2445,9 @@ export interface TranslationSchema {
         few: string;
         many: string;
         other: string;
-      },
-    },
-  }
+      };
+    };
+  };
 }
 
 /**

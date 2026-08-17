@@ -284,6 +284,40 @@ const guildSchemaMap: Record<string, SchemaField> = {
     isArray: true,
     default: "[]",
   },
+  "moderation.log_channel": {
+    prismaField: "modLogChannel",
+    prismaType: "String",
+    optional: true,
+  },
+  "moderation.dm_notify": {
+    prismaField: "modDmNotify",
+    prismaType: "Boolean",
+    default: "true",
+  },
+  "moderation.warn_expiry": {
+    prismaField: "modWarnExpiry",
+    prismaType: "Int",
+    default: "0",
+  },
+  "moderation.warn_thresholds": {
+    prismaField: "modWarnThresholds",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+
+  // Moderation - Forms (reports & appeals)
+  "moderation.forms.report": {
+    prismaField: "modReportForm",
+    prismaType: "Json",
+    default:
+      '"{\\"enabled\\":false,\\"channel\\":null,\\"cooldown\\":600,\\"max_pending\\":3,\\"allow_anonymous\\":false,\\"require_target\\":true,\\"allow_banned\\":false,\\"fields\\":[],\\"success_message\\":null,\\"approve_message\\":null,\\"reject_message\\":null}"',
+  },
+  "moderation.forms.appeal": {
+    prismaField: "modAppealForm",
+    prismaType: "Json",
+    default:
+      '"{\\"enabled\\":false,\\"channel\\":null,\\"cooldown\\":86400,\\"max_pending\\":1,\\"allow_anonymous\\":false,\\"require_target\\":false,\\"allow_banned\\":true,\\"fields\\":[],\\"success_message\\":null,\\"approve_message\\":null,\\"reject_message\\":null}"',
+  },
 
   // Auto Moderation - Invites
   "moderation.auto_moderation.invite.enabled": {

@@ -10,6 +10,15 @@ import { Guild } from "../../helpers";
 import { t } from "../../i18n/helpers";
 import { handleScenarioInteraction } from "../../handlers/scenarios";
 
+/**
+ * Components may carry a dynamic payload after a pipe
+ * (`I_mod:sub|<submissionId>|approve`). Handlers are registered under the part
+ * before the first pipe.
+ */
+function baseCustomId(customId: string): string {
+  return customId.split("|")[0];
+}
+
 module.exports = async (client: Client, interaction: any) => {
   let guild = interaction.guild ? new Guild(client, interaction.guild) : undefined;
   let lang = guild ? await guild.get(`settings.language`) : "en";
@@ -103,7 +112,9 @@ module.exports = async (client: Client, interaction: any) => {
     };
 
     if (interaction.isButton()) {
-      const component = client.holder.components.buttons.get(interaction.customId);
+      const component =
+        client.holder.components.buttons.get(interaction.customId) ??
+        client.holder.components.buttons.get(baseCustomId(interaction.customId));
 
       if (!component)
         return interaction.reply({
@@ -128,7 +139,9 @@ module.exports = async (client: Client, interaction: any) => {
     }
 
     if (interaction.isAnySelectMenu()) {
-      const component = client.holder.components.selectMenus.get(interaction.customId);
+      const component =
+        client.holder.components.selectMenus.get(interaction.customId) ??
+        client.holder.components.selectMenus.get(baseCustomId(interaction.customId));
 
       if (!component)
         return interaction.reply({
@@ -153,7 +166,9 @@ module.exports = async (client: Client, interaction: any) => {
     }
 
     if (interaction.isModalSubmit()) {
-      const component = client.holder.components.modals.get(interaction.customId);
+      const component =
+        client.holder.components.modals.get(interaction.customId) ??
+        client.holder.components.modals.get(baseCustomId(interaction.customId));
 
       if (!component)
         return interaction.reply({

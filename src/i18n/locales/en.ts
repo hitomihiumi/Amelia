@@ -2112,8 +2112,167 @@ export const en: TranslationSchema = {
       buttons: {
         invite: "Invite Bot",
         github: "GitHub Repository",
-      }
-    }
+      },
+    },
+
+    mod: {
+      warn: {
+        success: "⚠️ {0} has been warned. Case **#{1}**",
+      },
+      unwarn: {
+        success: "✅ Case **#{0}** has been revoked",
+      },
+      mute: {
+        success: "🔇 {0} has been muted for **{1}**. Case **#{2}**",
+        already: "This member is already muted",
+      },
+      unmute: {
+        success: "🔊 {0} has been unmuted",
+        not_muted: "This member is not muted",
+      },
+      kick: {
+        success: "👢 {0} has been kicked. Case **#{1}**",
+      },
+      ban: {
+        success: "🔨 {0} has been banned. Case **#{1}**",
+        temporary: "🔨 {0} has been banned for **{1}**. Case **#{2}**",
+        already: "This user is already banned",
+      },
+      unban: {
+        success: "✅ {0} has been unbanned. Case **#{1}**",
+      },
+      note: {
+        success: "📝 A note was added for {0}. Case **#{1}**",
+      },
+      case: {
+        not_found: "Case **#{0}** was not found",
+      },
+      cases: {
+        title: "Moderation history of {0}",
+        empty: "No cases found",
+        entry: "`#{0}` **{1}** • <t:{2}:R> • {3}",
+        footer: "Page {0}/{1} • {2} cases",
+      },
+      purge: {
+        success: "🧹 Deleted **{0}** messages",
+        empty: "There is nothing to delete",
+        too_old: "Messages older than 14 days cannot be deleted in bulk",
+      },
+      slowmode: {
+        success: "🐌 Slowmode is now **{0}**",
+        disabled: "🐌 Slowmode has been disabled",
+      },
+      link: {
+        title: "Submission forms",
+        report: "Report form",
+        appeal: "Appeal form",
+        disabled: "disabled",
+        not_configured: "The dashboard address is not configured on this bot instance",
+      },
+    },
+  },
+  moderation: {
+    types: {
+      warn: "Warn",
+      mute: "Mute",
+      kick: "Kick",
+      ban: "Ban",
+      note: "Note",
+      unwarn: "Warn revoked",
+      unmute: "Unmute",
+      unban: "Unban",
+      purge: "Purge",
+    },
+    sources: {
+      command: "Command",
+      automod: "Auto moderation",
+      dashboard: "Dashboard",
+      submission: "Submission",
+    },
+    case: {
+      title: "Case #{0} • {1}",
+      user: "User",
+      moderator: "Moderator",
+      reason: "Reason",
+      duration: "Duration",
+      expires: "Expires",
+      source: "Source",
+      status: "Status",
+      evidence: "Evidence",
+      active: "Active",
+      revoked: "Revoked",
+      expired: "Expired",
+      permanent: "Permanent",
+      no_reason: "No reason provided",
+    },
+    dm: {
+      applied: "You have been **{0}** in **{1}**",
+      revoked: "Your punishment in **{0}** has been revoked",
+      reason: "Reason",
+      duration: "Duration",
+      case: "Case",
+      appeal: "You can appeal this punishment here: {0}",
+    },
+    errors: {
+      no_permission: "You are not allowed to use moderation commands",
+      hierarchy: "You cannot act on this member — their highest role is not below yours",
+      self: "You cannot do this to yourself",
+      bot: "You cannot do this to the bot",
+      owner: "You cannot do this to the server owner",
+      member_not_found: "That member is not on this server",
+      user_not_found: "User not found",
+      invalid_duration: "Invalid duration. Examples: `30m`, `2h`, `7d`",
+      case_not_found: "Case **#{0}** was not found",
+      case_inactive: "Case **#{0}** is already revoked",
+      not_banned: "This user is not banned",
+      action_failed: "Discord rejected the action: {0}",
+    },
+    submission: {
+      title: "{0} #{1}",
+      kinds: {
+        report: "Report",
+        appeal: "Appeal",
+      },
+      author: "Author",
+      target: "Reported user",
+      case: "Case",
+      status: "Status",
+      response: "Response",
+      handled_by: "Handled by",
+      anonymous: "Anonymous",
+      statuses: {
+        pending: "Pending",
+        in_review: "In review",
+        approved: "Approved",
+        rejected: "Rejected",
+      },
+      buttons: {
+        claim: "Take in review",
+        approve: "Approve",
+        reject: "Reject",
+      },
+      modal: {
+        approve_title: "Approve submission",
+        reject_title: "Reject submission",
+        response_label: "Response to the author",
+        response_placeholder: "This text will be sent to the author in DM",
+      },
+      dm: {
+        approved: "Your {0} in **{1}** has been approved",
+        rejected: "Your {0} in **{1}** has been rejected",
+        response: "Moderator response",
+      },
+      already_handled: "This submission has already been handled",
+      not_found: "Submission not found",
+      claimed: "{0} is now reviewing this submission",
+    },
+    automod: {
+      invite_reason: "Auto moderation: server invite",
+      links_reason: "Auto moderation: forbidden link",
+    },
+    escalation: {
+      reason: "Automatic escalation: {0} active warns",
+    },
   },
 
   events: {
@@ -2359,5 +2518,5 @@ export const en: TranslationSchema = {
         other: " seconds",
       },
     },
-  }
+  },
 };

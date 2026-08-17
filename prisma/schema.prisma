@@ -80,7 +80,20 @@ model Guild {
   robPunishment  Json    @default("{\"min\":10,\"max\":50,\"type\":\"fixed\",\"fail_chance\":25}")
 
   // Moderation settings
-  moderationRoles String[] @default([])
+  moderationRoles   String[] @default([])
+  modLogChannel     String?
+  modDmNotify       Boolean  @default(true)
+  modWarnExpiry     Int      @default(0)
+  modWarnThresholds Json     @default("[]")
+
+  // Moderation forms (reports & appeals submitted from the dashboard)
+  modReportForm Json @default("{\"enabled\":false,\"channel\":null,\"cooldown\":600,\"max_pending\":3,\"allow_anonymous\":false,\"require_target\":true,\"allow_banned\":false,\"fields\":[],\"success_message\":null,\"approve_message\":null,\"reject_message\":null}")
+  modAppealForm Json @default("{\"enabled\":false,\"channel\":null,\"cooldown\":86400,\"max_pending\":1,\"allow_anonymous\":false,\"require_target\":false,\"allow_banned\":true,\"fields\":[],\"success_message\":null,\"approve_message\":null,\"reject_message\":null}")
+
+  // Sequences for per-guild incrementing numbers
+  modCaseSeq   Int @default(0)
+  modReportSeq Int @default(0)
+  modAppealSeq Int @default(0)
 
   // Auto moderation - Invites
   inviteEnabled          Boolean  @default(false)
@@ -103,8 +116,10 @@ model Guild {
   commandPermissions Json @default("{}")
 
   // Relationships
-  users     User[]
-  histories History[]
+  users       User[]
+  histories   History[]
+  cases       ModerationCase[]
+  submissions ModerationSubmission[]
 
   @@index([id])
 }
@@ -170,6 +185,68 @@ model History {
   @@index([guildId])
   @@index([userId])
   @@index([type])
+}
+
+// Moderation case model - every moderation action gets a numbered case
+model ModerationCase {
+  id         String @id @default(cuid())
+  guildId    String
+  caseNumber Int
+
+  type        String // warn | mute | kick | ban | note | unwarn | unmute | unban | purge
+  targetId    String // Discord user id the action was taken against
+  moderatorId String // Discord user id, or "AUTOMOD" for automatic actions
+  reason      String
+  evidence    Json      @default("[]") // Array of attachment/message links
+  duration    Int? // Duration in seconds for temporary punishments
+  expiresAt   DateTime?
+
+  active       Boolean   @default(true) // False once revoked or expired
+  revokedAt    DateTime?
+  revokedBy    String?
+  revokeReason String?
+
+  source    String   @default("command") // command | automod | dashboard | submission
+  createdAt DateTime @default(now())
+
+  guild   Guild                  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  appeals ModerationSubmission[]
+
+  @@unique([guildId, caseNumber])
+  @@index([guildId, targetId])
+  @@index([guildId, type, active])
+  @@index([expiresAt])
+}
+
+// Report / appeal submitted through the dashboard forms
+model ModerationSubmission {
+  id      String @id @default(cuid())
+  guildId String
+  number  Int
+  kind    String // report | appeal
+
+  authorId String // Submitter Discord id
+  targetId String? // Reported user (reports only)
+  caseId   String? // Appealed case (appeals only)
+  answers  Json // [{ fieldId, label, type, value }]
+
+  status    String    @default("pending") // pending | in_review | approved | rejected
+  handledBy String?
+  handledAt DateTime?
+  response  String? // Moderator response shown to the author
+
+  channelId String? // Moderation channel the embed was posted to
+  messageId String? // Embed message id, used to keep it in sync
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guild Guild           @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  case  ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
+
+  @@unique([guildId, kind, number])
+  @@index([guildId, kind, status])
+  @@index([guildId, authorId])
 }
 
 // Backup model for server backups
