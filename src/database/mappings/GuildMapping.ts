@@ -206,6 +206,30 @@ export const GuildPathMap: PathMap = {
   "moderation.auto_moderation.links.punishment": {
     field: "linksPunishment",
   },
+  "audit.enabled": {
+    field: "auditEnabled",
+  },
+  "audit.channel": {
+    field: "auditChannel",
+  },
+  "audit.ignore_channels": {
+    field: "auditIgnoreChannels",
+  },
+  "audit.ignore_roles": {
+    field: "auditIgnoreRoles",
+  },
+  "audit.ignore_bots": {
+    field: "auditIgnoreBots",
+  },
+  "audit.webhook.name": {
+    field: "auditWebhookName",
+  },
+  "audit.webhook.avatar": {
+    field: "auditWebhookAvatar",
+  },
+  "audit.events": {
+    field: "auditEvents",
+  },
   "permissions.commands": {
     field: "commandPermissions",
   },
@@ -342,6 +366,22 @@ export const GuildPathMap: PathMap = {
       "punishment",
     ],
   },
+  audit: {
+    field: "",
+    children: [
+      "channel",
+      "enabled",
+      "events",
+      "ignore_bots",
+      "ignore_channels",
+      "ignore_roles",
+      "webhook",
+    ],
+  },
+  "audit.webhook": {
+    field: "",
+    children: ["avatar", "name"],
+  },
   permissions: {
     field: "",
     children: ["commands"],
@@ -427,6 +467,14 @@ export const GuildFieldMap: Record<string, string> = {
   "moderation.auto_moderation.links.delete_message": "linksDeleteMessage",
   "moderation.auto_moderation.links.moderation_immune": "linksModerationImmune",
   "moderation.auto_moderation.links.punishment": "linksPunishment",
+  "audit.enabled": "auditEnabled",
+  "audit.channel": "auditChannel",
+  "audit.ignore_channels": "auditIgnoreChannels",
+  "audit.ignore_roles": "auditIgnoreRoles",
+  "audit.ignore_bots": "auditIgnoreBots",
+  "audit.webhook.name": "auditWebhookName",
+  "audit.webhook.avatar": "auditWebhookAvatar",
+  "audit.events": "auditEvents",
   "permissions.commands": "commandPermissions",
   "temp.join_to_create.map": "jtcTempMap",
 };

@@ -1,4 +1,11 @@
-import { Client, GatewayIntentBits, Partials, Collection, ColorResolvable } from "discord.js";
+import {
+  Client,
+  GatewayIntentBits,
+  Options,
+  Partials,
+  Collection,
+  ColorResolvable,
+} from "discord.js";
 import "dotenv/config";
 import "@hitomihiumi/colors.ts";
 import {
@@ -25,6 +32,16 @@ foldersCheck();
 
 const client = new Client({
   shards: "auto",
+  // The audit log shows the previous content of edited and deleted messages,
+  // and Discord only ever sends the new one — it has to come from this cache.
+  makeCache: Options.cacheWithLimits({
+    ...Options.DefaultMakeCacheSettings,
+    MessageManager: 500,
+  }),
+  sweepers: {
+    ...Options.DefaultSweeperSettings,
+    messages: { interval: 3600, lifetime: 43200 },
+  },
   allowedMentions: {
     parse: ["users", "roles"],
     repliedUser: false,

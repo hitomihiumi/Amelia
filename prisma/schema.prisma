@@ -112,6 +112,16 @@ model Guild {
   linksModerationImmune Boolean  @default(false)
   linksPunishment       Json     @default("{\"type\":\"warn\",\"time\":0,\"reason\":\"Auto moderation\"}")
 
+  // Audit log
+  auditEnabled        Boolean  @default(false)
+  auditChannel        String?
+  auditIgnoreChannels String[] @default([])
+  auditIgnoreRoles    String[] @default([])
+  auditIgnoreBots     Boolean  @default(true)
+  auditWebhookName    String?
+  auditWebhookAvatar  String?
+  auditEvents         Json     @default("{}")
+
   // Permissions
   commandPermissions Json @default("{}")
 
@@ -120,6 +130,7 @@ model Guild {
   histories   History[]
   cases       ModerationCase[]
   submissions ModerationSubmission[]
+  webhooks    GuildWebhook[]
 
   @@index([id])
 }
@@ -185,6 +196,21 @@ model History {
   @@index([guildId])
   @@index([userId])
   @@index([type])
+}
+
+// Webhook the bot created for a channel, reused across restarts
+model GuildWebhook {
+  id        String   @id @default(cuid())
+  guildId   String
+  channelId String
+  webhookId String
+  token     String
+  createdAt DateTime @default(now())
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@unique([guildId, channelId])
+  @@index([guildId])
 }
 
 // Moderation case model - every moderation action gets a numbered case

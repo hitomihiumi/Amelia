@@ -1,6 +1,7 @@
 import { Client, GuildMember, Message } from "discord.js";
 import { Guild } from "../helpers";
-import { ModerationService, isModerator } from "../helpers/moderation";
+import { ModerationService, isLinkIgnored, isModerator } from "../helpers/moderation";
+import { AuditLogger } from "../helpers/audit";
 import { GuildSchema, ModerationCaseType, Punishment } from "../types/helpers";
 import { t } from "../i18n/helpers";
 
@@ -49,12 +50,7 @@ function extractLinks(content: string, ignored: string[]): string[] {
   const matches = [...content.matchAll(LINK_REGEX)].map((match) => match[0]);
   if (matches.length === 0) return [];
 
-  const whitelist = ignored.map((entry) => entry.toLowerCase().replace(/^https?:\/\//, ""));
-
-  return matches.filter((link) => {
-    const normalized = link.toLowerCase().replace(/^https?:\/\//, "");
-    return !whitelist.some((entry) => entry && normalized.startsWith(entry));
-  });
+  return matches.filter((link) => !isLinkIgnored(link, ignored));
 }
 
 interface AutoModRule {
@@ -89,6 +85,8 @@ async function enforce(
     );
 
   if (rule.delete_message && message.deletable) {
+    // Tell the audit log why the message disappeared.
+    AuditLogger.markDeletion(message.id, reason);
     await message.delete().catch(() => null);
   }
 

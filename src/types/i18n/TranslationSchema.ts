@@ -2097,6 +2097,65 @@ export interface TranslationSchema {
       };
     };
   };
+  // Audit log
+  audit: {
+    events: {
+      member_join: string;
+      member_leave: string;
+      member_roles: string;
+      member_nickname: string;
+      member_ban: string;
+      member_unban: string;
+      member_kick: string;
+      member_timeout: string;
+      message_delete: string;
+      message_edit: string;
+      message_bulk_delete: string;
+      voice_join: string;
+      voice_leave: string;
+      voice_move: string;
+      channel_create: string;
+      channel_delete: string;
+      channel_update: string;
+      role_create: string;
+      role_delete: string;
+      role_update: string;
+      guild_update: string;
+    };
+    fields: {
+      registered: string;
+      roles_added: string;
+      roles_removed: string;
+      changed_by: string;
+      moderator: string;
+      reason: string;
+      author: string;
+      channel: string;
+      old_nickname: string;
+      new_nickname: string;
+      message: string;
+      changes: string;
+      attachments: string;
+      count: string;
+      until: string;
+      from: string;
+      to: string;
+      old_name: string;
+      new_name: string;
+      type: string;
+    };
+    footer: {
+      member: string;
+      message: string;
+      channel: string;
+      role: string;
+      guild: string;
+    };
+    unavailable: string;
+    none: string;
+    unknown_channel: string;
+  };
+
   // Moderation system
   moderation: {
     types: {

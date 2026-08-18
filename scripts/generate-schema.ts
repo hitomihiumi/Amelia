@@ -393,6 +393,50 @@ const guildSchemaMap: Record<string, SchemaField> = {
     default: '"{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"}"',
   },
 
+  // Audit log
+  "audit.enabled": {
+    prismaField: "auditEnabled",
+    prismaType: "Boolean",
+    default: "false",
+  },
+  "audit.channel": {
+    prismaField: "auditChannel",
+    prismaType: "String",
+    optional: true,
+  },
+  "audit.ignore_channels": {
+    prismaField: "auditIgnoreChannels",
+    prismaType: "String",
+    isArray: true,
+    default: "[]",
+  },
+  "audit.ignore_roles": {
+    prismaField: "auditIgnoreRoles",
+    prismaType: "String",
+    isArray: true,
+    default: "[]",
+  },
+  "audit.ignore_bots": {
+    prismaField: "auditIgnoreBots",
+    prismaType: "Boolean",
+    default: "true",
+  },
+  "audit.webhook.name": {
+    prismaField: "auditWebhookName",
+    prismaType: "String",
+    optional: true,
+  },
+  "audit.webhook.avatar": {
+    prismaField: "auditWebhookAvatar",
+    prismaType: "String",
+    optional: true,
+  },
+  "audit.events": {
+    prismaField: "auditEvents",
+    prismaType: "Json",
+    default: '"{}"',
+  },
+
   // Permissions
   "permissions.commands": {
     prismaField: "commandPermissions",
