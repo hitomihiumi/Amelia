@@ -59,7 +59,26 @@ automatically. `moderation.warn_expiry` (days, `0` = never) controls how long a 
 `src/handlers/automod.ts` runs at the top of `messageCreate`, before the level logic, so a deleted
 message never grants experience. Both rules (`moderation.auto_moderation.invite` and
 `.links`) support ignored channels, ignored roles, a moderator exemption, message deletion and a
-punishment. The link filter additionally honours the `ignore_links` domain whitelist.
+punishment. The link filter additionally honours the `ignore_links` whitelist.
+
+### Link whitelist patterns
+
+`ignore_links` holds glob patterns, not plain prefixes (`src/helpers/moderation/linkPatterns.ts`).
+Only `*` is a wildcard — URLs are full of `?`, so treating that as one would silently turn query
+strings into wildcards. Patterns are normalized (lower case, no scheme, no `www.`, no trailing
+slash) and compiled into an anchored `RegExp`, which keeps matching linear.
+
+| Pattern | Matches |
+| --- | --- |
+| `youtube.com` | the domain, every subdomain, every path |
+| `*.wikipedia.org` | subdomains only |
+| `discord.com/channels/*` | that path and everything below it |
+| `*docs*` | any link containing `docs` |
+
+A pattern without a wildcard and without a slash is treated as a bare domain and covers its
+subdomains, which is what the previous prefix matching did — existing whitelists keep working.
+Deeper paths and query strings are always covered, so `example.com/blog` matches
+`example.com/blog/post` but not `example.com/blogger`.
 
 ## Temporary punishments
 
@@ -83,6 +102,11 @@ ban or time out in Discord.
 
 Component ids carry their payload after a pipe; `interactionCreate` resolves handlers by the part
 before the first pipe, so one registered component serves every submission.
+
+## Audit log
+
+Moderation actions land in the moderation log channel; everything else that happens on the server
+is covered by the separate audit log — see [AUDIT.md](./AUDIT.md).
 
 ## Configuration
 
