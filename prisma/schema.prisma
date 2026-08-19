@@ -275,6 +275,80 @@ model ModerationSubmission {
   @@index([guildId, authorId])
 }
 
+// Website news posts, written in the admin panel
+model NewsPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  summary     String?
+  content     String // Markdown body
+  category    String    @default("update") // update | feature | maintenance | announcement
+  coverUrl    String?
+  authorId    String // Discord id of the author
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([published, publishedAt])
+  @@index([category])
+}
+
+// Status page incident, opened automatically or by hand
+model Incident {
+  id         String    @id @default(cuid())
+  title      String
+  body       String?
+  severity   String    @default("minor") // minor | major | critical | maintenance
+  status     String    @default("investigating") // investigating | identified | monitoring | resolved
+  component  String? // gateway | database | website | shards
+  auto       Boolean   @default(false) // Opened by the health check, not by a human
+  startedAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  updates IncidentUpdate[]
+
+  @@index([startedAt])
+  @@index([resolvedAt])
+}
+
+model IncidentUpdate {
+  id         String   @id @default(cuid())
+  incidentId String
+  status     String
+  body       String
+  createdAt  DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  @@index([incidentId])
+}
+
+// Single row holding the website wide configuration
+model GlobalConfig {
+  id        String   @id @default("global")
+  updatedAt DateTime @updatedAt
+
+  // Site banner
+  bannerEnabled Boolean @default(false)
+  bannerText    String?
+  bannerVariant String  @default("warning") // info | warning | danger | success
+
+  // Links
+  inviteUrl  String?
+  supportUrl String?
+  githubUrl  String?
+
+  // Landing copy
+  heroTagline String?
+  heroText    String?
+
+  // Status page
+  maintenance        Boolean @default(false)
+  maintenanceMessage String?
+  serviceOverrides   Json    @default("{}") // { gateway: { status, note }, ... }
+}
+
 // Backup model for server backups
 model Backup {
   id        String   @id @default(cuid())
