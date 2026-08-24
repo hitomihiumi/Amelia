@@ -4,7 +4,7 @@ import {
   ChatInputCommandInteraction,
   ChannelType,
   PermissionsBitField,
-  TextChannel,
+  TextChannel, MessageFlags, MessageFlagsBitField,
 } from "discord.js";
 import { defaultPermissions } from "../../helpers";
 import {
@@ -78,7 +78,7 @@ module.exports = {
       );
     }
 
-    await interaction.deferReply();
+    await interaction.deferReply({ flags: MessageFlagsBitField.Flags.Ephemeral });
 
     const updated = await (channel as TextChannel)
       .setRateLimitPerUser(seconds, `Slowmode by ${interaction.user.tag}`)

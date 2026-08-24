@@ -2269,7 +2269,8 @@ export const en: TranslationSchema = {
       reason: "Reason",
       duration: "Duration",
       case: "Case",
-      appeal: "You can appeal this punishment here: {0}",
+      appeal_button: "Submit an appeal",
+      appeal_footer: "You can appeal this punishment by clicking the button below",
     },
     errors: {
       no_permission: "You are not allowed to use moderation commands",

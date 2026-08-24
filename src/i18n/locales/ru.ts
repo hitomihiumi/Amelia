@@ -2267,7 +2267,8 @@ export const ru: TranslationSchema = {
       reason: "Причина",
       duration: "Длительность",
       case: "Дело",
-      appeal: "Вы можете обжаловать это наказание здесь: {0}",
+      appeal_button: "Обжаловать",
+      appeal_footer: "Вы можете обжаловать это наказание, нажав на кнопку ниже."
     },
     errors: {
       no_permission: "У вас нет доступа к командам модерации",
