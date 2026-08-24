@@ -1,5 +1,5 @@
 import { SlashCommand } from "../../types/helpers";
-import { Client, ChatInputCommandInteraction } from "discord.js";
+import {Client, ChatInputCommandInteraction, MessageFlagsBitField} from "discord.js";
 import { defaultPermissions } from "../../helpers";
 import {
   prepareModeration,
@@ -42,7 +42,7 @@ module.exports = {
     const ctx = await prepareModeration(client, interaction);
     if (!ctx) return;
 
-    await interaction.deferReply();
+    await interaction.deferReply({ flags: MessageFlagsBitField.Flags.Ephemeral });
 
     const caseNumber = interaction.options.getInteger("case", true);
 

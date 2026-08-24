@@ -512,10 +512,17 @@ export class ModerationService {
 
     const appealUrl = this.appealUrl();
     if (appealUrl) {
-      embed.addFields({
-        name: "​",
-        value: t(this.client, lang, "moderation.dm.appeal", appealUrl),
-      });
+
+      embed.setFooter({
+        text: t(this.client, lang, "moderation.dm.appeal_footer"),
+      })
+
+      return await this.sendDM(entry.targetId, embed, new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+          new ButtonBuilder()
+              .setLabel(t(this.client, lang, "moderation.dm.appeal_button"))
+              .setStyle(ButtonStyle.Link)
+              .setURL(appealUrl)
+      ));
     }
 
     await this.sendDM(entry.targetId, embed);
@@ -549,10 +556,10 @@ export class ModerationService {
     return `${base.replace(/\/+$/, "")}/submit/${this.discordGuild.id}/report`;
   }
 
-  private async sendDM(userId: string, embed: EmbedBuilder): Promise<void> {
+  private async sendDM(userId: string, embed: EmbedBuilder, action?: ActionRowBuilder<MessageActionRowComponentBuilder>): Promise<void> {
     try {
       const user: User = await this.client.users.fetch(userId);
-      await user.send({ embeds: [embed] });
+      await user.send({ embeds: [embed], components: action ? [action] : [] });
     } catch {
       // Closed DMs are expected and must never break a moderation action.
     }

@@ -1,5 +1,5 @@
 import { SlashCommand } from "../../types/helpers";
-import { Client, ChatInputCommandInteraction, PermissionsBitField } from "discord.js";
+import {Client, ChatInputCommandInteraction, PermissionsBitField, MessageFlagsBitField} from "discord.js";
 import { defaultPermissions } from "../../helpers";
 import {
   prepareModeration,
@@ -53,7 +53,7 @@ module.exports = {
       );
     }
 
-    await interaction.deferReply();
+    await interaction.deferReply({ flags: MessageFlagsBitField.Flags.Ephemeral });
 
     const reason = resolveReason(client, interaction, ctx.lang);
 

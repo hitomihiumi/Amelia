@@ -1,5 +1,5 @@
 import { SlashCommand } from "../../types/helpers";
-import { Client, ChatInputCommandInteraction, GuildMember } from "discord.js";
+import {Client, ChatInputCommandInteraction, GuildMember, MessageFlagsBitField} from "discord.js";
 import { defaultPermissions } from "../../helpers";
 import {
   ensureCanActOn,
@@ -58,7 +58,7 @@ module.exports = {
 
     if (!(await ensureCanActOn(client, interaction, ctx, member as GuildMember))) return;
 
-    await interaction.deferReply();
+    await interaction.deferReply({ flags: MessageFlagsBitField.Flags.Ephemeral });
 
     const reason = resolveReason(client, interaction, ctx.lang);
     const result = await ctx.service.punish({

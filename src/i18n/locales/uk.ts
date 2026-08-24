@@ -2215,7 +2215,8 @@ export const uk: TranslationSchema = {
       reason: "Причина",
       duration: "Тривалість",
       case: "Справа",
-      appeal: "Ви можете оскаржити це покарання тут: {0}",
+      appeal_button: "Оскаржити покарання",
+      appeal_footer: "Ви можете оскаржити це покарання, натиснувши кнопку нижче",
     },
     errors: {
       no_permission: "У вас немає доступу до команд модерації",

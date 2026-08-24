@@ -2138,7 +2138,8 @@ export interface TranslationSchema {
       reason: string;
       duration: string;
       case: string;
-      appeal: string;
+      appeal_footer: string;
+      appeal_button: string;
     };
     errors: {
       no_permission: string;

@@ -42,7 +42,7 @@ module.exports = {
     const disabled = t(client, ctx.lang, "commands.mod.link.disabled");
 
     const embed = new EmbedBuilder()
-      .setColor(client.holder.colors.info as any)
+      .setColor(client.holder.colors.default as any)
       .setTitle(t(client, ctx.lang, "commands.mod.link.title"))
       .addFields(
         {
@@ -55,6 +55,6 @@ module.exports = {
         },
       );
 
-    await interaction.reply({ embeds: [embed], flags: MessageFlagsBitField.Flags.Ephemeral });
+    await interaction.reply({ embeds: [embed] });
   },
 } as SlashCommand;

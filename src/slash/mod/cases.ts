@@ -1,5 +1,5 @@
 import { SlashCommand, ModerationCaseType } from "../../types/helpers";
-import { Client, ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import {Client, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, MessageFlagsBitField} from "discord.js";
 import { defaultPermissions } from "../../helpers";
 import { prepareModeration } from "../../helpers/moderation";
 import { t } from "../../i18n/helpers";
@@ -39,7 +39,7 @@ module.exports = {
     const ctx = await prepareModeration(client, interaction);
     if (!ctx) return;
 
-    await interaction.deferReply();
+    await interaction.deferReply({ flags: MessageFlagsBitField.Flags.Ephemeral });
 
     const user = interaction.options.getUser("user");
     const page = Math.max(1, interaction.options.getInteger("page") ?? 1) - 1;
