@@ -10,6 +10,7 @@ import {
 } from "../../handlers/functions";
 import { t } from "../../i18n/helpers";
 import { LevelCard } from "../../helpers/canvas/LevelCard";
+import { runAutoModeration } from "../../handlers/automod";
 
 module.exports = async (client: Client, message: Message) => {
   if (message.author.bot) return;
@@ -18,6 +19,9 @@ module.exports = async (client: Client, message: Message) => {
   if (message.partial) await message.fetch();
   if (!message.guild) return;
   if (!message.member) return;
+
+  // Auto moderation runs first: a deleted message must not grant experience.
+  if (await runAutoModeration(client, message)) return;
 
   const guild = new Guild(client, message.guild);
 
@@ -56,14 +60,16 @@ module.exports = async (client: Client, message: Message) => {
 
         const attachment = new AttachmentBuilder(buffer, { name: "levelup.png" });
 
-        return message.reply({
-          content: t(client, lang, "events.message_create.level_up", message.member),
-          files: [attachment],
-        }).then((msg) => {
-          setTimeout(async () => {
-            if (msg.deletable) await msg.delete();
-          }, 10000)
-        });
+        return message
+          .reply({
+            content: t(client, lang, "events.message_create.level_up", message.member),
+            files: [attachment],
+          })
+          .then((msg) => {
+            setTimeout(async () => {
+              if (msg.deletable) await msg.delete();
+            }, 10000);
+          });
       }
     }
 

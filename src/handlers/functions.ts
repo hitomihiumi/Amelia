@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Guild } from "../helpers";
-import {Command, Component, GetSchemaValueType, Levels, SlashCommand} from "../types/helpers";
+import { Command, Component, GetSchemaValueType, Levels, SlashCommand } from "../types/helpers";
 import {
   Client,
   Collection,
@@ -30,7 +30,7 @@ import { t, tObject } from "../i18n/helpers";
 import { en } from "../i18n/locales/en";
 import { ru } from "../i18n/locales/ru";
 import { uk } from "../i18n/locales/uk";
-import {TranslationSchema} from "../types/i18n/TranslationSchema";
+import { TranslationSchema } from "../types/i18n/TranslationSchema";
 
 export function foldersCheck() {
   let folders = [
@@ -43,7 +43,7 @@ export function foldersCheck() {
       path: "../",
     },
     {
-      name: "button",
+      name: "buttons",
       path: "../components",
     },
     {
@@ -525,12 +525,17 @@ function formatTimeValue(value: number, unit: TimeUnit, locale: string, short: b
   return `${value}${getTimeUnitSuffix(value, unit, locale, short)}`;
 }
 
-export function formatTime(ms: number, locale: string, units: TimeUnits, opts?: { full?: boolean; short?: boolean }): string {
+export function formatTime(
+  ms: number,
+  locale: string,
+  units: TimeUnits,
+  opts?: { full?: boolean; short?: boolean },
+): string {
   const options = {
     full: false,
     short: false,
     ...opts,
-  }
+  };
   const safeMs = Number.isFinite(ms) ? Math.max(0, ms) : 0;
 
   const days = Math.floor(safeMs / (24 * 60 * 60 * 1000));

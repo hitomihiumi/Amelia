@@ -80,7 +80,20 @@ model Guild {
   robPunishment  Json    @default("{\"min\":10,\"max\":50,\"type\":\"fixed\",\"fail_chance\":25}")
 
   // Moderation settings
-  moderationRoles String[] @default([])
+  moderationRoles   String[] @default([])
+  modLogChannel     String?
+  modDmNotify       Boolean  @default(true)
+  modWarnExpiry     Int      @default(0)
+  modWarnThresholds Json     @default("[]")
+
+  // Moderation forms (reports & appeals submitted from the dashboard)
+  modReportForm Json @default("{\"enabled\":false,\"channel\":null,\"cooldown\":600,\"max_pending\":3,\"allow_anonymous\":false,\"require_target\":true,\"allow_banned\":false,\"fields\":[],\"success_message\":null,\"approve_message\":null,\"reject_message\":null}")
+  modAppealForm Json @default("{\"enabled\":false,\"channel\":null,\"cooldown\":86400,\"max_pending\":1,\"allow_anonymous\":false,\"require_target\":false,\"allow_banned\":true,\"fields\":[],\"success_message\":null,\"approve_message\":null,\"reject_message\":null}")
+
+  // Sequences for per-guild incrementing numbers
+  modCaseSeq   Int @default(0)
+  modReportSeq Int @default(0)
+  modAppealSeq Int @default(0)
 
   // Auto moderation - Invites
   inviteEnabled          Boolean  @default(false)
@@ -99,12 +112,25 @@ model Guild {
   linksModerationImmune Boolean  @default(false)
   linksPunishment       Json     @default("{\"type\":\"warn\",\"time\":0,\"reason\":\"Auto moderation\"}")
 
+  // Audit log
+  auditEnabled        Boolean  @default(false)
+  auditChannel        String?
+  auditIgnoreChannels String[] @default([])
+  auditIgnoreRoles    String[] @default([])
+  auditIgnoreBots     Boolean  @default(true)
+  auditWebhookName    String?
+  auditWebhookAvatar  String?
+  auditEvents         Json     @default("{}")
+
   // Permissions
   commandPermissions Json @default("{}")
 
   // Relationships
-  users     User[]
-  histories History[]
+  users       User[]
+  histories   History[]
+  cases       ModerationCase[]
+  submissions ModerationSubmission[]
+  webhooks    GuildWebhook[]
 
   @@index([id])
 }
@@ -170,6 +196,157 @@ model History {
   @@index([guildId])
   @@index([userId])
   @@index([type])
+}
+
+// Webhook the bot created for a channel, reused across restarts
+model GuildWebhook {
+  id        String   @id @default(cuid())
+  guildId   String
+  channelId String
+  webhookId String
+  token     String
+  createdAt DateTime @default(now())
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@unique([guildId, channelId])
+  @@index([guildId])
+}
+
+// Moderation case model - every moderation action gets a numbered case
+model ModerationCase {
+  id         String @id @default(cuid())
+  guildId    String
+  caseNumber Int
+
+  type        String // warn | mute | kick | ban | note | unwarn | unmute | unban | purge
+  targetId    String // Discord user id the action was taken against
+  moderatorId String // Discord user id, or "AUTOMOD" for automatic actions
+  reason      String
+  evidence    Json      @default("[]") // Array of attachment/message links
+  duration    Int? // Duration in seconds for temporary punishments
+  expiresAt   DateTime?
+
+  active       Boolean   @default(true) // False once revoked or expired
+  revokedAt    DateTime?
+  revokedBy    String?
+  revokeReason String?
+
+  source    String   @default("command") // command | automod | dashboard | submission
+  createdAt DateTime @default(now())
+
+  guild   Guild                  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  appeals ModerationSubmission[]
+
+  @@unique([guildId, caseNumber])
+  @@index([guildId, targetId])
+  @@index([guildId, type, active])
+  @@index([expiresAt])
+}
+
+// Report / appeal submitted through the dashboard forms
+model ModerationSubmission {
+  id      String @id @default(cuid())
+  guildId String
+  number  Int
+  kind    String // report | appeal
+
+  authorId String // Submitter Discord id
+  targetId String? // Reported user (reports only)
+  caseId   String? // Appealed case (appeals only)
+  answers  Json // [{ fieldId, label, type, value }]
+
+  status    String    @default("pending") // pending | in_review | approved | rejected
+  handledBy String?
+  handledAt DateTime?
+  response  String? // Moderator response shown to the author
+
+  channelId String? // Moderation channel the embed was posted to
+  messageId String? // Embed message id, used to keep it in sync
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guild Guild           @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  case  ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
+
+  @@unique([guildId, kind, number])
+  @@index([guildId, kind, status])
+  @@index([guildId, authorId])
+}
+
+// Website news posts, written in the admin panel
+model NewsPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  summary     String?
+  content     String // Markdown body
+  category    String    @default("update") // update | feature | maintenance | announcement
+  coverUrl    String?
+  authorId    String // Discord id of the author
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([published, publishedAt])
+  @@index([category])
+}
+
+// Status page incident, opened automatically or by hand
+model Incident {
+  id         String    @id @default(cuid())
+  title      String
+  body       String?
+  severity   String    @default("minor") // minor | major | critical | maintenance
+  status     String    @default("investigating") // investigating | identified | monitoring | resolved
+  component  String? // gateway | database | website | shards
+  auto       Boolean   @default(false) // Opened by the health check, not by a human
+  startedAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  updates IncidentUpdate[]
+
+  @@index([startedAt])
+  @@index([resolvedAt])
+}
+
+model IncidentUpdate {
+  id         String   @id @default(cuid())
+  incidentId String
+  status     String
+  body       String
+  createdAt  DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  @@index([incidentId])
+}
+
+// Single row holding the website wide configuration
+model GlobalConfig {
+  id        String   @id @default("global")
+  updatedAt DateTime @updatedAt
+
+  // Site banner
+  bannerEnabled Boolean @default(false)
+  bannerText    String?
+  bannerVariant String  @default("warning") // info | warning | danger | success
+
+  // Links
+  inviteUrl  String?
+  supportUrl String?
+  githubUrl  String?
+
+  // Landing copy
+  heroTagline String?
+  heroText    String?
+
+  // Status page
+  maintenance        Boolean @default(false)
+  maintenanceMessage String?
+  serviceOverrides   Json    @default("{}") // { gateway: { status, note }, ... }
 }
 
 // Backup model for server backups

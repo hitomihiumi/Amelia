@@ -70,6 +70,10 @@ class MongoDBService {
       await userDataCollection.createIndex({ userId: 1, guildId: 1 });
       await guildDataCollection.createIndex({ guildId: 1 });
 
+      // Status heartbeat written by the bot and read by the website
+      const statusCollection = MongoDBService.getCollection("bot_status");
+      await statusCollection.createIndex({ updatedAt: 1 });
+
       // TTL index for automatic cleanup of temp data (24 hours)
       await userTempCollection.createIndex({ updatedAt: 1 }, { expireAfterSeconds: 86400 });
 
