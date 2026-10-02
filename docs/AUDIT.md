@@ -29,6 +29,19 @@ Each key has a switch and an optional channel override in `audit.events`; an eve
 there is on as soon as the log itself is enabled (`resolveAuditEvent` in
 `src/types/helpers/AuditSchema.ts`).
 
+### Which channel an event goes to
+
+The most specific setting wins (`resolveAuditChannel` in `src/types/helpers/AuditSchema.ts`):
+
+1. the channel of the event itself, `audit.events[event].channel`;
+2. the channel of its category, `audit.categories[category].channel` — Members, Messages, Voice or
+   Server;
+3. the default channel, `audit.channel`.
+
+An enabled event that resolves to none of them is rejected when the dashboard saves the settings, so
+the log can never silently drop entries. The dashboard creates a webhook for exactly the channels
+that the enabled events resolve to, and removes the ones that are no longer used.
+
 Kicks are not a gateway event: `guildMemberRemove` asks the Discord audit log whether the departure
 was a kick and logs `member_kick` instead of `member_leave` when it was.
 
@@ -78,4 +91,5 @@ and one insert in `messageCreate` are all it would take if that becomes necessar
 ## Configuration paths
 
 `audit.enabled`, `audit.channel`, `audit.ignore_channels`, `audit.ignore_roles`,
-`audit.ignore_bots`, `audit.webhook.name`, `audit.webhook.avatar`, `audit.events`.
+`audit.ignore_bots`, `audit.webhook.name`, `audit.webhook.avatar`, `audit.categories`,
+`audit.events`.

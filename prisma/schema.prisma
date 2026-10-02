@@ -124,6 +124,7 @@ model Guild {
   auditIgnoreBots     Boolean  @default(true)
   auditWebhookName    String?
   auditWebhookAvatar  String?
+  auditCategories     Json     @default("{}")
   auditEvents         Json     @default("{}")
 
   // Permissions

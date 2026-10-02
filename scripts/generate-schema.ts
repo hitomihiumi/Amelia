@@ -467,6 +467,11 @@ const guildSchemaMap: Record<string, SchemaField> = {
     prismaType: "String",
     optional: true,
   },
+  "audit.categories": {
+    prismaField: "auditCategories",
+    prismaType: "Json",
+    default: '"{}"',
+  },
   "audit.events": {
     prismaField: "auditEvents",
     prismaType: "Json",

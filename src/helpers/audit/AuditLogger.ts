@@ -15,6 +15,7 @@ import {
   AUDIT_EVENT_COLOR,
   AuditEventKey,
   AuditSettings,
+  resolveAuditChannel,
   resolveAuditEvent,
 } from "../../types/helpers";
 import { t } from "../../i18n/helpers";
@@ -126,7 +127,7 @@ export class AuditLogger {
         return;
       }
 
-      const channelId = config.channel || settings.channel;
+      const channelId = resolveAuditChannel(settings, event);
       if (!channelId) return;
 
       await this.enqueue(channelId, settings, this.buildEmbed(event, payload));

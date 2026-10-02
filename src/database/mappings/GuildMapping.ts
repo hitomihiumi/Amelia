@@ -251,6 +251,9 @@ export const GuildPathMap: PathMap = {
   "audit.webhook.avatar": {
     field: "auditWebhookAvatar",
   },
+  "audit.categories": {
+    field: "auditCategories",
+  },
   "audit.events": {
     field: "auditEvents",
   },
@@ -387,6 +390,7 @@ export const GuildPathMap: PathMap = {
   audit: {
     field: "",
     children: [
+      "categories",
       "channel",
       "enabled",
       "events",
@@ -496,6 +500,7 @@ export const GuildFieldMap: Record<string, string> = {
   "audit.ignore_bots": "auditIgnoreBots",
   "audit.webhook.name": "auditWebhookName",
   "audit.webhook.avatar": "auditWebhookAvatar",
+  "audit.categories": "auditCategories",
   "audit.events": "auditEvents",
   "permissions.commands": "commandPermissions",
 };

@@ -42,8 +42,15 @@ export interface AuditEventConfig {
   channel: string | null;
 }
 
+/** Channel shared by every event of a category. */
+export interface AuditCategoryConfig {
+  /** `null` falls back to `audit.channel`. */
+  channel: string | null;
+}
+
 export interface AuditSettings {
   enabled: boolean;
+  /** Default channel, used by every event that has no channel of its own. */
   channel: string | null;
   ignore_channels: string[];
   ignore_roles: string[];
@@ -52,6 +59,8 @@ export interface AuditSettings {
     name: string | null;
     avatar: string | null;
   };
+  /** Per-category channels: Members, Messages, Voice, Server. */
+  categories: Partial<Record<AuditCategory, AuditCategoryConfig>>;
   events: Partial<Record<AuditEventKey, AuditEventConfig>>;
 }
 
@@ -116,6 +125,7 @@ export const DEFAULT_AUDIT_SETTINGS: AuditSettings = {
   ignore_roles: [],
   ignore_bots: true,
   webhook: { name: null, avatar: null },
+  categories: {},
   events: {},
 };
 
@@ -125,4 +135,20 @@ export function resolveAuditEvent(
   event: AuditEventKey,
 ): AuditEventConfig {
   return events?.[event] ?? { enabled: true, channel: null };
+}
+
+/**
+ * Channel an event is posted to. The most specific setting wins:
+ * the event's own channel, then its category's channel, then the default one.
+ */
+export function resolveAuditChannel(
+  settings: Pick<AuditSettings, "channel" | "categories" | "events">,
+  event: AuditEventKey,
+): string | null {
+  return (
+    resolveAuditEvent(settings.events, event).channel ||
+    settings.categories?.[AUDIT_EVENT_CATEGORY[event]]?.channel ||
+    settings.channel ||
+    null
+  );
 }
