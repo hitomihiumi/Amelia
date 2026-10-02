@@ -48,8 +48,12 @@ model Guild {
   findTeamEmbed             Json    @default("{\"title\":null,\"description\":null,\"color\":null,\"thumbnail\":null,\"image\":null,\"footer\":null}")
   findTeamGames             Json    @default("[]")
 
-  // Custom Components are stored in MongoDB for better performance
-  // See: utils.components in DBGuild.ts
+  // Custom Components
+  componentsModals      Json @default("[]")
+  componentsEmbeds      Json @default("[]")
+  componentsButtons     Json @default("[]")
+  componentsSelectMenus Json @default("[]")
+  componentsScenarios   Json @default("[]")
 
   // Giveaways
   giveaways Json @default("[]")
@@ -168,6 +172,25 @@ model User {
 
   customBadges Json @default("[]")
 
+  // Level and economy (moved back from the MongoDB cache)
+  xp            Int      @default(0)
+  totalXp       Int      @default(0)
+  level         Int      @default(1)
+  voiceTime     Int      @default(0)
+  messageCount  Int      @default(0)
+  wallet        Int      @default(0)
+  bank          Int      @default(0)
+  customRoles   Json     @default("[]")
+  customItems   Json     @default("[]")
+  workTimeout   DateTime?
+  timelyTimeout DateTime?
+  dailyTimeout  DateTime?
+  weeklyTimeout DateTime?
+  robTimeout    DateTime?
+
+  // Game state (moved back from the MongoDB cache)
+  games Json @default("{}")
+
   // Presets
   jtcPresets Json @default("[]")
 
@@ -177,6 +200,8 @@ model User {
 
   @@unique([userId, guildId])
   @@index([userId, guildId])
+  @@index([guildId, totalXp])
+  @@index([guildId, voiceTime])
 }
 
 // History model for tracking actions

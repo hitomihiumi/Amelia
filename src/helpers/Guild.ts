@@ -84,6 +84,19 @@ export class Guild {
   }
 
   /**
+   * Atomically increment a numeric value and return the new value (ASYNC - must use await)
+   * Used for counters that must never collide (e.g. moderation case numbers)
+   */
+  public async increment<K extends LiteralGuildSchemaKey>(
+    path: K,
+    by?: GetSchemaValueType<GuildSchema, K> extends number ? number : never,
+  ): Promise<GetSchemaValueType<GuildSchema, K>>;
+  public async increment(path: string, by?: number): Promise<number>;
+  public async increment(path: string, by = 1): Promise<number> {
+    return await this.db.increment(path, by);
+  }
+
+  /**
    * Push to array (ASYNC - must use await)
    * Supports both literal paths (with type checking) and dynamic paths
    */

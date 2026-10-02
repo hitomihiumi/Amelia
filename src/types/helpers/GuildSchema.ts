@@ -27,7 +27,7 @@ export interface GuildSchema {
     counter: {
       enabled: boolean;
       category: string | null;
-      channel: {
+      channels: {
         [key: string]: CounterChannel;
       };
     };
@@ -115,6 +115,12 @@ export interface GuildSchema {
     /** Days after which a warn stops counting towards escalation. `0` disables expiry. */
     warn_expiry: number;
     warn_thresholds: WarnThreshold[];
+    /** Per-guild counters that allocate consecutive case/report/appeal numbers. */
+    sequences: {
+      case: number;
+      report: number;
+      appeal: number;
+    };
     forms: {
       report: ModerationForm;
       appeal: ModerationForm;

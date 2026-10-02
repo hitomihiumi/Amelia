@@ -32,6 +32,10 @@ export interface UserSchema {
     level_up: LevelCardDisplayOptions;
     badges: string[];
   };
+  /** Persistent game state (stored in the `games` column). */
+  games: {
+    tiles: any;
+  };
   presets: {
     jtc: JTCPreset[];
   };
@@ -39,9 +43,6 @@ export interface UserSchema {
 
 export interface UserCache {
   temp: {
-    games: {
-      tiles: any;
-    };
     voice_time: number;
   };
 }

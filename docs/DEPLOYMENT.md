@@ -22,7 +22,7 @@ This guide explains how to deploy the Amelia bot using Docker and Docker Compose
     
     # Database URLs (configured for the docker-compose services)
     DATABASE_URL="postgresql://user:password@postgres:5432/amelia?schema=public"
-    MONGODB_URL="mongodb://mongodb:27017/amelia"
+    REDIS_URL="redis://redis:6379"
     ```
 
 3.  **Start the bot**:
@@ -33,7 +33,7 @@ This guide explains how to deploy the Amelia bot using Docker and Docker Compose
 
     This command will:
     - Start a PostgreSQL database container.
-    - Start a MongoDB container.
+    - Start a Redis cache container.
     - Pull the latest bot image and start it.
 
 ## Updating
@@ -71,13 +71,13 @@ If you want to run the containers manually using the Docker CLI:
       postgres:15-alpine
     ```
 
-3.  **Start MongoDB**:
+3.  **Start Redis**:
     ```bash
     docker run -d \
-      --name amelia_mongodb \
+      --name amelia_redis \
       --network amelia-network \
-      -v mongodb_data:/data/db \
-      mongo:6
+      -v redis_data:/data \
+      redis:7-alpine
     ```
 
 4.  **Start the Bot**:
@@ -87,7 +87,7 @@ If you want to run the containers manually using the Docker CLI:
       --network amelia-network \
       -e TOKEN=your_discord_bot_token \
       -e DATABASE_URL="postgresql://user:password@amelia_postgres:5432/amelia?schema=public" \
-      -e MONGODB_URL="mongodb://amelia_mongodb:27017/amelia" \
+      -e REDIS_URL="redis://amelia_redis:6379" \
       ghcr.io/hitomihiumi/amelia:latest
     ```
 
@@ -99,7 +99,7 @@ If you prefer to run the bot directly on your system without Docker, follow thes
 
 -   [Node.js](https://nodejs.org/) (v18 or higher)
 -   [PostgreSQL](https://www.postgresql.org/)
--   [MongoDB](https://www.mongodb.com/)
+-   [Redis](https://redis.io/)
 
 ### Installation
 
@@ -119,7 +119,7 @@ If you prefer to run the bot directly on your system without Docker, follow thes
     ```dotenv
     TOKEN=your_discord_bot_token
     DATABASE_URL="postgresql://user:password@localhost:5432/amelia?schema=public"
-    MONGODB_URL="mongodb://localhost:27017/amelia"
+    REDIS_URL="redis://localhost:6379"
     ```
 
 4.  **Generate Prisma Client**:
@@ -153,4 +153,4 @@ pm2 start dist/index.js --name amelia
     docker-compose logs -f bot
     ```
 
--   **Database connection issues**: Ensure the `DATABASE_URL` and `MONGODB_URL` in your `.env` file match the service names and credentials defined in `docker-compose.yml`.
+-   **Database connection issues**: Ensure the `DATABASE_URL` and `REDIS_URL` in your `.env` file match the service names and credentials defined in `docker-compose.yml`.

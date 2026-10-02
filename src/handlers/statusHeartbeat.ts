@@ -1,12 +1,19 @@
 import { Client } from "discord.js";
-import { MongoDBService } from "../database";
+import { RedisService } from "../database";
 import { Manifest, SlashCommand } from "../types/helpers";
 import * as packageJson from "../../package.json";
 
 /** How often the heartbeat is refreshed. The website treats it as stale after 90s. */
 const INTERVAL_MS = 30_000;
 
-export const STATUS_COLLECTION = "bot_status";
+/**
+ * The key lives for two ticks; once it expires the shard is considered offline,
+ * so a crashed bot disappears from the status page on its own.
+ */
+const HEARTBEAT_TTL_SECONDS = 120;
+
+/** Redis key pattern shared with the website status page. */
+export const STATUS_KEY_PREFIX = "bot_status:shard";
 
 interface StatusDocument {
   _id: string;
@@ -58,18 +65,19 @@ async function writeHeartbeat(client: Client, status: "online" | "offline"): Pro
     updatedAt: now,
   };
 
-  await MongoDBService.getCollection<StatusDocument>(STATUS_COLLECTION).updateOne(
-    { _id: document._id },
-    { $set: document },
-    { upsert: true },
+  await RedisService.getClient().set(
+    `${STATUS_KEY_PREFIX}:${shardId}`,
+    JSON.stringify(document),
+    "EX",
+    HEARTBEAT_TTL_SECONDS,
   );
 }
 
 /**
  * Publishes the metrics the website status page and the landing statistics read.
  *
- * The bot has no HTTP API, so the numbers travel through the MongoDB cache both
- * projects already share.
+ * The bot has no HTTP API, so the numbers travel through the Redis cache both
+ * projects share. A missing key means the shard is offline.
  */
 module.exports = (client: Client) => {
   client.on("clientReady", () => {

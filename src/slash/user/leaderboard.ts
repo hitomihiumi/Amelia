@@ -1,4 +1,4 @@
-import { SlashCommand, UserSchema } from "../../types/helpers";
+import { SlashCommand } from "../../types/helpers";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -10,28 +10,18 @@ import {
   MessageFlags,
 } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
-import { MongoDBService } from "../../database";
-import {t, tObject} from "../../i18n/helpers";
-import type { Filter } from "mongodb";
+import { prisma } from "../../database";
+import { t, tObject } from "../../i18n/helpers";
 import { formatTime } from "../../handlers/functions";
 
-interface User {
-  _id: string;
-  data: {
-    economy?: {
-      balance?: {
-        wallet?: number;
-        bank?: number;
-      };
-    };
-    level?: {
-      total_xp?: number;
-      voice_time?: number;
-      level?: number;
-      xp?: number;
-    };
-  };
-  totalCoins?: number;
+interface LeaderboardEntry {
+  userId: string;
+  level: number;
+  xp: number;
+  totalXp: number;
+  voiceTime: number;
+  wallet: number;
+  bank: number;
 }
 
 type SortBy = "level" | "voice" | "coins";
@@ -250,7 +240,7 @@ function buildLeaderboardEmbed(
   client: Client,
   lang: string,
   sortBy: SortBy,
-  users: User[],
+  users: LeaderboardEntry[],
   page: number,
   limit: number,
   total: number,
@@ -276,16 +266,16 @@ function buildLeaderboardEmbed(
   let desc = "";
   for (const usr of users) {
     pos++;
-    const userMention = `<@${usr._id.split(":")[0]}>`;
+    const userMention = `<@${usr.userId}>`;
     desc +=
       t(client, lang, `commands.leaderboard.embeds.${sortBy}.field.name`, pos, userMention) + "\n";
 
     if (sortBy === "level") {
-      const lvl = usr.data?.level?.level ?? 0;
-      const xp = usr.data?.level?.xp ?? 0;
-      desc += t(client, lang, `commands.leaderboard.embeds.${sortBy}.field.value`, lvl, xp) + "\n";
+      desc +=
+        t(client, lang, `commands.leaderboard.embeds.${sortBy}.field.value`, usr.level, usr.xp) +
+        "\n";
     } else if (sortBy === "voice") {
-      const time = usr.data?.level?.voice_time ?? 0;
+      const time = usr.voiceTime;
       desc +=
         t(
           client,
@@ -294,10 +284,7 @@ function buildLeaderboardEmbed(
           formatTime(time, lang, tObject(client, lang, "time_units"), { full: true }),
         ) + "\n";
     } else {
-      const totalCoins =
-        typeof (usr as any).totalCoins === "number"
-          ? (usr as any).totalCoins
-          : (usr.data?.economy?.balance?.wallet ?? 0) + (usr.data?.economy?.balance?.bank ?? 0);
+      const totalCoins = usr.wallet + usr.bank;
       desc +=
         t(client, lang, `commands.leaderboard.embeds.${sortBy}.field.value`, totalCoins, emoji) +
         "\n";
@@ -316,41 +303,40 @@ async function membersData(
   limit: number,
   guildId: string,
   sortBy: SortBy = "level",
-): Promise<{ results: User[]; total: number }> {
-  const collection = MongoDBService.getCollection<UserSchema>("user_data");
-  const filter = { _id: { $regex: `:${guildId}$` } } as unknown as Filter<UserSchema>;
+): Promise<{ results: LeaderboardEntry[]; total: number }> {
+  const where = { guildId };
+  const total = await prisma.user.count({ where });
 
-  const total = await collection.countDocuments(filter);
+  const select = {
+    userId: true,
+    level: true,
+    xp: true,
+    totalXp: true,
+    voiceTime: true,
+    wallet: true,
+    bank: true,
+  };
 
-  if (sortBy === "level") {
-    const results = (await collection
-      .find(filter)
-      .sort({ "data.level.total_xp": -1 })
-      .skip(page * limit)
-      .limit(limit)
-      .toArray()) as unknown as User[];
-    return { results, total };
-  } else if (sortBy === "voice") {
-    const results = (await collection
-      .find(filter)
-      .sort({ "data.level.voice_time": -1 })
-      .skip(page * limit)
-      .limit(limit)
-      .toArray()) as unknown as User[];
-    return { results, total };
-  } else {
-    const pipeline = [
-      { $match: filter },
-      {
-        $addFields: {
-          totalCoins: { $add: ["$data.economy.balance.wallet", "$data.economy.balance.bank"] },
-        },
-      },
-      { $sort: { totalCoins: -1 } },
-      { $skip: page * limit },
-      { $limit: limit },
-    ];
-    const results = (await collection.aggregate(pipeline).toArray()) as unknown as User[];
+  if (sortBy === "coins") {
+    // The coins board sorts by wallet + bank, which is not a single column —
+    // fetch the guild and rank in memory. Guilds hold hundreds, not millions.
+    const rows = await prisma.user.findMany({ where, select });
+    const results = rows
+      .sort((a, b) => b.wallet + b.bank - (a.wallet + a.bank))
+      .slice(page * limit, page * limit + limit);
     return { results, total };
   }
+
+  const orderBy =
+    sortBy === "voice" ? { voiceTime: "desc" as const } : { totalXp: "desc" as const };
+
+  const results = await prisma.user.findMany({
+    where,
+    select,
+    orderBy,
+    skip: page * limit,
+    take: limit,
+  });
+
+  return { results, total };
 }

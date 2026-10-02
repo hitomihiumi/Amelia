@@ -87,19 +87,7 @@ export class ModerationService {
    * never receive the same number.
    */
   private async nextCaseNumber(): Promise<number> {
-    await prisma.guild.upsert({
-      where: { id: this.discordGuild.id },
-      update: {},
-      create: { id: this.discordGuild.id },
-    });
-
-    const row = await prisma.guild.update({
-      where: { id: this.discordGuild.id },
-      data: { modCaseSeq: { increment: 1 } },
-      select: { modCaseSeq: true },
-    });
-
-    return row.modCaseSeq;
+    return await this.guild.increment("moderation.sequences.case");
   }
 
   /** Translate a case type ("warn" → "Warn"). */
@@ -512,17 +500,20 @@ export class ModerationService {
 
     const appealUrl = this.appealUrl();
     if (appealUrl) {
-
       embed.setFooter({
         text: t(this.client, lang, "moderation.dm.appeal_footer"),
-      })
+      });
 
-      return await this.sendDM(entry.targetId, embed, new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+      return await this.sendDM(
+        entry.targetId,
+        embed,
+        new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
           new ButtonBuilder()
-              .setLabel(t(this.client, lang, "moderation.dm.appeal_button"))
-              .setStyle(ButtonStyle.Link)
-              .setURL(appealUrl)
-      ));
+            .setLabel(t(this.client, lang, "moderation.dm.appeal_button"))
+            .setStyle(ButtonStyle.Link)
+            .setURL(appealUrl),
+        ),
+      );
     }
 
     await this.sendDM(entry.targetId, embed);
@@ -556,7 +547,11 @@ export class ModerationService {
     return `${base.replace(/\/+$/, "")}/submit/${this.discordGuild.id}/report`;
   }
 
-  private async sendDM(userId: string, embed: EmbedBuilder, action?: ActionRowBuilder<MessageActionRowComponentBuilder>): Promise<void> {
+  private async sendDM(
+    userId: string,
+    embed: EmbedBuilder,
+    action?: ActionRowBuilder<MessageActionRowComponentBuilder>,
+  ): Promise<void> {
     try {
       const user: User = await this.client.users.fetch(userId);
       await user.send({ embeds: [embed], components: action ? [action] : [] });

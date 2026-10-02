@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   migrate:
     image: ghcr.io/hitomihiumi/amelia:latest
@@ -10,7 +8,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      mongodb:
+      redis:
         condition: service_healthy
     command: sh -c "sleep 5 && npx prisma migrate deploy"
     networks:
@@ -26,7 +24,7 @@ services:
         condition: service_completed_successfully
       postgres:
         condition: service_started
-      mongodb:
+      redis:
         condition: service_started
     volumes:
       # Mount assets if you want to customize them locally, otherwise the image has them.
@@ -55,19 +53,16 @@ services:
     networks:
       - amelia_network
 
-  mongodb:
-    image: mongo:6
-    container_name: amelia_mongodb
+  redis:
+    image: redis:7-alpine
+    container_name: amelia_redis
     restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-user}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-password}
     volumes:
-      - mongodb_data:/data/db
+      - redis_data:/data
     ports:
-      - "27017:27017"
+      - "6379:6379"
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -76,7 +71,7 @@ services:
 
 volumes:
   postgres_data:
-  mongodb_data:
+  redis_data:
 
 networks:
   amelia_network:

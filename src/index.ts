@@ -24,7 +24,7 @@ import {
 import { FileWatcher } from "@hitomihiumi/filewatcher";
 import { commandLoader } from "./handlers/cmdLoaders";
 import { initializeI18n } from "./i18n/locales";
-import { prisma, DatabaseService, MongoDBService } from "./database";
+import { prisma, DatabaseService, RedisService } from "./database";
 import { emojis } from "./emoji/emojis";
 import { markOffline } from "./handlers/statusHeartbeat";
 import { iconsMap } from "./helpers/assetsMap";
@@ -126,8 +126,8 @@ client.holder = {
     // Connect to PostgreSQL
     await DatabaseService.connect();
 
-    // Connect to MongoDB for temp data cache
-    await MongoDBService.connect();
+    // Connect to Redis for temp data cache
+    await RedisService.connect();
   } catch (error) {
     console.error("Failed to connect to databases:".red, error);
     process.exit(1);
@@ -173,8 +173,8 @@ const shutdown = async (signal: string) => {
     // Tell the website the bot is going down before the connections close.
     await markOffline(client);
 
-    // Disconnect from MongoDB
-    await MongoDBService.disconnect();
+    // Disconnect from Redis
+    await RedisService.disconnect();
 
     // Disconnect from PostgreSQL
     await DatabaseService.disconnect();

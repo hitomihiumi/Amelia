@@ -80,6 +80,21 @@ export const GuildPathMap: PathMap = {
   "utils.find_team.games": {
     field: "findTeamGames",
   },
+  "utils.components.modals": {
+    field: "componentsModals",
+  },
+  "utils.components.embed": {
+    field: "componentsEmbeds",
+  },
+  "utils.components.buttons": {
+    field: "componentsButtons",
+  },
+  "utils.components.selectMenus": {
+    field: "componentsSelectMenus",
+  },
+  "utils.components.scenarios": {
+    field: "componentsScenarios",
+  },
   "utils.giveaways": {
     field: "giveaways",
   },
@@ -167,6 +182,15 @@ export const GuildPathMap: PathMap = {
   "moderation.forms.appeal": {
     field: "modAppealForm",
   },
+  "moderation.sequences.case": {
+    field: "modCaseSeq",
+  },
+  "moderation.sequences.report": {
+    field: "modReportSeq",
+  },
+  "moderation.sequences.appeal": {
+    field: "modAppealSeq",
+  },
   "moderation.auto_moderation.invite.enabled": {
     field: "inviteEnabled",
   },
@@ -234,21 +258,6 @@ export const GuildPathMap: PathMap = {
     field: "commandPermissions",
   },
   "temp.join_to_create.map": {
-    field: "jtcTempMap",
-  },
-  "utils.components.modals": {
-    field: "",
-  },
-  "utils.components.embed": {
-    field: "",
-  },
-  "utils.components.buttons": {
-    field: "",
-  },
-  "utils.components.selectMenus": {
-    field: "",
-  },
-  "utils.components.scenarios": {
     field: "",
   },
   settings: {
@@ -278,6 +287,10 @@ export const GuildPathMap: PathMap = {
   "utils.find_team": {
     field: "",
     children: ["channel", "embed", "enabled", "games", "select_placeholder", "send_channel"],
+  },
+  "utils.components": {
+    field: "",
+    children: ["buttons", "embed", "modals", "scenarios", "selectMenus"],
   },
   economy: {
     field: "",
@@ -331,6 +344,7 @@ export const GuildPathMap: PathMap = {
       "forms",
       "log_channel",
       "moderation_roles",
+      "sequences",
       "warn_expiry",
       "warn_thresholds",
     ],
@@ -338,6 +352,10 @@ export const GuildPathMap: PathMap = {
   "moderation.forms": {
     field: "",
     children: ["appeal", "report"],
+  },
+  "moderation.sequences": {
+    field: "",
+    children: ["appeal", "case", "report"],
   },
   "moderation.auto_moderation": {
     field: "",
@@ -394,13 +412,9 @@ export const GuildPathMap: PathMap = {
     field: "",
     children: ["map"],
   },
-  "utils.components": {
-    field: "",
-    children: ["buttons", "embed", "modals", "scenarios", "selectMenus"],
-  },
 };
 
-// Note: MongoDB paths (utils.components.modals, utils.components.embed, utils.components.buttons, utils.components.selectMenus, utils.components.scenarios) are not included in FieldMap
+// Note: Redis cache paths (temp.join_to_create.map) are not included in FieldMap
 export const GuildFieldMap: Record<string, string> = {
   "settings.prefix": "prefix",
   "settings.language": "language",
@@ -425,6 +439,11 @@ export const GuildFieldMap: Record<string, string> = {
   "utils.find_team.select_placeholder": "findTeamSelectPlaceholder",
   "utils.find_team.embed": "findTeamEmbed",
   "utils.find_team.games": "findTeamGames",
+  "utils.components.modals": "componentsModals",
+  "utils.components.embed": "componentsEmbeds",
+  "utils.components.buttons": "componentsButtons",
+  "utils.components.selectMenus": "componentsSelectMenus",
+  "utils.components.scenarios": "componentsScenarios",
   "utils.giveaways": "giveaways",
   "economy.currency.emoji": "currencyEmoji",
   "economy.currency.id": "currencyId",
@@ -454,6 +473,9 @@ export const GuildFieldMap: Record<string, string> = {
   "moderation.warn_thresholds": "modWarnThresholds",
   "moderation.forms.report": "modReportForm",
   "moderation.forms.appeal": "modAppealForm",
+  "moderation.sequences.case": "modCaseSeq",
+  "moderation.sequences.report": "modReportSeq",
+  "moderation.sequences.appeal": "modAppealSeq",
   "moderation.auto_moderation.invite.enabled": "inviteEnabled",
   "moderation.auto_moderation.invite.ignore_channels": "inviteIgnoreChannels",
   "moderation.auto_moderation.invite.ignore_roles": "inviteIgnoreRoles",
@@ -476,5 +498,4 @@ export const GuildFieldMap: Record<string, string> = {
   "audit.webhook.avatar": "auditWebhookAvatar",
   "audit.events": "auditEvents",
   "permissions.commands": "commandPermissions",
-  "temp.join_to_create.map": "jtcTempMap",
 };

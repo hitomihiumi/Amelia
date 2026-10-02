@@ -66,7 +66,7 @@ sweepers: { ...Options.DefaultSweeperSettings, messages: { interval: 3600, lifet
 ```
 
 Messages that are older than that, or that predate the last restart, are logged with
-“content unavailable”. Persisting them would mean writing every message to MongoDB; the collection
+“content unavailable”. Persisting them would mean writing every message to the database; a table
 and one insert in `messageCreate` are all it would take if that becomes necessary.
 
 ## Permissions
