@@ -8,6 +8,7 @@ import {
   ModalCustom,
   ButtonCustom,
   SelectMenuCustom,
+  LayoutCustom,
 } from "../../types/helpers";
 import {
   Client,
@@ -20,11 +21,15 @@ import {
   ChannelType,
   MessageCreateOptions,
   MessageEditOptions,
+  InteractionReplyOptions,
   ActionRowBuilder,
   MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Guild } from "../Guild";
-import { CustomEmbed, VariableContext } from "./CustomEmbed";
+import { CustomEmbed } from "./CustomEmbed";
+import { buildLayoutPayload, LayoutPayload } from "./CustomLayout";
+import { substituteVariables, VariableContext } from "./substitute";
+import { t } from "../../i18n/helpers";
 import { CustomModal } from "./CustomModal";
 import { CustomButton } from "./CustomButton";
 import { CustomSelectMenu } from "./CustomSelectMenu";
@@ -60,6 +65,12 @@ interface ExecutionContext {
   };
   variables?: Record<string, string>;
 }
+
+/** Result of resolving `action.layoutId`. */
+type LayoutResolution =
+  | { status: "none" }
+  | { status: "ok"; payload: LayoutPayload }
+  | { status: "error"; error: string };
 
 interface CooldownEntry {
   userId: string;
@@ -194,7 +205,9 @@ export class ScenarioRunner {
     // Add input/selected context based on interaction type
     if (interaction.isModalSubmit()) {
       context.input = [];
-      const modal = await guildWrapper.get(`utils.components.modals`).then((modals) => (modals as ModalCustom[]).find((m) => m.id === interaction.customId));
+      const modal = await guildWrapper
+        .get(`utils.components.modals`)
+        .then((modals) => (modals as ModalCustom[]).find((m) => m.id === interaction.customId));
       if (!modal) {
         return { success: false, error: "Modal configuration not found" };
       }
@@ -203,7 +216,7 @@ export class ScenarioRunner {
       fieldsArray.forEach((field) => {
         context.input!.push({
           value: (field as any).value || "",
-          label: modal.fields.filter(m => m.id === (field as any).customId)[0].name || "", // customId contains the field identifier
+          label: modal.fields.filter((m) => m.id === (field as any).customId)[0].name || "", // customId contains the field identifier
         });
       });
     } else if (interaction.isStringSelectMenu()) {
@@ -394,7 +407,6 @@ export class ScenarioRunner {
   private async executeAction(
     action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
-
     try {
       switch (action.type) {
         case "show_modal":
@@ -427,70 +439,7 @@ export class ScenarioRunner {
   }
 
   private substituteVariables(text: string): string {
-    if (!text) return text;
-
-    let result = text;
-
-    // User variables
-    if (this.context.user) {
-      result = result
-        .replace(/{user\.id}/g, this.context.user.id)
-        .replace(/{user\.name}/g, this.context.user.name)
-        .replace(/{user\.displayName}/g, this.context.user.displayName)
-        .replace(/{user\.mention}/g, this.context.user.mention)
-        .replace(/{user\.avatar}/g, this.context.user.avatar);
-    }
-
-    // Channel variables
-    if (this.context.channel) {
-      result = result
-        .replace(/{channel\.id}/g, this.context.channel.id)
-        .replace(/{channel\.name}/g, this.context.channel.name)
-        .replace(/{channel\.mention}/g, this.context.channel.mention);
-    }
-
-    // Guild variables
-    if (this.context.guild) {
-      result = result
-        .replace(/{guild\.id}/g, this.context.guild.id)
-        .replace(/{guild\.name}/g, this.context.guild.name)
-        .replace(/{guild\.icon}/g, this.context.guild.icon || "");
-    }
-
-    // Input variables (by index: {input.0}, {input.0.label}, {input.1}, etc.)
-    if (this.context.input) {
-      this.context.input.forEach((field, index) => {
-        // Replace {input.N} with field value
-        result = result.replace(new RegExp(`\\{input\\.${index}\\}`, "g"), field.value);
-        // Replace {input.N.label} with field label
-        result = result.replace(new RegExp(`\\{input\\.${index}\\.label\\}`, "g"), field.label);
-        // Replace {input.N.value} with field value (explicit)
-        result = result.replace(new RegExp(`\\{input\\.${index}\\.value\\}`, "g"), field.value);
-      });
-    }
-
-    // Selected variables
-    if (this.context.selected) {
-      result = result
-        .replace(/{selected\.value}/g, this.context.selected.value)
-        .replace(/{selected\.label}/g, this.context.selected.label);
-    }
-
-    // Custom variables
-    if (this.context.variables) {
-      for (const [key, value] of Object.entries(this.context.variables)) {
-        result = result.replace(new RegExp(`{var\\.${key}}`, "g"), value);
-      }
-    }
-
-    // Date/time
-    const now = new Date();
-    result = result
-      .replace(/{date}/g, now.toLocaleDateString())
-      .replace(/{time}/g, now.toLocaleTimeString())
-      .replace(/{timestamp}/g, Math.floor(now.getTime() / 1000).toString());
-
-    return result;
+    return substituteVariables(text, this.toVariableContext());
   }
 
   private async actionShowModal(
@@ -524,23 +473,31 @@ export class ScenarioRunner {
     action: ScenarioAction,
   ): Promise<{ success: boolean; error?: string }> {
     const interaction = this.context.interaction;
-    const messagePayload = await this.buildMessagePayload(action);
 
-    if (!messagePayload.content && !messagePayload.embeds?.length && !messagePayload.components?.length) {
+    const layout = await this.resolveLayout(action);
+    if (layout.status === "error") return { success: false, error: layout.error };
+    const isLayout = layout.status === "ok";
+
+    const messagePayload = isLayout
+      ? this.layoutCreatePayload(layout.payload)
+      : await this.buildMessagePayload(action);
+
+    if (
+      !isLayout &&
+      !messagePayload.content &&
+      !messagePayload.embeds?.length &&
+      !messagePayload.components?.length
+    ) {
       return { success: false, error: "Message content or embeds are required" };
     }
 
     if (action.type === "reply") {
+      // Combine, never overwrite: a V2 message needs IsComponentsV2 next to Ephemeral
+      const flags = ScenarioRunner.combineFlags(action.ephemeral, isLayout);
       if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({
-          ...messagePayload,
-          flags: action.ephemeral ? MessageFlags.Ephemeral : undefined,
-        });
+        await interaction.followUp({ ...messagePayload, flags } as InteractionReplyOptions);
       } else {
-        await interaction.reply({
-          ...messagePayload,
-          flags: action.ephemeral ? MessageFlags.Ephemeral : undefined,
-        });
+        await interaction.reply({ ...messagePayload, flags } as InteractionReplyOptions);
       }
     } else {
       // Send to specific channel or current channel
@@ -634,38 +591,115 @@ export class ScenarioRunner {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const user = this.context.interaction.user;
-      const messagePayload = await this.buildMessagePayload(action, true);
 
-      if (!messagePayload.content && !messagePayload.embeds?.length && !messagePayload.components?.length) {
+      const layout = await this.resolveLayout(action);
+      if (layout.status === "error") return { success: false, error: layout.error };
+
+      const messagePayload =
+        layout.status === "ok"
+          ? this.layoutCreatePayload(layout.payload)
+          : await this.buildMessagePayload(action, true);
+
+      if (
+        layout.status !== "ok" &&
+        !messagePayload.content &&
+        !messagePayload.embeds?.length &&
+        !messagePayload.components?.length
+      ) {
         return { success: false, error: "DM content or embeds are required" };
       }
-      
+
       const dm = await user.createDM();
       await dm.send(messagePayload);
 
       return { success: true };
     } catch (error: any) {
-      if (error.code === 50007) { // Cannot send messages to this user
+      if (error.code === 50007) {
+        // Cannot send messages to this user
         return { success: false, error: "User has DMs disabled" };
       }
       return { success: false, error: `Failed to send DM: ${error.message}` };
     }
   }
-  
+
   // ============== HELPER METHODS ==============
 
-  private async buildMessagePayload(action: ScenarioAction, isDm: boolean = false): Promise<MessageCreateOptions> {
-    const _content = isDm ? (action.dmContent || action.content) : action.content;
+  /**
+   * Resolve `action.layoutId` into a Components V2 payload.
+   * A layout that was deleted, or that has nothing renderable left, is a failed step.
+   */
+  private async resolveLayout(action: ScenarioAction): Promise<LayoutResolution> {
+    if (!action.layoutId) return { status: "none" };
+
+    const layouts =
+      ((await this.context.guildWrapper.get("utils.components.layouts")) as
+        | LayoutCustom[]
+        | undefined) ?? [];
+    const layout = layouts.find((l) => l.id === action.layoutId);
+
+    if (!layout) {
+      console.warn(
+        `[ScenarioRunner] Scenario "${this.scenario.id}": layout "${action.layoutId}" not found (deleted?), step skipped`,
+      );
+      return { status: "error", error: "Layout not found" };
+    }
+
+    const buttons =
+      ((await this.context.guildWrapper.get("utils.components.buttons")) as
+        | ButtonCustom[]
+        | undefined) ?? [];
+    const selectMenus =
+      ((await this.context.guildWrapper.get("utils.components.selectMenus")) as
+        | SelectMenuCustom[]
+        | undefined) ?? [];
+
+    const payload = buildLayoutPayload(layout, { buttons, selectMenus }, this.toVariableContext(), {
+      onWarn: (message) =>
+        console.warn(`[ScenarioRunner] Scenario "${this.scenario.id}": ${message}`),
+    });
+
+    if (!payload) {
+      console.warn(
+        `[ScenarioRunner] Scenario "${this.scenario.id}": layout "${layout.id}" has nothing renderable left, step skipped`,
+      );
+      return { status: "error", error: "Layout has nothing to show" };
+    }
+
+    return { status: "ok", payload };
+  }
+
+  /** A V2 message carries components and the flag only: no content, embeds, stickers or poll. */
+  private layoutCreatePayload(layout: LayoutPayload): MessageCreateOptions {
+    return { components: layout.components, flags: layout.flags };
+  }
+
+  /** `Ephemeral` and/or `IsComponentsV2`, OR-ed together. `undefined` when neither applies. */
+  private static combineFlags(
+    ephemeral: boolean | undefined,
+    isLayout: boolean,
+  ): number | undefined {
+    let flags = 0;
+    if (ephemeral) flags |= MessageFlags.Ephemeral;
+    if (isLayout) flags |= MessageFlags.IsComponentsV2;
+    return flags === 0 ? undefined : flags;
+  }
+
+  private async buildMessagePayload(
+    action: ScenarioAction,
+    isDm: boolean = false,
+  ): Promise<MessageCreateOptions> {
+    const _content = isDm ? action.dmContent || action.content : action.content;
     const content = _content ? this.substituteVariables(_content) : undefined;
-    
+
     let embedIds = action.embeds || [];
     if (isDm && action.dmEmbedId && embedIds.length === 0) embedIds = [action.dmEmbedId];
     if (!isDm && action.embedId && embedIds.length === 0) embedIds = [action.embedId];
-      
+
     // Fetch embeds
     const resolvedEmbeds: any[] = [];
     if (embedIds.length > 0) {
-      const dbEmbeds = (await this.context.guildWrapper.get("utils.components.embed")) as EmbedCustom[] || [];
+      const dbEmbeds =
+        ((await this.context.guildWrapper.get("utils.components.embed")) as EmbedCustom[]) || [];
       for (const eid of embedIds) {
         const embedData = dbEmbeds.find((e) => e.id === eid);
         if (embedData) {
@@ -674,16 +708,20 @@ export class ScenarioRunner {
         }
       }
     }
-    
+
     // Build components
     const components: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
-    
+
     if (action.buttons?.length || action.selectMenus?.length) {
-      const dbButtons = (await this.context.guildWrapper.get("utils.components.buttons")) as ButtonCustom[] || [];
-      const dbSelectMenus = (await this.context.guildWrapper.get("utils.components.selectMenus")) as SelectMenuCustom[] || [];
-      
+      const dbButtons =
+        ((await this.context.guildWrapper.get("utils.components.buttons")) as ButtonCustom[]) || [];
+      const dbSelectMenus =
+        ((await this.context.guildWrapper.get(
+          "utils.components.selectMenus",
+        )) as SelectMenuCustom[]) || [];
+
       let currentRow = new ActionRowBuilder<MessageActionRowComponentBuilder>();
-      
+
       // Select Menus typically take up a whole row each
       if (action.selectMenus?.length) {
         for (const sid of action.selectMenus) {
@@ -691,29 +729,29 @@ export class ScenarioRunner {
           if (smData) {
             const customSelect = new CustomSelectMenu(smData);
             const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-              customSelect.getSelectMenu()
+              customSelect.getSelectMenu(),
             );
             components.push(row);
           }
         }
       }
-      
+
       // Buttons can be up to 5 per row
       if (action.buttons?.length) {
         for (const bid of action.buttons) {
           const btnData = dbButtons.find((b) => b.id === bid);
           if (btnData) {
             const customButton = new CustomButton(btnData);
-            
+
             if (currentRow.components.length >= 5) {
               components.push(currentRow);
               currentRow = new ActionRowBuilder<MessageActionRowComponentBuilder>();
             }
-            
+
             currentRow.addComponents(customButton.getButton());
           }
         }
-        
+
         if (currentRow.components.length > 0) {
           components.push(currentRow);
         }
@@ -761,11 +799,70 @@ export class ScenarioRunner {
     }
 
     try {
+      const message = interaction.message;
+      const isV2Message = Boolean(message.flags?.has(MessageFlags.IsComponentsV2));
+
+      const layout = await this.resolveLayout(action);
+      if (layout.status === "error") return { success: false, error: layout.error };
+
+      if (layout.status === "ok") {
+        const payload: MessageEditOptions = {
+          components: layout.payload.components,
+          flags: layout.payload.flags,
+        };
+        // A classic message only becomes a V2 one when its content and embeds are cleared in the same edit
+        if (!isV2Message) {
+          payload.content = null;
+          payload.embeds = [];
+        }
+        await message.edit(payload);
+        return { success: true };
+      }
+
+      // The IsComponentsV2 flag can never be removed from a message, and Discord rejects
+      // content/embeds on it: do not send a request that is bound to fail.
+      if (isV2Message) {
+        console.warn(
+          `[ScenarioRunner] Scenario "${this.scenario.id}": cannot edit a Components V2 message with a classic payload (no layoutId), step skipped`,
+        );
+        await this.replyLayoutEditConflict();
+        return {
+          success: false,
+          error: "A Components V2 message can only be edited with a layout",
+        };
+      }
+
       const messagePayload = await this.buildMessagePayload(action);
-      await interaction.message.edit(messagePayload as MessageEditOptions);
+      await message.edit(messagePayload as MessageEditOptions);
       return { success: true };
     } catch (error: any) {
       return { success: false, error: `Failed to edit message: ${error.message}` };
+    }
+  }
+
+  /** Tell the user, ephemerally, why the edit did not happen (only while the interaction is unanswered). */
+  private async replyLayoutEditConflict(): Promise<void> {
+    const interaction = this.context.interaction;
+    if (interaction.replied || interaction.deferred) return;
+
+    let content =
+      "⚠️ This message uses a Components V2 layout and cannot be turned back into a regular message.";
+    try {
+      const lang =
+        ((await this.context.guildWrapper.get("settings.language")) as string | undefined) || "en";
+      content = t(
+        this.context.client,
+        lang,
+        "events.interaction_create.scenario_layout_edit_conflict",
+      );
+    } catch {
+      // keep the English fallback
+    }
+
+    try {
+      await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+    } catch (error) {
+      console.warn("[ScenarioRunner] Could not send the layout edit notice:", error);
     }
   }
 

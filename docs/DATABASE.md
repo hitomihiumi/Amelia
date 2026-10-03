@@ -43,6 +43,8 @@ await guild.set("utils.levels.ignore_channels", ["123", "456"]);
 // Custom components (JSON columns in PostgreSQL)
 const modals = await guild.get("utils.components.modals");
 const buttons = await guild.get("utils.components.buttons");
+// Components V2 layouts (see COMPONENTS_V2.md): rows reference the stored buttons/select menus by id
+const layouts = await guild.get("utils.components.layouts");
 await guild.set("utils.components.modals", [...modals, newModal]);
 ```
 

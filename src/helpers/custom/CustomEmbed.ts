@@ -1,31 +1,8 @@
-import { EmbedCustom, VARIABLE_PLACEHOLDERS } from "../../types/helpers";
+import { EmbedCustom } from "../../types/helpers";
+import { substituteVariables, VariableContext } from "./substitute";
 import { EmbedBuilder, ColorResolvable } from "discord.js";
 
-export interface VariableContext {
-  user?: {
-    id: string;
-    name: string;
-    displayName: string;
-    mention: string;
-    avatar: string;
-  };
-  channel?: {
-    id: string;
-    name: string;
-    mention: string;
-  };
-  guild?: {
-    id: string;
-    name: string;
-    icon: string | null;
-  };
-  input?: Array<{ value: string; label: string }>;
-  selected?: {
-    value: string;
-    label: string;
-  };
-  variables?: Record<string, string>;
-}
+export type { VariableContext };
 
 export class CustomEmbed {
   public data: EmbedCustom;
@@ -38,70 +15,7 @@ export class CustomEmbed {
    * Substitute variables in text with actual values
    */
   private substituteVariables(text: string, context?: VariableContext): string {
-    if (!context) return text;
-
-    let result = text;
-
-    // User variables
-    if (context.user) {
-      result = result
-        .replace(/{user\.id}/g, context.user.id)
-        .replace(/{user\.name}/g, context.user.name)
-        .replace(/{user\.displayName}/g, context.user.displayName)
-        .replace(/{user\.mention}/g, context.user.mention)
-        .replace(/{user\.avatar}/g, context.user.avatar);
-    }
-
-    // Channel variables
-    if (context.channel) {
-      result = result
-        .replace(/{channel\.id}/g, context.channel.id)
-        .replace(/{channel\.name}/g, context.channel.name)
-        .replace(/{channel\.mention}/g, context.channel.mention);
-    }
-
-    // Guild variables
-    if (context.guild) {
-      result = result
-        .replace(/{guild\.id}/g, context.guild.id)
-        .replace(/{guild\.name}/g, context.guild.name)
-        .replace(/{guild\.icon}/g, context.guild.icon || "");
-    }
-
-    // Input variables (by index: {input.0}, {input.0.label}, {input.1}, etc.)
-    if (context.input) {
-      context.input.forEach((field, index) => {
-        // Replace {input.N} with field value
-        result = result.replace(new RegExp(`\\{input\\.${index}\\}`, "g"), field.value);
-        // Replace {input.N.label} with field label
-        result = result.replace(new RegExp(`\\{input\\.${index}\\.label\\}`, "g"), field.label);
-        // Replace {input.N.value} with field value (explicit)
-        result = result.replace(new RegExp(`\\{input\\.${index}\\.value\\}`, "g"), field.value);
-      });
-    }
-
-    // Selected value (from select menu)
-    if (context.selected) {
-      result = result
-        .replace(/{selected\.value}/g, context.selected.value)
-        .replace(/{selected\.label}/g, context.selected.label);
-    }
-
-    // Custom variables
-    if (context.variables) {
-      for (const [key, value] of Object.entries(context.variables)) {
-        result = result.replace(new RegExp(`{var\\.${key}}`, "g"), value);
-      }
-    }
-
-    // Date/time variables
-    const now = new Date();
-    result = result
-      .replace(/{date}/g, now.toLocaleDateString())
-      .replace(/{time}/g, now.toLocaleTimeString())
-      .replace(/{timestamp}/g, Math.floor(now.getTime() / 1000).toString());
-
-    return result;
+    return substituteVariables(text, context);
   }
 
   /**

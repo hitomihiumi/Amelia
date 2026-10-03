@@ -466,15 +466,17 @@ async function handleStringSelectMenu(i: any, ctx: HandlerContext) {
 
     case "NI_scenario:trigger_type":
       await i.deferUpdate();
-      _schema.trigger.type = i.values[0] as ScenarioTriggerType;
-      _schema.trigger.componentId = "";
+      _schema.trigger = { type: i.values[0] as ScenarioTriggerType, componentId: "" };
       setSchema({ ..._schema });
       await updateMessage();
       break;
 
     case "NI_scenario:trigger_component":
       await i.deferUpdate();
-      _schema.trigger.componentId = i.values[0];
+      _schema.trigger = {
+        type: _schema.trigger?.type ?? "button",
+        componentId: i.values[0],
+      };
       setSchema({ ..._schema });
       await updateMessage();
       break;
@@ -635,7 +637,7 @@ async function handleButton(i: any, ctx: HandlerContext) {
 
     case "NI_scenario:save":
       await i.deferUpdate();
-      if (!_schema.trigger.componentId) {
+      if (!_schema.trigger?.componentId) {
         await i.followUp({
           content: `❌ ${t(client, lang, "commands.scenario.messages.no_trigger")}`,
           flags: MessageFlagsBitField.Flags.Ephemeral,
@@ -1234,7 +1236,7 @@ async function buildEmbed(
           },
           {
             name: t(client, lang, "commands.scenario.embeds.edit.fields.trigger"),
-            value: schema.trigger.componentId
+            value: schema.trigger?.componentId
               ? `${schema.trigger.type}: \`${schema.trigger.componentId}\``
               : t(client, lang, "commands.send.fields.not_set"),
             inline: true,
@@ -1262,13 +1264,13 @@ async function buildEmbed(
           {
             name: t(client, lang, "commands.scenario.embeds.trigger.fields.type"),
             value:
-              t(client, lang, `commands.scenario.trigger_types.${schema.trigger.type}`) ||
-              schema.trigger.type,
+              t(client, lang, `commands.scenario.trigger_types.${schema.trigger?.type ?? "button"}`) ||
+              (schema.trigger?.type ?? "button"),
             inline: true,
           },
           {
             name: t(client, lang, "commands.scenario.embeds.trigger.fields.component_id"),
-            value: schema.trigger.componentId || t(client, lang, "commands.send.fields.not_set"),
+            value: schema.trigger?.componentId || t(client, lang, "commands.send.fields.not_set"),
             inline: true,
           },
         );
@@ -1786,14 +1788,14 @@ async function buildComponents(
                     t(client, lang, `commands.scenario.trigger_types.${tt.value}`) || tt.label,
                   )
                   .setEmoji(tt.emoji)
-                  .setDefault(schema.trigger.type === tt.value),
+                  .setDefault((schema.trigger?.type ?? "button") === tt.value),
               ),
             ),
         ),
       );
 
       // Component selection based on trigger type
-      const components = await getComponentsForTrigger(schema.trigger.type, guild);
+      const components = await getComponentsForTrigger(schema.trigger?.type ?? "button", guild);
       if (components.length > 0) {
         const compSelect = new StringSelectMenuBuilder()
           .setCustomId("NI_scenario:trigger_component")
@@ -1806,7 +1808,7 @@ async function buildComponents(
               .setValue(c.id)
               .setLabel(c.name)
               .setDescription(`ID: ${c.id}`)
-              .setDefault(schema.trigger.componentId === c.id),
+              .setDefault(schema.trigger?.componentId === c.id),
           );
         });
         rows.push(

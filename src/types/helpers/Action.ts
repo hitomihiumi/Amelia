@@ -163,10 +163,11 @@ export interface ScenarioCustom {
   name: string;
   description?: string;
   enabled: boolean;
+  /** `null` for scenarios created without a trigger (dashboard). Such scenarios never run on their own. */
   trigger: {
     type: ScenarioTriggerType;
     componentId: string; // ID of button/select menu/modal that triggers this
-  };
+  } | null;
   variables?: Record<string, string>; // Predefined variables
   steps: ScenarioStep[];
   // Restrictions

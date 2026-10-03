@@ -2274,6 +2274,7 @@ export interface TranslationSchema {
       component_permission: string;
       component_not_active: string;
       scenario_not_found: string;
+      scenario_layout_edit_conflict: string;
     };
   };
 

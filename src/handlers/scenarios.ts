@@ -57,8 +57,8 @@ export async function handleScenarioInteraction(
     const matchingScenario = scenarios?.find(
       (s) =>
         s.enabled &&
-        s.trigger.type === triggerType &&
-        s.trigger.componentId === interaction.customId,
+        s.trigger?.type === triggerType &&
+        s.trigger?.componentId === interaction.customId,
     );
 
     if (matchingScenario) {
@@ -161,5 +161,5 @@ export async function findScenarioByComponentId(
   componentId: string,
 ): Promise<ScenarioCustom | undefined> {
   const scenarios = await getGuildScenarios(client, guildId);
-  return scenarios.find((s) => s.trigger.componentId === componentId);
+  return scenarios.find((s) => s.trigger?.componentId === componentId);
 }

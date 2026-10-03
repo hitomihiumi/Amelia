@@ -2346,6 +2346,8 @@ export const en: TranslationSchema = {
       component_not_active: "This component is no longer active",
       scenario_not_found:
         "⚠️ This component has no scenario assigned. Please configure a scenario for this button/menu in the scenario settings.",
+      scenario_layout_edit_conflict:
+        "⚠️ This message uses a Components V2 layout and cannot be turned back into a regular message. Edit it with another layout, or send a new message instead.",
     },
   },
 
