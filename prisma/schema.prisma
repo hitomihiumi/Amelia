@@ -54,6 +54,7 @@ model Guild {
   componentsButtons     Json @default("[]")
   componentsSelectMenus Json @default("[]")
   componentsScenarios   Json @default("[]")
+  componentsLayouts     Json @default("[]")
 
   // Giveaways
   giveaways Json @default("[]")

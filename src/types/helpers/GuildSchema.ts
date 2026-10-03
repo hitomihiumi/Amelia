@@ -10,6 +10,7 @@ import {
 import { SchemaKey, LiteralSchemaKey } from "./SchemaKeys";
 import { ModerationForm, Punishment, WarnThreshold } from "./ModerationSchema";
 import { AuditSettings } from "./AuditSchema";
+import type { LayoutCustom } from "./Layout";
 
 export interface GuildSchema {
   id: string;
@@ -53,6 +54,7 @@ export interface GuildSchema {
       buttons: Array<ButtonCustom>;
       selectMenus: Array<SelectMenuCustom>;
       scenarios: Array<ScenarioCustom>;
+      layouts: Array<LayoutCustom>;
     };
     giveaways: Giveaway[];
   };

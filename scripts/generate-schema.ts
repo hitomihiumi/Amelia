@@ -179,6 +179,11 @@ const guildSchemaMap: Record<string, SchemaField> = {
     prismaType: "Json",
     default: '"[]"',
   },
+  "utils.components.layouts": {
+    prismaField: "componentsLayouts",
+    prismaType: "Json",
+    default: '"[]"',
+  },
 
   // Giveaways
   "utils.giveaways": {

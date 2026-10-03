@@ -95,6 +95,9 @@ export const GuildPathMap: PathMap = {
   "utils.components.scenarios": {
     field: "componentsScenarios",
   },
+  "utils.components.layouts": {
+    field: "componentsLayouts",
+  },
   "utils.giveaways": {
     field: "giveaways",
   },
@@ -293,7 +296,7 @@ export const GuildPathMap: PathMap = {
   },
   "utils.components": {
     field: "",
-    children: ["buttons", "embed", "modals", "scenarios", "selectMenus"],
+    children: ["buttons", "embed", "layouts", "modals", "scenarios", "selectMenus"],
   },
   economy: {
     field: "",
@@ -448,6 +451,7 @@ export const GuildFieldMap: Record<string, string> = {
   "utils.components.buttons": "componentsButtons",
   "utils.components.selectMenus": "componentsSelectMenus",
   "utils.components.scenarios": "componentsScenarios",
+  "utils.components.layouts": "componentsLayouts",
   "utils.giveaways": "giveaways",
   "economy.currency.emoji": "currencyEmoji",
   "economy.currency.id": "currencyId",

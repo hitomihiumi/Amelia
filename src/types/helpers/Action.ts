@@ -124,6 +124,11 @@ export interface ScenarioAction {
   buttons?: string[];
   selectMenus?: string[];
   embedId?: string; // Legacy
+  /**
+   * A Components V2 layout (`utils.components.layouts`) to send instead of content/embeds/buttons/menus.
+   * V2 messages cannot carry content or embeds, so when this is set those fields are ignored.
+   */
+  layoutId?: string;
   ephemeral?: boolean;
   // For add_role/remove_role
   roleId?: string;
