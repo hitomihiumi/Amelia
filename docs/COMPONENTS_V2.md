@@ -67,3 +67,7 @@ Every degradation is logged with `console.warn` (`[ScenarioRunner] Scenario "<id
 ## Buttons and selects inside layouts
 
 Layouts use the stored buttons and menus, so their `CI_*` custom ids are the same as in classic messages. A click goes through `interactionCreate` to `handleScenarioInteraction` (`src/handlers/scenarios.ts`), which runs the enabled scenario whose `trigger` matches the component id and type. A component without scenario answers with `scenario_not_found`. Scenarios without a trigger (`trigger: null`, created in the dashboard) are skipped safely.
+
+## Sending from the dashboard
+
+The dashboard has a **Send message** page (`/dashboard/{guildId}/send`) that posts a classic message or a layout to a channel as the bot, through the REST API and the bot token. It builds the request with its own port of the builders (`src/lib/discord/message-payload.ts` in the dashboard repository) and substitutes the same placeholders, with `{user.*}` describing the person who clicked Send. Keep the two implementations in step when the layout rules change. The `/send` slash command stays classic-only.

@@ -349,7 +349,9 @@ async function createChannel(
       console.error("[JTC] Failed to send control message to channel:", error);
     }
 
-    map.set(newState.channelId, {
+    // Keyed by the temporary channel: every other lookup (controls, cleanup, ownership transfer)
+    // uses the id of the channel the member is sitting in, and two rooms must not share an entry.
+    map.set(channel.id, {
       channel: channel.id,
       owner: newState.member.id,
     });
