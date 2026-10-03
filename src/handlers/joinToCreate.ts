@@ -1,4 +1,3 @@
-import { JTCPreset } from "../types/helpers";
 import {
   Client,
   BaseGuildVoiceChannel,
@@ -13,6 +12,8 @@ import {
 } from "discord.js";
 import { Guild } from "../helpers";
 import { User } from "../helpers";
+import { sanitizePresets } from "../helpers/jtcPresets";
+import { buildPresetButtonsRow, buildPresetSelectRow } from "../helpers/jtcPresetsUi";
 import { t } from "../i18n/helpers";
 
 module.exports = async (client: Client) => {
@@ -189,32 +190,12 @@ async function createChannel(
     }
 
     const user = new User(client, newState.member.user, guild.guild);
-    const presets = (await user.get("presets.jtc")) as JTCPreset[];
-
-    const select = new StringSelectMenuBuilder()
-      .setCustomId("I_jtc:preset")
-      .setPlaceholder(t(client, lang, "functions.join_to_create.preset.placeholder"))
-      .setMaxValues(1);
-
-    if (presets.length > 0) {
-      for (const preset of presets) {
-        select.addOptions(
-          new StringSelectMenuOptionBuilder()
-            .setLabel(preset.name)
-            .setValue(preset.id)
-            .setDescription(
-              preset.description ||
-                t(client, lang, "functions.join_to_create.preset.default_description"),
-            ),
-        );
-      }
-    } else {
-      select.addOptions(
-        new StringSelectMenuOptionBuilder()
-          .setLabel(t(client, lang, "functions.join_to_create.preset.add"))
-          .setValue("new")
-          .setDescription(t(client, lang, "functions.join_to_create.preset.add_description")),
-      );
+    // Presets are read once here; the preset handlers always re-read them from the database.
+    let presets: ReturnType<typeof sanitizePresets> = [];
+    try {
+      presets = sanitizePresets(await user.get("presets.jtc"));
+    } catch (error) {
+      console.error("[JTC] Failed to read presets:", error);
     }
 
     try {
@@ -360,7 +341,8 @@ async function createChannel(
                   ),
               ),
           ),
-          new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(select),
+          buildPresetSelectRow(client, lang, presets),
+          buildPresetButtonsRow(client, lang, presets),
         ],
       });
     } catch (error) {

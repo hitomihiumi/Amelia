@@ -2301,9 +2301,52 @@ export interface TranslationSchema {
     join_to_create: {
       preset: {
         placeholder: string;
-        default_description: string;
-        add: string;
-        add_description: string;
+        none: string;
+        none_description: string;
+        none_hint: string;
+        buttons: {
+          save: string;
+          delete: string;
+        };
+        summary: {
+          limit: string;
+          unlimited: string;
+          bitrate: string;
+        };
+        modal: {
+          title: string;
+          name_label: string;
+          name_placeholder: string;
+          description_label: string;
+        };
+        save: {
+          limit_reached: string;
+          saved: string;
+          updated: string;
+          failed: string;
+          channel_gone: string;
+        };
+        apply: {
+          success: string;
+          partial: string;
+          skipped: string;
+          not_found: string;
+          failed: string;
+          parts: {
+            name: string;
+            user_limit: string;
+            bitrate: string;
+            region: string;
+            permissions: string;
+          };
+        };
+        delete: {
+          msg: string;
+          placeholder: string;
+          none: string;
+          success: string;
+          not_found: string;
+        };
       };
       embed: {
         title: string;

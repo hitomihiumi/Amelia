@@ -128,8 +128,30 @@ await user.set("custom.rank.mode", true);
 "games" // Json object with persistent game state
 
 // Presets
-"presets.jtc" // Json array
+"presets.jtc" // Json array of Join To Create presets (column `jtcPresets`), max 5 per user and guild
 ```
+
+Shape of a `presets.jtc` entry (JSON-safe, permission bitfields are decimal strings):
+
+```jsonc
+{
+  "id": "a1b2c3d4e5",            // short random id, used as the select option value
+  "name": "Chill",               // 1-40 chars, unique per user (case-insensitive)
+  "description": null,           // string (max 80) or null
+  "channel": {
+    "name": "My room",           // literal channel name at save time
+    "userLimit": 5,              // 0 = unlimited
+    "bitrate": 64000,
+    "rtcRegion": null,           // null = automatic
+    "overwrites": [              // max 50; owner, bot and managed roles are not stored
+      { "id": "<role or member id>", "type": "role", "allow": "1048576", "deny": "0" }
+    ]
+  }
+}
+```
+
+Stored values are validated on every read (`sanitizePresets` in `src/helpers/jtcPresets.ts`); malformed
+entries are dropped. Saving under an existing name overwrites that preset in place.
 
 ### Redis Namespaces
 

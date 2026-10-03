@@ -2372,10 +2372,53 @@ export const en: TranslationSchema = {
     },
     join_to_create: {
       preset: {
-        placeholder: "Select a preset",
-        default_description: "Default channel preset",
-        add: "No Preset",
-        add_description: "Create channel without preset",
+        placeholder: "Select a preset to apply",
+        none: "No saved presets",
+        none_description: "Save your current settings with the button below",
+        none_hint: "You have no saved presets yet. Use **Save current settings** to create one (up to {0}).",
+        buttons: {
+          save: "Save current settings",
+          delete: "Delete preset",
+        },
+        summary: {
+          limit: "Limit {0}",
+          unlimited: "No limit",
+          bitrate: "{0} kbps",
+        },
+        modal: {
+          title: "Save channel preset",
+          name_label: "Preset name",
+          name_placeholder: "Saving under an existing name overwrites that preset",
+          description_label: "Description (optional)",
+        },
+        save: {
+          limit_reached: "You already have the maximum of {0} presets. Delete one first, or save under the name of an existing preset to overwrite it.",
+          saved: "Preset **{0}** saved.",
+          updated: "Preset **{0}** updated.",
+          failed: "Could not save the preset, please try again later.",
+          channel_gone: "Your temporary channel is no longer available, so the preset was not saved.",
+        },
+        apply: {
+          success: "Preset **{0}** applied to your channel.",
+          partial: "Preset **{0}** applied, but some parts could not be changed: {1}.",
+          skipped: "{0} permission entries were skipped because the role or member no longer exists.",
+          not_found: "This preset no longer exists.",
+          failed: "Could not apply the preset, please try again later.",
+          parts: {
+            name: "name (rename limit reached?)",
+            user_limit: "user limit",
+            bitrate: "bitrate",
+            region: "region",
+            permissions: "permissions",
+          },
+        },
+        delete: {
+          msg: "Choose a preset to delete",
+          placeholder: "Select a preset",
+          none: "You have no saved presets.",
+          success: "Preset **{0}** deleted.",
+          not_found: "This preset no longer exists.",
+        },
       },
       embed: {
         title: "Channel Settings",

@@ -1,4 +1,3 @@
-import { PermissionsBitField } from "discord.js";
 import { SchemaKey, LiteralSchemaKey } from "./SchemaKeys";
 import { TranslationSchema } from "../i18n/TranslationSchema";
 
@@ -130,21 +129,32 @@ export interface BalanceCardDisplayOptions extends DisplayOptions {
 
 export interface LevelCardDisplayOptions extends DisplayOptions {}
 
+/**
+ * A permission overwrite stored inside a Join To Create preset.
+ * `allow` / `deny` are permission bitfields serialised with `BigInt#toString()`
+ * so the whole preset stays JSON-safe.
+ */
+export interface JTCPresetOverwrite {
+  id: string;
+  type: "role" | "member";
+  allow: string;
+  deny: string;
+}
+
+/**
+ * Saved Join To Create channel settings (stored in `User.jtcPresets`, max 5 per user and guild).
+ * `channel.rtcRegion` is `null` for "automatic".
+ */
 export interface JTCPreset {
   id: string;
   name: string;
   description: string | null;
   channel: {
     name: string;
-    user_limit: number;
+    userLimit: number;
     bitrate: number;
-    region: string;
-    permissions: {
-      [key: string]: {
-        true: PermissionsBitField[];
-        false: PermissionsBitField[];
-      };
-    };
+    rtcRegion: string | null;
+    overwrites: JTCPresetOverwrite[];
   };
 }
 
