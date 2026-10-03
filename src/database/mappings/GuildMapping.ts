@@ -80,6 +80,24 @@ export const GuildPathMap: PathMap = {
   "utils.find_team.games": {
     field: "findTeamGames",
   },
+  "utils.components.modals": {
+    field: "componentsModals",
+  },
+  "utils.components.embed": {
+    field: "componentsEmbeds",
+  },
+  "utils.components.buttons": {
+    field: "componentsButtons",
+  },
+  "utils.components.selectMenus": {
+    field: "componentsSelectMenus",
+  },
+  "utils.components.scenarios": {
+    field: "componentsScenarios",
+  },
+  "utils.components.layouts": {
+    field: "componentsLayouts",
+  },
   "utils.giveaways": {
     field: "giveaways",
   },
@@ -149,6 +167,33 @@ export const GuildPathMap: PathMap = {
   "moderation.moderation_roles": {
     field: "moderationRoles",
   },
+  "moderation.log_channel": {
+    field: "modLogChannel",
+  },
+  "moderation.dm_notify": {
+    field: "modDmNotify",
+  },
+  "moderation.warn_expiry": {
+    field: "modWarnExpiry",
+  },
+  "moderation.warn_thresholds": {
+    field: "modWarnThresholds",
+  },
+  "moderation.forms.report": {
+    field: "modReportForm",
+  },
+  "moderation.forms.appeal": {
+    field: "modAppealForm",
+  },
+  "moderation.sequences.case": {
+    field: "modCaseSeq",
+  },
+  "moderation.sequences.report": {
+    field: "modReportSeq",
+  },
+  "moderation.sequences.appeal": {
+    field: "modAppealSeq",
+  },
   "moderation.auto_moderation.invite.enabled": {
     field: "inviteEnabled",
   },
@@ -188,25 +233,37 @@ export const GuildPathMap: PathMap = {
   "moderation.auto_moderation.links.punishment": {
     field: "linksPunishment",
   },
+  "audit.enabled": {
+    field: "auditEnabled",
+  },
+  "audit.channel": {
+    field: "auditChannel",
+  },
+  "audit.ignore_channels": {
+    field: "auditIgnoreChannels",
+  },
+  "audit.ignore_roles": {
+    field: "auditIgnoreRoles",
+  },
+  "audit.ignore_bots": {
+    field: "auditIgnoreBots",
+  },
+  "audit.webhook.name": {
+    field: "auditWebhookName",
+  },
+  "audit.webhook.avatar": {
+    field: "auditWebhookAvatar",
+  },
+  "audit.categories": {
+    field: "auditCategories",
+  },
+  "audit.events": {
+    field: "auditEvents",
+  },
   "permissions.commands": {
     field: "commandPermissions",
   },
   "temp.join_to_create.map": {
-    field: "jtcTempMap",
-  },
-  "utils.components.modals": {
-    field: "",
-  },
-  "utils.components.embed": {
-    field: "",
-  },
-  "utils.components.buttons": {
-    field: "",
-  },
-  "utils.components.selectMenus": {
-    field: "",
-  },
-  "utils.components.scenarios": {
     field: "",
   },
   settings: {
@@ -236,6 +293,10 @@ export const GuildPathMap: PathMap = {
   "utils.find_team": {
     field: "",
     children: ["channel", "embed", "enabled", "games", "select_placeholder", "send_channel"],
+  },
+  "utils.components": {
+    field: "",
+    children: ["buttons", "embed", "layouts", "modals", "scenarios", "selectMenus"],
   },
   economy: {
     field: "",
@@ -283,7 +344,24 @@ export const GuildPathMap: PathMap = {
   },
   moderation: {
     field: "",
-    children: ["auto_moderation", "moderation_roles"],
+    children: [
+      "auto_moderation",
+      "dm_notify",
+      "forms",
+      "log_channel",
+      "moderation_roles",
+      "sequences",
+      "warn_expiry",
+      "warn_thresholds",
+    ],
+  },
+  "moderation.forms": {
+    field: "",
+    children: ["appeal", "report"],
+  },
+  "moderation.sequences": {
+    field: "",
+    children: ["appeal", "case", "report"],
   },
   "moderation.auto_moderation": {
     field: "",
@@ -312,6 +390,23 @@ export const GuildPathMap: PathMap = {
       "punishment",
     ],
   },
+  audit: {
+    field: "",
+    children: [
+      "categories",
+      "channel",
+      "enabled",
+      "events",
+      "ignore_bots",
+      "ignore_channels",
+      "ignore_roles",
+      "webhook",
+    ],
+  },
+  "audit.webhook": {
+    field: "",
+    children: ["avatar", "name"],
+  },
   permissions: {
     field: "",
     children: ["commands"],
@@ -324,13 +419,9 @@ export const GuildPathMap: PathMap = {
     field: "",
     children: ["map"],
   },
-  "utils.components": {
-    field: "",
-    children: ["buttons", "embed", "modals", "scenarios", "selectMenus"],
-  },
 };
 
-// Note: MongoDB paths (utils.components.modals, utils.components.embed, utils.components.buttons, utils.components.selectMenus, utils.components.scenarios) are not included in FieldMap
+// Note: Redis cache paths (temp.join_to_create.map) are not included in FieldMap
 export const GuildFieldMap: Record<string, string> = {
   "settings.prefix": "prefix",
   "settings.language": "language",
@@ -355,6 +446,12 @@ export const GuildFieldMap: Record<string, string> = {
   "utils.find_team.select_placeholder": "findTeamSelectPlaceholder",
   "utils.find_team.embed": "findTeamEmbed",
   "utils.find_team.games": "findTeamGames",
+  "utils.components.modals": "componentsModals",
+  "utils.components.embed": "componentsEmbeds",
+  "utils.components.buttons": "componentsButtons",
+  "utils.components.selectMenus": "componentsSelectMenus",
+  "utils.components.scenarios": "componentsScenarios",
+  "utils.components.layouts": "componentsLayouts",
   "utils.giveaways": "giveaways",
   "economy.currency.emoji": "currencyEmoji",
   "economy.currency.id": "currencyId",
@@ -378,6 +475,15 @@ export const GuildFieldMap: Record<string, string> = {
   "economy.income.rob.income": "robIncome",
   "economy.income.rob.punishment": "robPunishment",
   "moderation.moderation_roles": "moderationRoles",
+  "moderation.log_channel": "modLogChannel",
+  "moderation.dm_notify": "modDmNotify",
+  "moderation.warn_expiry": "modWarnExpiry",
+  "moderation.warn_thresholds": "modWarnThresholds",
+  "moderation.forms.report": "modReportForm",
+  "moderation.forms.appeal": "modAppealForm",
+  "moderation.sequences.case": "modCaseSeq",
+  "moderation.sequences.report": "modReportSeq",
+  "moderation.sequences.appeal": "modAppealSeq",
   "moderation.auto_moderation.invite.enabled": "inviteEnabled",
   "moderation.auto_moderation.invite.ignore_channels": "inviteIgnoreChannels",
   "moderation.auto_moderation.invite.ignore_roles": "inviteIgnoreRoles",
@@ -391,6 +497,14 @@ export const GuildFieldMap: Record<string, string> = {
   "moderation.auto_moderation.links.delete_message": "linksDeleteMessage",
   "moderation.auto_moderation.links.moderation_immune": "linksModerationImmune",
   "moderation.auto_moderation.links.punishment": "linksPunishment",
+  "audit.enabled": "auditEnabled",
+  "audit.channel": "auditChannel",
+  "audit.ignore_channels": "auditIgnoreChannels",
+  "audit.ignore_roles": "auditIgnoreRoles",
+  "audit.ignore_bots": "auditIgnoreBots",
+  "audit.webhook.name": "auditWebhookName",
+  "audit.webhook.avatar": "auditWebhookAvatar",
+  "audit.categories": "auditCategories",
+  "audit.events": "auditEvents",
   "permissions.commands": "commandPermissions",
-  "temp.join_to_create.map": "jtcTempMap",
 };

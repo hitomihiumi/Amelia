@@ -8,6 +8,9 @@ import {
   ScenarioCustom,
 } from "./";
 import { SchemaKey, LiteralSchemaKey } from "./SchemaKeys";
+import { ModerationForm, Punishment, WarnThreshold } from "./ModerationSchema";
+import { AuditSettings } from "./AuditSchema";
+import type { LayoutCustom } from "./Layout";
 
 export interface GuildSchema {
   id: string;
@@ -25,7 +28,7 @@ export interface GuildSchema {
     counter: {
       enabled: boolean;
       category: string | null;
-      channel: {
+      channels: {
         [key: string]: CounterChannel;
       };
     };
@@ -51,6 +54,7 @@ export interface GuildSchema {
       buttons: Array<ButtonCustom>;
       selectMenus: Array<SelectMenuCustom>;
       scenarios: Array<ScenarioCustom>;
+      layouts: Array<LayoutCustom>;
     };
     giveaways: Giveaway[];
   };
@@ -108,6 +112,21 @@ export interface GuildSchema {
   };
   moderation: {
     moderation_roles: string[];
+    log_channel: string | null;
+    dm_notify: boolean;
+    /** Days after which a warn stops counting towards escalation. `0` disables expiry. */
+    warn_expiry: number;
+    warn_thresholds: WarnThreshold[];
+    /** Per-guild counters that allocate consecutive case/report/appeal numbers. */
+    sequences: {
+      case: number;
+      report: number;
+      appeal: number;
+    };
+    forms: {
+      report: ModerationForm;
+      appeal: ModerationForm;
+    };
     auto_moderation: {
       invite: {
         enabled: boolean;
@@ -115,11 +134,7 @@ export interface GuildSchema {
         ignore_roles: string[];
         delete_message: boolean;
         moderation_immune: boolean;
-        punishment: {
-          type: PunishmentType;
-          time: number;
-          reason: string;
-        };
+        punishment: Punishment;
       };
       links: {
         enabled: boolean;
@@ -128,14 +143,11 @@ export interface GuildSchema {
         ignore_links: string[];
         delete_message: boolean;
         moderation_immune: boolean;
-        punishment: {
-          type: PunishmentType;
-          time: number;
-          reason: string;
-        };
+        punishment: Punishment;
       };
     };
   };
+  audit: AuditSettings;
   permissions: {
     commands: {
       [key: string]: CommandPermission;
@@ -163,13 +175,6 @@ interface Giveaway {
   prize: string;
   ends: number;
   channel: string;
-}
-
-enum PunishmentType {
-  Kick = "kick",
-  Ban = "ban",
-  Warn = "warn",
-  Mute = "mute",
 }
 
 export interface CommandPermission {

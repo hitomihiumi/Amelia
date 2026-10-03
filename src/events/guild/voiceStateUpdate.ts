@@ -1,5 +1,6 @@
 import { Client, VoiceState, ChannelType } from "discord.js";
 import { Guild, User } from "../../helpers";
+import { AuditLogger, channelMention } from "../../helpers/audit";
 import { Levels } from "../../types/helpers";
 import { awardLevelRole, getNextLevelXP, userLevelIgnoreCheck } from "../../handlers/functions";
 
@@ -9,7 +10,11 @@ const VOICE_XP_MULTIPLIER = 2;
 const MINIMUM_VOICE_TIME_MS = 1000;
 
 module.exports = async (client: Client, oldState: VoiceState, newState: VoiceState) => {
-  if (!newState.guild || !newState.member || newState.member.user.bot) return;
+  if (!newState.guild || !newState.member) return;
+
+  await logVoiceChange(client, oldState, newState);
+
+  if (newState.member.user.bot) return;
 
   const guild = new Guild(client, newState.guild);
   const levelS = (await guild.get("utils.levels")) as Levels;
@@ -205,4 +210,56 @@ function calculateNewLevel(currentLevel: number, totalXP: number): [number, numb
   }
 
   return [newLevel, xpRemaining];
+}
+
+/** Audit log entries for joining, leaving and switching voice channels. */
+async function logVoiceChange(client: Client, oldState: VoiceState, newState: VoiceState) {
+  const member = newState.member;
+  if (!member) return;
+
+  if (oldState.channelId === newState.channelId) return;
+
+  const audit = new AuditLogger(client, newState.guild);
+  const subject = { bot: member.user.bot, roleIds: [...member.roles.cache.keys()] };
+  const footer = await audit.t("audit.footer.member", member.id);
+  const mention = `<@${member.id}>`;
+
+  if (!oldState.channelId && newState.channelId) {
+    return await audit.log("voice_join", {
+      header: await audit.t(
+        "audit.events.voice_join",
+        mention,
+        member.user.username,
+        channelMention(newState.channelId),
+      ),
+      footer,
+      sourceChannelId: newState.channelId,
+      subject,
+    });
+  }
+
+  if (oldState.channelId && !newState.channelId) {
+    return await audit.log("voice_leave", {
+      header: await audit.t(
+        "audit.events.voice_leave",
+        mention,
+        member.user.username,
+        channelMention(oldState.channelId),
+      ),
+      footer,
+      sourceChannelId: oldState.channelId,
+      subject,
+    });
+  }
+
+  await audit.log("voice_move", {
+    header: await audit.t("audit.events.voice_move", mention, member.user.username),
+    lines: [
+      { label: await audit.t("audit.fields.from"), value: channelMention(oldState.channelId) },
+      { label: await audit.t("audit.fields.to"), value: channelMention(newState.channelId) },
+    ],
+    footer,
+    sourceChannelId: newState.channelId,
+    subject,
+  });
 }

@@ -3,18 +3,17 @@
 ## Architecture
 
 ### Hybrid Database System
-- **PostgreSQL** - User settings, guild configuration, metadata
-- **MongoDB** - User level/economy data, guild components (custom modals, buttons, etc.), temporary cache
+- **PostgreSQL** - User settings, guild configuration, user level/economy, guild components (custom modals, buttons, etc.), moderation, metadata
+- **Redis** - Temporary cache (voice join timestamps, join-to-create channel map) and the status heartbeat shared with the website
 
 ### Automatic Routing
 DBGuild class automatically routes requests:
-- `utils.components.*` → MongoDB (modals, embed, buttons, selectMenus, scenarios)
-- Everything else → PostgreSQL
+- `temp.*` → Redis via `guild.cache` (TempCache)
+- Everything else → PostgreSQL (`utils.components.*` included, stored as JSON columns)
 
 DBUser class automatically routes requests:
-- `level.*` → MongoDB
-- `economy.*` → MongoDB  
-- Everything else → PostgreSQL
+- `temp.*` → Redis via `user.cache` (TempCache)
+- Everything else → PostgreSQL (`level.*`, `economy.*`, `games` included)
 
 ## Quick Start
 
@@ -41,9 +40,11 @@ const settings = await guild.get("settings");
 await guild.set("utils.levels.enabled", true);
 await guild.set("utils.levels.ignore_channels", ["123", "456"]);
 
-// Custom components (stored in MongoDB for better performance)
+// Custom components (JSON columns in PostgreSQL)
 const modals = await guild.get("utils.components.modals");
 const buttons = await guild.get("utils.components.buttons");
+// Components V2 layouts (see COMPONENTS_V2.md): rows reference the stored buttons/select menus by id
+const layouts = await guild.get("utils.components.layouts");
 await guild.set("utils.components.modals", [...modals, newModal]);
 ```
 
@@ -54,7 +55,7 @@ import { User } from "./helpers";
 
 const user = new User(client, discordUser, guild);
 
-// Level system (MongoDB)
+// Level system (PostgreSQL)
 await user.add("level.xp", 50);
 await user.add("level.message_count", 1);
 const xp = await user.get("level.xp");
@@ -64,7 +65,7 @@ const level = await user.get("level.level");
 const levelData = await user.get("level");
 // { xp: 150, total_xp: 500, level: 3, voice_time: 1200, message_count: 45 }
 
-// Economy system (MongoDB)
+// Economy system (PostgreSQL)
 await user.add("economy.balance.wallet", 100);
 await user.sub("economy.balance.wallet", 50);
 await user.set("economy.timeout.work", Date.now() + 3600000);
@@ -113,61 +114,67 @@ await user.set("custom.rank.mode", true);
 "custom.profile.bio" // string
 "custom.rank.color" // string | null
 
+// Level and economy (moved back from the MongoDB cache)
+"level.xp" // number
+"level.total_xp" // number
+"level.level" // number
+"level.voice_time" // number (seconds)
+"level.message_count" // number
+"economy.balance.wallet" // number
+"economy.balance.bank" // number
+"economy.inventory.custom.roles" // Json array
+"economy.inventory.custom.items" // Json array
+"economy.timeout.work" // number (ms timestamp, stored as DateTime; null = 0)
+"games" // Json object with persistent game state
+
 // Presets
-"presets.jtc" // Json array
+"presets.jtc" // Json array of Join To Create presets (column `jtcPresets`), max 5 per user and guild
 ```
 
-### MongoDB Collections
+Shape of a `presets.jtc` entry (JSON-safe, permission bitfields are decimal strings):
 
-#### user_data (Persistent)
-```typescript
+```jsonc
 {
-  _id: "userId:guildId",
-  data: {
-    level: {
-      xp: 0,
-      total_xp: 0,
-      level: 1,
-      voice_time: 0,
-      message_count: 0
-    },
-    economy: {
-      balance: {
-        wallet: 0,
-        bank: 0
-      },
-      inventory: {
-        custom: {
-          roles: [],
-          items: []
-        }
-      },
-      timeout: {
-        work: 0,
-        timely: 0,
-        daily: 0,
-        weekly: 0,
-        rob: 0
-      }
-    }
-  },
-  mapPaths: [], // Tracks Map structures
-  updatedAt: Date
+  "id": "a1b2c3d4e5",            // short random id, used as the select option value
+  "name": "Chill",               // 1-40 chars, unique per user (case-insensitive)
+  "description": null,           // string (max 80) or null
+  "channel": {
+    "name": "My room",           // literal channel name at save time
+    "userLimit": 5,              // 0 = unlimited
+    "bitrate": 64000,
+    "rtcRegion": null,           // null = automatic
+    "overwrites": [              // max 50; owner, bot and managed roles are not stored
+      { "id": "<role or member id>", "type": "role", "allow": "1048576", "deny": "0" }
+    ]
+  }
 }
 ```
 
-#### user_temp (24h TTL)
+Stored values are validated on every read (`sanitizePresets` in `src/helpers/jtcPresets.ts`); malformed
+entries are dropped. Saving under an existing name overwrites that preset in place.
+
+### Redis Namespaces
+
+#### user_temp (24h TTL, refreshed on write)
 ```typescript
+// Key: cache:user_temp:{userId}:{guildId} (hash: field = path, value = JSON)
 {
-  _id: "userId:guildId",
-  data: {
-    temp: {
-      games: { /* game state */ },
-      voice_time: 0
-    }
-  },
-  updatedAt: Date
+  "temp.voice_time": 1730000000000
 }
+```
+
+#### guild_temp (no TTL — survives restarts)
+```typescript
+// Key: cache:guild_temp:{guildId} (hash: field = path, value = JSON)
+{
+  "temp.join_to_create.map": [["channelId", { "channel": "...", "owner": "..." }]]
+}
+```
+
+#### bot_status (120s TTL)
+```typescript
+// Key: bot_status:shard:{shardId} — JSON heartbeat written by the bot
+// and read by the website. A missing key means the shard is offline.
 ```
 
 ## CRUD Operations
@@ -218,8 +225,6 @@ await user.add("level.voice_time", 60);
 // Add to array
 await user.push("economy.inventory.custom.roles", "roleId");
 await guild.push("utils.levels.ignore_channels", "channelId");
-
-// MongoDB handles duplicates automatically
 ```
 
 ### Has
@@ -418,29 +423,27 @@ if (!guildSettings) {
 ### Check Current Storage
 
 ```typescript
-// Level/economy data stored in MongoDB
-await user.get("level.xp"); // MongoDB
-await user.get("economy.balance.wallet"); // MongoDB
+// Level/economy data stored in PostgreSQL columns
+await user.get("level.xp"); // PostgreSQL
+await user.get("economy.balance.wallet"); // PostgreSQL
 
-// Custom settings in PostgreSQL
-await user.get("custom.profile.bio"); // PostgreSQL
-await guild.get("settings.prefix"); // PostgreSQL
+// Temp data in Redis
+await user.cache.get("temp.voice_time"); // Redis
 ```
 
-### Migrate Existing Data
+### Migrate Existing Data (MongoDB → PostgreSQL)
 
 ```bash
-# Backup databases
+# Backup databases first
 pg_dump amelia > backup.sql
 mongodump --uri="mongodb://..." --out=./backup
 
-# Run migration
-npm run migrate:mongodb
+# Apply the new Prisma migration, then move the cached data
+npx prisma migrate deploy
+npm run migrate:cache   # needs MONGODB_URL in the environment
 
 # Verify
-mongosh "mongodb://..."
-use amelia_cache
-db.user_data.findOne()
+npm run prisma:studio
 ```
 
 ## Troubleshooting
@@ -451,9 +454,9 @@ db.user_data.findOne()
 // ✅ Make sure to use await
 await user.set("level.xp", 100); // Not user.set(...)
 
-// ✅ Check MongoDB connection
-import { MongoDBService } from "./database";
-console.log(MongoDBService.isConnectedToMongoDB());
+// ✅ Check Redis connection
+import { RedisService } from "./database";
+console.log(RedisService.isConnectedToRedis());
 ```
 
 ### Type Errors
@@ -473,8 +476,7 @@ npm run generate:schema
 const level = await user.get("level"); // 1 query
 // Instead of multiple get calls
 
-// Check MongoDB indexes
-db.user_data.getIndexes()
+// add()/sub() on numeric columns run as a single atomic UPDATE ... increment
 ```
 
 ## Examples
@@ -591,22 +593,21 @@ Same as User methods
 ## Summary
 
 **Storage:**
-- Level/Economy → MongoDB (fast, scalable)
+- Level/Economy/Components → PostgreSQL (atomic `increment` for numeric columns)
 - Settings/Custom → PostgreSQL (relational, structured)
-- Temp data → MongoDB with TTL (auto-cleanup)
+- Temp data → Redis with TTL (auto-cleanup)
 
 **Key Points:**
 - Always use `await` with database operations
 - Use parent paths for batch reads
-- Use `add()`/`sub()` instead of get/set for numbers
-- MongoDB handles level/economy automatically
-- PostgreSQL handles everything else
+- Use `add()`/`sub()` instead of get/set for numbers (atomic on direct columns)
+- Use `guild.increment(path)` for counters that must never collide
+- PostgreSQL handles every schema path; Redis only serves `temp.*` via `.cache`
 - Type-safe with literal paths
 - Dynamic paths work but skip type checking
 
-**Migration:**
-- `npm run migrate:mongodb` - Migrate data
-- Zero code changes needed
-- Fully backward compatible
-- Rollback available if needed
+**Migration (one-time, from the MongoDB era):**
+- `npx prisma migrate deploy` - add the new columns
+- `npm run migrate:cache` - move user_data/guild_data/games into PostgreSQL
+- Then shut MongoDB down and remove `MONGODB_URL` from the environment
 

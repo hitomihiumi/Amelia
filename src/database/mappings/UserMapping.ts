@@ -11,6 +11,51 @@ export interface PathMap {
 }
 
 export const UserPathMap: PathMap = {
+  "level.xp": {
+    field: "xp",
+  },
+  "level.total_xp": {
+    field: "totalXp",
+  },
+  "level.level": {
+    field: "level",
+  },
+  "level.voice_time": {
+    field: "voiceTime",
+  },
+  "level.message_count": {
+    field: "messageCount",
+  },
+  "economy.balance.wallet": {
+    field: "wallet",
+  },
+  "economy.balance.bank": {
+    field: "bank",
+  },
+  "economy.inventory.custom.roles": {
+    field: "customRoles",
+  },
+  "economy.inventory.custom.items": {
+    field: "customItems",
+  },
+  "economy.timeout.work": {
+    field: "workTimeout",
+  },
+  "economy.timeout.timely": {
+    field: "timelyTimeout",
+  },
+  "economy.timeout.daily": {
+    field: "dailyTimeout",
+  },
+  "economy.timeout.weekly": {
+    field: "weeklyTimeout",
+  },
+  "economy.timeout.rob": {
+    field: "robTimeout",
+  },
+  games: {
+    field: "games",
+  },
   "custom.balance.number": {
     field: "balanceNumber",
   },
@@ -68,14 +113,35 @@ export const UserPathMap: PathMap = {
   "custom.badges": {
     field: "customBadges",
   },
-  "temp.games": {
-    field: "tempGames",
-  },
-  "temp.voice_time": {
-    field: "tempVoiceTime",
-  },
   "presets.jtc": {
     field: "jtcPresets",
+  },
+  "temp.voice_time": {
+    field: "",
+  },
+  level: {
+    field: "",
+    children: ["level", "message_count", "total_xp", "voice_time", "xp"],
+  },
+  economy: {
+    field: "",
+    children: ["balance", "inventory", "timeout"],
+  },
+  "economy.balance": {
+    field: "",
+    children: ["bank", "wallet"],
+  },
+  "economy.inventory": {
+    field: "",
+    children: ["custom"],
+  },
+  "economy.inventory.custom": {
+    field: "",
+    children: ["items", "roles"],
+  },
+  "economy.timeout": {
+    field: "",
+    children: ["daily", "rob", "timely", "weekly", "work"],
   },
   custom: {
     field: "",
@@ -97,18 +163,33 @@ export const UserPathMap: PathMap = {
     field: "",
     children: ["mode", "solid", "url"],
   },
-  temp: {
-    field: "",
-    children: ["games", "voice_time"],
-  },
   presets: {
     field: "",
     children: ["jtc"],
   },
+  temp: {
+    field: "",
+    children: ["voice_time"],
+  },
 };
 
-// Note: MongoDB paths () are not included in FieldMap
+// Note: Redis cache paths (temp.voice_time) are not included in FieldMap
 export const UserFieldMap: Record<string, string> = {
+  "level.xp": "xp",
+  "level.total_xp": "totalXp",
+  "level.level": "level",
+  "level.voice_time": "voiceTime",
+  "level.message_count": "messageCount",
+  "economy.balance.wallet": "wallet",
+  "economy.balance.bank": "bank",
+  "economy.inventory.custom.roles": "customRoles",
+  "economy.inventory.custom.items": "customItems",
+  "economy.timeout.work": "workTimeout",
+  "economy.timeout.timely": "timelyTimeout",
+  "economy.timeout.daily": "dailyTimeout",
+  "economy.timeout.weekly": "weeklyTimeout",
+  "economy.timeout.rob": "robTimeout",
+  games: "games",
   "custom.balance.number": "balanceNumber",
   "custom.balance.mode": "balanceMode",
   "custom.balance.solid": "balanceSolid",
@@ -128,7 +209,5 @@ export const UserFieldMap: Record<string, string> = {
   "custom.level_up.solid": "levelupSolid",
   "custom.level_up.url": "levelupUrl",
   "custom.badges": "customBadges",
-  "temp.games": "tempGames",
-  "temp.voice_time": "tempVoiceTime",
   "presets.jtc": "jtcPresets",
 };
