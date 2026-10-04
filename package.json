@@ -12,7 +12,11 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "migrate:cache": "tsx scripts/migrate-cache-to-postgres.ts"
+    "migrate:cache": "tsx scripts/migrate-cache-to-postgres.ts",
+    "db": "node scripts/db.mjs",
+    "db:status": "node scripts/db.mjs status",
+    "db:backup": "node scripts/db.mjs backup",
+    "db:migrate": "node scripts/db.mjs migrate"
   },
   "type": "commonjs",
   "author": "hitomihiumi",
