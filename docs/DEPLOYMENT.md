@@ -124,7 +124,7 @@ has to connect over the internet, and then the databases need a password **and**
    its own chains (`AMELIA-INPUT`, `AMELIA-DOCKER`):
    ```bash
    sudo scripts/firewall.sh apply --dry-run     # prints the commands, changes nothing
-   sudo ADMIN_CIDRS="203.0.113.7/32" scripts/firewall.sh apply
+   sudo scripts/firewall.sh apply
    sudo scripts/firewall.sh status
    sudo scripts/firewall.sh install-service     # re-apply on boot and after Docker restarts
    ```
@@ -132,8 +132,8 @@ has to connect over the internet, and then the databases need a password **and**
      (`REDIS_TLS_PORT`) are reachable, plus `EXTRA_TCP_PORTS` if you set it. Everything else, including a port
      Docker publishes by mistake (6379, 5632), is dropped. Loopback, the Docker networks and the private
      network are not restricted.
-   - `ADMIN_CIDRS` limits SSH to your address (recommended). Without it SSH is open but rate limited.
-     The script refuses an `ADMIN_CIDRS` that does not contain the address of your current SSH session.
+   - SSH is open to everyone, so a changing home address never locks you out. Compensate on the server:
+     key-only login (`PasswordAuthentication no` in `/etc/ssh/sshd_config`) and, optionally, `fail2ban`.
    - `DB_CIDRS` limits the database ports to some networks. Leave it empty for Vercel, which has no fixed
      addresses.
    - After `apply` you have 30 seconds to type `yes` from the same session; otherwise the rules are removed

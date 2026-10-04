@@ -3,13 +3,12 @@
 # iptables firewall for a host that runs the Amelia compose stack with docker-compose.remote.yml.
 #
 #   sudo scripts/firewall.sh status
-#   sudo scripts/firewall.sh apply [--dry-run] [--yes] [--force]
+#   sudo scripts/firewall.sh apply [--dry-run] [--yes]
 #   sudo scripts/firewall.sh remove
 #   sudo scripts/firewall.sh install-service     # re-apply after every boot / Docker restart
 #
 # Configuration (environment variables, or /etc/default/amelia-firewall, or the project's .env):
-#   SSH_PORT          default 22
-#   ADMIN_CIDRS       who may reach SSH, e.g. "203.0.113.7/32 2001:db8::/48". Empty = anyone (rate limited)
+#   SSH_PORT          default 22 (open to everyone, so a changing address never locks you out)
 #   DB_CIDRS          who may reach PostgreSQL and Redis. Empty = anyone (Vercel has no fixed addresses)
 #   POSTGRES_PUBLIC_PORT (5433)  and  REDIS_TLS_PORT (6380)
 #   EXTRA_TCP_PORTS   more public TCP ports, e.g. "80 443"
@@ -36,7 +35,6 @@ DEFAULTS_FILE="/etc/default/amelia-firewall"
 
 DRY_RUN=0
 ASSUME_YES=0
-FORCE=0
 NO_GUARD=0
 
 die() { echo "error: $*" >&2; exit 1; }
@@ -52,7 +50,7 @@ read_file_var() { # <file> <name>
 
 load_config() {
   local name value
-  for name in SSH_PORT ADMIN_CIDRS DB_CIDRS POSTGRES_PUBLIC_PORT REDIS_TLS_PORT EXTRA_TCP_PORTS WAN_IF GUARD_SECONDS; do
+  for name in SSH_PORT DB_CIDRS POSTGRES_PUBLIC_PORT REDIS_TLS_PORT EXTRA_TCP_PORTS WAN_IF GUARD_SECONDS; do
     if [[ -z "${!name:-}" ]]; then
       value="$(read_file_var "$DEFAULTS_FILE" "$name")"
       [[ -n "$value" ]] || value="$(read_file_var "$PROJECT_DIR/.env" "$name")"
@@ -60,7 +58,6 @@ load_config() {
     fi
   done
   SSH_PORT="${SSH_PORT:-22}"
-  ADMIN_CIDRS="${ADMIN_CIDRS:-}"
   DB_CIDRS="${DB_CIDRS:-}"
   POSTGRES_PUBLIC_PORT="${POSTGRES_PUBLIC_PORT:-5433}"
   REDIS_TLS_PORT="${REDIS_TLS_PORT:-6380}"
@@ -80,7 +77,7 @@ validate_config() {
   done
   [[ "$GUARD_SECONDS" =~ ^[0-9]+$ ]] || die "GUARD_SECONDS must be a number"
   local cidr
-  for cidr in $ADMIN_CIDRS $DB_CIDRS; do
+  for cidr in $DB_CIDRS; do
     [[ "$cidr" =~ ^[0-9a-fA-F:.]+(/[0-9]+)?$ ]] || die "not a valid address or network: $cidr"
   done
 }
@@ -174,19 +171,8 @@ build_input() { # <family>
   run "$family" -A "$IN_CHAIN" -i docker0 -j ACCEPT
   run "$family" -A "$IN_CHAIN" -i 'br-+' -j ACCEPT
 
-  # SSH
-  local admins
-  admins="$(cidrs_of "$family" $ADMIN_CIDRS | xargs || true)"
-  if [[ -n "$ADMIN_CIDRS" ]]; then
-    for cidr in $admins; do
-      run "$family" -A "$IN_CHAIN" -s "$cidr" -p tcp --dport "$SSH_PORT" -j ACCEPT
-    done
-  else
-    run "$family" -A "$IN_CHAIN" -p tcp --dport "$SSH_PORT" -m conntrack --ctstate NEW \
-      -m hashlimit --hashlimit-name "amelia-ssh$family" --hashlimit-mode srcip \
-      --hashlimit-above 10/minute --hashlimit-burst 10 -j DROP
-    run "$family" -A "$IN_CHAIN" -p tcp --dport "$SSH_PORT" -j ACCEPT
-  fi
+  # SSH: open to everyone. Use key-only authentication on the server itself.
+  run "$family" -A "$IN_CHAIN" -p tcp --dport "$SSH_PORT" -j ACCEPT
 
   # Databases (IPv6 reaches them through docker-proxy, so this is where IPv6 is decided)
   local dbs
@@ -263,28 +249,6 @@ remove_family() { # <family>
 
 # ---- lock-out protection ------------------------------------------------------------------------
 
-# Refuses a configuration that would cut off the SSH session this script runs in.
-check_own_session() {
-  [[ -n "$ADMIN_CIDRS" && -n "${SSH_CONNECTION:-}" ]] || return 0
-  local client="${SSH_CONNECTION%% *}"
-  command -v python3 >/dev/null 2>&1 || { say "warning: python3 is missing, cannot check that $client is in ADMIN_CIDRS"; return 0; }
-  if ! python3 - "$client" $ADMIN_CIDRS <<'PY'
-import ipaddress, sys
-client = ipaddress.ip_address(sys.argv[1])
-for item in sys.argv[2:]:
-    try:
-        if client in ipaddress.ip_network(item, strict=False):
-            sys.exit(0)
-    except ValueError:
-        pass
-sys.exit(1)
-PY
-  then
-    (( FORCE )) && { say "warning: your SSH address $client is not in ADMIN_CIDRS (--force given)"; return 0; }
-    die "your SSH address $client is not in ADMIN_CIDRS, applying would lock you out (use --force to override)"
-  fi
-}
-
 # After apply: unless you confirm, a detached job removes our chains again. It survives a dropped SSH
 # session, which is exactly the case it is for.
 guard_and_confirm() {
@@ -330,12 +294,11 @@ remove_all() {
 cmd_apply() {
   load_config
   validate_config
-  check_own_session
   if (( ! DRY_RUN && ! ASSUME_YES && ! NO_GUARD )) && [[ ! -t 0 ]]; then
     die "no terminal to confirm on: run it from a terminal, or pass --yes"
   fi
   say "Public interface: $WAN_IF"
-  say "SSH: port $SSH_PORT, from ${ADMIN_CIDRS:-anywhere (rate limited)}"
+  say "SSH: port $SSH_PORT, from anywhere"
   say "Databases: ports $(db_ports | xargs | tr ' ' ','), from ${DB_CIDRS:-anywhere}"
   [[ -z "$EXTRA_TCP_PORTS" ]] || say "Also open: $EXTRA_TCP_PORTS"
   say
@@ -391,7 +354,6 @@ cmd_install_service() {
   cat >"$DEFAULTS_FILE" <<EOF
 # Read by scripts/firewall.sh and amelia-firewall.service. Edit, then: systemctl restart amelia-firewall
 SSH_PORT=$SSH_PORT
-ADMIN_CIDRS="$ADMIN_CIDRS"
 DB_CIDRS="$DB_CIDRS"
 POSTGRES_PUBLIC_PORT=$POSTGRES_PUBLIC_PORT
 REDIS_TLS_PORT=$REDIS_TLS_PORT
@@ -436,7 +398,6 @@ main() {
     case "$arg" in
       --dry-run) DRY_RUN=1 ;;
       --yes|-y) ASSUME_YES=1 ;;
-      --force) FORCE=1 ;;
       --no-guard) NO_GUARD=1 ;;
       -h|--help) usage 0 ;;
       *) die "unknown option: $arg" ;;
