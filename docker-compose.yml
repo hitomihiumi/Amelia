@@ -37,6 +37,23 @@ services:
     networks:
       - amelia_network
 
+  # Collects the warnings and errors of every container on this host into Redis for the dashboard's
+  # admin panel (Logs page, last 24 hours). It only reads logs, but access to the Docker socket is
+  # root-equivalent on the host: remove this service if you do not want the Logs page.
+  logs:
+    image: ghcr.io/hitomihiumi/amelia:latest
+    container_name: amelia_logs
+    restart: always
+    env_file: .env
+    command: node scripts/log-shipper.mjs
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - amelia_network
+
   postgres:
     image: postgres:${POSTGRES_VERSION:-15}-alpine
     container_name: amelia_postgres
