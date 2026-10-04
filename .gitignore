@@ -10,3 +10,6 @@ Kyoko.iml
 /dbs/
 
 /src/generated/prisma
+
+# database dumps written by scripts/db.mjs
+/backups/

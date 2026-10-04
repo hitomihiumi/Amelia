@@ -50,6 +50,58 @@ To update the bot to the latest version:
     docker-compose up -d
     ```
 
+The `migrate` service applies new migrations with `prisma migrate deploy`. It never resets anything:
+if the migration history does not match, it stops and the bot does not start (see below).
+
+## Database maintenance (backups, migrations, PostgreSQL upgrades)
+
+`scripts/db.mjs` needs only Node 18+. In a checkout run it as `npm run db -- <command>`; next to a
+`docker-compose.yml` without a checkout, download that single file and run `node db.mjs <command>`.
+With a running `postgres` compose service it works through docker compose, so no PostgreSQL tools are
+needed on the host; otherwise it uses `DATABASE_URL` with `pg_dump`/`pg_restore`/`psql` from `PATH`
+(or `PG_BIN_DIR`).
+
+| Command | What it does |
+| --- | --- |
+| `status` | PostgreSQL version, size, backups and the state of the migration history |
+| `backup` | Dump to `backups/` (custom format) with a row-count snapshot; keeps the last 10 (`--keep N`) |
+| `migrate` | Backup, then `prisma migrate deploy`. Refuses to touch a history that needs repair |
+| `repair` | Fixes a history Prisma would ask a reset for. Only `_prisma_migrations` is changed, never your data |
+| `baseline` | Adopts a database that has tables but no migration history |
+| `restore <file>` | Restores a dump in one transaction (all or nothing) after taking a safety backup |
+| `verify [file]` | Compares row counts with the snapshot of a backup |
+| `upgrade-pg <major>` | Docker: major PostgreSQL upgrade with all data kept (see below) |
+
+Add `--dry-run` to see what a command would do, `--yes` to skip the prompts, `--no-backup` to skip the safety backup.
+
+### "Prisma wants to reset the database"
+
+Prisma asks for a reset when the migrations recorded in the database and the files in `prisma/migrations`
+disagree. Typical causes: another project (the dashboard used to ship its own migration) ran migrations against
+the same database, a migration file was edited after it was applied, or the database was created without
+Prisma Migrate. Run `npm run db -- status` to see which one it is, then:
+
+- *recorded in the database but missing from prisma/migrations*, *file was edited*, *failed migration* → `repair`
+- *tables but no migration history* → `baseline`
+- *migrations to apply* → `migrate`
+
+Never answer "yes" to a `prisma migrate reset` / `migrate dev` prompt on a database that holds real data.
+
+### Upgrading PostgreSQL to a new major version
+
+A new major version cannot read the old data directory, so changing the image tag by hand leaves the
+database unreadable. Use:
+
+```bash
+npm run db -- upgrade-pg 17        # add --dry-run first to see the plan
+```
+
+It dumps the database, keeps a copy of the old data volume (`<volume>_pg15_<timestamp>`, not deleted),
+starts the new version on a fresh volume, restores the dump in one transaction, runs the migrations,
+compares every table's row count with the snapshot and only then starts the bot. The image tag comes from
+`POSTGRES_VERSION` in `.env`, which the command updates. If anything fails before the bot is started, the
+command prints the exact steps to go back.
+
 ## Deployment with Docker (without Compose)
 
 If you want to run the containers manually using the Docker CLI:

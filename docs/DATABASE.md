@@ -448,6 +448,11 @@ npm run prisma:studio
 
 ## Troubleshooting
 
+### Prisma asks to reset the database
+
+Do not reset. The migration history and the files disagree; `npm run db -- status` shows how and `repair`/`baseline`/`migrate` fix it without data loss. Details in [DEPLOYMENT.md](DEPLOYMENT.md#database-maintenance-backups-migrations-postgresql-upgrades). Only this repository owns `prisma/migrations`; the dashboard repository must not run `migrate dev`, `migrate reset` or `migrate deploy` against the shared database.
+
+
 ### Data Not Persisting
 
 ```typescript

@@ -34,7 +34,7 @@ services:
       - amelia_network
 
   postgres:
-    image: postgres:15-alpine
+    image: postgres:${POSTGRES_VERSION:-15}-alpine
     container_name: amelia_postgres
     restart: always
     environment:
