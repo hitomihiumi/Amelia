@@ -24,7 +24,6 @@ COPY --from=builder /app/prisma ./prisma/
 COPY --from=builder /app/assets ./assets
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/scripts/db.mjs ./scripts/db.mjs
-COPY --from=builder /app/scripts/log-shipper.mjs ./scripts/log-shipper.mjs
 
 # pg_dump/pg_restore/psql for scripts/db.mjs (backups and restore around migrations).
 # The client must be at least as new as the server: reinstall the image after a PostgreSQL upgrade.
