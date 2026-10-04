@@ -12,8 +12,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "migrate:mongodb": "tsx scripts/migrate-to-mongodb.ts",
-    "migrate:components": "tsx scripts/migrate-components-to-mongodb.ts"
+    "migrate:cache": "tsx scripts/migrate-cache-to-postgres.ts"
   },
   "type": "commonjs",
   "author": "hitomihiumi",
@@ -22,6 +21,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "i": "^0.3.7",
+    "mongodb": "^7.7.0",
     "tslib": "^2.8.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
@@ -39,7 +39,7 @@
     "discord.js": "^14.25.1",
     "dotenv": "^16.6.1",
     "fuse.js": "^7.1.0",
-    "mongodb": "^7.0.0",
+    "ioredis": "^5.11.1",
     "nekos.life": "^3.0.0",
     "prisma": "^7.3.0"
   }

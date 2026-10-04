@@ -153,13 +153,37 @@ const guildSchemaMap: Record<string, SchemaField> = {
     default: '"[]"',
   },
 
-  // Components - STORED IN MONGODB, not in Prisma
-  // These paths are kept for mapping but won't generate Prisma fields
-  // "utils.components.modals": MongoDB
-  // "utils.components.embed": MongoDB
-  // "utils.components.buttons": MongoDB
-  // "utils.components.selectMenus": MongoDB
-  // "utils.components.scenarios": MongoDB
+  // Components - custom components stored as PostgreSQL JSON columns
+  "utils.components.modals": {
+    prismaField: "componentsModals",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+  "utils.components.embed": {
+    prismaField: "componentsEmbeds",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+  "utils.components.buttons": {
+    prismaField: "componentsButtons",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+  "utils.components.selectMenus": {
+    prismaField: "componentsSelectMenus",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+  "utils.components.scenarios": {
+    prismaField: "componentsScenarios",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+  "utils.components.layouts": {
+    prismaField: "componentsLayouts",
+    prismaType: "Json",
+    default: '"[]"',
+  },
 
   // Giveaways
   "utils.giveaways": {
@@ -284,6 +308,57 @@ const guildSchemaMap: Record<string, SchemaField> = {
     isArray: true,
     default: "[]",
   },
+  "moderation.log_channel": {
+    prismaField: "modLogChannel",
+    prismaType: "String",
+    optional: true,
+  },
+  "moderation.dm_notify": {
+    prismaField: "modDmNotify",
+    prismaType: "Boolean",
+    default: "true",
+  },
+  "moderation.warn_expiry": {
+    prismaField: "modWarnExpiry",
+    prismaType: "Int",
+    default: "0",
+  },
+  "moderation.warn_thresholds": {
+    prismaField: "modWarnThresholds",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+
+  // Moderation - Forms (reports & appeals)
+  "moderation.forms.report": {
+    prismaField: "modReportForm",
+    prismaType: "Json",
+    default:
+      '"{\\"enabled\\":false,\\"channel\\":null,\\"cooldown\\":600,\\"max_pending\\":3,\\"allow_anonymous\\":false,\\"require_target\\":true,\\"allow_banned\\":false,\\"fields\\":[],\\"success_message\\":null,\\"approve_message\\":null,\\"reject_message\\":null}"',
+  },
+  "moderation.forms.appeal": {
+    prismaField: "modAppealForm",
+    prismaType: "Json",
+    default:
+      '"{\\"enabled\\":false,\\"channel\\":null,\\"cooldown\\":86400,\\"max_pending\\":1,\\"allow_anonymous\\":false,\\"require_target\\":false,\\"allow_banned\\":true,\\"fields\\":[],\\"success_message\\":null,\\"approve_message\\":null,\\"reject_message\\":null}"',
+  },
+
+  // Sequences for per-guild incrementing numbers
+  "moderation.sequences.case": {
+    prismaField: "modCaseSeq",
+    prismaType: "Int",
+    default: "0",
+  },
+  "moderation.sequences.report": {
+    prismaField: "modReportSeq",
+    prismaType: "Int",
+    default: "0",
+  },
+  "moderation.sequences.appeal": {
+    prismaField: "modAppealSeq",
+    prismaType: "Int",
+    default: "0",
+  },
 
   // Auto Moderation - Invites
   "moderation.auto_moderation.invite.enabled": {
@@ -359,15 +434,58 @@ const guildSchemaMap: Record<string, SchemaField> = {
     default: '"{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"}"',
   },
 
-  // Permissions
-  "permissions.commands": {
-    prismaField: "commandPermissions",
+  // Audit log
+  "audit.enabled": {
+    prismaField: "auditEnabled",
+    prismaType: "Boolean",
+    default: "false",
+  },
+  "audit.channel": {
+    prismaField: "auditChannel",
+    prismaType: "String",
+    optional: true,
+  },
+  "audit.ignore_channels": {
+    prismaField: "auditIgnoreChannels",
+    prismaType: "String",
+    isArray: true,
+    default: "[]",
+  },
+  "audit.ignore_roles": {
+    prismaField: "auditIgnoreRoles",
+    prismaType: "String",
+    isArray: true,
+    default: "[]",
+  },
+  "audit.ignore_bots": {
+    prismaField: "auditIgnoreBots",
+    prismaType: "Boolean",
+    default: "true",
+  },
+  "audit.webhook.name": {
+    prismaField: "auditWebhookName",
+    prismaType: "String",
+    optional: true,
+  },
+  "audit.webhook.avatar": {
+    prismaField: "auditWebhookAvatar",
+    prismaType: "String",
+    optional: true,
+  },
+  "audit.categories": {
+    prismaField: "auditCategories",
+    prismaType: "Json",
+    default: '"{}"',
+  },
+  "audit.events": {
+    prismaField: "auditEvents",
     prismaType: "Json",
     default: '"{}"',
   },
 
-  "temp.join_to_create.map": {
-    prismaField: "jtcTempMap",
+  // Permissions
+  "permissions.commands": {
+    prismaField: "commandPermissions",
     prismaType: "Json",
     default: '"{}"',
   },
@@ -377,6 +495,88 @@ const guildSchemaMap: Record<string, SchemaField> = {
  * User schema mapping based on UserSchema interface
  */
 const userSchemaMap: Record<string, SchemaField> = {
+  // Level (moved back from the MongoDB cache)
+  "level.xp": {
+    prismaField: "xp",
+    prismaType: "Int",
+    default: "0",
+  },
+  "level.total_xp": {
+    prismaField: "totalXp",
+    prismaType: "Int",
+    default: "0",
+  },
+  "level.level": {
+    prismaField: "level",
+    prismaType: "Int",
+    default: "1",
+  },
+  "level.voice_time": {
+    prismaField: "voiceTime",
+    prismaType: "Int",
+    default: "0",
+  },
+  "level.message_count": {
+    prismaField: "messageCount",
+    prismaType: "Int",
+    default: "0",
+  },
+
+  // Economy (moved back from the MongoDB cache)
+  "economy.balance.wallet": {
+    prismaField: "wallet",
+    prismaType: "Int",
+    default: "0",
+  },
+  "economy.balance.bank": {
+    prismaField: "bank",
+    prismaType: "Int",
+    default: "0",
+  },
+  "economy.inventory.custom.roles": {
+    prismaField: "customRoles",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+  "economy.inventory.custom.items": {
+    prismaField: "customItems",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+  // Timeouts are stored as DateTime; null means "no cooldown" (0 in the schema)
+  "economy.timeout.work": {
+    prismaField: "workTimeout",
+    prismaType: "DateTime",
+    optional: true,
+  },
+  "economy.timeout.timely": {
+    prismaField: "timelyTimeout",
+    prismaType: "DateTime",
+    optional: true,
+  },
+  "economy.timeout.daily": {
+    prismaField: "dailyTimeout",
+    prismaType: "DateTime",
+    optional: true,
+  },
+  "economy.timeout.weekly": {
+    prismaField: "weeklyTimeout",
+    prismaType: "DateTime",
+    optional: true,
+  },
+  "economy.timeout.rob": {
+    prismaField: "robTimeout",
+    prismaType: "DateTime",
+    optional: true,
+  },
+
+  // Game state (moved back from the MongoDB cache)
+  games: {
+    prismaField: "games",
+    prismaType: "Json",
+    default: '"{}"',
+  },
+
   // Custom Balance
   "custom.balance.number": {
     prismaField: "balanceNumber",
@@ -485,18 +685,6 @@ const userSchemaMap: Record<string, SchemaField> = {
     default: '"[]"',
   },
 
-  // Temp
-  "temp.games": {
-    prismaField: "tempGames",
-    prismaType: "Json",
-    default: '"{}"',
-  },
-  "temp.voice_time": {
-    prismaField: "tempVoiceTime",
-    prismaType: "Int",
-    default: "0",
-  },
-
   // Presets
   "presets.jtc": {
     prismaField: "jtcPresets",
@@ -506,17 +694,15 @@ const userSchemaMap: Record<string, SchemaField> = {
 };
 
 /**
- * MongoDB-stored paths (not in PostgreSQL)
- * These paths are stored in MongoDB for better performance
+ * Redis-stored paths (not in PostgreSQL)
+ *
+ * Ephemeral cache paths resolved by TempCache through the Cache helper
+ * (guild_temp / user_temp namespaces). They stay in the PathMap for path and
+ * type resolution but must not appear in the schema maps above.
  */
-const mongoDBPaths: Record<string, string[]> = {
-  guild: [
-    "utils.components.modals",
-    "utils.components.embed",
-    "utils.components.buttons",
-    "utils.components.selectMenus",
-    "utils.components.scenarios",
-  ],
+const redisPaths: Record<string, string[]> = {
+  guild: ["temp.join_to_create.map"],
+  user: ["temp.voice_time"],
 };
 
 /**
@@ -529,8 +715,8 @@ function buildPathHierarchy(
   const hierarchy: PathMapping = {};
   const paths = Object.keys(schemaMap);
 
-  // Get MongoDB paths for this schema
-  const mongoPaths = mongoDBPaths[schemaName.toLowerCase()] || [];
+  // Get Redis cache paths for this schema
+  const cachePaths = redisPaths[schemaName.toLowerCase()] || [];
 
   // Add all leaf paths
   for (const fullPath of paths) {
@@ -540,18 +726,18 @@ function buildPathHierarchy(
     };
   }
 
-  // Add MongoDB paths with empty field (they don't map to PostgreSQL)
-  for (const mongoPath of mongoPaths) {
-    hierarchy[mongoPath] = {
-      field: "", // MongoDB paths don't have PostgreSQL fields
+  // Add Redis cache paths with empty field (they don't map to PostgreSQL)
+  for (const cachePath of cachePaths) {
+    hierarchy[cachePath] = {
+      field: "", // Redis cache paths don't have PostgreSQL fields
     };
   }
 
   // Build all parent paths (including intermediate ones)
   const parentPaths = new Map<string, Set<string>>();
 
-  // Include MongoDB paths in the hierarchy building
-  const allPaths = [...paths, ...mongoPaths];
+  // Include Redis cache paths in the hierarchy building
+  const allPaths = [...paths, ...cachePaths];
 
   for (const fullPath of allPaths) {
     const parts = fullPath.split(".");
@@ -577,7 +763,7 @@ function buildPathHierarchy(
       const childKey = parts[parts.length - 1];
 
       // If the parent path is not a leaf path, add this as a child
-      if (!schemaMap[parentPath] && !mongoPaths.includes(parentPath)) {
+      if (!schemaMap[parentPath] && !cachePaths.includes(parentPath)) {
         if (!parentPaths.has(parentPath)) {
           parentPaths.set(parentPath, new Set());
         }
@@ -589,7 +775,7 @@ function buildPathHierarchy(
   // Add parent paths with their children
   for (const [parentPath, childrenSet] of parentPaths) {
     // Skip if this is a leaf path (already added above)
-    if (schemaMap[parentPath] || mongoPaths.includes(parentPath)) continue;
+    if (schemaMap[parentPath] || cachePaths.includes(parentPath)) continue;
 
     hierarchy[parentPath] = {
       field: "", // Parent paths don't map to a single field
@@ -610,8 +796,8 @@ function generateMapping(
 ): void {
   const hierarchy = buildPathHierarchy(schemaMap, name);
 
-  // Get MongoDB paths for this schema (they shouldn't be in FieldMap)
-  const mongoPaths = mongoDBPaths[name.toLowerCase()] || [];
+  // Get Redis cache paths for this schema (they shouldn't be in FieldMap)
+  const cachePaths = redisPaths[name.toLowerCase()] || [];
 
   const content = `/**
  * Auto-generated ${name} path mapping
@@ -627,7 +813,7 @@ export interface PathMap {
 
 export const ${name}PathMap: PathMap = ${JSON.stringify(hierarchy, null, 2)};
 
-// Note: MongoDB paths (${mongoPaths.join(", ")}) are not included in FieldMap
+// Note: Redis cache paths (${cachePaths.join(", ")}) are not included in FieldMap
 export const ${name}FieldMap: Record<string, string> = ${JSON.stringify(
     Object.fromEntries(Object.entries(schemaMap).map(([path, field]) => [path, field.prismaField])),
     null,

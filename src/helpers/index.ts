@@ -4,3 +4,5 @@ export * from "./canvasUtil";
 export * from "./customUtil";
 export * from "./permissions";
 export * from "./Cache";
+export * from "./moderation";
+export * from "./audit";

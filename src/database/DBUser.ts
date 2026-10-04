@@ -3,7 +3,6 @@ import { User as DiscordUser, Guild, Client } from "discord.js";
 import { prisma } from "./prisma";
 import { DBHistory } from "./DBHistory";
 import { UserPathMap, UserFieldMap } from "./mappings/UserMapping";
-import { TempCache } from "./TempCache";
 
 /**
  * Type-safe paths for User data access
@@ -29,6 +28,7 @@ type UserPath =
   | "economy.timeout.daily"
   | "economy.timeout.weekly"
   | "economy.timeout.rob"
+  | "games"
   | "custom.balance"
   | "custom.balance.number"
   | "custom.balance.mode"
@@ -67,40 +67,20 @@ type UserPathValue<T extends UserPath> = T extends "level.xp"
                       : any;
 
 /**
- * Default values for MongoDB-stored fields
+ * Paths stored as DateTime columns; the wrapper converts them to
+ * millisecond timestamps (0 = no cooldown) to keep the schema numeric.
  */
-const MONGODB_DEFAULTS = {
-  level: {
-    xp: 0,
-    total_xp: 0,
-    level: 1,
-    voice_time: 0,
-    message_count: 0,
-  },
-  economy: {
-    balance: {
-      wallet: 0,
-      bank: 0,
-    },
-    inventory: {
-      custom: {
-        roles: [],
-        items: [],
-      },
-    },
-    timeout: {
-      work: 0,
-      timely: 0,
-      daily: 0,
-      weekly: 0,
-      rob: 0,
-    },
-  },
-};
+const TIMEOUT_PATHS = new Set([
+  "economy.timeout.work",
+  "economy.timeout.timely",
+  "economy.timeout.daily",
+  "economy.timeout.weekly",
+  "economy.timeout.rob",
+]);
 
 /**
- * Database User wrapper with type-safe access
- * Automatically routes level and economy fields to MongoDB
+ * Database User wrapper with type-safe access.
+ * All schema paths live in PostgreSQL; only temp.* paths are served by TempCache (Redis).
  */
 export class DBUser {
   public user: DiscordUser;
@@ -108,68 +88,12 @@ export class DBUser {
   public client: Client;
   public history: DBHistory;
   private data: PrismaUser | null = null;
-  private mongoCache: TempCache<typeof UserPathMap>;
 
   constructor(client: Client, user: DiscordUser, guild: Guild) {
     this.client = client;
     this.user = user;
     this.guild = guild;
     this.history = new DBHistory(client, guild);
-    // Use persistent MongoDB collection for user data (not temp)
-    this.mongoCache = new TempCache("user_data", `${user.id}:${guild.id}`, UserPathMap);
-  }
-
-  /**
-   * Check if a path should be stored in MongoDB
-   */
-  private isMongoDBPath(path: string): boolean {
-    return path.startsWith("level") || path.startsWith("economy");
-  }
-
-  /**
-   * Initialize MongoDB data with defaults
-   */
-  private async ensureMongoDBData(path: string): Promise<void> {
-    const rootPath = path.split(".")[0];
-
-    if (rootPath === "level") {
-      const hasLevel = await this.mongoCache.has("level.xp");
-      if (!hasLevel) {
-        // Initialize all level fields
-        for (const [key, value] of Object.entries(MONGODB_DEFAULTS.level)) {
-          await this.mongoCache.set(`level.${key}`, value);
-        }
-      }
-    } else if (rootPath === "economy") {
-      const hasEconomy = await this.mongoCache.has("economy.balance.wallet");
-      if (!hasEconomy) {
-        // Initialize all economy fields
-        await this.mongoCache.set(
-          "economy.balance.wallet",
-          MONGODB_DEFAULTS.economy.balance.wallet,
-        );
-        await this.mongoCache.set("economy.balance.bank", MONGODB_DEFAULTS.economy.balance.bank);
-        await this.mongoCache.set(
-          "economy.inventory.custom.roles",
-          MONGODB_DEFAULTS.economy.inventory.custom.roles,
-        );
-        await this.mongoCache.set(
-          "economy.inventory.custom.items",
-          MONGODB_DEFAULTS.economy.inventory.custom.items,
-        );
-        await this.mongoCache.set("economy.timeout.work", MONGODB_DEFAULTS.economy.timeout.work);
-        await this.mongoCache.set(
-          "economy.timeout.timely",
-          MONGODB_DEFAULTS.economy.timeout.timely,
-        );
-        await this.mongoCache.set("economy.timeout.daily", MONGODB_DEFAULTS.economy.timeout.daily);
-        await this.mongoCache.set(
-          "economy.timeout.weekly",
-          MONGODB_DEFAULTS.economy.timeout.weekly,
-        );
-        await this.mongoCache.set("economy.timeout.rob", MONGODB_DEFAULTS.economy.timeout.rob);
-      }
-    }
   }
 
   /**
@@ -197,40 +121,30 @@ export class DBUser {
   }
 
   /**
+   * Convert a stored column value into its schema representation
+   */
+  private readField(path: string, value: any): any {
+    if (TIMEOUT_PATHS.has(path)) {
+      return value ? new Date(value).getTime() : 0;
+    }
+    return value;
+  }
+
+  /**
+   * Convert a schema value into its column representation
+   */
+  private writeField(path: string, value: any): any {
+    if (TIMEOUT_PATHS.has(path)) {
+      return value ? new Date(value) : null;
+    }
+    return value;
+  }
+
+  /**
    * Get value by path with type inference
    * Supports parent paths (e.g., "level" returns all level fields)
-   * Automatically routes to MongoDB for level and economy fields
    */
   public async get<T extends UserPath>(path: T): Promise<UserPathValue<T>> {
-    // Route to MongoDB for level and economy paths
-    if (this.isMongoDBPath(path)) {
-      await this.ensureMongoDBData(path);
-
-      // Check if this is a parent path
-      const pathInfo = UserPathMap[path];
-
-      if (pathInfo && pathInfo.children) {
-        // Parent path: collect all child values from MongoDB
-        const result: any = {};
-
-        for (const childKey of pathInfo.children) {
-          const childPath = `${path}.${childKey}`;
-          const value = await this.mongoCache.get(childPath);
-
-          if (value !== null && value !== undefined) {
-            result[childKey] = value;
-          }
-        }
-
-        return result as UserPathValue<T>;
-      }
-
-      // Leaf path: get single value from MongoDB
-      const value = await this.mongoCache.get(path);
-      return (value ?? null) as UserPathValue<T>;
-    }
-
-    // PostgreSQL path
     await this.ensureUser();
 
     const data = await prisma.user.findUnique({
@@ -248,40 +162,43 @@ export class DBUser {
     const pathInfo = UserPathMap[path];
 
     if (pathInfo && pathInfo.children) {
-      // This is a parent path, collect all child values
-      const result: any = {};
-
-      for (const childKey of pathInfo.children) {
-        const childPath = `${path}.${childKey}`;
-        const childInfo = UserPathMap[childPath];
-
-        if (childInfo && childInfo.field) {
-          result[childKey] = data[childInfo.field as keyof typeof data];
-        }
-      }
-
+      // This is a parent path, recursively collect all child values
+      const result = this.collectChildValues(path, pathInfo.children, data);
       return result as UserPathValue<T>;
     }
 
     // This is a leaf path, get the single field value
     const field = this.mapPathToField(path);
-    return data[field as keyof typeof data] as UserPathValue<T>;
+    return this.readField(path, data[field as keyof typeof data]) as UserPathValue<T>;
   }
 
   /**
    * Set value by path with type safety
-   * Automatically routes to MongoDB for level and economy fields
    */
   public async set<T extends UserPath>(path: T, value: UserPathValue<T>): Promise<void> {
-    // Route to MongoDB for level and economy paths
-    if (this.isMongoDBPath(path)) {
-      await this.ensureMongoDBData(path);
-      await this.mongoCache.set(path, value);
+    await this.ensureUser();
+
+    // Parent path: update every mapped child column in one statement
+    const pathInfo = UserPathMap[path];
+    if (pathInfo && pathInfo.children && pathInfo.children.length > 0) {
+      const updateData: Record<string, any> = {};
+      this.collectFieldUpdates(path, pathInfo.children, value, updateData);
+
+      if (Object.keys(updateData).length > 0) {
+        await prisma.user.update({
+          where: {
+            userId_guildId: {
+              userId: this.user.id,
+              guildId: this.guild.id,
+            },
+          },
+          data: updateData,
+        });
+        this.data = null;
+      }
+
       return;
     }
-
-    // PostgreSQL path
-    await this.ensureUser();
 
     const field = this.mapPathToField(path);
 
@@ -292,7 +209,7 @@ export class DBUser {
           guildId: this.guild.id,
         },
       },
-      data: { [field]: value },
+      data: { [field]: this.writeField(path, value) },
     });
 
     // Invalidate cache
@@ -300,46 +217,51 @@ export class DBUser {
   }
 
   /**
+   * Atomic add for direct numeric columns, returns false for composite paths
+   */
+  private async tryIncrement(path: string, value: number): Promise<boolean> {
+    const field = UserFieldMap[path];
+    if (!field || TIMEOUT_PATHS.has(path)) return false;
+
+    await this.ensureUser();
+    await prisma.user.update({
+      where: {
+        userId_guildId: {
+          userId: this.user.id,
+          guildId: this.guild.id,
+        },
+      },
+      data: { [field]: { increment: value } } as any,
+    });
+
+    this.data = null;
+    return true;
+  }
+
+  /**
    * Add to numeric value
-   * Works with both MongoDB and PostgreSQL paths
    */
   public async add(path: string, value: number): Promise<void> {
-    if (this.isMongoDBPath(path)) {
-      await this.ensureMongoDBData(path);
-      await this.mongoCache.add(path, value);
-      return;
+    if (!(await this.tryIncrement(path, value))) {
+      const current = await this.get(path as any);
+      await this.set(path as any, (current as number) + value);
     }
-
-    const current = await this.get(path as any);
-    await this.set(path as any, (current as number) + value);
   }
 
   /**
    * Subtract from numeric value
-   * Works with both MongoDB and PostgreSQL paths
    */
   public async sub(path: string, value: number): Promise<void> {
-    if (this.isMongoDBPath(path)) {
-      await this.ensureMongoDBData(path);
-      await this.mongoCache.sub(path, value);
-      return;
+    if (!(await this.tryIncrement(path, -value))) {
+      const current = await this.get(path as any);
+      await this.set(path as any, (current as number) - value);
     }
-
-    const current = await this.get(path as any);
-    await this.set(path as any, (current as number) - value);
   }
 
   /**
    * Push to array
-   * Works with both MongoDB and PostgreSQL paths
    */
   public async push(path: string, value: any): Promise<void> {
-    if (this.isMongoDBPath(path)) {
-      await this.ensureMongoDBData(path);
-      await this.mongoCache.push(path, value);
-      return;
-    }
-
     const current = await this.get(path as any);
     if (Array.isArray(current)) {
       await this.set(path as any, [...current, value]);
@@ -348,36 +270,78 @@ export class DBUser {
 
   /**
    * Delete field
-   * Works with both MongoDB and PostgreSQL paths
    */
   public async delete(path: string): Promise<void> {
-    if (this.isMongoDBPath(path)) {
-      await this.mongoCache.delete(path);
-      return;
-    }
-
     await this.set(path as any, null as any);
   }
 
   /**
    * Check if path exists
-   * Works with both MongoDB and PostgreSQL paths
    */
   public async has(path: string): Promise<boolean> {
-    if (this.isMongoDBPath(path)) {
-      return await this.mongoCache.has(path);
-    }
-
     const value = await this.get(path as any);
     return value !== null && value !== undefined;
   }
 
   /**
-   * Get all user data (PostgreSQL only)
-   * Note: MongoDB data is not included in this method
+   * Get all user data
    */
   public async all(): Promise<PrismaUser> {
     return await this.ensureUser();
+  }
+
+  /**
+   * Recursively collect child values for a parent path
+   */
+  private collectChildValues(parentPath: string, children: string[], data: any): any {
+    const result: any = {};
+
+    for (const childKey of children) {
+      const childPath = `${parentPath}.${childKey}`;
+      const childInfo = UserPathMap[childPath];
+
+      if (!childInfo) continue;
+
+      if (childInfo.children && childInfo.children.length > 0) {
+        // This child is also a parent, recurse
+        result[childKey] = this.collectChildValues(childPath, childInfo.children, data);
+      } else if (childInfo.field) {
+        // This is a leaf node with a direct field mapping
+        result[childKey] = this.readField(childPath, data[childInfo.field as keyof typeof data]);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Recursively collect field updates from nested value object
+   */
+  private collectFieldUpdates(
+    parentPath: string,
+    children: string[],
+    value: any,
+    updateData: Record<string, any>,
+  ): void {
+    if (!value || typeof value !== "object") return;
+
+    for (const childKey of children) {
+      const childPath = `${parentPath}.${childKey}`;
+      const childInfo = UserPathMap[childPath];
+      const childValue = value[childKey];
+
+      if (childValue === undefined) continue;
+
+      if (!childInfo) continue;
+
+      if (childInfo.children && childInfo.children.length > 0) {
+        // This child is also a parent, recurse
+        this.collectFieldUpdates(childPath, childInfo.children, childValue, updateData);
+      } else if (childInfo.field) {
+        // This is a leaf node with a direct field mapping
+        updateData[childInfo.field] = this.writeField(childPath, childValue);
+      }
+    }
   }
 
   /**

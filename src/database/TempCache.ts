@@ -1,38 +1,79 @@
-import { Collection } from "mongodb";
-import { MongoDBService } from "./mongodb";
+import type { Redis } from "ioredis";
+import { RedisService } from "./redis";
 import type { PathMap } from "./mappings/GuildMapping";
 
 /**
- * Document structure in MongoDB for temp data
+ * Hash field that tracks which paths hold Map structures,
+ * the counterpart of the former MongoDB `mapPaths` document field.
  */
-interface TempDocument {
-  _id: string;
-  data: Record<string, any>;
-  /** Tracks which paths contain Map structures */
-  mapPaths?: string[];
-  updatedAt: Date;
-}
+const MAP_PATHS_FIELD = "__mapPaths__";
+
+/** user_temp keys expire after 24 hours, refreshed on every write. */
+const USER_TEMP_TTL_SECONDS = 24 * 60 * 60;
 
 /**
- * Generic TempCache class for handling temporary data in MongoDB
+ * Generic TempCache class for handling temporary data in Redis
+ *
+ * Storage layout: one Redis hash per entity — key `cache:{collection}:{entityId}`,
+ * hash field = dot path, value = JSON. Plain numbers are stored as "5", so
+ * HINCRBY keeps add/sub atomic on the server side.
+ *
  * @template TMapping - The PathMap type (GuildPathMap or UserPathMap)
  */
 export class TempCache<TMapping extends PathMap> {
-  private collection: Collection<TempDocument>;
-  private entityId: string;
+  private client: Redis;
+  private key: string;
   private pathMapping: TMapping;
+  private ttlSeconds: number | null;
   private localCache: Map<string, any> = new Map();
 
   /**
    * Create a new TempCache instance
-   * @param collectionName - MongoDB collection name ("guild_temp" or "user_temp")
+   * @param collectionName - Namespace ("guild_temp" or "user_temp")
    * @param entityId - Unique identifier (guildId or "userId:guildId")
    * @param pathMapping - Path mapping for type-safe access
    */
   constructor(collectionName: string, entityId: string, pathMapping: TMapping) {
-    this.collection = MongoDBService.getCollection<TempDocument>(collectionName);
-    this.entityId = entityId;
+    this.client = RedisService.getClient();
+    this.key = `cache:${collectionName}:${entityId}`;
     this.pathMapping = pathMapping;
+    this.ttlSeconds = collectionName === "user_temp" ? USER_TEMP_TTL_SECONDS : null;
+  }
+
+  /**
+   * Refresh the key TTL after a write, when the namespace has one
+   */
+  private async refreshTtl(): Promise<void> {
+    if (this.ttlSeconds !== null) {
+      await this.client.expire(this.key, this.ttlSeconds);
+    }
+  }
+
+  /**
+   * Read the list of paths that hold Map structures
+   */
+  private async getMapPaths(): Promise<string[]> {
+    const raw = await this.client.hget(this.key, MAP_PATHS_FIELD);
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as string[];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Add or remove a path from the Map tracking list
+   */
+  private async trackMapPath(path: string, isMap: boolean): Promise<void> {
+    const paths = await this.getMapPaths();
+    const next = isMap ? paths.concat(path) : paths.filter((p) => p !== path);
+
+    if (next.length > 0) {
+      await this.client.hset(this.key, MAP_PATHS_FIELD, JSON.stringify(next));
+    } else {
+      await this.client.hdel(this.key, MAP_PATHS_FIELD);
+    }
   }
 
   /**
@@ -46,22 +87,14 @@ export class TempCache<TMapping extends PathMap> {
     }
 
     try {
-      const doc = await this.collection.findOne({ _id: this.entityId });
-
-      if (!doc || !doc.data) {
-        return null;
-      }
-
-      // Check if this is a parent path
+      // Parent path: collect all child values from the whole hash
       const pathInfo = this.pathMapping[path];
-
       if (pathInfo && pathInfo.children) {
-        // Parent path: collect all child values
+        const entries = await this.client.hgetall(this.key);
         const result: any = {};
 
         for (const childKey of pathInfo.children) {
-          const childPath = `${path}.${childKey}`;
-          const value = this.extractValue(doc.data, childPath, doc.mapPaths);
+          const value = this.extractValueFromEntries(entries, `${path}.${childKey}`);
           if (value !== undefined) {
             result[childKey] = value;
           }
@@ -70,12 +103,22 @@ export class TempCache<TMapping extends PathMap> {
         return result as T;
       }
 
-      // Leaf path: extract single value
-      const value = this.extractValue(doc.data, path, doc.mapPaths);
+      // Leaf path: read the single field
+      const raw = await this.client.hget(this.key, path);
+      if (raw === null) {
+        return null;
+      }
 
-      // Cache Maps in local cache
-      if (value instanceof Map) {
-        this.localCache.set(path, value);
+      const value = this.parseJson(raw);
+
+      // Restore Map structures tracked in the metadata field
+      if (Array.isArray(value)) {
+        const mapPaths = await this.getMapPaths();
+        if (mapPaths.includes(path)) {
+          const map = new Map(value);
+          this.localCache.set(path, map);
+          return map as T;
+        }
       }
 
       return value as T;
@@ -94,27 +137,14 @@ export class TempCache<TMapping extends PathMap> {
     // Store Map structures in local cache
     if (isMap) {
       this.localCache.set(path, value);
-      // Convert to array of entries for MongoDB
+      // Convert to array of entries for storage
       value = Array.from(value.entries());
     }
 
     try {
-      const updateData = this.buildUpdateObject(path, value);
-      const update: any = {
-        $set: {
-          ...updateData,
-          updatedAt: new Date(),
-        },
-      };
-
-      // Track Map paths
-      if (isMap) {
-        update.$addToSet = { mapPaths: path };
-      } else {
-        update.$pull = { mapPaths: path };
-      }
-
-      await this.collection.updateOne({ _id: this.entityId }, update, { upsert: true });
+      await this.client.hset(this.key, path, JSON.stringify(value));
+      await this.trackMapPath(path, isMap);
+      await this.refreshTtl();
     } catch (error) {
       console.error(`Error setting temp data for ${path}:`, error);
       throw error;
@@ -129,16 +159,12 @@ export class TempCache<TMapping extends PathMap> {
     this.localCache.delete(path);
 
     try {
-      const unsetData = this.buildUnsetObject(path);
+      await this.client.hdel(this.key, path);
 
-      await this.collection.updateOne(
-        { _id: this.entityId },
-        {
-          $unset: unsetData,
-          $pull: { mapPaths: path },
-          $set: { updatedAt: new Date() },
-        },
-      );
+      const paths = await this.getMapPaths();
+      if (paths.includes(path)) {
+        await this.trackMapPath(path, false);
+      }
     } catch (error) {
       console.error(`Error deleting temp data for ${path}:`, error);
       throw error;
@@ -164,7 +190,7 @@ export class TempCache<TMapping extends PathMap> {
     this.localCache.clear();
 
     try {
-      await this.collection.deleteOne({ _id: this.entityId });
+      await this.client.del(this.key);
     } catch (error) {
       console.error(`Error clearing temp data:`, error);
       throw error;
@@ -172,12 +198,31 @@ export class TempCache<TMapping extends PathMap> {
   }
 
   /**
-   * Get all temp data
+   * Get all temp data as a nested object (same shape the MongoDB document had)
    */
   public async all(): Promise<Record<string, any> | null> {
     try {
-      const doc = await this.collection.findOne({ _id: this.entityId });
-      return doc?.data || null;
+      const entries = await this.client.hgetall(this.key);
+      const result: Record<string, any> = {};
+
+      for (const [field, raw] of Object.entries(entries)) {
+        if (field === MAP_PATHS_FIELD) continue;
+
+        const value = this.parseJson(raw);
+        const keys = field.split(".");
+        let node = result;
+
+        for (let i = 0; i < keys.length - 1; i++) {
+          if (typeof node[keys[i]] !== "object" || node[keys[i]] === null) {
+            node[keys[i]] = {};
+          }
+          node = node[keys[i]];
+        }
+
+        node[keys[keys.length - 1]] = value;
+      }
+
+      return Object.keys(result).length > 0 ? result : null;
     } catch (error) {
       console.error(`Error getting all temp data:`, error);
       return null;
@@ -185,62 +230,31 @@ export class TempCache<TMapping extends PathMap> {
   }
 
   /**
-   * Extract value from nested object by path
-   * @param data - The data object to extract from
-   * @param path - The path to extract
-   * @param mapPaths - Array of paths that should be converted to Maps
-   */
-  private extractValue(data: any, path: string, mapPaths?: string[]): any {
-    const keys = path.split(".");
-    let current = data;
-
-    for (const key of keys) {
-      if (current === null || current === undefined) {
-        return undefined;
-      }
-      current = current[key];
-    }
-
-    // Check if this path should be a Map (using metadata)
-    if (mapPaths && mapPaths.includes(path) && Array.isArray(current)) {
-      return new Map(current);
-    }
-
-    return current;
-  }
-
-  /**
-   * Build MongoDB update object from path
-   */
-  private buildUpdateObject(path: string, value: any): Record<string, any> {
-    const keys = path.split(".");
-    const mongoPath = `data.${keys.join(".")}`;
-    return { [mongoPath]: value };
-  }
-
-  /**
-   * Build MongoDB unset object from path
-   */
-  private buildUnsetObject(path: string): Record<string, any> {
-    const keys = path.split(".");
-    const mongoPath = `data.${keys.join(".")}`;
-    return { [mongoPath]: "" };
-  }
-
-  /**
-   * Add to numeric value
+   * Add to numeric value (atomic HINCRBY)
    */
   public async add(path: string, value: number): Promise<void> {
-    const current = (await this.get<number>(path)) || 0;
-    await this.set(path, current + value);
+    await this.change(path, value);
   }
 
   /**
-   * Subtract from numeric value
+   * Subtract from numeric value (atomic HINCRBY)
    */
   public async sub(path: string, value: number): Promise<void> {
-    const current = (await this.get<number>(path)) || 0;
-    await this.set(path, current - value);
+    await this.change(path, -value);
+  }
+
+  /**
+   * Atomic numeric change with a read-modify-write fallback for paths
+   * that hold non-numeric values
+   */
+  private async change(path: string, value: number): Promise<void> {
+    try {
+      await this.client.hincrby(this.key, path, value);
+      await this.refreshTtl();
+    } catch {
+      const current = (await this.get<number>(path)) || 0;
+      await this.set(path, current + value);
+    }
   }
 
   /**
@@ -251,5 +265,35 @@ export class TempCache<TMapping extends PathMap> {
     if (Array.isArray(current)) {
       await this.set(path, [...current, value]);
     }
+  }
+
+  /**
+   * Parse a raw hash field, restoring Map structures where tracked
+   */
+  private parseJson(raw: string): any {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return raw;
+    }
+  }
+
+  /**
+   * Extract a value from parsed hash entries by dot path
+   */
+  private extractValueFromEntries(entries: Record<string, string>, path: string): any {
+    const value = this.parseJson(entries[path] ?? "null");
+    if (value === null) return undefined;
+
+    if (Array.isArray(value)) {
+      const mapPaths = entries[MAP_PATHS_FIELD]
+        ? (JSON.parse(entries[MAP_PATHS_FIELD]) as string[])
+        : [];
+      if (mapPaths.includes(path)) {
+        return new Map(value);
+      }
+    }
+
+    return value;
   }
 }

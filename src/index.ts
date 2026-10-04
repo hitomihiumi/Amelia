@@ -1,4 +1,11 @@
-import { Client, GatewayIntentBits, Partials, Collection, ColorResolvable } from "discord.js";
+import {
+  Client,
+  GatewayIntentBits,
+  Options,
+  Partials,
+  Collection,
+  ColorResolvable,
+} from "discord.js";
 import "dotenv/config";
 import "@hitomihiumi/colors.ts";
 import {
@@ -17,14 +24,25 @@ import {
 import { FileWatcher } from "@hitomihiumi/filewatcher";
 import { commandLoader } from "./handlers/cmdLoaders";
 import { initializeI18n } from "./i18n/locales";
-import { prisma, DatabaseService, MongoDBService } from "./database";
+import { prisma, DatabaseService, RedisService } from "./database";
 import { emojis } from "./emoji/emojis";
+import { markOffline } from "./handlers/statusHeartbeat";
 import { iconsMap } from "./helpers/assetsMap";
 
 foldersCheck();
 
 const client = new Client({
   shards: "auto",
+  // The audit log shows the previous content of edited and deleted messages,
+  // and Discord only ever sends the new one — it has to come from this cache.
+  makeCache: Options.cacheWithLimits({
+    ...Options.DefaultMakeCacheSettings,
+    MessageManager: 500,
+  }),
+  sweepers: {
+    ...Options.DefaultSweeperSettings,
+    messages: { interval: 3600, lifetime: 43200 },
+  },
   allowedMentions: {
     parse: ["users", "roles"],
     repliedUser: false,
@@ -108,14 +126,23 @@ client.holder = {
     // Connect to PostgreSQL
     await DatabaseService.connect();
 
-    // Connect to MongoDB for temp data cache
-    await MongoDBService.connect();
+    // Connect to Redis for temp data cache
+    await RedisService.connect();
   } catch (error) {
     console.error("Failed to connect to databases:".red, error);
     process.exit(1);
   }
 
-  ["antiCrash", "events", "commands", "components", "slash", "joinToCreate"]
+  [
+    "antiCrash",
+    "events",
+    "commands",
+    "components",
+    "slash",
+    "joinToCreate",
+    "moderationScheduler",
+    "statusHeartbeat",
+  ]
     .filter(Boolean)
     .forEach((handler: any) => {
       require(`./handlers/${handler}`)(client);
@@ -143,8 +170,11 @@ const shutdown = async (signal: string) => {
   console.log(`\n${signal} received. Shutting down gracefully...`.yellow);
 
   try {
-    // Disconnect from MongoDB
-    await MongoDBService.disconnect();
+    // Tell the website the bot is going down before the connections close.
+    await markOffline(client);
+
+    // Disconnect from Redis
+    await RedisService.disconnect();
 
     // Disconnect from PostgreSQL
     await DatabaseService.disconnect();
