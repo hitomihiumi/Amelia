@@ -10,6 +10,8 @@
  *   backup [--keep N]       pg_dump to backups/ (custom format) plus a row-count snapshot; keeps 10
  *   restore <file|latest>   restore a dump in one transaction (a safety backup is taken first)
  *   migrate                 backup, then `prisma migrate deploy`; refuses to touch a broken history
+ *   deploy                  for containers: wait for the database, then migrate non-interactively and
+ *                           put the database back from the backup if a migration fails
  *   repair                  fix a history Prisma would "reset" for, without touching any data
  *   baseline [--through M]  adopt a database that has data but no migration history
  *   upgrade-pg <major>      docker only: dump, swap the data volume, restore, migrate, verify
@@ -108,8 +110,10 @@ let composeCmd;
 function compose() {
   if (composeCmd !== undefined) return composeCmd;
   composeCmd = null;
-  if (run("docker", ["compose", "version"]).code === 0) composeCmd = ["docker", "compose"];
-  else if (run("docker-compose", ["version"]).code === 0) composeCmd = ["docker-compose"];
+  // probes must not abort the script when docker is missing (e.g. inside the migrate container)
+  const works = (cmd, argv) => spawnSync(cmd, argv, { stdio: "ignore" }).status === 0;
+  if (works("docker", ["compose", "version"])) composeCmd = ["docker", "compose"];
+  else if (works("docker-compose", ["version"])) composeCmd = ["docker-compose"];
   return composeCmd;
 }
 function dc(argv, options = {}) {
@@ -122,7 +126,7 @@ function detectMode() {
   if (flag("local")) return "local";
   if (process.env.DB_MODE === "docker" || process.env.DB_MODE === "local")
     return process.env.DB_MODE;
-  if (compose() && fs.existsSync(path.join(ROOT, "docker-compose.yml"))) {
+  if (fs.existsSync(path.join(ROOT, "docker-compose.yml")) && compose()) {
     const id = dc(["ps", "-q", "postgres"]).stdout.trim();
     if (id) return "docker";
   }
@@ -147,12 +151,11 @@ function pg(tool, toolArgs, io = {}) {
   const stdio = [io.stdin ?? "ignore", io.stdout ?? "pipe", "pipe"];
   if (MODE === "docker") {
     const base = ["exec", "-T", "postgres", tool, "-U", PG_USER];
-    if (tool !== "pg_dumpall" && tool !== "pg_isready") base.push("-d", PG_DB);
-    if (tool === "pg_isready") base.push("-d", PG_DB);
+    if (tool !== "pg_dumpall" && !io.noDb) base.push("-d", PG_DB);
     return dc([...base, ...toolArgs], { stdio });
   }
   const url = localUrl();
-  const target = tool === "pg_dumpall" || tool === "pg_isready" ? ["-d", url] : ["-d", url];
+  const target = io.noDb ? [] : ["-d", url];
   return run(pgTool(tool), [...target, ...toolArgs], { stdio });
 }
 function sql(query) {
@@ -379,24 +382,48 @@ function resolveBackup(arg) {
   }
   return path.resolve(candidate);
 }
+/**
+ * Puts the database back exactly as the dump has it. The schema is dropped and recreated inside the same
+ * transaction as the restore, so tables a failed migration created after the backup do not survive, and
+ * if anything fails the transaction rolls back and the database stays as it was.
+ */
 function restoreDump(file) {
   out.step(`Restoring ${path.relative(ROOT, file)} (single transaction: all or nothing)`);
   if (DRY) {
-    out.info("(dry run) pg_restore --clean --if-exists --single-transaction");
+    out.info("(dry run) drop schema public, load the dump, all in one transaction");
     return;
   }
-  const fd = fs.openSync(file, "r");
-  const res = pg(
-    "pg_restore",
-    ["--clean", "--if-exists", "--no-owner", "--no-acl", "--single-transaction", "--exit-on-error"],
-    { stdin: fd },
-  );
-  fs.closeSync(fd);
-  if (res.code !== 0)
-    die(
-      "pg_restore failed; the transaction was rolled back and the database is as it was.",
-      res.stderr.trim(),
-    );
+  ensureBackupDir();
+  const script = path.join(BACKUP_DIR, `.restore-${process.pid}.sql`);
+  try {
+    // 1. the dump as plain SQL (pg_restore reads the custom-format archive, nothing is executed yet)
+    const input = fs.openSync(file, "r");
+    const output = fs.openSync(script, "w");
+    fs.writeSync(output, "DROP SCHEMA IF EXISTS public CASCADE;\nCREATE SCHEMA public;\n");
+    const convert = pg("pg_restore", ["--no-owner", "--no-acl", "-f", "-"], {
+      stdin: input,
+      stdout: output,
+      noDb: true,
+    });
+    fs.closeSync(input);
+    fs.closeSync(output);
+    if (convert.code !== 0)
+      die("The dump could not be read; the database was not touched.", convert.stderr.trim());
+
+    // 2. run it in one transaction
+    const source = fs.openSync(script, "r");
+    const res = pg("psql", ["-X", "-q", "-1", "-v", "ON_ERROR_STOP=1", "-f", "-"], {
+      stdin: source,
+    });
+    fs.closeSync(source);
+    if (res.code !== 0)
+      die(
+        "The restore failed; the transaction was rolled back and the database is as it was.",
+        res.stderr.trim(),
+      );
+  } finally {
+    fs.rmSync(script, { force: true });
+  }
   out.ok("Restored.");
 }
 function verifyCounts(file, { allowMore }) {
@@ -416,6 +443,14 @@ function verifyCounts(file, { allowMore }) {
     } else if (after < before || (!allowMore && after !== before)) {
       out.warn(`${table}: ${before} rows before, ${after} now`);
       good = false;
+    }
+  }
+  if (!allowMore) {
+    for (const table of Object.keys(now)) {
+      if (!(table in snapshot.counts)) {
+        out.warn(`${table}: this table is not in the backup`);
+        good = false;
+      }
     }
   }
   if (good) out.ok(`All ${Object.keys(snapshot.counts).length} tables keep their rows.`);
@@ -439,7 +474,7 @@ function status() {
     out.info(`${f}  ${(fs.statSync(path.join(BACKUP_DIR, f)).size / 1024).toFixed(0)} KiB`);
 }
 function cmdBackup() {
-  const keep = Number(option("keep") ?? KEEP_DEFAULT);
+  const keep = Number(option("keep") ?? process.env.DB_BACKUP_KEEP ?? KEEP_DEFAULT);
   backup();
   if (!DRY) prune(keep);
 }
@@ -483,6 +518,58 @@ async function cmdMigrate() {
     );
   }
   printHealth(health());
+}
+/**
+ * The command of the compose `migrate` service. No prompts, no reset: wait for the database, apply
+ * pending migrations after a backup, and if one fails restore that backup so the database is exactly
+ * as it was before this run. Exits non-zero in every case where the bot must not start.
+ */
+async function cmdDeploy() {
+  waitForDatabase();
+
+  out.step("Checking the migration history");
+  const h = health();
+  printHealth(h);
+  if (h.state === "upToDate") return;
+  if (h.state === "unbaselined" || h.state === "broken") {
+    die(
+      "The migration history needs attention. Nothing was changed, and the bot will not start until it is fixed.",
+      [
+        "Look:      docker compose run --rm migrate node scripts/db.mjs status",
+        "Fix:       docker compose run --rm migrate node scripts/db.mjs repair   (or baseline)",
+        "Then:      docker compose up -d",
+      ].join("\n"),
+    );
+  }
+
+  const file = backup("before-migrate");
+  prune(Number(option("keep") ?? process.env.DB_BACKUP_KEEP ?? KEEP_DEFAULT));
+
+  out.step(`Applying ${h.names.length} migration(s)`);
+  const res = prisma(["migrate", "deploy"]);
+  if (res.code === 0) {
+    const after = health();
+    if (after.state === "upToDate") {
+      out.ok("Migrations applied.");
+      return;
+    }
+    out.warn("The migrations ran but the history still does not match prisma/migrations.");
+    printHealth(after);
+  }
+
+  out.warn("The migration failed. Putting the database back from the backup taken a moment ago.");
+  restoreDump(file);
+  const intact = verifyCounts(file, { allowMore: false });
+  printHealth(health());
+  die(
+    intact
+      ? "Migration failed; the database was restored to its state before this run. The bot was not started."
+      : "Migration failed and the restore finished, but the row counts differ from the backup. Check them before starting the bot.",
+    [
+      `Backup: ${path.relative(ROOT, file)}`,
+      "Fix the cause (usually: the bot image and the database are out of step), then start again.",
+    ].join("\n"),
+  );
 }
 async function cmdRepair() {
   const h = health();
@@ -737,6 +824,8 @@ async function main() {
       return cmdBackup();
     case "restore":
       return cmdRestore();
+    case "deploy":
+      return cmdDeploy();
     case "migrate":
       return cmdMigrate();
     case "repair":

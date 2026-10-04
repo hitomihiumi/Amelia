@@ -10,7 +10,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: sh -c "sleep 5 && npx prisma migrate deploy"
+    # Waits for the database, backs it up to ./backups, applies the migrations and restores the backup
+    # if one of them fails (the bot then does not start). Never resets the database.
+    command: node scripts/db.mjs deploy --yes
+    volumes:
+      - ./backups:/app/backups
     networks:
       - amelia_network
 
