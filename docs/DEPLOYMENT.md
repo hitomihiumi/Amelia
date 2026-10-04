@@ -50,8 +50,18 @@ To update the bot to the latest version:
     docker-compose up -d
     ```
 
-The `migrate` service applies new migrations with `prisma migrate deploy`. It never resets anything:
-if the migration history does not match, it stops and the bot does not start (see below).
+The `migrate` service runs `node scripts/db.mjs deploy` before the bot starts:
+
+1. it waits for PostgreSQL and checks the migration history;
+2. when there is something to apply, it takes a backup into `./backups` (the last 10 are kept, `DB_BACKUP_KEEP`
+   changes that);
+3. it applies the migrations with `prisma migrate deploy`;
+4. if a migration fails, it **restores that backup** (one transaction, all or nothing), compares the row counts
+   and exits with an error, so the bot does not start on a half-migrated database.
+
+It never resets anything. If the migration history does not match the files (see below), it stops without
+changing anything and the bot does not start either. Inspect and fix it with
+`docker compose run --rm migrate node scripts/db.mjs status` / `repair` / `baseline`.
 
 ## Database maintenance (backups, migrations, PostgreSQL upgrades)
 
