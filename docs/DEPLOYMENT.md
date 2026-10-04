@@ -63,6 +63,106 @@ It never resets anything. If the migration history does not match the files (see
 changing anything and the bot does not start either. Inspect and fix it with
 `docker compose run --rm migrate node scripts/db.mjs status` / `repair` / `baseline`.
 
+## Dashboard on another host (for example Vercel)
+
+By default PostgreSQL and Redis are published on `127.0.0.1` only, so nothing outside the machine can reach
+them. A dashboard that runs elsewhere (Vercel has no fixed IP addresses and cannot join a private network)
+has to connect over the internet, and then the databases need a password **and** encryption.
+`docker-compose.remote.yml` does that on top of the base file:
+
+- PostgreSQL listens with TLS. `docker/postgres/pg_hba.conf` accepts plain connections only from the private
+  Docker network (bot, migrate); anything else must use TLS and a password, a plain connection from a public
+  address is rejected before a password can be tried.
+- Redis requires `REDIS_PASSWORD` and offers TLS on port 6380 (6379 stays plain, inside the compose network).
+- `POSTGRES_PASSWORD` and `REDIS_PASSWORD` are mandatory: `docker compose` refuses to start without them.
+
+1. **DNS and certificate.** Create an `A` record (for example `db.hitomihiumi.xyz`) for the droplet in
+   Cloudflare and set it to **DNS only** (grey cloud). Cloudflare's proxy carries HTTP(S) only, PostgreSQL and
+   Redis cannot go through the orange cloud, and the proxy would hide the TLS certificate anyway.
+   Then pick one of the two certificate options:
+
+   - **Cloudflare Origin CA certificate (what you already have).** Save the certificate and the key on the
+     server (for example as `origin.pem` and `origin.key`) and install them:
+     ```bash
+     sudo scripts/install-certs.sh --cert origin.pem --key origin.key /opt/amelia
+     ```
+     The script checks that the key belongs to the certificate, copies both into `./certs/postgres` and
+     `./certs/redis` and restarts the databases. The host name you connect to must be covered by the
+     certificate (Origin CA certificates normally list `hitomihiumi.xyz` and `*.hitomihiumi.xyz`).
+     **Catch:** an Origin CA certificate is trusted by Cloudflare only, not by browsers, operating systems or
+     Node.js. The dashboard therefore has to be told which CA to trust, see step 5
+     (`DATABASE_SSL_CA` and `REDIS_TLS_CA`). Origin CA certificates are valid for up to 15 years, so there is
+     no renewal job.
+   - **Let's Encrypt through the DNS challenge.** A publicly trusted certificate, so Vercel needs no extra
+     setting. Port 80 is not needed, Cloudflare's API is used to prove the domain. Create an API token with
+     `Zone / DNS / Edit` for the zone and put it into a file that only root can read:
+     ```bash
+     sudo apt install certbot python3-certbot-dns-cloudflare
+     printf 'dns_cloudflare_api_token = <token>\n' | sudo tee /root/cloudflare.ini >/dev/null
+     sudo chmod 600 /root/cloudflare.ini
+     sudo certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini \
+       -d db.hitomihiumi.xyz \
+       --deploy-hook "/opt/amelia/scripts/install-certs.sh db.hitomihiumi.xyz /opt/amelia"
+     ```
+     The hook installs the certificate after the first issue and after every renewal.
+2. **Passwords.** `POSTGRES_PASSWORD` only applies when the data volume is created. For an existing database
+   change it explicitly, then set the same value in `.env` (`POSTGRES_PASSWORD` and the bot's `DATABASE_URL`):
+   ```bash
+   docker compose exec postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "ALTER USER $POSTGRES_USER PASSWORD 'new-strong-password'"
+   ```
+   Set `REDIS_PASSWORD` in `.env` and add it to the bot's `REDIS_URL`: `redis://:<password>@redis:6379`.
+   Use long random values (`openssl rand -base64 32`); URL-encode special characters in the URLs.
+3. **Start.**
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.remote.yml up -d
+   ```
+   Add `-f docker-compose.remote.yml` to every later compose command too (or set
+   `COMPOSE_FILE=docker-compose.yml:docker-compose.remote.yml` in `.env`).
+4. **Firewall (iptables).** Without a cloud firewall, the host has to do it, and Docker needs special care:
+   a published port is forwarded (DNAT) and bypasses the `INPUT` chain, so an `iptables -A INPUT -j DROP` rule
+   or `ufw` does **not** protect it. `scripts/firewall.sh` writes the rules where they count and only touches
+   its own chains (`AMELIA-INPUT`, `AMELIA-DOCKER`):
+   ```bash
+   sudo scripts/firewall.sh apply --dry-run     # prints the commands, changes nothing
+   sudo scripts/firewall.sh apply
+   sudo scripts/firewall.sh status
+   sudo scripts/firewall.sh install-service     # re-apply on boot and after Docker restarts
+   ```
+   - On the public interface only SSH (`SSH_PORT`, default 22), PostgreSQL (`POSTGRES_PUBLIC_PORT`) and Redis
+     (`REDIS_TLS_PORT`) are reachable, plus `EXTRA_TCP_PORTS` if you set it. Everything else, including a port
+     Docker publishes by mistake (6379, 5632), is dropped. Loopback, the Docker networks and the private
+     network are not restricted.
+   - SSH is open to everyone, so a changing home address never locks you out. Compensate on the server:
+     key-only login (`PasswordAuthentication no` in `/etc/ssh/sshd_config`) and, optionally, `fail2ban`.
+   - `DB_CIDRS` limits the database ports to some networks. Leave it empty for Vercel, which has no fixed
+     addresses.
+   - After `apply` you have 30 seconds to type `yes` from the same session; otherwise the rules are removed
+     automatically, so a mistake cannot lock you out of the server. `--yes` skips this (the service uses it).
+   - The public interface is detected from the default route; set `WAN_IF` if that is wrong.
+   - IPv4 and IPv6 are both handled. `sudo scripts/firewall.sh remove` takes everything back out.
+   Check from the outside afterwards, for example `nmap -Pn -p 22,5433,5632,6379,6380 <droplet-ip>`: only
+   22, 5433 and 6380 may be open.
+5. **Vercel environment variables.**
+   ```dotenv
+   DATABASE_URL=postgresql://<user>:<password>@db.hitomihiumi.xyz:5433/<database>?sslmode=verify-full
+   REDIS_URL=rediss://:<password>@db.hitomihiumi.xyz:6380
+   ```
+   `sslmode=verify-full` checks the certificate and the host name (the `node-postgres` driver treats `require`
+   the same way). `rediss://` (two s) is Redis over TLS.
+
+   With a **Cloudflare Origin CA** certificate add the Cloudflare Origin CA root certificate, which the
+   dashboard then trusts instead of the system roots (download it from Cloudflare's "Origin CA root
+   certificates" documentation: the RSA root if your certificate has an RSA key, the ECC root for ECC):
+   ```dotenv
+   DATABASE_SSL_CA=<contents of the root PEM>
+   REDIS_TLS_CA=<contents of the root PEM>
+   ```
+   The value may be the PEM text itself, the PEM with `\n` instead of line breaks, or its base64. The
+   certificate and the host name are still verified, only the trusted authority changes. With Let's Encrypt
+   leave both unset.
+
+If Vercel's static IPs are available on your plan, list them in `DB_CIDRS` to restrict the two ports to them.
+
 ## Database maintenance (backups, migrations, PostgreSQL upgrades)
 
 `scripts/db.mjs` needs only Node 18+. In a checkout run it as `npm run db -- <command>`; next to a

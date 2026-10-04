@@ -13,3 +13,6 @@ Kyoko.iml
 
 # database dumps written by scripts/db.mjs
 /backups/
+
+# TLS certificates copied by scripts/install-certs.sh
+/certs/

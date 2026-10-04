@@ -1,0 +1,46 @@
+# Reach PostgreSQL and Redis from another host (for example the dashboard on Vercel) safely:
+# passwords are mandatory, both listen with TLS, and PostgreSQL refuses unencrypted connections that
+# do not come from the compose network. Use it on top of the base file:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.remote.yml up -d
+#
+# Certificates: see "Dashboard on another host" in docs/DEPLOYMENT.md (scripts/install-certs.sh).
+services:
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set a strong POSTGRES_PASSWORD in .env}
+    command:
+      - postgres
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/certs/fullchain.pem
+      - -c
+      - ssl_key_file=/certs/privkey.pem
+      - -c
+      - hba_file=/etc/postgresql/pg_hba.conf
+      - -c
+      - password_encryption=scram-sha-256
+    volumes:
+      - ./certs/postgres:/certs:ro
+      - ./docker/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    ports:
+      - "${POSTGRES_PUBLIC_PORT:-5433}:5432"
+
+  redis:
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}
+    # 6379 stays plain but only inside the compose network (and on 127.0.0.1); 6380 is TLS for the outside.
+    command:
+      - sh
+      - -c
+      - >-
+        exec redis-server --requirepass "$$REDIS_PASSWORD"
+        --tls-port 6380
+        --tls-cert-file /certs/fullchain.pem
+        --tls-key-file /certs/privkey.pem
+        --tls-auth-clients no
+    volumes:
+      - ./certs/redis:/certs:ro
+    ports:
+      - "${REDIS_TLS_PORT:-6380}:6380"
