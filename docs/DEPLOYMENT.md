@@ -63,6 +63,56 @@ It never resets anything. If the migration history does not match the files (see
 changing anything and the bot does not start either. Inspect and fix it with
 `docker compose run --rm migrate node scripts/db.mjs status` / `repair` / `baseline`.
 
+## Dashboard on another host (for example Vercel)
+
+By default PostgreSQL and Redis are published on `127.0.0.1` only, so nothing outside the machine can reach
+them. A dashboard that runs elsewhere (Vercel has no fixed IP addresses and cannot join a private network)
+has to connect over the internet, and then the databases need a password **and** encryption.
+`docker-compose.remote.yml` does that on top of the base file:
+
+- PostgreSQL listens with TLS. `docker/postgres/pg_hba.conf` accepts plain connections only from the private
+  Docker network (bot, migrate); anything else must use TLS and a password, a plain connection from a public
+  address is rejected before a password can be tried.
+- Redis requires `REDIS_PASSWORD` and offers TLS on port 6380 (6379 stays plain, inside the compose network).
+- `POSTGRES_PASSWORD` and `REDIS_PASSWORD` are mandatory: `docker compose` refuses to start without them.
+
+1. **DNS and certificate.** Point a name such as `db.example.com` at the droplet and issue a certificate
+   (this opens port 80 once):
+   ```bash
+   sudo apt install certbot
+   sudo certbot certonly --standalone -d db.example.com \
+     --deploy-hook "/opt/amelia/scripts/install-certs.sh db.example.com /opt/amelia"
+   ```
+   The hook copies the certificate into `./certs/postgres` and `./certs/redis` (each container runs as another
+   user and a private key may be readable only by its owner) and restarts the databases after every renewal.
+2. **Passwords.** `POSTGRES_PASSWORD` only applies when the data volume is created. For an existing database
+   change it explicitly, then set the same value in `.env` (`POSTGRES_PASSWORD` and the bot's `DATABASE_URL`):
+   ```bash
+   docker compose exec postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "ALTER USER $POSTGRES_USER PASSWORD 'new-strong-password'"
+   ```
+   Set `REDIS_PASSWORD` in `.env` and add it to the bot's `REDIS_URL`: `redis://:<password>@redis:6379`.
+   Use long random values (`openssl rand -base64 32`); URL-encode special characters in the URLs.
+3. **Start.**
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.remote.yml up -d
+   ```
+   Add `-f docker-compose.remote.yml` to every later compose command too (or set
+   `COMPOSE_FILE=docker-compose.yml:docker-compose.remote.yml` in `.env`).
+4. **Firewall.** In the DigitalOcean Cloud Firewall allow inbound 22 (from your address), 80 (certificate
+   renewal), the PostgreSQL port (`POSTGRES_PUBLIC_PORT`, default 5433) and the Redis TLS port (6380). Docker
+   publishes ports around `ufw`, so the Cloud Firewall is the one that counts. Nothing else, in particular not
+   6379 or 5632.
+5. **Vercel environment variables.**
+   ```dotenv
+   DATABASE_URL=postgresql://<user>:<password>@db.example.com:5433/<database>?sslmode=verify-full
+   REDIS_URL=rediss://:<password>@db.example.com:6380
+   ```
+   `sslmode=verify-full` checks the certificate and the host name (the `node-postgres` driver treats `require`
+   the same way). `rediss://` (two s) is Redis over TLS.
+
+If Vercel's static IPs are available on your plan you can additionally restrict the two ports to them in the
+Cloud Firewall.
+
 ## Database maintenance (backups, migrations, PostgreSQL upgrades)
 
 `scripts/db.mjs` needs only Node 18+. In a checkout run it as `npm run db -- <command>`; next to a
