@@ -37,15 +37,16 @@ services:
     networks:
       - amelia_network
 
-  # Collects the warnings and errors of every container on this host into Redis for the dashboard's
-  # admin panel (Logs page, last 24 hours). It only reads logs, but access to the Docker socket is
-  # root-equivalent on the host: remove this service if you do not want the Logs page.
+  # Collects the warnings and errors of this project's containers into Redis for the dashboard's admin
+  # panel (Logs page, last 24 hours). A separate ~60 MB image, not the bot's. It only reads logs, but
+  # access to the Docker socket is root-equivalent on the host: remove this service if you do not want
+  # the Logs page.
   logs:
-    image: ghcr.io/hitomihiumi/amelia:latest
+    image: ghcr.io/hitomihiumi/amelia-logs:latest
     container_name: amelia_logs
     restart: always
-    env_file: .env
-    command: node scripts/log-shipper.mjs
+    environment:
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
     depends_on:
       redis:
         condition: service_healthy

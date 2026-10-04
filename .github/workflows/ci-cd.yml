@@ -49,6 +49,26 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Extract metadata for the logs image
+        id: meta-logs
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-logs
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push the logs image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./logger
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta-logs.outputs.tags }}
+          labels: ${{ steps.meta-logs.outputs.labels }}
+
   release:
     needs: build-and-push
     if: startsWith(github.ref, 'refs/tags/v')

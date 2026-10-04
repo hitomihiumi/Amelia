@@ -1,0 +1,11 @@
+{
+  "name": "amelia-logs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Collects warnings and errors of the Amelia containers into Redis for the dashboard's Logs page",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "ioredis": "^5.11.1"
+  }
+}

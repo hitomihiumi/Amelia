@@ -63,6 +63,14 @@ It never resets anything. If the migration history does not match the files (see
 changing anything and the bot does not start either. Inspect and fix it with
 `docker compose run --rm migrate node scripts/db.mjs status` / `repair` / `baseline`.
 
+## Logs in the admin panel
+
+The `logs` service (a separate small image, `ghcr.io/hitomihiumi/amelia-logs`) reads the logs of the
+containers of this compose project (bot, migrate, PostgreSQL, Redis, itself excluded) and keeps their
+warnings and errors for 24 hours in Redis. The dashboard shows them on **Admin → Logs**. It needs the
+Docker socket (mounted read-only, but access to it is root-equivalent on the host); delete the service
+from `docker-compose.yml` if you do not want that. Containers of other projects are never read.
+
 ## Dashboard on another host (for example Vercel)
 
 By default PostgreSQL and Redis are published on `127.0.0.1` only, so nothing outside the machine can reach
