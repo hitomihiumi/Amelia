@@ -2256,6 +2256,10 @@ export interface TranslationSchema {
     automod: {
       invite_reason: string;
       links_reason: string;
+      keywords_reason: string;
+      profanity_reason: string;
+      mention_spam_reason: string;
+      spam_reason: string;
     };
     escalation: {
       reason: string;

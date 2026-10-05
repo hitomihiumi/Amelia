@@ -2326,6 +2326,10 @@ export const ru: TranslationSchema = {
     automod: {
       invite_reason: "Автомодерация: приглашение на сервер",
       links_reason: "Автомодерация: запрещённая ссылка",
+      keywords_reason: "Автомодерация: запрещённое слово",
+      profanity_reason: "Автомодерация: нецензурная лексика",
+      mention_spam_reason: "Автомодерация: слишком много упоминаний",
+      spam_reason: "Автомодерация: спам",
     },
     escalation: {
       reason: "Автоматическая эскалация: активных предупреждений — {0}",

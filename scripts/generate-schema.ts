@@ -434,6 +434,56 @@ const guildSchemaMap: Record<string, SchemaField> = {
     default: '"{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"}"',
   },
 
+  // Auto Moderation - native Discord AutoMod: extra settings for the invite and link rules
+  "moderation.auto_moderation.invite.block_message": {
+    prismaField: "inviteBlockMessage",
+    prismaType: "String",
+    optional: true,
+  },
+  "moderation.auto_moderation.invite.alert_channel": {
+    prismaField: "inviteAlertChannel",
+    prismaType: "String",
+    optional: true,
+  },
+  "moderation.auto_moderation.links.block_message": {
+    prismaField: "linksBlockMessage",
+    prismaType: "String",
+    optional: true,
+  },
+  "moderation.auto_moderation.links.alert_channel": {
+    prismaField: "linksAlertChannel",
+    prismaType: "String",
+    optional: true,
+  },
+
+  // Auto Moderation - rules that exist only as Discord AutoMod rules (one JSON document each)
+  "moderation.auto_moderation.keywords": {
+    prismaField: "autoModKeywords",
+    prismaType: "Json",
+    default: '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"},\\"keywords\\":[],\\"regex\\":[],\\"allow\\":[]}"',
+  },
+  "moderation.auto_moderation.profanity": {
+    prismaField: "autoModProfanity",
+    prismaType: "Json",
+    default: '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"},\\"presets\\":[\\"profanity\\",\\"slurs\\"],\\"allow\\":[]}"',
+  },
+  "moderation.auto_moderation.mention_spam": {
+    prismaField: "autoModMentionSpam",
+    prismaType: "Json",
+    default: '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"},\\"limit\\":5,\\"raid_protection\\":true}"',
+  },
+  "moderation.auto_moderation.spam": {
+    prismaField: "autoModSpam",
+    prismaType: "Json",
+    default: '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"}}"',
+  },
+  // Ids of the Discord AutoMod rules the bot or the dashboard created, by kind
+  "moderation.auto_moderation.rules": {
+    prismaField: "autoModRules",
+    prismaType: "Json",
+    default: '"{}"',
+  },
+
   // Audit log
   "audit.enabled": {
     prismaField: "auditEnabled",

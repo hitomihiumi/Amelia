@@ -36,6 +36,82 @@ export interface Punishment {
   reason: string;
 }
 
+/**
+ * Auto moderation runs on Discord's own AutoMod: every enabled rule below is turned into a native
+ * AutoMod rule of the server (see `helpers/moderation/autoModeration.ts`). Discord blocks the
+ * message, alerts and times out natively; the bot only records the case and applies the heavier
+ * punishments (warn, kick, ban) when Discord reports that a rule fired.
+ */
+export const AUTOMOD_KINDS = [
+  "invite",
+  "links",
+  "keywords",
+  "profanity",
+  "mention_spam",
+  "spam",
+] as const;
+
+export type AutoModKind = (typeof AUTOMOD_KINDS)[number];
+
+/** Settings every auto moderation rule has. */
+export interface AutoModRuleBase {
+  enabled: boolean;
+  /** Channels the rule ignores (Discord accepts up to 50). */
+  ignore_channels: string[];
+  /** Roles the rule ignores (Discord accepts up to 20, shared with the moderator roles). */
+  ignore_roles: string[];
+  /** Block the message (Discord's "block message" action). */
+  delete_message: boolean;
+  /** Text shown to the author of a blocked message, up to 150 characters. */
+  block_message: string | null;
+  /** Channel Discord posts an alert to when the rule fires. */
+  alert_channel: string | null;
+  /** The moderation roles of the server are exempt as well. */
+  moderation_immune: boolean;
+  /** Case and punishment recorded for a member who trips the rule. */
+  punishment: Punishment;
+}
+
+export type AutoModPreset = "profanity" | "sexual_content" | "slurs";
+
+export interface AutoModKeywordsRule extends AutoModRuleBase {
+  /** Words and phrases, `*` at the start or end works as a wildcard (up to 1000, 60 characters each). */
+  keywords: string[];
+  /** Regular expressions in Rust syntax (up to 10, 260 characters each). */
+  regex: string[];
+  /** Words that never trigger the rule (up to 100). */
+  allow: string[];
+}
+
+export interface AutoModLinksRule extends AutoModRuleBase {
+  /** Whitelist of links, see `linkPatterns.ts`. */
+  ignore_links: string[];
+}
+
+export interface AutoModProfanityRule extends AutoModRuleBase {
+  /** Discord's built-in word lists. */
+  presets: AutoModPreset[];
+  allow: string[];
+}
+
+export interface AutoModMentionSpamRule extends AutoModRuleBase {
+  /** Mentions (users and roles) allowed in one message, 1-50. */
+  limit: number;
+  /** Let Discord detect mention raids on its own. */
+  raid_protection: boolean;
+}
+
+export interface AutoModerationSettings {
+  invite: AutoModRuleBase;
+  links: AutoModLinksRule;
+  keywords: AutoModKeywordsRule;
+  profanity: AutoModProfanityRule;
+  mention_spam: AutoModMentionSpamRule;
+  spam: AutoModRuleBase;
+  /** Ids of the Discord AutoMod rules created for this server, by kind. */
+  rules: Partial<Record<AutoModKind, string>>;
+}
+
 /** Escalation rule: once a member reaches `count` active warns, apply `punishment`. */
 export interface WarnThreshold {
   count: number;

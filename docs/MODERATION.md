@@ -56,17 +56,63 @@ automatically. `moderation.warn_expiry` (days, `0` = never) controls how long a 
 
 ## Auto moderation
 
-`src/handlers/automod.ts` runs at the top of `messageCreate`, before the level logic, so a deleted
-message never grants experience. Both rules (`moderation.auto_moderation.invite` and
-`.links`) support ignored channels, ignored roles, a moderator exemption, message deletion and a
-punishment. The link filter additionally honours the `ignore_links` whitelist.
+Auto moderation runs on **Discord's native AutoMod**. The settings in `moderation.auto_moderation`
+(edited in the dashboard) are the source of truth; each enabled rule becomes an AutoMod rule of the
+server. Discord itself blocks the message, posts the alert and applies the timeout, before the
+message is even visible, and it keeps doing so while the bot is offline. The bot adds what AutoMod
+cannot do: it answers Discord's execution event with a numbered case, the moderation log entry and
+the direct message, and applies `warn`, `kick` and `ban`.
+
+| Kind | Discord trigger | What it catches |
+| --- | --- | --- |
+| `invite` | keyword, regex (`INVITE_REGEX`) | invites to other servers |
+| `links` | keyword `*http://*`, `*https://*` + allow list | links, minus the whitelist |
+| `keywords` | keyword (words, wildcards, regex) | a custom word list |
+| `profanity` | keyword preset | Discord's lists: profanity, sexual content, slurs |
+| `mention_spam` | mention spam | too many mentions in one message, raid detection |
+| `spam` | spam | Discord's spam content detection |
+
+Every rule has ignored channels (up to 50), ignored roles (up to 20, shared with the moderator roles
+when "moderators are exempt" is on), a message for the author of a blocked message, an alert
+channel and a punishment. Members with Administrator or Manage Server are never touched by AutoMod.
+
+### How the pieces fit
+
+- `src/helpers/moderation/autoModeration.ts` turns the settings into rule bodies
+  (`buildAutoModRule`), validates them against Discord's limits and keeps the server in sync
+  (`syncAutoModeration`) through a small transport. The dashboard has a mirrored copy
+  (`src/lib/moderation/autoModeration.ts`); keep both in sync.
+- The dashboard syncs on every save and shows what Discord refused. The bot never overwrites a rule
+  on its own: at startup and when it joins a server (`reconcileAutoModeration`) it only creates the
+  rules of settings that have none yet (servers that used the old bot-side filters get theirs on the
+  first start) and switches a setting off when its rule was deleted in Discord.
+- `src/handlers/autoModeration.ts` handles `autoModerationActionExecution`. Discord sends one event
+  per executed action, so exactly one is answered (the timeout if there is one, else the block, else
+  the alert; see `autoModDriver`). A timeout configured as the `mute` punishment is applied by
+  Discord itself for the `invite`, `links` and `keywords` rules; the bot only records the case
+  (`skipDiscordAction`). For the other kinds, Discord offers no timeout action, so the bot applies it.
+- A rule always needs at least one action. When neither "block message", an alert channel nor a native
+  timeout is configured, the message is blocked anyway.
+- Rule ids are stored in `moderation.auto_moderation.rules`. Rules made by hand in Discord are not
+  ours and never produce cases.
+
+The bot needs the **Manage Server** permission to manage the rules (and **Moderate Members** for
+timeouts) and the `AutoModerationExecution` intent to hear about them.
+
+Discord's limits worth knowing: 6 keyword-type rules per server (we use 3), 1 rule each of the spam,
+word list and mention spam type (a server's own rule of the same type makes ours fail with an error
+shown in the dashboard), 1000 words of 60 characters, 10 regex patterns of 260 characters
+(Rust syntax, no look-around).
 
 ### Link whitelist patterns
 
 `ignore_links` holds glob patterns, not plain prefixes (`src/helpers/moderation/linkPatterns.ts`).
-Only `*` is a wildcard — URLs are full of `?`, so treating that as one would silently turn query
-strings into wildcards. Patterns are normalized (lower case, no scheme, no `www.`, no trailing
-slash) and compiled into an anchored `RegExp`, which keeps matching linear.
+Only `*` is a wildcard. Discord only knows `*` at the start and end of a word, so every pattern is
+translated into allow-list words (`linkPatternToAllowWords`) that pin the host boundary:
+`youtube.com` becomes `*://youtube.com`, `*://youtube.com/*`, `*.youtube.com` and `*.youtube.com/*`
+(a looser `*youtube.com*` would let `notyoutube.com` and `youtube.com.evil.xyz` through). That costs
+two to four of Discord's 100 allow-list entries per pattern. A wildcard in the middle of a pattern
+cannot be expressed and is rejected when saving.
 
 | Pattern | Matches |
 | --- | --- |
@@ -75,10 +121,8 @@ slash) and compiled into an anchored `RegExp`, which keeps matching linear.
 | `discord.com/channels/*` | that path and everything below it |
 | `*docs*` | any link containing `docs` |
 
-A pattern without a wildcard and without a slash is treated as a bare domain and covers its
-subdomains, which is what the previous prefix matching did — existing whitelists keep working.
-Deeper paths and query strings are always covered, so `example.com/blog` matches
-`example.com/blog/post` but not `example.com/blogger`.
+`isLinkIgnored` still exists for the dashboard's tester, but Discord's matcher has the final word,
+so the tester is an approximation.
 
 ## Temporary punishments
 
@@ -115,7 +159,8 @@ Guild settings live under the `moderation.*` paths (see `scripts/generate-schema
 - `moderation.moderation_roles`, `moderation.log_channel`, `moderation.dm_notify`
 - `moderation.warn_expiry`, `moderation.warn_thresholds`
 - `moderation.forms.report`, `moderation.forms.appeal`
-- `moderation.auto_moderation.invite`, `moderation.auto_moderation.links`
+- `moderation.auto_moderation.{invite,links,keywords,profanity,mention_spam,spam}` and
+  `moderation.auto_moderation.rules` (the ids of the Discord rules)
 
 Set `DASHBOARD_URL` in the environment so the bot can put the appeal link into the direct messages
 it sends to punished members, and so `/mod link` can print the form links.

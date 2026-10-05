@@ -26,7 +26,17 @@ else
   LIVE="${CERT_LIVE_DIR:-/etc/letsencrypt/live}/${DOMAIN}"
   CERT="${LIVE}/fullchain.pem" KEY="${LIVE}/privkey.pem" DIR="${2:-}"
 fi
-DIR="${DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+if [ -z "${DIR}" ]; then
+  # The project is the folder that holds the compose files: next to the script, one level up
+  # (scripts/), or the current directory.
+  here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  for candidate in "${here}" "${here}/.." "$(pwd)"; do
+    if [ -f "${candidate}/docker-compose.remote.yml" ]; then DIR="$(cd "${candidate}" && pwd)"; break; fi
+  done
+  [ -n "${DIR}" ] || { echo "Cannot find docker-compose.remote.yml; pass the project directory as the last argument." >&2; exit 1; }
+fi
+[ -f "${DIR}/docker-compose.remote.yml" ] || { echo "${DIR} has no docker-compose.remote.yml; is it the project directory?" >&2; exit 1; }
+echo "project directory: ${DIR}"
 
 for file in "${CERT}" "${KEY}"; do
   [ -r "${file}" ] || { echo "Cannot read ${file} (run as root, and issue the certificate first)." >&2; exit 1; }

@@ -116,7 +116,9 @@ has to connect over the internet, and then the databases need a password **and**
 2. **Passwords.** `POSTGRES_PASSWORD` only applies when the data volume is created. For an existing database
    change it explicitly, then set the same value in `.env` (`POSTGRES_PASSWORD` and the bot's `DATABASE_URL`):
    ```bash
-   docker compose exec postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "ALTER USER $POSTGRES_USER PASSWORD 'new-strong-password'"
+   docker compose exec postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+   # then, inside psql, type:  \password        (asks twice, nothing is echoed, no quoting problems)
+   # and leave with:           \q
    ```
    Set `REDIS_PASSWORD` in `.env` and add it to the bot's `REDIS_URL`: `redis://:<password>@redis:6379`.
    Use long random values (`openssl rand -base64 32`); URL-encode special characters in the URLs.

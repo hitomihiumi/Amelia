@@ -41,6 +41,8 @@ export interface PunishInput {
   deleteMessageSeconds?: number;
   /** Skip the escalation check (used by the escalation itself to avoid loops). */
   skipEscalation?: boolean;
+  /** Discord already applied the punishment (a native AutoMod timeout): only record the case. */
+  skipDiscordAction?: boolean;
 }
 
 export type PunishResult =
@@ -113,11 +115,16 @@ export class ModerationService {
     const source = input.source ?? "command";
     const member = await this.fetchMember(input.targetId);
 
-    if (["mute", "kick"].includes(input.type) && !member) {
+    if (!input.skipDiscordAction && ["mute", "kick"].includes(input.type) && !member) {
       return { ok: false, error: t(this.client, lang, "moderation.errors.member_not_found") };
     }
 
-    if (member && ["mute", "kick", "ban"].includes(input.type) && !botCanActOn(member)) {
+    if (
+      !input.skipDiscordAction &&
+      member &&
+      ["mute", "kick", "ban"].includes(input.type) &&
+      !botCanActOn(member)
+    ) {
       return { ok: false, error: t(this.client, lang, "moderation.errors.hierarchy") };
     }
 
@@ -151,7 +158,9 @@ export class ModerationService {
     // The DM has to go out before a kick/ban, otherwise there is no mutual guild left.
     await this.notifyTarget(created, lang);
 
-    const performed = await this.performDiscordAction(input, member, duration);
+    const performed = input.skipDiscordAction
+      ? ({ ok: true } as const)
+      : await this.performDiscordAction(input, member, duration);
     if (!performed.ok) {
       await prisma.moderationCase.delete({ where: { id: created.id } });
       return {

@@ -2328,6 +2328,10 @@ export const en: TranslationSchema = {
     automod: {
       invite_reason: "Auto moderation: server invite",
       links_reason: "Auto moderation: forbidden link",
+      keywords_reason: "Auto moderation: forbidden word",
+      profanity_reason: "Auto moderation: profanity",
+      mention_spam_reason: "Auto moderation: too many mentions",
+      spam_reason: "Auto moderation: spam",
     },
     escalation: {
       reason: "Automatic escalation: {0} active warns",
