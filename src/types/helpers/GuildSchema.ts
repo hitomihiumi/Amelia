@@ -8,7 +8,7 @@ import {
   ScenarioCustom,
 } from "./";
 import { SchemaKey, LiteralSchemaKey } from "./SchemaKeys";
-import { ModerationForm, Punishment, WarnThreshold } from "./ModerationSchema";
+import { AutoModerationSettings, ModerationForm, WarnThreshold } from "./ModerationSchema";
 import { AuditSettings } from "./AuditSchema";
 import type { LayoutCustom } from "./Layout";
 
@@ -127,25 +127,7 @@ export interface GuildSchema {
       report: ModerationForm;
       appeal: ModerationForm;
     };
-    auto_moderation: {
-      invite: {
-        enabled: boolean;
-        ignore_channels: string[];
-        ignore_roles: string[];
-        delete_message: boolean;
-        moderation_immune: boolean;
-        punishment: Punishment;
-      };
-      links: {
-        enabled: boolean;
-        ignore_channels: string[];
-        ignore_roles: string[];
-        ignore_links: string[];
-        delete_message: boolean;
-        moderation_immune: boolean;
-        punishment: Punishment;
-      };
-    };
+    auto_moderation: AutoModerationSettings;
   };
   audit: AuditSettings;
   permissions: {

@@ -1,7 +1,11 @@
 import { ActivityType, Client } from "discord.js";
 import { resolve } from "node:path";
+import { reconcileAllAutoModeration } from "../../handlers/autoModeration";
 
 module.exports = async (client: Client) => {
+  // Servers that used the bot-side filters get their native AutoMod rules on the first start.
+  void reconcileAllAutoModeration(client);
+
   try {
     try {
       const stringlength = 69;

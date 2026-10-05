@@ -107,6 +107,8 @@ model Guild {
   inviteDeleteMessage    Boolean  @default(false)
   inviteModerationImmune Boolean  @default(false)
   invitePunishment       Json     @default("{\"type\":\"warn\",\"time\":0,\"reason\":\"Auto moderation\"}")
+  inviteBlockMessage     String?
+  inviteAlertChannel     String?
 
   // Auto moderation - Links
   linksEnabled          Boolean  @default(false)
@@ -116,6 +118,16 @@ model Guild {
   linksDeleteMessage    Boolean  @default(false)
   linksModerationImmune Boolean  @default(false)
   linksPunishment       Json     @default("{\"type\":\"warn\",\"time\":0,\"reason\":\"Auto moderation\"}")
+  linksBlockMessage     String?
+  linksAlertChannel     String?
+
+  // Auto moderation - rules that only exist as native Discord AutoMod rules
+  autoModKeywords Json @default("{\"enabled\":false,\"ignore_channels\":[],\"ignore_roles\":[],\"delete_message\":true,\"block_message\":null,\"alert_channel\":null,\"moderation_immune\":true,\"punishment\":{\"type\":\"warn\",\"time\":0,\"reason\":\"Auto moderation\"},\"keywords\":[],\"regex\":[],\"allow\":[]}")
+  autoModProfanity Json @default("{\"enabled\":false,\"ignore_channels\":[],\"ignore_roles\":[],\"delete_message\":true,\"block_message\":null,\"alert_channel\":null,\"moderation_immune\":true,\"punishment\":{\"type\":\"warn\",\"time\":0,\"reason\":\"Auto moderation\"},\"presets\":[\"profanity\",\"slurs\"],\"allow\":[]}")
+  autoModMentionSpam Json @default("{\"enabled\":false,\"ignore_channels\":[],\"ignore_roles\":[],\"delete_message\":true,\"block_message\":null,\"alert_channel\":null,\"moderation_immune\":true,\"punishment\":{\"type\":\"warn\",\"time\":0,\"reason\":\"Auto moderation\"},\"limit\":5,\"raid_protection\":true}")
+  autoModSpam Json @default("{\"enabled\":false,\"ignore_channels\":[],\"ignore_roles\":[],\"delete_message\":true,\"block_message\":null,\"alert_channel\":null,\"moderation_immune\":true,\"punishment\":{\"type\":\"warn\",\"time\":0,\"reason\":\"Auto moderation\"}}")
+  // Ids of the Discord AutoMod rules created for the server, by kind
+  autoModRules Json @default("{}")
 
   // Audit log
   auditEnabled        Boolean  @default(false)

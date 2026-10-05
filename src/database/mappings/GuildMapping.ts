@@ -233,6 +233,33 @@ export const GuildPathMap: PathMap = {
   "moderation.auto_moderation.links.punishment": {
     field: "linksPunishment",
   },
+  "moderation.auto_moderation.invite.block_message": {
+    field: "inviteBlockMessage",
+  },
+  "moderation.auto_moderation.invite.alert_channel": {
+    field: "inviteAlertChannel",
+  },
+  "moderation.auto_moderation.links.block_message": {
+    field: "linksBlockMessage",
+  },
+  "moderation.auto_moderation.links.alert_channel": {
+    field: "linksAlertChannel",
+  },
+  "moderation.auto_moderation.keywords": {
+    field: "autoModKeywords",
+  },
+  "moderation.auto_moderation.profanity": {
+    field: "autoModProfanity",
+  },
+  "moderation.auto_moderation.mention_spam": {
+    field: "autoModMentionSpam",
+  },
+  "moderation.auto_moderation.spam": {
+    field: "autoModSpam",
+  },
+  "moderation.auto_moderation.rules": {
+    field: "autoModRules",
+  },
   "audit.enabled": {
     field: "auditEnabled",
   },
@@ -365,11 +392,13 @@ export const GuildPathMap: PathMap = {
   },
   "moderation.auto_moderation": {
     field: "",
-    children: ["invite", "links"],
+    children: ["invite", "keywords", "links", "mention_spam", "profanity", "rules", "spam"],
   },
   "moderation.auto_moderation.invite": {
     field: "",
     children: [
+      "alert_channel",
+      "block_message",
       "delete_message",
       "enabled",
       "ignore_channels",
@@ -381,6 +410,8 @@ export const GuildPathMap: PathMap = {
   "moderation.auto_moderation.links": {
     field: "",
     children: [
+      "alert_channel",
+      "block_message",
       "delete_message",
       "enabled",
       "ignore_channels",
@@ -497,6 +528,15 @@ export const GuildFieldMap: Record<string, string> = {
   "moderation.auto_moderation.links.delete_message": "linksDeleteMessage",
   "moderation.auto_moderation.links.moderation_immune": "linksModerationImmune",
   "moderation.auto_moderation.links.punishment": "linksPunishment",
+  "moderation.auto_moderation.invite.block_message": "inviteBlockMessage",
+  "moderation.auto_moderation.invite.alert_channel": "inviteAlertChannel",
+  "moderation.auto_moderation.links.block_message": "linksBlockMessage",
+  "moderation.auto_moderation.links.alert_channel": "linksAlertChannel",
+  "moderation.auto_moderation.keywords": "autoModKeywords",
+  "moderation.auto_moderation.profanity": "autoModProfanity",
+  "moderation.auto_moderation.mention_spam": "autoModMentionSpam",
+  "moderation.auto_moderation.spam": "autoModSpam",
+  "moderation.auto_moderation.rules": "autoModRules",
   "audit.enabled": "auditEnabled",
   "audit.channel": "auditChannel",
   "audit.ignore_channels": "auditIgnoreChannels",

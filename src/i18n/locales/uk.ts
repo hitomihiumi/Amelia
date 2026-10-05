@@ -2332,6 +2332,10 @@ export const uk: TranslationSchema = {
     automod: {
       invite_reason: "Автомодерація: запрошення на сервер",
       links_reason: "Автомодерація: заборонене посилання",
+      keywords_reason: "Автомодерація: заборонене слово",
+      profanity_reason: "Автомодерація: нецензурна лексика",
+      mention_spam_reason: "Автомодерація: забагато згадок",
+      spam_reason: "Автомодерація: спам",
     },
     escalation: {
       reason: "Автоматична ескалація: активних попереджень — {0}",

@@ -10,7 +10,6 @@ import {
 } from "../../handlers/functions";
 import { t } from "../../i18n/helpers";
 import { LevelCard } from "../../helpers/canvas/LevelCard";
-import { runAutoModeration } from "../../handlers/automod";
 
 module.exports = async (client: Client, message: Message) => {
   if (message.author.bot) return;
@@ -19,9 +18,6 @@ module.exports = async (client: Client, message: Message) => {
   if (message.partial) await message.fetch();
   if (!message.guild) return;
   if (!message.member) return;
-
-  // Auto moderation runs first: a deleted message must not grant experience.
-  if (await runAutoModeration(client, message)) return;
 
   const guild = new Guild(client, message.guild);
 
