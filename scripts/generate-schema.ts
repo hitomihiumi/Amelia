@@ -533,6 +533,57 @@ const guildSchemaMap: Record<string, SchemaField> = {
     default: '"{}"',
   },
 
+  // AI chat
+  "ai.enabled": {
+    prismaField: "aiEnabled",
+    prismaType: "Boolean",
+    default: "false",
+  },
+  "ai.channels": {
+    prismaField: "aiChannels",
+    prismaType: "String",
+    isArray: true,
+    default: "[]",
+  },
+  "ai.ignore_channels": {
+    prismaField: "aiIgnoreChannels",
+    prismaType: "String",
+    isArray: true,
+    default: "[]",
+  },
+  "ai.model": {
+    prismaField: "aiModel",
+    prismaType: "String",
+    default: '"auto"',
+  },
+  "ai.persona": {
+    prismaField: "aiPersona",
+    prismaType: "String",
+    optional: true,
+  },
+  "ai.limits": {
+    prismaField: "aiLimits",
+    prismaType: "Json",
+    default: '"{\\"user_per_minute\\":3,\\"user_per_day\\":40,\\"guild_per_day\\":400}"',
+  },
+
+  // Premium
+  "premium.enabled": {
+    prismaField: "premium",
+    prismaType: "Boolean",
+    default: "false",
+  },
+  "premium.until": {
+    prismaField: "premiumUntil",
+    prismaType: "DateTime",
+    optional: true,
+  },
+  "premium.note": {
+    prismaField: "premiumNote",
+    prismaType: "String",
+    optional: true,
+  },
+
   // Permissions
   "permissions.commands": {
     prismaField: "commandPermissions",

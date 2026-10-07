@@ -10,6 +10,7 @@ import {
 } from "../../handlers/functions";
 import { t } from "../../i18n/helpers";
 import { LevelCard } from "../../helpers/canvas/LevelCard";
+import { handleAiMessage } from "../../helpers/ai";
 
 module.exports = async (client: Client, message: Message) => {
   if (message.author.bot) return;
@@ -26,6 +27,11 @@ module.exports = async (client: Client, message: Message) => {
   const prefix = await guild.get("settings.prefix");
   const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`);
   if (!prefixRegex.test(message.content)) {
+    // Runs next to the level system, so a slow answer never holds back the XP.
+    handleAiMessage(client, message, guild).catch((error) =>
+      console.error("[AI] Message handler failed:".red, error),
+    );
+
     const levelS = (await guild.get("utils.levels")) as Levels;
 
     if (levelS.enabled && !userLevelIgnoreCheck(message.member, levelS, message.channelId)) {
@@ -86,7 +92,15 @@ module.exports = async (client: Client, message: Message) => {
   const command =
     (client.holder.cmds.commands.get(commandName) as unknown as Command) ||
     (client.holder.cmds.aliases.get(commandName) as unknown as Command);
-  if (!command) return;
+  if (!command) {
+    // "@Amelia some words": not a command, so it is talk meant for the AI.
+    if (matchedPrefix.includes(client.user.id)) {
+      await handleAiMessage(client, message, guild).catch((error) =>
+        console.error("[AI] Message handler failed:".red, error),
+      );
+    }
+    return;
+  }
 
   if (command) {
     if (onCoolDown(message, command, client)) {
