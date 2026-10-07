@@ -287,6 +287,24 @@ export const GuildPathMap: PathMap = {
   "audit.events": {
     field: "auditEvents",
   },
+  "ai.enabled": {
+    field: "aiEnabled",
+  },
+  "ai.channels": {
+    field: "aiChannels",
+  },
+  "ai.ignore_channels": {
+    field: "aiIgnoreChannels",
+  },
+  "ai.model": {
+    field: "aiModel",
+  },
+  "ai.persona": {
+    field: "aiPersona",
+  },
+  "ai.limits": {
+    field: "aiLimits",
+  },
   "permissions.commands": {
     field: "commandPermissions",
   },
@@ -438,6 +456,10 @@ export const GuildPathMap: PathMap = {
     field: "",
     children: ["avatar", "name"],
   },
+  ai: {
+    field: "",
+    children: ["channels", "enabled", "ignore_channels", "limits", "model", "persona"],
+  },
   permissions: {
     field: "",
     children: ["commands"],
@@ -546,5 +568,11 @@ export const GuildFieldMap: Record<string, string> = {
   "audit.webhook.avatar": "auditWebhookAvatar",
   "audit.categories": "auditCategories",
   "audit.events": "auditEvents",
+  "ai.enabled": "aiEnabled",
+  "ai.channels": "aiChannels",
+  "ai.ignore_channels": "aiIgnoreChannels",
+  "ai.model": "aiModel",
+  "ai.persona": "aiPersona",
+  "ai.limits": "aiLimits",
   "permissions.commands": "commandPermissions",
 };

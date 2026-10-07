@@ -2157,6 +2157,92 @@ export interface TranslationSchema {
   };
 
   // Moderation system
+  ai: {
+    failure: {
+      rate_limited: {
+        user_minute: string;
+        user_day: string;
+        guild_day: string;
+      };
+      quota: string;
+      unavailable: string;
+      blocked: string;
+      error: string;
+    };
+    not_configured: string;
+    disabled: string;
+    channel_ignored: string;
+    usage: {
+      title: string;
+      description: string;
+    };
+    reset: {
+      success: string;
+      no_permission: string;
+    };
+    setting: {
+      title: string;
+      description: string;
+      privacy: string;
+      warning_no_key: string;
+      fields: {
+        status: string;
+        model: string;
+        channels: string;
+        ignored: string;
+        limits: string;
+        persona: string;
+      };
+      enabled: string;
+      disabled: string;
+      none: string;
+      models: {
+        auto: string;
+        "31b": string;
+        "26b": string;
+      };
+      limits_format: string;
+      persona_default: string;
+      buttons: {
+        enable: string;
+        disable: string;
+        persona: string;
+        limits: string;
+      };
+      select_menus: {
+        model: {
+          placeholder: string;
+          options: {
+            auto: { label: string; description: string };
+            "31b": { label: string; description: string };
+            "26b": { label: string; description: string };
+          };
+        };
+        channels: { placeholder: string };
+        ignored: { placeholder: string };
+      };
+      modals: {
+        persona: {
+          title: string;
+          label: string;
+          placeholder: string;
+        };
+        limits: {
+          title: string;
+          user_per_minute: string;
+          user_per_day: string;
+          guild_per_day: string;
+        };
+      };
+      messages: {
+        persona_saved: string;
+        persona_reset: string;
+        limits_saved: string;
+        limits_invalid: string;
+      };
+    };
+  };
+
   moderation: {
     types: {
       warn: string;

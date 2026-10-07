@@ -4,6 +4,7 @@ export * from "./Options";
 export * from "./GuildSchema";
 export * from "./ModerationSchema";
 export * from "./AuditSchema";
+export * from "./AiSchema";
 export * from "./HistorySchema";
 export * from "./UserSchema";
 export * from "./Action";

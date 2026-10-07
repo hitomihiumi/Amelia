@@ -140,6 +140,14 @@ model Guild {
   auditCategories     Json     @default("{}")
   auditEvents         Json     @default("{}")
 
+  // AI chat
+  aiEnabled        Boolean  @default(false)
+  aiChannels       String[] @default([])
+  aiIgnoreChannels String[] @default([])
+  aiModel          String   @default("auto")
+  aiPersona        String?
+  aiLimits         Json     @default("{\"user_per_minute\":3,\"user_per_day\":40,\"guild_per_day\":400}")
+
   // Permissions
   commandPermissions Json @default("{}")
 

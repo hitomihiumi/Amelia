@@ -10,6 +10,7 @@ import {
 import { SchemaKey, LiteralSchemaKey } from "./SchemaKeys";
 import { AutoModerationSettings, ModerationForm, WarnThreshold } from "./ModerationSchema";
 import { AuditSettings } from "./AuditSchema";
+import { AiSettings } from "./AiSchema";
 import type { LayoutCustom } from "./Layout";
 
 export interface GuildSchema {
@@ -130,6 +131,7 @@ export interface GuildSchema {
     auto_moderation: AutoModerationSettings;
   };
   audit: AuditSettings;
+  ai: AiSettings;
   permissions: {
     commands: {
       [key: string]: CommandPermission;

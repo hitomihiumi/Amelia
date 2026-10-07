@@ -2229,6 +2229,108 @@ export const en: TranslationSchema = {
     unknown_channel: "unknown",
   },
 
+  ai: {
+    failure: {
+      rate_limited: {
+        user_minute: "Easy there, you're talking to me too fast! Try again {0}.",
+        user_day: "You've used all of your AI chats for today. They come back {0}.",
+        guild_day: "This server has used up its AI chats for today. They come back {0}.",
+      },
+      quota: "I'm out of thinking power for the moment. Please try again in a minute.",
+      unavailable: "My head isn't responding right now. Please try again a bit later.",
+      blocked: "I'd rather not answer that one.",
+      error: "Something went wrong while I was thinking. Please try again.",
+    },
+    not_configured: "AI chat is not available: this bot has no API key configured.",
+    disabled:
+      "AI chat is turned off on this server. An administrator can turn it on with `/setting ai`.",
+    channel_ignored: "AI chat is turned off in this channel.",
+    usage: {
+      title: "AI chat usage",
+      description:
+        "**Your messages**\n- This minute: **{0}** / {1}\n- Today: **{2}** / {3}\n\n**This server**\n- Today: **{4}** / {5}\n\nThe minute counter restarts every minute, the daily ones at 00:00 UTC.",
+    },
+    reset: {
+      success: "Done, I forgot the recent conversation in this channel.",
+      no_permission: "You need the **Manage Messages** permission to do this.",
+    },
+    setting: {
+      title: "AI chat",
+      description:
+        "Amelia can chat with your members. She answers when she is mentioned or replied to, and to every message in the chat channels. She replies in the language of the person she talks to.",
+      privacy:
+        "Messages addressed to her are processed by Google's Gemini API (free tier) to write the answer. Keep the AI turned off if your community should not use it.",
+      warning_no_key:
+        "⚠️ This bot has no API key, so the AI will not work until its owner sets `GEMINI_API_KEY`.",
+      fields: {
+        status: "Status",
+        model: "Model",
+        channels: "Chat channels",
+        ignored: "Ignored channels",
+        limits: "Limits",
+        persona: "Personality",
+      },
+      enabled: "✅ Enabled",
+      disabled: "❌ Disabled",
+      none: "None",
+      models: {
+        auto: "Automatic (31B, then 26B)",
+        "31b": "Gemma 4 31B",
+        "26b": "Gemma 4 26B",
+      },
+      limits_format:
+        "{0} per minute and {1} per day for each member\n{2} per day for the whole server",
+      persona_default: "Amelia's own personality",
+      buttons: {
+        enable: "Enable AI chat",
+        disable: "Disable AI chat",
+        persona: "Personality",
+        limits: "Limits",
+      },
+      select_menus: {
+        model: {
+          placeholder: "Choose the model",
+          options: {
+            auto: {
+              label: "Automatic",
+              description: "31B first, 26B when the first one is busy",
+            },
+            "31b": {
+              label: "Gemma 4 31B",
+              description: "Smarter answers, a smaller daily quota",
+            },
+            "26b": {
+              label: "Gemma 4 26B",
+              description: "Faster answers, lighter on the quota",
+            },
+          },
+        },
+        channels: { placeholder: "Chat channels: she answers every message here" },
+        ignored: { placeholder: "Channels where she never answers" },
+      },
+      modals: {
+        persona: {
+          title: "Personality of the server",
+          label: "Extra instructions",
+          placeholder:
+            "For example: be a bit more formal, we are a study group. Leave empty for her own personality.",
+        },
+        limits: {
+          title: "AI chat limits",
+          user_per_minute: "Messages per member per minute",
+          user_per_day: "Messages per member per day",
+          guild_per_day: "Messages per server per day",
+        },
+      },
+      messages: {
+        persona_saved: "Saved. She will follow these instructions from her next answer on.",
+        persona_reset: "Reset. She uses her own personality again.",
+        limits_saved: "Limits saved.",
+        limits_invalid: "Enter whole numbers within these bounds: {0}",
+      },
+    },
+  },
+
   moderation: {
     types: {
       warn: "Warn",
