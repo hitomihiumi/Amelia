@@ -409,3 +409,47 @@ model Backup {
   @@index([guildId])
   @@index([createdAt])
 }
+
+// Snapshot of every server the bot is (or was) in, kept up to date by the bot; shown in the admin panel.
+// No relation to Guild: the row must survive when the bot is removed from the server.
+model GuildPresence {
+  id          String    @id // Discord guild id
+  name        String
+  icon        String? // Icon hash
+  ownerId     String?
+  memberCount Int       @default(0)
+  locale      String?
+  boostTier   Int       @default(0)
+  joinedAt    DateTime? // When the bot was added
+  leftAt      DateTime? // Set when the bot was removed, cleared when it comes back
+  updatedAt   DateTime  @updatedAt
+
+  @@index([leftAt])
+}
+
+// Per server, per day (UTC) usage counters. Rolled up by the bot every minute, kept for 90 days.
+model GuildStat {
+  id         String   @id @default(cuid())
+  guildId    String
+  day        DateTime @db.Date
+  commands   Int      @default(0) // Slash commands run
+  components Int      @default(0) // Buttons, select menus, modals used
+  messages   Int      @default(0) // Messages sent by members
+  joins      Int      @default(0) // Members who joined
+  leaves     Int      @default(0) // Members who left
+
+  @@unique([guildId, day])
+  @@index([day])
+}
+
+// Per server, per day, per slash command: how often it was run.
+model CommandStat {
+  id      String   @id @default(cuid())
+  guildId String
+  day     DateTime @db.Date
+  name    String // "category subcommand"
+  count   Int      @default(0)
+
+  @@unique([guildId, day, name])
+  @@index([day])
+}

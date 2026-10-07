@@ -143,6 +143,7 @@ client.holder = {
     "joinToCreate",
     "moderationScheduler",
     "statusHeartbeat",
+    "guildStats",
   ]
     .filter(Boolean)
     .forEach((handler: any) => {
