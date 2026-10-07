@@ -104,8 +104,8 @@ export interface AiGlobalConfig {
   caps: AiLimits;
 }
 
-/** Both models of the free key allow 14,400 requests a day. */
-export const DEFAULT_AI_QUOTA: AiModelQuota = { rpm: 15, rpd: 14400, tpm: 15000 };
+/** Both models of the free key allow 14,400 requests a day and 10 a minute. */
+export const DEFAULT_AI_QUOTA: AiModelQuota = { rpm: 10, rpd: 14400, tpm: 15000 };
 
 export const DEFAULT_AI_CAPS: AiLimits = {
   user_per_minute: 20,

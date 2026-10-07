@@ -206,9 +206,42 @@ export async function shouldNotify(scopeKey: string, seconds = 20): Promise<bool
 
 // ── Quota of the API key ────────────────────────────────────────────────────────
 
+/**
+ * Per-model requests: a sliding 60 second window for the per-minute limit and a counter for the
+ * day, checked and counted in one step. A fixed window would let a burst through at the turn of
+ * the minute (the whole limit at the end of one minute and again at the start of the next),
+ * which is more than the key allows. Time comes from Redis, so every shard agrees on it.
+ */
+const MODEL_SLOT_SCRIPT = `
+local t = redis.call('TIME')
+local now = tonumber(t[1]) * 1000 + math.floor(tonumber(t[2]) / 1000)
+local window = tonumber(ARGV[1])
+if tonumber(redis.call('GET', KEYS[2]) or '0') >= tonumber(ARGV[3]) then
+  return 2
+end
+redis.call('ZREMRANGEBYSCORE', KEYS[1], 0, now - window)
+if redis.call('ZCARD', KEYS[1]) >= tonumber(ARGV[2]) then
+  return 1
+end
+redis.call('ZADD', KEYS[1], now, ARGV[5])
+redis.call('PEXPIRE', KEYS[1], window + 1000)
+if redis.call('INCR', KEYS[2]) == 1 then
+  redis.call('EXPIRE', KEYS[2], tonumber(ARGV[4]))
+end
+return 0
+`;
+
+const MODEL_REFUND_SCRIPT = `
+redis.call('ZREM', KEYS[1], ARGV[1])
+if tonumber(redis.call('GET', KEYS[2]) or '0') > 0 then
+  redis.call('DECR', KEYS[2])
+end
+return 1
+`;
+
 function modelKeys(model: AiModelKey) {
   return {
-    minute: `${PREFIX}:rl:model:${model}:m:${minuteBucket()}`,
+    window: `${PREFIX}:rl:model:${model}:window`,
     tokens: `${PREFIX}:rl:model:${model}:t:${minuteBucket()}`,
     day: `${PREFIX}:rl:model:${model}:d:${pacificDay()}`,
     cooldown: `${PREFIX}:model:${model}:cooldown`,
@@ -233,13 +266,25 @@ export async function takeModelSlot(model: AiModelKey): Promise<ModelSlot | null
   const tokens = Number((await redis().get(keys.tokens)) ?? 0);
   if (tokens >= quota.tpm) return null;
 
-  const counters: Counter[] = [
-    { key: keys.minute, limit: quota.rpm, ttl: 70 },
-    { key: keys.day, limit: quota.rpd, ttl: 90000 },
-  ];
-  if ((await consume(counters)) > 0) return null;
+  const member = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  const refused = await redis().eval(
+    MODEL_SLOT_SCRIPT,
+    2,
+    keys.window,
+    keys.day,
+    60000,
+    quota.rpm,
+    quota.rpd,
+    90000,
+    member,
+  );
+  if (refused !== 0) return null;
 
-  return { refund: () => refund(counters.map((counter) => counter.key)) };
+  return {
+    refund: async () => {
+      await redis().eval(MODEL_REFUND_SCRIPT, 2, keys.window, keys.day, member);
+    },
+  };
 }
 
 /** Add the tokens a finished request used to the model's per-minute budget. */

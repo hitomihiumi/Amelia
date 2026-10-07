@@ -41,7 +41,7 @@ out personally.
 | `GEMINI_API_KEY` | – | Key of Google AI Studio. Without it the AI is off everywhere. |
 | `AI_MODEL_31B` | `gemma-4-31b-it` | Model id of the larger model. |
 | `AI_MODEL_26B` | `gemma-4-26b-a4b-it` | Model id of the smaller (mixture of experts) model. |
-| `AI_MODEL_RPM` | `15` | Requests per minute per model, used until the admin panel has saved its own. |
+| `AI_MODEL_RPM` | `10` | Requests per minute per model, used until the admin panel has saved its own. |
 | `AI_MODEL_RPD` | `14400` | Requests per day per model, used until the admin panel has saved its own. |
 | `AI_MODEL_TPM` | `15000` | Tokens per minute per model, used until the admin panel has saved its own. |
 | `AI_MAX_OUTPUT_TOKENS` | `700` | Longest answer, in tokens. |
@@ -49,8 +49,8 @@ out personally.
 | `GEMINI_API_BASE` | Google's `v1beta` endpoint | Only for tests or a proxy. |
 
 The quota is the **bot's own ceiling**, kept at or below what the key allows. Both Gemma 4 models
-of the free key allow 14,400 requests a day, which is the default; the per-minute and token numbers
-are not known for sure, so check them in the AI Studio rate-limit dashboard. Day-to-day the quota
+of the free key allow 14,400 requests a day and 10 requests a minute, which are the defaults; the
+token numbers are not known for sure, so check them in the AI Studio rate-limit dashboard. Day-to-day the quota
 lives in the admin panel (below), the environment variables are only the starting values.
 
 ## How the bot decides to answer
@@ -101,7 +101,7 @@ minute counter restarts every minute, daily ones at 00:00 UTC.
 | Messages per member per day | server, up to the ceiling | 40 |
 | Messages per server per day | server, up to the ceiling | 400 |
 | One request at a time per member | built in | – |
-| Requests per minute, per day and tokens per minute **per model** | admin panel, shared by all servers | 15 / 14400 / 15000 |
+| Requests per minute, per day and tokens per minute **per model** | admin panel, shared by all servers | 10 / 14400 / 15000 |
 
 **Ceilings** are the highest values a server may give itself, also set in the admin panel
 (default 20 per minute and 500 per day for a member, 5000 per day for a server). They are applied
@@ -122,7 +122,11 @@ Dashboard → admin panel → **AI & premium** (visible to the bot administrator
 - A request is checked against all member and server counters in one atomic step: a request
   refused by one limit does not use up the others.
 - The model counters are shared by every server, so one busy community cannot burn the whole
-  key. The daily model counter follows Google's reset at midnight Pacific time.
+  key. The per-minute limit of a model is a **sliding** 60 second window, so it never lets more than
+  that many requests through in any 60 seconds, not even around the turn of a minute. The daily
+  model counter follows Google's reset at midnight Pacific time.
+- A request to a model that failed with a timeout or a server error keeps its slot, since Google
+  may have counted it.
 - When the API answers `429`, the model is put on a cooldown for the delay the API asked for, on
   every shard, and the other model takes over in `auto`.
 - A request that never reached a model (quota spent, API down) is given back to the member.

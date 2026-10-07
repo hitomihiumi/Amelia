@@ -45,10 +45,10 @@ export function modelOrder(choice: AiModelChoice): AiModel[] {
 
 /**
  * Quota of the API key per model, used until the admin panel has saved one. Both Gemma 4
- * models of the free key allow 14,400 requests a day.
+ * models of the free key allow 14,400 requests a day and 10 a minute.
  */
 export const ENV_QUOTA: AiModelQuota = {
-  rpm: envInt("AI_MODEL_RPM", 15),
+  rpm: envInt("AI_MODEL_RPM", 10),
   rpd: envInt("AI_MODEL_RPD", 14400),
   tpm: envInt("AI_MODEL_TPM", 15000),
 };

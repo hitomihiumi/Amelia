@@ -113,8 +113,8 @@ export async function chat(request: AiChatRequest): Promise<AiChatResult> {
         }
 
         if (cause.kind === "unavailable") {
-          // The API never counted this one.
-          await slot.refund();
+          // The slot stays used: a timeout or a 5xx may still have counted at Google, and the
+          // per-minute limit of the key is a hard one.
           console.warn(`[AI] ${model.id} is unavailable (status ${cause.status})`.yellow);
           failure = "unavailable";
           continue;
