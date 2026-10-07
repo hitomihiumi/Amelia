@@ -2170,6 +2170,7 @@ export interface TranslationSchema {
       error: string;
     };
     not_configured: string;
+    premium_required: string;
     disabled: string;
     channel_ignored: string;
     usage: {
@@ -2185,6 +2186,8 @@ export interface TranslationSchema {
       description: string;
       privacy: string;
       warning_no_key: string;
+      premium_until: string;
+      premium_forever: string;
       fields: {
         status: string;
         model: string;

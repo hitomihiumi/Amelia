@@ -1,7 +1,8 @@
-import type { AiSettings } from "../../types/helpers";
+import { type AiSettings, clampLimits } from "../../types/helpers";
 import { modelOrder, type AiModel } from "./config";
 import { GeminiError, generate, type AiTurn } from "./gemini";
 import { sanitizeReply } from "./format";
+import { getAiConfig, hasAiAccess } from "./globalConfig";
 import {
   coolDownModel,
   lockUser,
@@ -32,6 +33,8 @@ export interface AiChatRequest {
 
 export type AiChatResult =
   | { ok: true; text: string; model: AiModel }
+  /** The AI chat is a premium feature and the server has no active premium. */
+  | { ok: false; reason: "premium" }
   /** The member already has a request running. */
   | { ok: false; reason: "busy" }
   /** A limit of the member or the server is spent. */
@@ -55,10 +58,14 @@ function turnFor(request: AiChatRequest): AiTurn {
 export async function chat(request: AiChatRequest): Promise<AiChatResult> {
   const { guildId, userId, channelId, settings } = request;
 
+  if (!(await hasAiAccess(guildId))) return { ok: false, reason: "premium" };
+
   if (!(await lockUser(guildId, userId))) return { ok: false, reason: "busy" };
 
   try {
-    const taken = await takeUserSlot(guildId, userId, settings.limits);
+    // A server cannot give itself more than the administrators allow, whatever it has stored.
+    const limits = clampLimits(settings.limits, (await getAiConfig()).caps);
+    const taken = await takeUserSlot(guildId, userId, limits);
     if ("refusal" in taken) return { ok: false, reason: "rate_limited", refusal: taken.refusal };
 
     const system = buildSystemPrompt({

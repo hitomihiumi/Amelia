@@ -5,6 +5,7 @@ import { Guild } from "../Guild";
 import { chat, type AiChatResult } from "./chat";
 import { isAiConfigured } from "./config";
 import { sanitizeReply, splitReply } from "./format";
+import { hasAiAccess } from "./globalConfig";
 import { shouldNotify } from "./limiter";
 import { clip, isAiReply, markAiReply } from "./memory";
 
@@ -38,6 +39,8 @@ export function describeFailure(
   switch (result.reason) {
     case "busy":
       return null;
+    case "premium":
+      return t(client, lang, "ai.premium_required");
     case "rate_limited":
       return t(
         client,
@@ -126,6 +129,9 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
     : PermissionFlagsBits.SendMessages;
   if (!permissions?.has(canSend)) return false;
 
+  // Premium ended since the server turned the AI on: stay silent instead of nagging in chat.
+  if (!(await hasAiAccess(message.guild.id))) return false;
+
   const lang = (await guild.get("settings.language")) as string;
 
   // The model can take a while: keep the typing indicator alive until it answers.
@@ -152,6 +158,8 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
   }
 
   if (!result.ok) {
+    if (result.reason === "premium") return false;
+
     const notice = describeFailure(client, lang, result);
     if (!notice) {
       await react(message, "⏳");

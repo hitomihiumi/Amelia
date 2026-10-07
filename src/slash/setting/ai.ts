@@ -18,14 +18,17 @@ import {
 import { defaultPermissions, Guild } from "../../helpers";
 import { t } from "../../i18n/helpers";
 import {
-  AI_LIMIT_BOUNDS,
   AI_MODEL_CHOICES,
   AI_PERSONA_MAX_LENGTH,
   type AiLimits,
   type AiModelChoice,
   type AiSettings,
+  clampLimits,
+  isPremiumActive,
+  limitBounds,
+  type PremiumSettings,
 } from "../../types/helpers";
-import { isAiConfigured, loadAiSettings } from "../../helpers/ai";
+import { getAiConfig, getPremium, isAiConfigured, loadAiSettings } from "../../helpers/ai";
 
 const CHANNEL_TYPES = [
   ChannelType.GuildText,
@@ -41,7 +44,27 @@ function channelList(client: Client, lang: string, ids: string[]): string {
     : t(client, lang, "ai.setting.none");
 }
 
-function buildEmbed(client: Client, lang: string, settings: AiSettings) {
+/** Who the AI is unlocked for, and until when. */
+function premiumLine(client: Client, lang: string, premium: PremiumSettings): string {
+  return premium.until
+    ? t(
+        client,
+        lang,
+        "ai.setting.premium_until",
+        `<t:${Math.floor(new Date(premium.until).getTime() / 1000)}:D>`,
+      )
+    : t(client, lang, "ai.setting.premium_forever");
+}
+
+/** What a server without premium sees instead of the settings. */
+function buildLockedEmbed(client: Client, lang: string) {
+  return client.holder.utils.fastEmbed({
+    title: t(client, lang, "ai.setting.title"),
+    description: `${t(client, lang, "ai.setting.description")}\n\n${t(client, lang, "ai.premium_required")}`,
+  });
+}
+
+function buildEmbed(client: Client, lang: string, settings: AiSettings, premium: PremiumSettings) {
   const warning = isAiConfigured() ? "" : `\n\n${t(client, lang, "ai.setting.warning_no_key")}`;
 
   return client.holder.utils.fastEmbed({
@@ -50,9 +73,11 @@ function buildEmbed(client: Client, lang: string, settings: AiSettings) {
     fields: [
       {
         name: t(client, lang, "ai.setting.fields.status"),
-        value: settings.enabled
-          ? t(client, lang, "ai.setting.enabled")
-          : t(client, lang, "ai.setting.disabled"),
+        value: `${
+          settings.enabled
+            ? t(client, lang, "ai.setting.enabled")
+            : t(client, lang, "ai.setting.disabled")
+        }\n${premiumLine(client, lang, premium)}`,
         inline: true,
       },
       {
@@ -157,10 +182,8 @@ function buildComponents(client: Client, lang: string, settings: AiSettings, gui
   ];
 }
 
-function boundsText(): string {
-  return LIMIT_FIELDS.map(
-    (field) => `${AI_LIMIT_BOUNDS[field].min}–${AI_LIMIT_BOUNDS[field].max}`,
-  ).join(", ");
+function boundsText(bounds: ReturnType<typeof limitBounds>): string {
+  return LIMIT_FIELDS.map((field) => `${bounds[field].min}–${bounds[field].max}`).join(", ");
 }
 
 module.exports = {
@@ -183,10 +206,26 @@ module.exports = {
     const guild = new Guild(client, interaction.guild);
     const lang = (await guild.get("settings.language")) as string;
 
-    let settings = await loadAiSettings(guild);
+    // The AI chat is a premium feature, handed out by the bot's administrators.
+    const premium = await getPremium(interaction.guild.id);
+    if (!isPremiumActive(premium)) {
+      await interaction.editReply({ embeds: [buildLockedEmbed(client, lang)] });
+      return;
+    }
 
+    let settings = await loadAiSettings(guild);
+    let caps = (await getAiConfig()).caps;
+
+    // The server sees the limits that really apply, under the administrators' ceilings.
     const render = () => ({
-      embeds: [buildEmbed(client, lang, settings)],
+      embeds: [
+        buildEmbed(
+          client,
+          lang,
+          { ...settings, limits: clampLimits(settings.limits, caps) },
+          premium,
+        ),
+      ],
       components: buildComponents(client, lang, settings, guild),
     });
 
@@ -251,6 +290,10 @@ module.exports = {
         }
 
         if (i.customId === "NI_ai:limits") {
+          caps = (await getAiConfig()).caps;
+          const bounds = limitBounds(caps);
+          const current = clampLimits(settings.limits, caps);
+
           const modal = new ModalBuilder()
             .setTitle(t(client, lang, "ai.setting.modals.limits.title"))
             .setCustomId("NI_ai:limits_modal");
@@ -266,7 +309,7 @@ module.exports = {
                     .setRequired(true)
                     .setMinLength(1)
                     .setMaxLength(4)
-                    .setValue(String(settings.limits[field])),
+                    .setValue(String(current[field])),
                 ),
             );
           }
@@ -287,7 +330,7 @@ module.exports = {
           for (const field of LIMIT_FIELDS) {
             const raw = submitted.fields.getTextInputValue(`NI_ai:${field}`).trim();
             const value = /^\d+$/.test(raw) ? Number.parseInt(raw, 10) : Number.NaN;
-            const { min, max } = AI_LIMIT_BOUNDS[field];
+            const { min, max } = bounds[field];
             if (!(value >= min && value <= max)) valid = false;
             limits[field] = value;
           }
@@ -296,7 +339,7 @@ module.exports = {
 
           if (!valid) {
             return submitted.followUp({
-              content: t(client, lang, "ai.setting.messages.limits_invalid", boundsText()),
+              content: t(client, lang, "ai.setting.messages.limits_invalid", boundsText(bounds)),
               flags: MessageFlagsBitField.Flags.Ephemeral,
             });
           }

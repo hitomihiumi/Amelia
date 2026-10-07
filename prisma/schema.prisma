@@ -148,6 +148,11 @@ model Guild {
   aiPersona        String?
   aiLimits         Json     @default("{\"user_per_minute\":3,\"user_per_day\":40,\"guild_per_day\":400}")
 
+  // Premium access, handed out by the bot's administrators
+  premium      Boolean   @default(false)
+  premiumUntil DateTime?
+  premiumNote  String?
+
   // Permissions
   commandPermissions Json @default("{}")
 
@@ -258,6 +263,17 @@ model GuildWebhook {
 
   @@unique([guildId, channelId])
   @@index([guildId])
+}
+
+// Single row with the AI chat limits that hold for every server, edited in the admin panel
+model AiConfig {
+  id        String   @id @default("global")
+  updatedAt DateTime @updatedAt
+
+  // Quota of the API key per model: { "31b": { rpm, rpd, tpm }, "26b": { rpm, rpd, tpm } }
+  quota Json @default("{}")
+  // Highest limits a server may set for itself: { user_per_minute, user_per_day, guild_per_day }
+  caps  Json @default("{}")
 }
 
 // Moderation case model - every moderation action gets a numbered case

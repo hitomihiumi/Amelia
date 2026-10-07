@@ -2242,6 +2242,8 @@ export const en: TranslationSchema = {
       error: "Something went wrong while I was thinking. Please try again.",
     },
     not_configured: "AI chat is not available: this bot has no API key configured.",
+    premium_required:
+      "💎 AI chat is a **premium** feature. For now premium is given out personally by the bot's administrators, ask them to unlock it for this server.",
     disabled:
       "AI chat is turned off on this server. An administrator can turn it on with `/setting ai`.",
     channel_ignored: "AI chat is turned off in this channel.",
@@ -2262,6 +2264,8 @@ export const en: TranslationSchema = {
         "Messages addressed to her are processed by Google's Gemini API (free tier) to write the answer. Keep the AI turned off if your community should not use it.",
       warning_no_key:
         "⚠️ This bot has no API key, so the AI will not work until its owner sets `GEMINI_API_KEY`.",
+      premium_until: "💎 Premium until {0}",
+      premium_forever: "💎 Premium, no end date",
       fields: {
         status: "Status",
         model: "Model",

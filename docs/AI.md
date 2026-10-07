@@ -2,7 +2,7 @@
 
 Amelia can chat with the members of a server. The answers come from Google's **Gemma 4** models
 (`31B` and `26B`) through the Gemini API, using a free key from Google AI Studio. Everything is
-off until the bot has a key **and** a server turns the AI on.
+off until the bot has a key, the server has **premium** and a server administrator turns the AI on.
 
 ## Setup
 
@@ -13,8 +13,26 @@ off until the bot has a key **and** a server turns the AI on.
    GEMINI_API_KEY=your-key
    ```
 
-3. On the server an administrator runs `/setting ai` (or uses **AI chat** in the dashboard) and
+3. Check the limits of the key in the admin panel (**AI & premium**, see below).
+4. Give a server premium from the same page.
+5. On that server an administrator runs `/setting ai` (or uses **AI chat** in the dashboard) and
    turns the chat on.
+
+## Premium
+
+The AI chat is a premium feature. For now premium is not sold: the administrators of the bot
+(the Discord ids in the dashboard's `ADMIN_USER_IDS`, the same people who get the admin panel) give it
+out personally.
+
+- **Give or take it away** in the dashboard's admin panel → **AI & premium** → *Premium servers*.
+  Enter the server id, an optional end date and a note (who it is for and why; only administrators
+  see it). A server without an end date keeps premium until it is revoked.
+- It takes effect at once: the bot reads premium from the database on every request.
+- Without premium `/setting ai` shows a notice instead of the settings, `/ai ask` and `/ai usage`
+  answer that the feature is premium, and mentions or chat channels get no answer at all. The
+  server's own settings are kept, so turning premium back on restores them.
+- Premium is stored on the server (`Guild.premium`, `premiumUntil`, `premiumNote`), so the same
+  switch can unlock other features later.
 
 ### Environment
 
@@ -23,16 +41,17 @@ off until the bot has a key **and** a server turns the AI on.
 | `GEMINI_API_KEY` | – | Key of Google AI Studio. Without it the AI is off everywhere. |
 | `AI_MODEL_31B` | `gemma-4-31b-it` | Model id of the larger model. |
 | `AI_MODEL_26B` | `gemma-4-26b-a4b-it` | Model id of the smaller (mixture of experts) model. |
-| `AI_MODEL_RPM` | `15` | Requests per minute the bot sends to **each** model. |
-| `AI_MODEL_RPD` | `1000` | Requests per day the bot sends to **each** model. |
-| `AI_MODEL_TPM` | `15000` | Tokens per minute the bot spends on **each** model. |
+| `AI_MODEL_RPM` | `15` | Requests per minute per model, used until the admin panel has saved its own. |
+| `AI_MODEL_RPD` | `14400` | Requests per day per model, used until the admin panel has saved its own. |
+| `AI_MODEL_TPM` | `15000` | Tokens per minute per model, used until the admin panel has saved its own. |
 | `AI_MAX_OUTPUT_TOKENS` | `700` | Longest answer, in tokens. |
 | `AI_REQUEST_TIMEOUT_MS` | `45000` | How long to wait for the API. |
 | `GEMINI_API_BASE` | Google's `v1beta` endpoint | Only for tests or a proxy. |
 
-The three quota variables are the **bot's own ceiling**. Look up the real limits of your key in
-the AI Studio rate-limit dashboard and keep these numbers at or below them. Free-tier limits differ
-between models and change over time, which is why they are not hard-coded.
+The quota is the **bot's own ceiling**, kept at or below what the key allows. Both Gemma 4 models
+of the free key allow 14,400 requests a day, which is the default; the per-minute and token numbers
+are not known for sure, so check them in the AI Studio rate-limit dashboard. Day-to-day the quota
+lives in the admin panel (below), the environment variables are only the starting values.
 
 ## How the bot decides to answer
 
@@ -78,11 +97,27 @@ minute counter restarts every minute, daily ones at 00:00 UTC.
 
 | Limit | Set by | Default |
 | --- | --- | --- |
-| Messages per member per minute | server (1–20) | 3 |
-| Messages per member per day | server (1–500) | 40 |
-| Messages per server per day | server (1–5000) | 400 |
+| Messages per member per minute | server, up to the ceiling | 3 |
+| Messages per member per day | server, up to the ceiling | 40 |
+| Messages per server per day | server, up to the ceiling | 400 |
 | One request at a time per member | built in | – |
-| Requests per minute, per day and tokens per minute **per model** | `.env`, shared by all servers | 15 / 1000 / 15000 |
+| Requests per minute, per day and tokens per minute **per model** | admin panel, shared by all servers | 15 / 14400 / 15000 |
+
+**Ceilings** are the highest values a server may give itself, also set in the admin panel
+(default 20 per minute and 500 per day for a member, 5000 per day for a server). They are applied
+when the bot counts a request, so lowering one takes effect at once even for servers that saved a
+higher number earlier; `/setting ai` and the dashboard only accept values up to them.
+
+### Admin panel
+
+Dashboard → admin panel → **AI & premium** (visible to the bot administrators only):
+
+- **Model quota**: requests per minute, requests per day and tokens per minute for each of the two
+  models. The bot picks changes up within about 30 seconds, no restart needed. Until something is
+  saved there the `AI_MODEL_*` variables apply, and a stored number that is out of range is ignored
+  in favour of them.
+- **Ceilings for servers**: the three limits above.
+- **Premium servers**: give, change or revoke premium (see *Premium*).
 
 - A request is checked against all member and server counters in one atomic step: a request
   refused by one limit does not use up the others.
@@ -125,6 +160,7 @@ dashboard and `/setting ai` say this as well.
 | `src/helpers/ai/handler.ts` | Decides if a message is meant for the AI and sends the answer. |
 | `src/helpers/ai/chat.ts` | One exchange: limits, model fallback, memory. |
 | `src/helpers/ai/limiter.ts` | Redis rate limiting. |
+| `src/helpers/ai/globalConfig.ts` | Quota and ceilings from the admin panel, premium lookup. |
 | `src/helpers/ai/gemini.ts` | Gemini API client. |
 | `src/helpers/ai/persona.ts` | Personality and rules. |
 | `src/helpers/ai/memory.ts` | Conversation memory. |

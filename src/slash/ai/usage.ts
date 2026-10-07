@@ -2,7 +2,8 @@ import { SlashCommand } from "../../types/helpers";
 import { ChatInputCommandInteraction, Client, MessageFlagsBitField } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
 import { t } from "../../i18n/helpers";
-import { getUsage, loadAiSettings } from "../../helpers/ai";
+import { clampLimits } from "../../types/helpers";
+import { getAiConfig, getUsage, hasAiAccess, loadAiSettings } from "../../helpers/ai";
 
 module.exports = {
   name: "usage",
@@ -23,14 +24,21 @@ module.exports = {
     const lang = (await guild.get("settings.language")) as string;
     const settings = await loadAiSettings(guild);
 
-    if (!settings.enabled) {
+    const blocked = !(await hasAiAccess(interaction.guild.id))
+      ? "ai.premium_required"
+      : !settings.enabled
+        ? "ai.disabled"
+        : null;
+    if (blocked) {
       return interaction.reply({
-        content: t(client, lang, "ai.disabled"),
+        content: t(client, lang, blocked),
         flags: MessageFlagsBitField.Flags.Ephemeral,
       });
     }
 
-    const usage = await getUsage(interaction.guild.id, interaction.user.id, settings.limits);
+    // The limits that really apply, under the ceilings of the administrators.
+    const limits = clampLimits(settings.limits, (await getAiConfig()).caps);
+    const usage = await getUsage(interaction.guild.id, interaction.user.id, limits);
 
     await interaction.reply({
       embeds: [

@@ -1,6 +1,7 @@
 import { RedisService } from "../../database/redis";
 import type { AiLimits } from "../../types/helpers";
-import { AI_BUSY_LOCK_SECONDS, AI_QUOTA, type AiModelKey } from "./config";
+import { AI_BUSY_LOCK_SECONDS, type AiModelKey } from "./config";
+import { getAiConfig } from "./globalConfig";
 
 /**
  * Rate limits of the AI chat, all kept in Redis so they hold across shards:
@@ -224,15 +225,17 @@ export interface ModelSlot {
  */
 export async function takeModelSlot(model: AiModelKey): Promise<ModelSlot | null> {
   const keys = modelKeys(model);
+  // The administrators' numbers apply to the next request, no restart needed.
+  const quota = (await getAiConfig()).quota[model];
 
   if (await redis().exists(keys.cooldown)) return null;
 
   const tokens = Number((await redis().get(keys.tokens)) ?? 0);
-  if (tokens >= AI_QUOTA.tokensPerMinute) return null;
+  if (tokens >= quota.tpm) return null;
 
   const counters: Counter[] = [
-    { key: keys.minute, limit: AI_QUOTA.requestsPerMinute, ttl: 70 },
-    { key: keys.day, limit: AI_QUOTA.requestsPerDay, ttl: 90000 },
+    { key: keys.minute, limit: quota.rpm, ttl: 70 },
+    { key: keys.day, limit: quota.rpd, ttl: 90000 },
   ];
   if ((await consume(counters)) > 0) return null;
 

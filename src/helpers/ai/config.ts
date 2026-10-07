@@ -1,15 +1,15 @@
-import type { AiModelChoice } from "../../types/helpers";
+import type { AiModelChoice, AiModelKey, AiModelQuota } from "../../types/helpers";
 
 /**
  * AI chat runs on Gemma 4 through the Gemini API with a free Google AI Studio key.
  *
- * Everything here is read from the environment so a different key tier or a
- * renamed model needs no code change. The quota numbers are the bot's own
- * ceiling, kept under what the key really allows — check the actual limits of
- * the key in AI Studio and adjust them in `.env`.
+ * Model ids come from the environment so a renamed model needs no code change. The quota
+ * numbers are the bot's own ceiling, kept at or under what the key really allows. They are
+ * edited in the admin panel (see `globalConfig.ts`); the environment only supplies the
+ * numbers used until an administrator has saved some.
  */
 
-export type AiModelKey = "31b" | "26b";
+export type { AiModelKey };
 
 export interface AiModel {
   key: AiModelKey;
@@ -43,11 +43,14 @@ export function modelOrder(choice: AiModelChoice): AiModel[] {
   return [AI_MODELS["31b"], AI_MODELS["26b"]];
 }
 
-/** Quota of the API key, counted per model and shared by every server and shard. */
-export const AI_QUOTA = {
-  requestsPerMinute: envInt("AI_MODEL_RPM", 15),
-  requestsPerDay: envInt("AI_MODEL_RPD", 1000),
-  tokensPerMinute: envInt("AI_MODEL_TPM", 15000),
+/**
+ * Quota of the API key per model, used until the admin panel has saved one. Both Gemma 4
+ * models of the free key allow 14,400 requests a day.
+ */
+export const ENV_QUOTA: AiModelQuota = {
+  rpm: envInt("AI_MODEL_RPM", 15),
+  rpd: envInt("AI_MODEL_RPD", 14400),
+  tpm: envInt("AI_MODEL_TPM", 15000),
 };
 
 export const AI_API_BASE =

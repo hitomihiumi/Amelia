@@ -5,6 +5,7 @@ import { t } from "../../i18n/helpers";
 import {
   chat,
   describeFailure,
+  hasAiAccess,
   isAiConfigured,
   loadAiSettings,
   markAiReply,
@@ -39,13 +40,16 @@ module.exports = {
 
     const guild = new Guild(client, interaction.guild);
     const lang = (await guild.get("settings.language")) as string;
-    const refuse = (key: "ai.not_configured" | "ai.disabled" | "ai.channel_ignored") =>
+    const refuse = (
+      key: "ai.not_configured" | "ai.premium_required" | "ai.disabled" | "ai.channel_ignored",
+    ) =>
       interaction.reply({
         content: t(client, lang, key),
         flags: MessageFlagsBitField.Flags.Ephemeral,
       });
 
     if (!isAiConfigured()) return refuse("ai.not_configured");
+    if (!(await hasAiAccess(interaction.guild.id))) return refuse("ai.premium_required");
 
     const settings = await loadAiSettings(guild);
     if (!settings.enabled) return refuse("ai.disabled");
