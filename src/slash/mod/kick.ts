@@ -1,11 +1,5 @@
 import { SlashCommand } from "../../types/helpers";
-import {
-  Client,
-  ChatInputCommandInteraction,
-  PermissionsBitField,
-  MessageFlags,
-  MessageFlagsBitField,
-} from "discord.js";
+import {Client, ChatInputCommandInteraction, PermissionsBitField, MessageFlags, MessageFlagsBitField} from "discord.js";
 import { defaultPermissions } from "../../helpers";
 import {
   ensureCanActOn,

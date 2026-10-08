@@ -278,10 +278,7 @@ export function collectLayoutIssues(
   };
   const checkMedia = (url: unknown, description: unknown, path: string) => {
     if (typeof url !== "string" || !isLayoutMediaUrl(url)) add("mediaUrlInvalid", path);
-    if (
-      typeof description === "string" &&
-      description.length > LAYOUT_LIMITS.MAX_MEDIA_DESCRIPTION
-    ) {
+    if (typeof description === "string" && description.length > LAYOUT_LIMITS.MAX_MEDIA_DESCRIPTION) {
       add("descriptionTooLong", path, { max: LAYOUT_LIMITS.MAX_MEDIA_DESCRIPTION });
     }
   };
@@ -289,8 +286,7 @@ export function collectLayoutIssues(
   const checkChild = (child: LayoutContainerChild, path: string) => {
     switch (child.type) {
       case "text":
-        if (typeof child.content !== "string" || child.content.trim() === "")
-          add("textEmpty", path);
+        if (typeof child.content !== "string" || child.content.trim() === "") add("textEmpty", path);
         break;
 
       case "separator":
@@ -302,9 +298,7 @@ export function collectLayoutIssues(
           if (child.items.length > LAYOUT_LIMITS.MAX_GALLERY_ITEMS) {
             add("galleryTooMany", path, { max: LAYOUT_LIMITS.MAX_GALLERY_ITEMS });
           }
-          child.items.forEach((item, i) =>
-            checkMedia(item.url, item.description, `${path}.items[${i}]`),
-          );
+          child.items.forEach((item, i) => checkMedia(item.url, item.description, `${path}.items[${i}]`));
         }
         break;
 
@@ -314,8 +308,7 @@ export function collectLayoutIssues(
           add("sectionTexts", path, { max: LAYOUT_LIMITS.MAX_SECTION_TEXTS });
         }
         texts.forEach((text, i) => {
-          if (typeof text !== "string" || text.trim() === "")
-            add("textEmpty", `${path}.texts[${i}]`);
+          if (typeof text !== "string" || text.trim() === "") add("textEmpty", `${path}.texts[${i}]`);
         });
 
         if (!child.accessory) add("sectionAccessoryMissing", path);

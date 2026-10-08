@@ -2,7 +2,7 @@ import { Level, RankCardDisplayOptions, SlashCommand } from "../../types/helpers
 import { AttachmentBuilder, MessageFlags, PermissionsBitField } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
 import { RankCard } from "../../helpers/canvas/RankCard";
-import { t, tObject } from "../../i18n/helpers";
+import {t, tObject} from "../../i18n/helpers";
 
 module.exports = {
   name: "rank",
@@ -42,19 +42,16 @@ module.exports = {
 
     const displayOptions = (await member.get("custom.rank")) as RankCardDisplayOptions;
 
-    const rank = new RankCard(
-      {
-        avatar: user.displayAvatarURL({ size: 512, extension: "jpg" }),
-        username: user.username,
-        globalName: user.globalName || user.username,
-        data: {
-          ...levelData,
-          rank: 1,
-        },
-        displayOptions,
+    const rank = new RankCard({
+      avatar: user.displayAvatarURL({ size: 512, extension: "jpg" }),
+      username: user.username,
+      globalName: user.globalName || user.username,
+      data: {
+        ...levelData,
+        rank: 1,
       },
-      tObject(client, await guild.get(`settings.language`), "time_units"),
-    );
+      displayOptions,
+    }, tObject(client, await guild.get(`settings.language`), "time_units"));
 
     const buffer = await rank.render();
     if (!buffer) {

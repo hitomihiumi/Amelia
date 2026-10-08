@@ -1,12 +1,6 @@
-import { SlashCommand } from "../../types/helpers";
-import {
-  ChatInputCommandInteraction,
-  Client,
-  MessageFlags,
-  MessageFlagsBitField,
-  PermissionsBitField,
-} from "discord.js";
-import { defaultPermissions } from "../../helpers";
+import {SlashCommand} from "../../types/helpers";
+import {ChatInputCommandInteraction, Client, MessageFlags, MessageFlagsBitField, PermissionsBitField} from "discord.js";
+import {defaultPermissions} from "../../helpers";
 import {
   ensureCanActOn,
   parseDuration,
@@ -15,7 +9,7 @@ import {
   replySuccess,
   resolveReason,
 } from "../../helpers/moderation";
-import { t } from "../../i18n/helpers";
+import {t} from "../../i18n/helpers";
 
 module.exports = {
   name: "ban",

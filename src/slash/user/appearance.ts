@@ -17,7 +17,7 @@ import {
   TextInputStyle,
 } from "discord.js";
 import { defaultPermissions, Guild, User } from "../../helpers";
-import { t, tObject } from "../../i18n/helpers";
+import {t, tObject} from "../../i18n/helpers";
 import { isHexColor } from "../../handlers/functions";
 import { RankCard } from "../../helpers/canvas/RankCard";
 import { ProfileCard } from "../../helpers/canvas/ProfileCard";
@@ -440,50 +440,43 @@ function embedUpdate(
 async function imageUpdate(
   opt: "rank" | "profile" | "level_up",
   user: import("discord.js").User,
-  client: Client,
-  lang: string,
+  client: Client, lang: string,
   displayOptions: RankCardDisplayOptions | ProfileCardDisplayOptions | LevelCardDisplayOptions,
 ) {
   let attachment: AttachmentBuilder;
   switch (opt) {
     case "rank":
-      const rank = new RankCard(
-        {
-          avatar: user.displayAvatarURL({ size: 512, extension: "png" }),
-          username: user.username,
-          globalName: user.globalName || user.username,
-          data: {
-            level: 999,
-            total_xp: 999999,
-            xp: 2500000,
-            message_count: 99999,
-            voice_time: 99999999,
-            rank: 1,
-          },
-          displayOptions: displayOptions as RankCardDisplayOptions,
+      const rank = new RankCard({
+        avatar: user.displayAvatarURL({ size: 512, extension: "png" }),
+        username: user.username,
+        globalName: user.globalName || user.username,
+        data: {
+          level: 999,
+          total_xp: 999999,
+          xp: 2500000,
+          message_count: 99999,
+          voice_time: 99999999,
+          rank: 1,
         },
-        tObject(client, lang, "time_units"),
-      );
+        displayOptions: displayOptions as RankCardDisplayOptions,
+      }, tObject(client, lang, "time_units"));
       attachment = new AttachmentBuilder(await rank.render(), { name: "rank.png" });
       break;
     case "profile":
-      const profile = new ProfileCard(
-        {
-          avatar: user.displayAvatarURL({ size: 512, extension: "png" }),
-          username: user.username,
-          globalName: user.globalName || user.username,
-          data: {
-            level: 999,
-            total_xp: 999999,
-            xp: 2500000,
-            message_count: 99999,
-            voice_time: 99999999,
-            rank: 1,
-          },
-          displayOptions: displayOptions as ProfileCardDisplayOptions,
+      const profile = new ProfileCard({
+        avatar: user.displayAvatarURL({ size: 512, extension: "png" }),
+        username: user.username,
+        globalName: user.globalName || user.username,
+        data: {
+          level: 999,
+          total_xp: 999999,
+          xp: 2500000,
+          message_count: 99999,
+          voice_time: 99999999,
+          rank: 1,
         },
-        tObject(client, lang, "time_units"),
-      );
+        displayOptions: displayOptions as ProfileCardDisplayOptions,
+      }, tObject(client, lang, "time_units"));
       attachment = new AttachmentBuilder(await profile.render(), { name: "profile.png" });
       break;
     case "level_up":
