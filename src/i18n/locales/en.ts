@@ -2273,7 +2273,15 @@ export const en: TranslationSchema = {
         ignored: "Ignored channels",
         limits: "Limits",
         persona: "Personality",
+        memory: "Memory and pictures",
       },
+      options: {
+        short_term: "Short-term memory",
+        long_term: "Long-term memory",
+        images: "Pictures",
+        code: "Code files",
+      },
+      memory_count: "Notes kept about members: {0}",
       enabled: "✅ Enabled",
       disabled: "❌ Disabled",
       none: "None",
@@ -2290,6 +2298,7 @@ export const en: TranslationSchema = {
         disable: "Disable AI chat",
         persona: "Personality",
         limits: "Limits",
+        memory_clear: "Forget all notes",
       },
       select_menus: {
         model: {
@@ -2331,7 +2340,17 @@ export const en: TranslationSchema = {
         persona_reset: "Reset. She uses her own personality again.",
         limits_saved: "Limits saved.",
         limits_invalid: "Enter whole numbers within these bounds: {0}",
+        memory_cleared: "Forgot {0} notes about the members of this server.",
       },
+    },
+    memory: {
+      title: "What I remember about you",
+      description: "Things you told me about yourself. Delete any you don't want me to keep.",
+      empty: "Nothing yet. If you tell me something lasting about yourself I may remember it, and I will react with 🧠 when I do.",
+      switched_off: "Long-term memory is switched off on this server, so I am not saving anything new.",
+      forget_one: "Forget one note",
+      forget_all: "Forget everything",
+      forgot_all: "Done, I forgot {0} notes about you.",
     },
   },
 

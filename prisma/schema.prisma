@@ -147,6 +147,8 @@ model Guild {
   aiModel          String   @default("auto")
   aiPersona        String?
   aiLimits         Json     @default("{\"user_per_minute\":3,\"user_per_day\":40,\"guild_per_day\":400}")
+  // Switches: { short_term, long_term, images, code }
+  aiOptions        Json     @default("{\"short_term\":true,\"long_term\":true,\"images\":true,\"code\":true}")
 
   // Premium access, handed out by the bot's administrators
   premium      Boolean   @default(false)
@@ -162,8 +164,27 @@ model Guild {
   cases       ModerationCase[]
   submissions ModerationSubmission[]
   webhooks    GuildWebhook[]
+  aiMemories  AiMemory[]
 
   @@index([id])
+}
+
+// Something the AI chat remembers about a member of a server, for good. Written by the model
+// from what the member said about themselves; the member can read and delete it.
+model AiMemory {
+  id         String   @id @default(cuid())
+  guildId    String
+  userId     String
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  lastUsedAt DateTime @default(now())
+  // How many times it was handed to the model, so rarely useful notes are the first to go
+  uses       Int      @default(0)
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, userId])
 }
 
 // User model

@@ -34,6 +34,10 @@ export interface ChannelOption extends BaseOption {
   type: "CHANNEL";
 }
 
+export interface AttachmentOption extends BaseOption {
+  type: "ATTACHMENT";
+}
+
 export interface RoleOption extends BaseOption {
   type: "ROLE";
 }

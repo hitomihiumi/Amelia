@@ -566,6 +566,11 @@ const guildSchemaMap: Record<string, SchemaField> = {
     prismaType: "Json",
     default: '"{\\"user_per_minute\\":3,\\"user_per_day\\":40,\\"guild_per_day\\":400}"',
   },
+  "ai.options": {
+    prismaField: "aiOptions",
+    prismaType: "Json",
+    default: '"{\\"short_term\\":true,\\"long_term\\":true,\\"images\\":true,\\"code\\":true}"',
+  },
 
   // Premium
   "premium.enabled": {

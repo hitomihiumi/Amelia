@@ -1,16 +1,24 @@
 import { cleanContent, type Client, type Message, PermissionFlagsBits } from "discord.js";
-import { DEFAULT_AI_LIMITS, type AiSettings, DEFAULT_AI_SETTINGS } from "../../types/helpers";
+import {
+  DEFAULT_AI_LIMITS,
+  type AiSettings,
+  DEFAULT_AI_SETTINGS,
+  normalizeAiOptions,
+} from "../../types/helpers";
 import { t } from "../../i18n/helpers";
 import { Guild } from "../Guild";
 import { chat, type AiChatResult } from "./chat";
 import { isAiConfigured } from "./config";
 import { sanitizeReply, splitReply } from "./format";
 import { hasAiAccess } from "./globalConfig";
+import { prepareAttachments, usableAttachments } from "./attachments";
+import type { AttachmentInfo } from "./images";
 import { shouldNotify } from "./limiter";
 import { clip, isAiReply, markAiReply } from "./memory";
 
-/** At most this many messages for one answer; the rest is cut. */
+/** At most this many messages for one answer; the rest is cut. A review of code gets more room. */
 const MAX_REPLY_MESSAGES = 2;
+const MAX_REPLY_MESSAGES_CODE = 4;
 const REPLY_CONTEXT_CHARS = 300;
 
 /** Settings of a server with the defaults filled in, whatever the database holds. */
@@ -22,6 +30,7 @@ export async function loadAiSettings(guild: Guild): Promise<AiSettings> {
     channels: raw.channels ?? [],
     ignore_channels: raw.ignore_channels ?? [],
     limits: { ...DEFAULT_AI_LIMITS, ...(raw.limits ?? {}) },
+    options: normalizeAiOptions(raw.options),
   };
 }
 
@@ -71,14 +80,26 @@ async function replyContext(message: Message) {
   try {
     const target = await message.fetchReference();
     const text = cleanContent(target.content, message.channel).trim();
-    if (!text) return null;
+    const attachments = attachmentsOf(target);
+    if (!text && attachments.length === 0) return null;
     return {
       name: target.member?.displayName ?? target.author.displayName,
-      text: clip(text, REPLY_CONTEXT_CHARS),
+      text: text ? clip(text, REPLY_CONTEXT_CHARS) : "(an attachment)",
+      attachments,
     };
   } catch {
     return null;
   }
+}
+
+/** The attachments of a message. */
+function attachmentsOf(message: Message): AttachmentInfo[] {
+  return [...message.attachments.values()].map((attachment) => ({
+    url: attachment.url,
+    contentType: attachment.contentType,
+    size: attachment.size,
+    name: attachment.name,
+  }));
 }
 
 async function react(message: Message, emoji: string) {
@@ -119,7 +140,15 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
     message.content.replace(new RegExp(`<@!?${client.user.id}>`, "g"), ""),
     message.channel,
   ).trim();
-  if (!text) return false;
+
+  // A picture or file without a word is answered when it is addressed to the bot. In a chat
+  // channel it is most likely a meme or a file meant for the people there, and every answer
+  // costs quota.
+  const ownAttachments = usableAttachments(attachmentsOf(message));
+  if (!text) {
+    const addressed = mentioned || repliesToAi;
+    if (ownAttachments.length === 0 || !addressed) return false;
+  }
 
   const me = message.guild.members.me;
   const channel = message.channel;
@@ -140,7 +169,17 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
   const typing = setInterval(sendTyping, 8000);
 
   let result: AiChatResult;
+  let hadFiles = false;
   try {
+    const replyTo = await replyContext(message);
+
+    // Pictures and files of the message, and of the one it replies to ("review this" under a file).
+    const prepared = await prepareAttachments(
+      [...ownAttachments, ...usableAttachments(replyTo?.attachments ?? [])],
+      settings.options,
+    );
+    hadFiles = prepared.files.length > 0;
+
     result = await chat({
       guildId: message.guild.id,
       guildName: message.guild.name,
@@ -149,7 +188,8 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
       userId: message.author.id,
       userName: message.member.displayName,
       text,
-      replyTo: await replyContext(message),
+      replyTo: replyTo ? { name: replyTo.name, text: replyTo.text } : null,
+      ...prepared,
       lang,
       settings,
     });
@@ -173,7 +213,10 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
     return true;
   }
 
-  const chunks = splitReply(sanitizeReply(result.text)).slice(0, MAX_REPLY_MESSAGES);
+  const chunks = splitReply(sanitizeReply(result.text)).slice(
+    0,
+    hadFiles ? MAX_REPLY_MESSAGES_CODE : MAX_REPLY_MESSAGES,
+  );
   const options = { allowedMentions: { parse: [], repliedUser: false } } as const;
 
   const send = (content: string): Promise<Message | null> =>
@@ -191,6 +234,9 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
     const sent = index === 0 ? await sendFirst(chunk) : await send(chunk);
     if (sent) await markAiReply(sent.id);
   }
+
+  // Tell the member when something about them was kept, so a note never appears unseen.
+  if (result.remembered > 0) await react(message, "🧠");
 
   return true;
 }

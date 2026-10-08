@@ -1,8 +1,14 @@
 import { AuditLogEvent, Client, GuildMember, PartialGuildMember } from "discord.js";
 import { AuditLogger, describeUser } from "../../helpers/audit";
+import { clearUserMemories } from "../../helpers/ai";
 
 module.exports = async (client: Client, member: GuildMember | PartialGuildMember) => {
   if (!member.guild) return;
+
+  // What the AI chat kept about a member goes with them.
+  clearUserMemories(member.guild.id, member.id).catch((error) =>
+    console.error("[AI] Could not clear the memories of a member who left:".red, error),
+  );
 
   const audit = new AuditLogger(client, member.guild);
 

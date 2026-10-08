@@ -150,6 +150,15 @@ function optionsLoad(
             .setMaxValue(data.max),
         );
         break;
+      case "ATTACHMENT":
+        slashCommand.addAttachmentOption((opt) =>
+          opt
+            .setName(data.name)
+            .setDescription(data.description)
+            .setRequired(data.required)
+            .setDescriptionLocalizations(data.local),
+        );
+        break;
       case "STRING_CHOICE":
         slashCommand.addStringOption((opt) =>
           opt

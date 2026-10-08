@@ -2195,7 +2195,15 @@ export interface TranslationSchema {
         ignored: string;
         limits: string;
         persona: string;
+        memory: string;
       };
+      options: {
+        short_term: string;
+        long_term: string;
+        images: string;
+        code: string;
+      };
+      memory_count: string;
       enabled: string;
       disabled: string;
       none: string;
@@ -2211,6 +2219,7 @@ export interface TranslationSchema {
         disable: string;
         persona: string;
         limits: string;
+        memory_clear: string;
       };
       select_menus: {
         model: {
@@ -2242,7 +2251,17 @@ export interface TranslationSchema {
         persona_reset: string;
         limits_saved: string;
         limits_invalid: string;
+        memory_cleared: string;
       };
+    };
+    memory: {
+      title: string;
+      description: string;
+      empty: string;
+      switched_off: string;
+      forget_one: string;
+      forget_all: string;
+      forgot_all: string;
     };
   };
 

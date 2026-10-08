@@ -22,13 +22,21 @@ import {
   AI_PERSONA_MAX_LENGTH,
   type AiLimits,
   type AiModelChoice,
+  type AiOptions,
   type AiSettings,
   clampLimits,
   isPremiumActive,
   limitBounds,
   type PremiumSettings,
 } from "../../types/helpers";
-import { getAiConfig, getPremium, isAiConfigured, loadAiSettings } from "../../helpers/ai";
+import {
+  clearGuildMemories,
+  countMemories,
+  getAiConfig,
+  getPremium,
+  isAiConfigured,
+  loadAiSettings,
+} from "../../helpers/ai";
 
 const CHANNEL_TYPES = [
   ChannelType.GuildText,
@@ -37,6 +45,12 @@ const CHANNEL_TYPES = [
 ];
 
 const LIMIT_FIELDS = ["user_per_minute", "user_per_day", "guild_per_day"] as const;
+const OPTION_KEYS = [
+  "short_term",
+  "long_term",
+  "images",
+  "code",
+] as const satisfies (keyof AiOptions)[];
 
 function channelList(client: Client, lang: string, ids: string[]): string {
   return ids.length > 0
@@ -64,7 +78,13 @@ function buildLockedEmbed(client: Client, lang: string) {
   });
 }
 
-function buildEmbed(client: Client, lang: string, settings: AiSettings, premium: PremiumSettings) {
+function buildEmbed(
+  client: Client,
+  lang: string,
+  settings: AiSettings,
+  premium: PremiumSettings,
+  memoryCount: number,
+) {
   const warning = isAiConfigured() ? "" : `\n\n${t(client, lang, "ai.setting.warning_no_key")}`;
 
   return client.holder.utils.fastEmbed({
@@ -103,6 +123,16 @@ function buildEmbed(client: Client, lang: string, settings: AiSettings, premium:
       {
         name: t(client, lang, "ai.setting.fields.ignored"),
         value: channelList(client, lang, settings.ignore_channels),
+      },
+      {
+        name: t(client, lang, "ai.setting.fields.memory"),
+        value: [
+          ...OPTION_KEYS.map(
+            (key) =>
+              `${settings.options[key] ? "✅" : "❌"} ${t(client, lang, `ai.setting.options.${key}`)}`,
+          ),
+          t(client, lang, "ai.setting.memory_count", memoryCount),
+        ].join("\n"),
       },
       {
         name: t(client, lang, "ai.setting.fields.persona"),
@@ -166,6 +196,20 @@ function buildComponents(client: Client, lang: string, settings: AiSettings, gui
     return new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(menu);
   };
 
+  // What the AI may do besides answering: one switch for each, and a way to wipe the notes.
+  const options = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    ...OPTION_KEYS.map((key) =>
+      new ButtonBuilder()
+        .setCustomId(`NI_ai:option_${key}`)
+        .setStyle(settings.options[key] ? ButtonStyle.Success : ButtonStyle.Secondary)
+        .setLabel(t(client, lang, `ai.setting.options.${key}`)),
+    ),
+    new ButtonBuilder()
+      .setCustomId("NI_ai:memory_clear")
+      .setStyle(ButtonStyle.Danger)
+      .setLabel(t(client, lang, "ai.setting.buttons.memory_clear")),
+  );
+
   return [
     buttons,
     model,
@@ -179,6 +223,7 @@ function buildComponents(client: Client, lang: string, settings: AiSettings, gui
       t(client, lang, "ai.setting.select_menus.ignored.placeholder"),
       known(settings.ignore_channels),
     ),
+    options,
   ];
 }
 
@@ -215,6 +260,7 @@ module.exports = {
 
     let settings = await loadAiSettings(guild);
     let caps = (await getAiConfig()).caps;
+    let memoryCount = await countMemories(interaction.guild.id);
 
     // The server sees the limits that really apply, under the administrators' ceilings.
     const render = () => ({
@@ -224,6 +270,7 @@ module.exports = {
           lang,
           { ...settings, limits: clampLimits(settings.limits, caps) },
           premium,
+          memoryCount,
         ),
       ],
       components: buildComponents(client, lang, settings, guild),
@@ -242,6 +289,23 @@ module.exports = {
           settings.enabled = !settings.enabled;
           await guild.set("ai.enabled", settings.enabled);
           return i.update(render());
+        }
+
+        const optionKey = OPTION_KEYS.find((key) => i.customId === `NI_ai:option_${key}`);
+        if (optionKey) {
+          settings.options = { ...settings.options, [optionKey]: !settings.options[optionKey] };
+          await guild.set("ai.options", settings.options);
+          return i.update(render());
+        }
+
+        if (i.customId === "NI_ai:memory_clear") {
+          const count = await clearGuildMemories(interaction.guild!.id);
+          memoryCount = 0;
+          await i.update(render());
+          return i.followUp({
+            content: t(client, lang, "ai.setting.messages.memory_cleared", count),
+            flags: MessageFlagsBitField.Flags.Ephemeral,
+          });
         }
 
         if (i.customId === "NI_ai:persona") {

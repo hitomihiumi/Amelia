@@ -71,4 +71,6 @@ export const AI_MEMORY_TTL_SECONDS = 30 * 60;
 export const AI_MAX_INPUT_CHARS = 1500;
 
 export const AI_MAX_OUTPUT_TOKENS = envInt("AI_MAX_OUTPUT_TOKENS", 700);
+/** A review of attached code needs more room than chat does. */
+export const AI_MAX_OUTPUT_TOKENS_CODE = envInt("AI_MAX_OUTPUT_TOKENS_CODE", 1800);
 export const AI_REQUEST_TIMEOUT_MS = envInt("AI_REQUEST_TIMEOUT_MS", 45000);

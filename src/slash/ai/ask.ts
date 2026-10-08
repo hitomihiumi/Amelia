@@ -9,7 +9,9 @@ import {
   isAiConfigured,
   loadAiSettings,
   markAiReply,
+  prepareAttachments,
   splitReply,
+  usableAttachments,
 } from "../../helpers/ai";
 
 module.exports = {
@@ -29,6 +31,26 @@ module.exports = {
       local: {
         ru: "Что ты хочешь ей сказать?",
         uk: "Що ти хочеш їй сказати?",
+      },
+    },
+    {
+      name: "image",
+      description: "A picture for her to look at",
+      required: false,
+      type: "ATTACHMENT",
+      local: {
+        ru: "Картинка, на которую ей стоит посмотреть",
+        uk: "Картинка, на яку їй варто подивитися",
+      },
+    },
+    {
+      name: "file",
+      description: "A code or text file for her to read",
+      required: false,
+      type: "ATTACHMENT",
+      local: {
+        ru: "Файл с кодом или текстом, который ей стоит прочитать",
+        uk: "Файл із кодом або текстом, який їй варто прочитати",
       },
     },
   ],
@@ -68,6 +90,20 @@ module.exports = {
     const member = interaction.guild.members.cache.get(interaction.user.id);
     const text = interaction.options.getString("message", true);
 
+    // A picture or a file given to the command; the server may have either switched off.
+    const given = [
+      interaction.options.getAttachment("image"),
+      interaction.options.getAttachment("file"),
+    ]
+      .filter((attachment) => attachment !== null)
+      .map((attachment) => ({
+        url: attachment.url,
+        contentType: attachment.contentType,
+        size: attachment.size,
+        name: attachment.name,
+      }));
+    const prepared = await prepareAttachments(usableAttachments(given), settings.options);
+
     const result = await chat({
       guildId: interaction.guild.id,
       guildName: interaction.guild.name,
@@ -76,6 +112,7 @@ module.exports = {
       userId: interaction.user.id,
       userName: member?.displayName ?? interaction.user.displayName,
       text,
+      ...prepared,
       lang,
       settings,
     });
@@ -86,7 +123,7 @@ module.exports = {
       return interaction.followUp({ content: notice, flags: MessageFlagsBitField.Flags.Ephemeral });
     }
 
-    const [first, ...rest] = splitReply(result.text).slice(0, 2);
+    const [first, ...rest] = splitReply(result.text).slice(0, prepared.files.length > 0 ? 4 : 2);
     const options = { allowedMentions: { parse: [] as never[] } };
 
     const sent = await interaction.editReply({ content: first, ...options });

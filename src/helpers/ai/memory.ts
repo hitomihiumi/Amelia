@@ -3,10 +3,18 @@ import { AI_MAX_INPUT_CHARS, AI_MEMORY_TTL_SECONDS, AI_MEMORY_TURNS } from "./co
 import type { AiTurn } from "./gemini";
 
 /**
- * Short conversation memory, one per channel: the last few exchanges, so a reply
- * can refer to what was said a minute ago. It expires on its own and is never
- * written to the database. Only answered exchanges are stored.
+ * Short-term memory, one per channel: the last few exchanges, so a reply can refer to what was
+ * said a minute ago. It expires on its own and is never written to the database. Only answered
+ * exchanges are stored. What lasts longer is in `longTerm.ts`.
  */
+
+/** A turn as it is kept: the author is remembered too, to find what is known about them. */
+export interface MemoryTurn extends AiTurn {
+  /** Discord id of the member who wrote a user turn. */
+  uid?: string;
+  /** Their name in the server at the time. */
+  name?: string;
+}
 
 const key = (channelId: string) => `ai:mem:${channelId}`;
 
@@ -19,16 +27,16 @@ export function clip(text: string, max = AI_MAX_INPUT_CHARS): string {
 }
 
 /** User turns carry the author's name so a channel with several people stays readable. */
-export function userTurn(name: string, text: string): AiTurn {
-  return { role: "user", text: `${name}: ${clip(text)}` };
+export function userTurn(name: string, text: string, uid?: string): MemoryTurn {
+  return { role: "user", text: `${name}: ${clip(text)}`, uid, name };
 }
 
-export async function loadMemory(channelId: string): Promise<AiTurn[]> {
+export async function loadMemory(channelId: string): Promise<MemoryTurn[]> {
   const raw = await RedisService.getClient().lrange(key(channelId), 0, -1);
-  const turns: AiTurn[] = [];
+  const turns: MemoryTurn[] = [];
   for (const entry of raw) {
     try {
-      const turn = JSON.parse(entry) as AiTurn;
+      const turn = JSON.parse(entry) as MemoryTurn;
       if ((turn.role === "user" || turn.role === "model") && typeof turn.text === "string") {
         turns.push(turn);
       }
@@ -39,9 +47,9 @@ export async function loadMemory(channelId: string): Promise<AiTurn[]> {
   return turns;
 }
 
-export async function remember(channelId: string, user: AiTurn, answer: string): Promise<void> {
+export async function remember(channelId: string, user: MemoryTurn, answer: string): Promise<void> {
   const redis = RedisService.getClient();
-  const entries = [user, { role: "model", text: clip(answer) } satisfies AiTurn].map((turn) =>
+  const entries = [user, { role: "model", text: clip(answer) } satisfies MemoryTurn].map((turn) =>
     JSON.stringify(turn),
   );
 
