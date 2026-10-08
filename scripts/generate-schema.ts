@@ -569,7 +569,7 @@ const guildSchemaMap: Record<string, SchemaField> = {
   "ai.options": {
     prismaField: "aiOptions",
     prismaType: "Json",
-    default: '"{\\"short_term\\":true,\\"long_term\\":true,\\"images\\":true}"',
+    default: '"{\\"short_term\\":true,\\"long_term\\":true,\\"images\\":true,\\"code\\":true}"',
   },
 
   // Premium

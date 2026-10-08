@@ -13,6 +13,8 @@ export interface AiTurn {
   text: string;
   /** Pictures of the turn. Only the newest user turn carries any. */
   images?: AiImage[];
+  /** Text sent with the turn but never kept in memory, such as the contents of attached files. */
+  extra?: string;
 }
 
 export interface GenerateResult {
@@ -65,6 +67,7 @@ export function normalizeTurns(turns: AiTurn[]): AiTurn[] {
     if (last && last.role === turn.role) {
       last.text += `\n${turn.text}`;
       if (turn.images?.length) last.images = [...(last.images ?? []), ...turn.images];
+      if (turn.extra) last.extra = last.extra ? `${last.extra}\n\n${turn.extra}` : turn.extra;
     } else {
       merged.push({ ...turn });
     }
@@ -73,7 +76,13 @@ export function normalizeTurns(turns: AiTurn[]): AiTurn[] {
   return merged;
 }
 
-function buildBody(model: AiModel, system: string, turns: AiTurn[], useThinking: boolean) {
+function buildBody(
+  model: AiModel,
+  system: string,
+  turns: AiTurn[],
+  useThinking: boolean,
+  maxOutputTokens: number,
+) {
   const useSystem = !quirks.noSystemInstruction.has(model.id);
   const dropImages = quirks.noImages.has(model.id);
   const normalized = normalizeTurns(turns);
@@ -85,7 +94,7 @@ function buildBody(model: AiModel, system: string, turns: AiTurn[], useThinking:
     return {
       role: turn.role,
       parts: [
-        { text: turn.text + note },
+        { text: turn.text + (turn.extra ? `\n\n${turn.extra}` : "") + note },
         ...(dropImages
           ? []
           : (turn.images ?? []).map((image) => ({
@@ -100,7 +109,7 @@ function buildBody(model: AiModel, system: string, turns: AiTurn[], useThinking:
   }
 
   const generationConfig: Record<string, unknown> = {
-    maxOutputTokens: AI_MAX_OUTPUT_TOKENS,
+    maxOutputTokens,
     temperature: 0.9,
     topP: 0.95,
   };
@@ -141,13 +150,20 @@ export async function generate(
   model: AiModel,
   system: string,
   turns: AiTurn[],
+  options: { maxOutputTokens?: number } = {},
 ): Promise<GenerateResult> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new GeminiError({ kind: "fatal", status: null, message: "No API key" });
 
   // A few retries, one for each thing a model may reject: thinking, a system instruction, images.
   for (let attempt = 0; attempt < 4; attempt++) {
-    const body = buildBody(model, system, turns, !quirks.noThinking.has(model.id));
+    const body = buildBody(
+      model,
+      system,
+      turns,
+      !quirks.noThinking.has(model.id),
+      options.maxOutputTokens ?? AI_MAX_OUTPUT_TOKENS,
+    );
 
     try {
       const { data } = await axios.post(`${AI_API_BASE}/models/${model.id}:generateContent`, body, {

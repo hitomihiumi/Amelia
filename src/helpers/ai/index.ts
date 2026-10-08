@@ -11,3 +11,5 @@ export type { AiTurn } from "./gemini";
 export * from "./images";
 export * from "./longTerm";
 export * from "./memoryText";
+export * from "./files";
+export * from "./attachments";

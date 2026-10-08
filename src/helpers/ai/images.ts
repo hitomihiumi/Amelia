@@ -27,6 +27,18 @@ export interface AttachmentInfo {
   url: string;
   contentType: string | null;
   size: number;
+  /** File name as the sender gave it. Untrusted. */
+  name?: string;
+}
+
+/** An https link on Discord's own CDN: the only place attachments are ever fetched from. */
+export function isDiscordCdnUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && DISCORD_CDN.test(url.hostname);
+  } catch {
+    return false;
+  }
 }
 
 /** The format of a picture by its first bytes, whatever the sender claimed. */
@@ -62,12 +74,7 @@ export function pickCandidates(attachments: AttachmentInfo[]): AttachmentInfo[] 
       if (attachment.contentType && !/^image\/(png|jpe?g|webp)/i.test(attachment.contentType)) {
         return false;
       }
-      try {
-        const url = new URL(attachment.url);
-        return url.protocol === "https:" && DISCORD_CDN.test(url.hostname);
-      } catch {
-        return false;
-      }
+      return isDiscordCdnUrl(attachment.url);
     })
     .slice(0, AI_MAX_IMAGES);
 }

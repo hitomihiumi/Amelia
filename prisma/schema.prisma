@@ -147,8 +147,8 @@ model Guild {
   aiModel          String   @default("auto")
   aiPersona        String?
   aiLimits         Json     @default("{\"user_per_minute\":3,\"user_per_day\":40,\"guild_per_day\":400}")
-  // Switches: { short_term, long_term, images }
-  aiOptions        Json     @default("{\"short_term\":true,\"long_term\":true,\"images\":true}")
+  // Switches: { short_term, long_term, images, code }
+  aiOptions        Json     @default("{\"short_term\":true,\"long_term\":true,\"images\":true,\"code\":true}")
 
   // Premium access, handed out by the bot's administrators
   premium      Boolean   @default(false)

@@ -1,5 +1,6 @@
 import { type AiSettings, clampLimits } from "../../types/helpers";
-import { modelOrder, type AiModel } from "./config";
+import { AI_MAX_OUTPUT_TOKENS_CODE, modelOrder, type AiModel } from "./config";
+import { type CodeFile, formatCodeFiles } from "./files";
 import { GeminiError, generate, type AiImage } from "./gemini";
 import { sanitizeReply } from "./format";
 import { getAiConfig, hasAiAccess } from "./globalConfig";
@@ -34,6 +35,12 @@ export interface AiChatRequest {
   imagesFailed?: number;
   /** Pictures that were attached while the server has looking at pictures switched off. */
   imagesOff?: number;
+  /** Code and text files of the message, already downloaded. */
+  files?: CodeFile[];
+  /** Files that were attached but could not be read (too big, binary, not downloadable). */
+  filesFailed?: number;
+  /** Files that were attached while the server has reading code files switched off. */
+  filesOff?: number;
   /** Language code of the server. */
   lang: string;
   settings: Pick<AiSettings, "model" | "persona" | "limits" | "options">;
@@ -58,9 +65,25 @@ export type AiChatResult =
   /** Every model failed or the model refused to answer. */
   | { ok: false; reason: "unavailable" | "blocked" | "error" };
 
-/** What to tell the model about pictures that are, or are not, part of the message. */
-function pictureNotes(request: AiChatRequest): string {
+/** What to tell the model about pictures and files that are, or are not, part of the message. */
+function attachmentNotes(request: AiChatRequest): string {
   const notes: string[] = [];
+  const files = request.files ?? [];
+  if (files.length > 0) {
+    notes.push(
+      `[the message has ${files.length} file(s): ${files.map((file) => file.name).join(", ")}]`,
+    );
+  }
+  if (request.filesFailed) {
+    notes.push(
+      `[${request.filesFailed} file(s) could not be read: too big, not text, or not downloadable]`,
+    );
+  }
+  if (request.filesOff) {
+    notes.push(
+      `[${request.filesOff} file(s) attached, but reading code files is switched off on this server]`,
+    );
+  }
   const shown = request.images?.length ?? 0;
   if (shown > 0) notes.push(`[the message has ${shown} picture${shown === 1 ? "" : "s"}]`);
   if (request.imagesFailed) notes.push(`[${request.imagesFailed} picture(s) could not be loaded]`);
@@ -76,7 +99,7 @@ function turnFor(request: AiChatRequest): MemoryTurn {
   const text = request.replyTo
     ? `(replying to ${request.replyTo.name}: "${request.replyTo.text}")\n${request.text}`
     : request.text;
-  return userTurn(request.userName, `${text}${pictureNotes(request)}`, request.userId);
+  return userTurn(request.userName, `${text}${attachmentNotes(request)}`, request.userId);
 }
 
 /** The other people in the recent conversation, newest first, whose notes may help. */
@@ -132,7 +155,12 @@ export async function chat(request: AiChatRequest): Promise<AiChatResult> {
     const taken = await takeUserSlot(guildId, userId, limits);
     if ("refusal" in taken) return { ok: false, reason: "rate_limited", refusal: taken.refusal };
 
-    const { short_term: shortTerm, long_term: longTerm, images: imagesOn } = settings.options;
+    const {
+      short_term: shortTerm,
+      long_term: longTerm,
+      images: imagesOn,
+      code: codeOn,
+    } = settings.options;
 
     const recent = shortTerm ? await loadMemory(channelId) : [];
 
@@ -146,6 +174,7 @@ export async function chat(request: AiChatRequest): Promise<AiChatResult> {
     }
 
     const images = imagesOn ? (request.images ?? []) : [];
+    const files = codeOn ? (request.files ?? []) : [];
     const system = buildSystemPrompt({
       guildName: request.guildName,
       channelName: request.channelName,
@@ -155,9 +184,12 @@ export async function chat(request: AiChatRequest): Promise<AiChatResult> {
       recalled,
       speakerName: request.userName,
       hasImages: images.length > 0,
+      hasFiles: files.length > 0,
     });
-    const userMessage = turnFor({ ...request, images });
-    const turns = [...recent, { ...userMessage, images }];
+    const userMessage = turnFor({ ...request, images, files });
+    // The files travel with this message only: they are not part of what the channel remembers.
+    const turns = [...recent, { ...userMessage, images, extra: formatCodeFiles(files) }];
+    const generateOptions = files.length > 0 ? { maxOutputTokens: AI_MAX_OUTPUT_TOKENS_CODE } : {};
 
     let failure: "quota" | "unavailable" = "quota";
     let reachedModel = false;
@@ -167,7 +199,7 @@ export async function chat(request: AiChatRequest): Promise<AiChatResult> {
       if (!slot) continue;
 
       try {
-        const result = await generate(model, system, turns);
+        const result = await generate(model, system, turns, generateOptions);
         // The markers are taken out of every answer, whether or not this server keeps notes.
         const markers = extractMarkers(result.text);
         const text = sanitizeReply(markers.text);

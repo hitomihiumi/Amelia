@@ -45,6 +45,10 @@ out personally.
 | `AI_MODEL_RPD` | `14400` | Requests per day per model, used until the admin panel has saved its own. |
 | `AI_MODEL_TPM` | `15000` | Tokens per minute per model, used until the admin panel has saved its own. |
 | `AI_MAX_OUTPUT_TOKENS` | `700` | Longest answer, in tokens. |
+| `AI_MAX_FILES` | `3` | Code files read per message. |
+| `AI_MAX_FILE_BYTES` | `204800` | Largest single code file, in bytes. |
+| `AI_MAX_CODE_CHARS` | `30000` | Characters of code sent per message, all files together. |
+| `AI_MAX_OUTPUT_TOKENS_CODE` | `1800` | Longest answer when files are attached, in tokens. |
 | `AI_MAX_IMAGES` | `3` | Pictures looked at per message. |
 | `AI_MAX_IMAGE_BYTES` | `4194304` | Largest single picture, in bytes. |
 | `AI_REQUEST_TIMEOUT_MS` | `45000` | How long to wait for the API. |
@@ -138,8 +142,8 @@ Dashboard → admin panel → **AI & premium** (visible to the bot administrator
 
 ## Memory
 
-The bot has two kinds of memory. A server can switch each of them (and the pictures below) on or off
-in `/setting ai` or in the dashboard; all three are on by default.
+The bot has two kinds of memory. A server can switch each of them (and pictures and code files below)
+on or off in `/setting ai` or in the dashboard; all are on by default.
 
 ### Short-term memory
 
@@ -192,12 +196,44 @@ replies to (so "what is this?" under someone's picture works). `/ai ask` has an 
 - If a model refuses pictures the bot asks again without them and says so in the answer, and
   remembers that for the model. If looking at pictures is switched off the bot says that instead.
 
+## Code files
+
+The bot can read code and text files attached to a message, to explain or review them: "what does this
+do?", "find the bug", "is this safe?". It reads the files of the message and of the message it replies
+to, and `/ai ask` has a `file` option. A file without a word is answered when it is addressed to the bot
+(mention, reply, `/ai ask`), not in a chat channel.
+
+- **Which files.** By name: the usual source and config extensions (JavaScript, TypeScript, Python,
+  Java, Kotlin, C, C++, C#, Go, Rust, Ruby, PHP, Swift, shell, SQL, HTML, CSS, JSON, YAML, TOML, XML,
+  Markdown, plain text, diffs and many more) and files like `Dockerfile` and `Makefile`. Archives and
+  binaries are not read, and neither are files that exist to hold secrets: `.env` (but not
+  `.env.example`), `*.pem`, `*.key`, `id_rsa` and similar.
+- **Limits.** Up to **3 files** of 200 KB each (`AI_MAX_FILES`, `AI_MAX_FILE_BYTES`), and **30,000
+  characters** of code per message in total (`AI_MAX_CODE_CHARS`, about 8,000 tokens); the rest is cut at
+  a line and the answer says it only saw the start. Lines over 400 characters are cut. Files must be UTF-8
+  text: a file with NUL bytes or another encoding is skipped.
+- **Where they come from.** Only Discord's own CDN over HTTPS, without redirects, like pictures.
+- **Secrets are blanked out before anything leaves the bot.** Private key blocks, Discord, GitHub, AWS,
+  Google, Slack and `sk-` style keys, JWTs, `password = "…"` style assignments and the password in a
+  `postgres://user:password@host` URL become `[redacted]`. This is a precaution, not a guarantee: a secret
+  in an unusual shape still goes through, so keep real credentials out of what you post.
+- **Files are data, not instructions.** They go into the prompt in a marked block with line numbers, and
+  the model is told that text in a file never changes its rules. An answer points at `file:line` and shows
+  fixes as small code blocks. The bot does not run the code and says so.
+- **Not kept.** The contents are sent with that one message only. Short-term memory keeps a note that a
+  file was shared, and the model is told never to remember anything from a file.
+- **Answers are longer.** A review gets up to 1,800 tokens (`AI_MAX_OUTPUT_TOKENS_CODE`) and up to four
+  Discord messages instead of two.
+- It can be switched off per server (*Code files* in `/setting ai` and the dashboard). The files go to
+  Google's Gemini API with the message, like everything else the bot is asked about, so do not enable it
+  for private code.
+
 ## Commands
 
 | Command | Who | |
 | --- | --- | --- |
-| `/setting ai` | Administrators | Turn the chat on or off, model, chat and ignored channels, personality, limits, memory and picture switches, forget all notes. |
-| `/ai ask <message> [image]` | Everyone | Talk to the bot with a command, optionally with a picture. |
+| `/setting ai` | Administrators | Turn the chat on or off, model, chat and ignored channels, personality, limits, memory, picture and code file switches, forget all notes. |
+| `/ai ask <message> [image] [file]` | Everyone | Talk to the bot with a command, optionally with a picture or a code file. |
 | `/ai memory` | Everyone | See what the bot remembers about you, delete one note or all. |
 | `/ai usage` | Everyone | Own usage of the limits. |
 | `/ai reset` | Manage Messages | Make the bot forget the conversation in the channel. |
@@ -216,4 +252,6 @@ replies to (so "what is this?" under someone's picture works). `/ai ask` has an 
 | `src/helpers/ai/longTerm.ts` | Long-term notes about members (database). |
 | `src/helpers/ai/memoryText.ts` | Memory markers, what is refused, note similarity. |
 | `src/helpers/ai/images.ts` | Picking and downloading pictures. |
+| `src/helpers/ai/files.ts` | Code files: recognising, downloading, redacting secrets, numbering lines. |
+| `src/helpers/ai/attachments.ts` | Sorts the attachments of a message into pictures and files. |
 | `src/types/helpers/AiSchema.ts` | Settings type, mirrored in the dashboard (`src/lib/db/types/Ai.ts`). |

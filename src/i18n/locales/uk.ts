@@ -2283,6 +2283,7 @@ export const uk: TranslationSchema = {
         short_term: "Короткочасна пам'ять",
         long_term: "Довготривала пам'ять",
         images: "Картинки",
+        code: "Файли з кодом",
       },
       memory_count: "Нотаток про учасників: {0}",
       enabled: "✅ Увімкнено",

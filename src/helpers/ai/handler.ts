@@ -11,12 +11,14 @@ import { chat, type AiChatResult } from "./chat";
 import { isAiConfigured } from "./config";
 import { sanitizeReply, splitReply } from "./format";
 import { hasAiAccess } from "./globalConfig";
-import { type AttachmentInfo, fetchImages, pickCandidates } from "./images";
+import { prepareAttachments, usableAttachments } from "./attachments";
+import type { AttachmentInfo } from "./images";
 import { shouldNotify } from "./limiter";
 import { clip, isAiReply, markAiReply } from "./memory";
 
-/** At most this many messages for one answer; the rest is cut. */
+/** At most this many messages for one answer; the rest is cut. A review of code gets more room. */
 const MAX_REPLY_MESSAGES = 2;
+const MAX_REPLY_MESSAGES_CODE = 4;
 const REPLY_CONTEXT_CHARS = 300;
 
 /** Settings of a server with the defaults filled in, whatever the database holds. */
@@ -82,7 +84,7 @@ async function replyContext(message: Message) {
     if (!text && attachments.length === 0) return null;
     return {
       name: target.member?.displayName ?? target.author.displayName,
-      text: text ? clip(text, REPLY_CONTEXT_CHARS) : "(a picture)",
+      text: text ? clip(text, REPLY_CONTEXT_CHARS) : "(an attachment)",
       attachments,
     };
   } catch {
@@ -90,17 +92,15 @@ async function replyContext(message: Message) {
   }
 }
 
-/** The attachments of a message that could be pictures. */
+/** The attachments of a message. */
 function attachmentsOf(message: Message): AttachmentInfo[] {
   return [...message.attachments.values()].map((attachment) => ({
     url: attachment.url,
     contentType: attachment.contentType,
     size: attachment.size,
+    name: attachment.name,
   }));
 }
-
-const looksLikePicture = (attachment: AttachmentInfo) =>
-  !attachment.contentType || attachment.contentType.startsWith("image/");
 
 async function react(message: Message, emoji: string) {
   await message.react(emoji).catch(() => null);
@@ -141,12 +141,13 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
     message.channel,
   ).trim();
 
-  // A picture without a word is answered when it is addressed to the bot. In a chat channel it
-  // is most likely a meme meant for the people there, and every answer costs quota.
-  const ownPictures = attachmentsOf(message).filter(looksLikePicture);
+  // A picture or file without a word is answered when it is addressed to the bot. In a chat
+  // channel it is most likely a meme or a file meant for the people there, and every answer
+  // costs quota.
+  const ownAttachments = usableAttachments(attachmentsOf(message));
   if (!text) {
     const addressed = mentioned || repliesToAi;
-    if (ownPictures.length === 0 || !addressed) return false;
+    if (ownAttachments.length === 0 || !addressed) return false;
   }
 
   const me = message.guild.members.me;
@@ -168,23 +169,16 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
   const typing = setInterval(sendTyping, 8000);
 
   let result: AiChatResult;
+  let hadFiles = false;
   try {
     const replyTo = await replyContext(message);
 
-    // Pictures of the message, and of the one it replies to ("what is this?" under a picture).
-    const wanted = [...ownPictures, ...(replyTo?.attachments ?? []).filter(looksLikePicture)];
-    let images: Awaited<ReturnType<typeof fetchImages>>["images"] = [];
-    let imagesFailed = 0;
-    let imagesOff = 0;
-    if (wanted.length > 0) {
-      if (settings.options.images) {
-        const fetched = await fetchImages(wanted);
-        images = fetched.images;
-        imagesFailed = fetched.skipped + Math.max(0, wanted.length - pickCandidates(wanted).length);
-      } else {
-        imagesOff = wanted.length;
-      }
-    }
+    // Pictures and files of the message, and of the one it replies to ("review this" under a file).
+    const prepared = await prepareAttachments(
+      [...ownAttachments, ...usableAttachments(replyTo?.attachments ?? [])],
+      settings.options,
+    );
+    hadFiles = prepared.files.length > 0;
 
     result = await chat({
       guildId: message.guild.id,
@@ -195,9 +189,7 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
       userName: message.member.displayName,
       text,
       replyTo: replyTo ? { name: replyTo.name, text: replyTo.text } : null,
-      images,
-      imagesFailed,
-      imagesOff,
+      ...prepared,
       lang,
       settings,
     });
@@ -221,7 +213,10 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
     return true;
   }
 
-  const chunks = splitReply(sanitizeReply(result.text)).slice(0, MAX_REPLY_MESSAGES);
+  const chunks = splitReply(sanitizeReply(result.text)).slice(
+    0,
+    hadFiles ? MAX_REPLY_MESSAGES_CODE : MAX_REPLY_MESSAGES,
+  );
   const options = { allowedMentions: { parse: [], repliedUser: false } } as const;
 
   const send = (content: string): Promise<Message | null> =>

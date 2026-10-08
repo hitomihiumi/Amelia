@@ -2279,6 +2279,7 @@ export const en: TranslationSchema = {
         short_term: "Short-term memory",
         long_term: "Long-term memory",
         images: "Pictures",
+        code: "Code files",
       },
       memory_count: "Notes kept about members: {0}",
       enabled: "✅ Enabled",

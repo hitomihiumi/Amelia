@@ -2277,6 +2277,7 @@ export const ru: TranslationSchema = {
         short_term: "Краткосрочная память",
         long_term: "Долговременная память",
         images: "Картинки",
+        code: "Файлы с кодом",
       },
       memory_count: "Заметок об участниках: {0}",
       enabled: "✅ Включено",

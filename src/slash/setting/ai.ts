@@ -45,7 +45,12 @@ const CHANNEL_TYPES = [
 ];
 
 const LIMIT_FIELDS = ["user_per_minute", "user_per_day", "guild_per_day"] as const;
-const OPTION_KEYS = ["short_term", "long_term", "images"] as const satisfies (keyof AiOptions)[];
+const OPTION_KEYS = [
+  "short_term",
+  "long_term",
+  "images",
+  "code",
+] as const satisfies (keyof AiOptions)[];
 
 function channelList(client: Client, lang: string, ids: string[]): string {
   return ids.length > 0

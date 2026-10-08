@@ -2201,6 +2201,7 @@ export interface TranslationSchema {
         short_term: string;
         long_term: string;
         images: string;
+        code: string;
       };
       memory_count: string;
       enabled: string;

@@ -35,16 +35,28 @@ export interface AiOptions {
   long_term: boolean;
   /** Look at images attached to messages. */
   images: boolean;
+  /** Read code and text files attached to messages, to explain or review them. */
+  code: boolean;
 }
 
-export const DEFAULT_AI_OPTIONS: AiOptions = { short_term: true, long_term: true, images: true };
+export const DEFAULT_AI_OPTIONS: AiOptions = {
+  short_term: true,
+  long_term: true,
+  images: true,
+  code: true,
+};
 
 /** Read stored options, with anything missing or not a boolean taken from the defaults. */
 export function normalizeAiOptions(raw: unknown): AiOptions {
   const source = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
   const pick = (key: keyof AiOptions) =>
     typeof source[key] === "boolean" ? (source[key] as boolean) : DEFAULT_AI_OPTIONS[key];
-  return { short_term: pick("short_term"), long_term: pick("long_term"), images: pick("images") };
+  return {
+    short_term: pick("short_term"),
+    long_term: pick("long_term"),
+    images: pick("images"),
+    code: pick("code"),
+  };
 }
 
 /** Most things the AI keeps about one member of a server; the least useful go first. */
