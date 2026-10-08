@@ -1,16 +1,26 @@
 import axios, { AxiosError } from "axios";
 import { AI_API_BASE, AI_MAX_OUTPUT_TOKENS, AI_REQUEST_TIMEOUT_MS, type AiModel } from "./config";
 
+/** An image sent along with a turn, base64 encoded as the API wants it. */
+export interface AiImage {
+  mimeType: string;
+  data: string;
+}
+
 /** One turn of the conversation sent to the model. */
 export interface AiTurn {
   role: "user" | "model";
   text: string;
+  /** Pictures of the turn. Only the newest user turn carries any. */
+  images?: AiImage[];
 }
 
 export interface GenerateResult {
   text: string;
   /** Tokens the request used, prompt and answer together. */
   totalTokens: number;
+  /** The model could not take the images, so it answered without seeing them. */
+  imagesDropped: boolean;
 }
 
 export type GeminiFailure =
@@ -35,7 +45,13 @@ const quirks = {
   noThinking: new Set<string>(),
   /** The model rejected `systemInstruction`; the prompt goes into the first turn instead. */
   noSystemInstruction: new Set<string>(),
+  /** The model rejected pictures; they are left out and the question says so. */
+  noImages: new Set<string>(),
 };
+
+/** Added to the question when the pictures had to be left out, so the answer does not pretend. */
+const IMAGES_DROPPED_NOTE =
+  "\n(The image or images of this message could not be processed and you cannot see them. Say so instead of guessing what they show.)";
 
 /**
  * The API wants the conversation to start with the user and to alternate.
@@ -48,6 +64,7 @@ export function normalizeTurns(turns: AiTurn[]): AiTurn[] {
     const last = merged[merged.length - 1];
     if (last && last.role === turn.role) {
       last.text += `\n${turn.text}`;
+      if (turn.images?.length) last.images = [...(last.images ?? []), ...turn.images];
     } else {
       merged.push({ ...turn });
     }
@@ -58,13 +75,28 @@ export function normalizeTurns(turns: AiTurn[]): AiTurn[] {
 
 function buildBody(model: AiModel, system: string, turns: AiTurn[], useThinking: boolean) {
   const useSystem = !quirks.noSystemInstruction.has(model.id);
-  const contents = normalizeTurns(turns).map((turn) => ({
-    role: turn.role,
-    parts: [{ text: turn.text }],
-  }));
+  const dropImages = quirks.noImages.has(model.id);
+  const normalized = normalizeTurns(turns);
+  const hadImages = normalized.some((turn) => turn.images?.length);
+
+  const contents = normalized.map((turn, index) => {
+    const note =
+      dropImages && hadImages && index === normalized.length - 1 ? IMAGES_DROPPED_NOTE : "";
+    return {
+      role: turn.role,
+      parts: [
+        { text: turn.text + note },
+        ...(dropImages
+          ? []
+          : (turn.images ?? []).map((image) => ({
+              inlineData: { mimeType: image.mimeType, data: image.data },
+            }))),
+      ] as Record<string, unknown>[],
+    };
+  });
 
   if (!useSystem && contents.length > 0) {
-    contents[0].parts[0].text = `${system}\n\n---\n\n${contents[0].parts[0].text}`;
+    contents[0].parts[0].text = `${system}\n\n---\n\n${String(contents[0].parts[0].text)}`;
   }
 
   const generationConfig: Record<string, unknown> = {
@@ -113,8 +145,8 @@ export async function generate(
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new GeminiError({ kind: "fatal", status: null, message: "No API key" });
 
-  // At most two retries: one when thinking is rejected, one when the system instruction is.
-  for (let attempt = 0; attempt < 3; attempt++) {
+  // A few retries, one for each thing a model may reject: thinking, a system instruction, images.
+  for (let attempt = 0; attempt < 4; attempt++) {
     const body = buildBody(model, system, turns, !quirks.noThinking.has(model.id));
 
     try {
@@ -134,7 +166,11 @@ export async function generate(
 
       if (!text) throw new GeminiError({ kind: "blocked" });
 
-      return { text, totalTokens: Number(data?.usageMetadata?.totalTokenCount ?? 0) };
+      return {
+        text,
+        totalTokens: Number(data?.usageMetadata?.totalTokenCount ?? 0),
+        imagesDropped: quirks.noImages.has(model.id) && turns.some((turn) => turn.images?.length),
+      };
     } catch (error) {
       if (error instanceof GeminiError) throw error;
       if (!axios.isAxiosError(error)) throw error;
@@ -156,6 +192,14 @@ export async function generate(
           !quirks.noSystemInstruction.has(model.id)
         ) {
           quirks.noSystemInstruction.add(model.id);
+          continue;
+        }
+        if (
+          /image|mime|inline[_ ]?data|media|vision|multimodal/i.test(message) &&
+          turns.some((turn) => turn.images?.length) &&
+          !quirks.noImages.has(model.id)
+        ) {
+          quirks.noImages.add(model.id);
           continue;
         }
       }

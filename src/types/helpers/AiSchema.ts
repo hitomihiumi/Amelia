@@ -27,6 +27,31 @@ export interface AiLimits {
   guild_per_day: number;
 }
 
+/** What the AI may do beyond answering the message in front of it. */
+export interface AiOptions {
+  /** Keep the last exchanges of a channel for a while, so replies follow the conversation. */
+  short_term: boolean;
+  /** Remember lasting things members say about themselves, across days. */
+  long_term: boolean;
+  /** Look at images attached to messages. */
+  images: boolean;
+}
+
+export const DEFAULT_AI_OPTIONS: AiOptions = { short_term: true, long_term: true, images: true };
+
+/** Read stored options, with anything missing or not a boolean taken from the defaults. */
+export function normalizeAiOptions(raw: unknown): AiOptions {
+  const source = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const pick = (key: keyof AiOptions) =>
+    typeof source[key] === "boolean" ? (source[key] as boolean) : DEFAULT_AI_OPTIONS[key];
+  return { short_term: pick("short_term"), long_term: pick("long_term"), images: pick("images") };
+}
+
+/** Most things the AI keeps about one member of a server; the least useful go first. */
+export const AI_MEMORY_MAX_PER_USER = 30;
+/** Longest single memory, in characters. */
+export const AI_MEMORY_MAX_LENGTH = 160;
+
 export interface AiSettings {
   enabled: boolean;
   /** Chat channels: the bot answers every message there. Elsewhere it answers mentions and replies. */
@@ -37,6 +62,7 @@ export interface AiSettings {
   /** Extra instructions of the server, appended to the bot's own personality. */
   persona: string | null;
   limits: AiLimits;
+  options: AiOptions;
 }
 
 export const AI_PERSONA_MAX_LENGTH = 1500;
@@ -54,6 +80,7 @@ export const DEFAULT_AI_SETTINGS: AiSettings = {
   model: "auto",
   persona: null,
   limits: DEFAULT_AI_LIMITS,
+  options: DEFAULT_AI_OPTIONS,
 };
 
 // ── Premium ─────────────────────────────────────────────────────────────────────

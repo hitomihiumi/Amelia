@@ -1,5 +1,11 @@
 import { SlashCommand, ModerationCaseType } from "../../types/helpers";
-import {Client, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, MessageFlagsBitField} from "discord.js";
+import {
+  Client,
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessageFlags,
+  MessageFlagsBitField,
+} from "discord.js";
 import { defaultPermissions } from "../../helpers";
 import { prepareModeration } from "../../helpers/moderation";
 import { t } from "../../i18n/helpers";

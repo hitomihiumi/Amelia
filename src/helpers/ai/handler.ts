@@ -1,11 +1,17 @@
 import { cleanContent, type Client, type Message, PermissionFlagsBits } from "discord.js";
-import { DEFAULT_AI_LIMITS, type AiSettings, DEFAULT_AI_SETTINGS } from "../../types/helpers";
+import {
+  DEFAULT_AI_LIMITS,
+  type AiSettings,
+  DEFAULT_AI_SETTINGS,
+  normalizeAiOptions,
+} from "../../types/helpers";
 import { t } from "../../i18n/helpers";
 import { Guild } from "../Guild";
 import { chat, type AiChatResult } from "./chat";
 import { isAiConfigured } from "./config";
 import { sanitizeReply, splitReply } from "./format";
 import { hasAiAccess } from "./globalConfig";
+import { type AttachmentInfo, fetchImages, pickCandidates } from "./images";
 import { shouldNotify } from "./limiter";
 import { clip, isAiReply, markAiReply } from "./memory";
 
@@ -22,6 +28,7 @@ export async function loadAiSettings(guild: Guild): Promise<AiSettings> {
     channels: raw.channels ?? [],
     ignore_channels: raw.ignore_channels ?? [],
     limits: { ...DEFAULT_AI_LIMITS, ...(raw.limits ?? {}) },
+    options: normalizeAiOptions(raw.options),
   };
 }
 
@@ -71,15 +78,29 @@ async function replyContext(message: Message) {
   try {
     const target = await message.fetchReference();
     const text = cleanContent(target.content, message.channel).trim();
-    if (!text) return null;
+    const attachments = attachmentsOf(target);
+    if (!text && attachments.length === 0) return null;
     return {
       name: target.member?.displayName ?? target.author.displayName,
-      text: clip(text, REPLY_CONTEXT_CHARS),
+      text: text ? clip(text, REPLY_CONTEXT_CHARS) : "(a picture)",
+      attachments,
     };
   } catch {
     return null;
   }
 }
+
+/** The attachments of a message that could be pictures. */
+function attachmentsOf(message: Message): AttachmentInfo[] {
+  return [...message.attachments.values()].map((attachment) => ({
+    url: attachment.url,
+    contentType: attachment.contentType,
+    size: attachment.size,
+  }));
+}
+
+const looksLikePicture = (attachment: AttachmentInfo) =>
+  !attachment.contentType || attachment.contentType.startsWith("image/");
 
 async function react(message: Message, emoji: string) {
   await message.react(emoji).catch(() => null);
@@ -119,7 +140,14 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
     message.content.replace(new RegExp(`<@!?${client.user.id}>`, "g"), ""),
     message.channel,
   ).trim();
-  if (!text) return false;
+
+  // A picture without a word is answered when it is addressed to the bot. In a chat channel it
+  // is most likely a meme meant for the people there, and every answer costs quota.
+  const ownPictures = attachmentsOf(message).filter(looksLikePicture);
+  if (!text) {
+    const addressed = mentioned || repliesToAi;
+    if (ownPictures.length === 0 || !addressed) return false;
+  }
 
   const me = message.guild.members.me;
   const channel = message.channel;
@@ -141,6 +169,23 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
 
   let result: AiChatResult;
   try {
+    const replyTo = await replyContext(message);
+
+    // Pictures of the message, and of the one it replies to ("what is this?" under a picture).
+    const wanted = [...ownPictures, ...(replyTo?.attachments ?? []).filter(looksLikePicture)];
+    let images: Awaited<ReturnType<typeof fetchImages>>["images"] = [];
+    let imagesFailed = 0;
+    let imagesOff = 0;
+    if (wanted.length > 0) {
+      if (settings.options.images) {
+        const fetched = await fetchImages(wanted);
+        images = fetched.images;
+        imagesFailed = fetched.skipped + Math.max(0, wanted.length - pickCandidates(wanted).length);
+      } else {
+        imagesOff = wanted.length;
+      }
+    }
+
     result = await chat({
       guildId: message.guild.id,
       guildName: message.guild.name,
@@ -149,7 +194,10 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
       userId: message.author.id,
       userName: message.member.displayName,
       text,
-      replyTo: await replyContext(message),
+      replyTo: replyTo ? { name: replyTo.name, text: replyTo.text } : null,
+      images,
+      imagesFailed,
+      imagesOff,
       lang,
       settings,
     });
@@ -191,6 +239,9 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
     const sent = index === 0 ? await sendFirst(chunk) : await send(chunk);
     if (sent) await markAiReply(sent.id);
   }
+
+  // Tell the member when something about them was kept, so a note never appears unseen.
+  if (result.remembered > 0) await react(message, "🧠");
 
   return true;
 }

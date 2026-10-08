@@ -305,6 +305,9 @@ export const GuildPathMap: PathMap = {
   "ai.limits": {
     field: "aiLimits",
   },
+  "ai.options": {
+    field: "aiOptions",
+  },
   "premium.enabled": {
     field: "premium",
   },
@@ -467,7 +470,7 @@ export const GuildPathMap: PathMap = {
   },
   ai: {
     field: "",
-    children: ["channels", "enabled", "ignore_channels", "limits", "model", "persona"],
+    children: ["channels", "enabled", "ignore_channels", "limits", "model", "options", "persona"],
   },
   premium: {
     field: "",
@@ -587,6 +590,7 @@ export const GuildFieldMap: Record<string, string> = {
   "ai.model": "aiModel",
   "ai.persona": "aiPersona",
   "ai.limits": "aiLimits",
+  "ai.options": "aiOptions",
   "premium.enabled": "premium",
   "premium.until": "premiumUntil",
   "premium.note": "premiumNote",

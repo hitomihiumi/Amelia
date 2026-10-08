@@ -5,6 +5,7 @@ import { t } from "../../i18n/helpers";
 import {
   chat,
   describeFailure,
+  fetchImages,
   hasAiAccess,
   isAiConfigured,
   loadAiSettings,
@@ -29,6 +30,16 @@ module.exports = {
       local: {
         ru: "Что ты хочешь ей сказать?",
         uk: "Що ти хочеш їй сказати?",
+      },
+    },
+    {
+      name: "image",
+      description: "A picture for her to look at",
+      required: false,
+      type: "ATTACHMENT",
+      local: {
+        ru: "Картинка, на которую ей стоит посмотреть",
+        uk: "Картинка, на яку їй варто подивитися",
       },
     },
   ],
@@ -68,6 +79,23 @@ module.exports = {
     const member = interaction.guild.members.cache.get(interaction.user.id);
     const text = interaction.options.getString("message", true);
 
+    // A picture given to the command; the server may have looking at pictures switched off.
+    const attached = interaction.options.getAttachment("image");
+    let images: Awaited<ReturnType<typeof fetchImages>>["images"] = [];
+    let imagesFailed = 0;
+    let imagesOff = 0;
+    if (attached) {
+      if (settings.options.images) {
+        const fetched = await fetchImages([
+          { url: attached.url, contentType: attached.contentType, size: attached.size },
+        ]);
+        images = fetched.images;
+        imagesFailed = images.length === 0 ? 1 : 0;
+      } else {
+        imagesOff = 1;
+      }
+    }
+
     const result = await chat({
       guildId: interaction.guild.id,
       guildName: interaction.guild.name,
@@ -76,6 +104,9 @@ module.exports = {
       userId: interaction.user.id,
       userName: member?.displayName ?? interaction.user.displayName,
       text,
+      images,
+      imagesFailed,
+      imagesOff,
       lang,
       settings,
     });

@@ -37,6 +37,7 @@ export interface SlashCommand {
     | _options.BooleanOption
     | _options.RoleOption
     | _options.UserOption
+    | _options.AttachmentOption
   >;
   context?: InteractionContextType[];
   run: (client: Client, interaction: ChatInputCommandInteraction) => void;

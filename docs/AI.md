@@ -45,6 +45,8 @@ out personally.
 | `AI_MODEL_RPD` | `14400` | Requests per day per model, used until the admin panel has saved its own. |
 | `AI_MODEL_TPM` | `15000` | Tokens per minute per model, used until the admin panel has saved its own. |
 | `AI_MAX_OUTPUT_TOKENS` | `700` | Longest answer, in tokens. |
+| `AI_MAX_IMAGES` | `3` | Pictures looked at per message. |
+| `AI_MAX_IMAGE_BYTES` | `4194304` | Largest single picture, in bytes. |
 | `AI_REQUEST_TIMEOUT_MS` | `45000` | How long to wait for the API. |
 | `GEMINI_API_BASE` | Google's `v1beta` endpoint | Only for tests or a proxy. |
 
@@ -136,24 +138,67 @@ Dashboard → admin panel → **AI & premium** (visible to the bot administrator
 
 ## Memory
 
-The bot remembers the last six exchanges **per channel** for 30 minutes, so replies can refer to
-what was said a moment ago. It lives in Redis only and expires on its own; `/ai reset` (needs
-*Manage Messages*) clears it early. When a message replies to another message, that message is
-included as context.
+The bot has two kinds of memory. A server can switch each of them (and the pictures below) on or off
+in `/setting ai` or in the dashboard; all three are on by default.
 
-## Privacy
+### Short-term memory
 
-Messages addressed to the bot are sent to Google's Gemini API. The free tier of the Gemini API
-may use submitted content to improve Google's products, so make sure the community is fine with
-that before turning the AI on, and don't enable it where private conversations happen. The
-dashboard and `/setting ai` say this as well.
+The last six exchanges **per channel** for 30 minutes, so replies can refer to what was said a
+moment ago. It lives in Redis only, expires on its own and is never written to the database.
+`/ai reset` (needs *Manage Messages*) clears it early. When a message replies to another message,
+that message is included as context. With it switched off every message is answered on its own.
+
+### Long-term memory
+
+Lasting things members say **about themselves** (a name, what they play, their pets, what they
+study) are kept in the database, per server and member, and brought back in later conversations,
+days later. The model proposes them: at the end of an answer it may add `[[remember: …]]` or
+`[[forget: …]]`, and the bot takes those markers out before the message is shown, so no extra
+request is made and the per-minute quota is not touched.
+
+- **The member knows.** When something is stored the bot reacts to the message with 🧠.
+- **The member controls it.** `/ai memory` lists their notes and deletes one or all. "Forget that I
+  like cats" works in chat too. Notes of a member are deleted when they leave the server, and all
+  notes of a server with its *Forget all notes* button (`/setting ai` and the dashboard).
+- **What is refused**, whatever the model decided: contact details, links, number sequences like
+  phone or card numbers, key-like strings, mentions, words like *password* or *token*, and anything
+  that reads as an instruction to the bot ("from now on always …"). The model is also told to keep
+  nothing about other people, health, money, politics or anything sexual.
+- **Limits:** 160 characters per note, 30 notes per member (the note used least, and longest ago,
+  makes room), 3 notes taken from one answer. A note that says the same as an old one replaces it.
+- **How it is used:** the notes of the person writing and up to three other people from the recent
+  conversation (10 and 3 notes each) go into the prompt, labelled as unverified things members said
+  about themselves, never as instructions.
+
+Storage is the `AiMemory` table (`guildId`, `userId`, `content`, `uses`, timestamps), deleted with
+the server.
+
+## Pictures
+
+The bot can look at images: PNG, JPEG and WebP attachments of the message, and of the message it
+replies to (so "what is this?" under someone's picture works). `/ai ask` has an `image` option too.
+
+- Up to **3 pictures** per message and 4 MB each (`AI_MAX_IMAGES`, `AI_MAX_IMAGE_BYTES`). Pictures
+  count toward the model's token budget but are one request like any other.
+- They are downloaded only from Discord's own CDN (`*.discordapp.com`, `*.discordapp.net`), over
+  HTTPS, without following redirects, and the format is checked by the file's first bytes, not by
+  what it claims to be.
+- A picture without a word is answered when it is addressed to the bot (mention, reply, `/ai ask`).
+  In a chat channel it is ignored, as it is most likely meant for the people there.
+- Pictures are sent with the newest message only and are not stored. Short-term memory keeps a note
+  that a picture was shared, not the picture.
+- The bot is told not to name real people from their faces and not to read personal data out of a
+  picture.
+- If a model refuses pictures the bot asks again without them and says so in the answer, and
+  remembers that for the model. If looking at pictures is switched off the bot says that instead.
 
 ## Commands
 
 | Command | Who | |
 | --- | --- | --- |
-| `/setting ai` | Administrators | Turn the chat on or off, model, chat and ignored channels, personality, limits. |
-| `/ai ask <message>` | Everyone | Talk to the bot with a command. |
+| `/setting ai` | Administrators | Turn the chat on or off, model, chat and ignored channels, personality, limits, memory and picture switches, forget all notes. |
+| `/ai ask <message> [image]` | Everyone | Talk to the bot with a command, optionally with a picture. |
+| `/ai memory` | Everyone | See what the bot remembers about you, delete one note or all. |
 | `/ai usage` | Everyone | Own usage of the limits. |
 | `/ai reset` | Manage Messages | Make the bot forget the conversation in the channel. |
 
@@ -167,5 +212,8 @@ dashboard and `/setting ai` say this as well.
 | `src/helpers/ai/globalConfig.ts` | Quota and ceilings from the admin panel, premium lookup. |
 | `src/helpers/ai/gemini.ts` | Gemini API client. |
 | `src/helpers/ai/persona.ts` | Personality and rules. |
-| `src/helpers/ai/memory.ts` | Conversation memory. |
+| `src/helpers/ai/memory.ts` | Short-term memory of a channel. |
+| `src/helpers/ai/longTerm.ts` | Long-term notes about members (database). |
+| `src/helpers/ai/memoryText.ts` | Memory markers, what is refused, note similarity. |
+| `src/helpers/ai/images.ts` | Picking and downloading pictures. |
 | `src/types/helpers/AiSchema.ts` | Settings type, mirrored in the dashboard (`src/lib/db/types/Ai.ts`). |

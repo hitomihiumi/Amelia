@@ -1,7 +1,7 @@
 import { Level, ProfileCardDisplayOptions, SlashCommand } from "../../types/helpers";
 import { AttachmentBuilder, PermissionsBitField } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
-import {t, tObject} from "../../i18n/helpers";
+import { t, tObject } from "../../i18n/helpers";
 import { ProfileCard } from "../../helpers/canvas/ProfileCard";
 
 module.exports = {
@@ -42,16 +42,19 @@ module.exports = {
 
     const displayOptions = (await member.get("custom.profile")) as ProfileCardDisplayOptions;
 
-    const profile = new ProfileCard({
-      avatar: user.displayAvatarURL({ size: 512, extension: "jpg" }),
-      username: user.username,
-      globalName: user.globalName || user.username,
-      data: {
-        ...levelData,
-        rank: 1,
+    const profile = new ProfileCard(
+      {
+        avatar: user.displayAvatarURL({ size: 512, extension: "jpg" }),
+        username: user.username,
+        globalName: user.globalName || user.username,
+        data: {
+          ...levelData,
+          rank: 1,
+        },
+        displayOptions,
       },
-      displayOptions,
-    }, tObject(client, await guild.get(`settings.language`), "time_units"));
+      tObject(client, await guild.get(`settings.language`), "time_units"),
+    );
 
     const buffer = await profile.render();
     if (!buffer) {

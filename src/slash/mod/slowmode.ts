@@ -4,7 +4,9 @@ import {
   ChatInputCommandInteraction,
   ChannelType,
   PermissionsBitField,
-  TextChannel, MessageFlags, MessageFlagsBitField,
+  TextChannel,
+  MessageFlags,
+  MessageFlagsBitField,
 } from "discord.js";
 import { defaultPermissions } from "../../helpers";
 import {

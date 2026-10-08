@@ -8,3 +8,6 @@ export * from "./format";
 export * from "./globalConfig";
 export { GeminiError, normalizeTurns } from "./gemini";
 export type { AiTurn } from "./gemini";
+export * from "./images";
+export * from "./longTerm";
+export * from "./memoryText";
