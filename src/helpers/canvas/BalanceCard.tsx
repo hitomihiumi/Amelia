@@ -1,19 +1,16 @@
 /** @jsx createElement */
 import {
-  Exporter,
   Filters,
   FontWeight,
   ImageLayer,
   MorphLayer,
   Path2DLayer,
   TextLayer,
-  Scene,
-  Div,
+  Group,
   createElement,
 } from "@nmmty/lazycanvas";
 import { BalanceCardDisplayOptions } from "../../types/helpers";
-import { fontMap } from "../assetsMap";
-import { Path2D } from "@napi-rs/canvas";
+import { Path2D, createScene, renderScene } from "./scene";
 
 export class BalanceCard {
   data: BalanceCardOptions;
@@ -23,9 +20,7 @@ export class BalanceCard {
   }
 
   async render() {
-    const scene = new Scene(430, 270);
-
-    scene.lazyCanvas.manager.fonts.add(fontMap.wdxllubrifont);
+    const scene = createScene(430, 270);
 
     scene.load(
       <MorphLayer
@@ -44,7 +39,7 @@ export class BalanceCard {
         }}
         color={this.data.displayOptions.solid.bg_color}
       >
-        <Div
+        <Group
           layout={{
             position: "absolute",
             width: "100%",
@@ -192,9 +187,9 @@ export class BalanceCard {
             }}
             color={"#ffffff"}
           />
-        </Div>
+        </Group>
 
-        <Div
+        <Group
           layout={{
             flexDirection: "column",
             alignItems: "flex-start",
@@ -205,7 +200,7 @@ export class BalanceCard {
             gap: 30,
           }}
         >
-          <Div
+          <Group
             layout={{
               flexDirection: "column",
               position: "relative",
@@ -214,7 +209,7 @@ export class BalanceCard {
               gap: 20,
             }}
           >
-            <Div
+            <Group
               layout={{
                 flexDirection: "column",
                 position: "relative",
@@ -223,7 +218,7 @@ export class BalanceCard {
                 gap: 10,
               }}
             >
-              <Div
+              <Group
                 layout={{
                   flexDirection: "row",
                   position: "relative",
@@ -257,8 +252,8 @@ export class BalanceCard {
                     blur: 1,
                   }}
                 />
-              </Div>
-              <Div
+              </Group>
+              <Group
                 layout={{
                   flexDirection: "row",
                   position: "relative",
@@ -292,8 +287,8 @@ export class BalanceCard {
                     blur: 1,
                   }}
                 />
-              </Div>
-            </Div>
+              </Group>
+            </Group>
             <TextLayer
               text={this.data.displayOptions.number}
               font={{
@@ -308,7 +303,7 @@ export class BalanceCard {
                 blur: 4,
               }}
             />
-          </Div>
+          </Group>
           <TextLayer
             text={this.data.username.toUpperCase()}
             font={{
@@ -323,7 +318,7 @@ export class BalanceCard {
               blur: 4,
             }}
           />
-        </Div>
+        </Group>
 
         {/* Border Overlay */}
         <MorphLayer
@@ -337,7 +332,7 @@ export class BalanceCard {
       </MorphLayer>,
     );
 
-    return (await new Exporter(scene).export("buffer")) as Buffer;
+    return renderScene(scene);
   }
 }
 
