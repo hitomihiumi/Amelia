@@ -1,5 +1,6 @@
 import { SelectMenuCustom, SelectMenuOptionCustom, SCENARIO_LIMITS } from "../../types/helpers";
 import { StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "discord.js";
+import { substituteFitted, VariableContext } from "./substitute";
 
 export class CustomSelectMenu {
   public data: SelectMenuCustom;
@@ -9,13 +10,14 @@ export class CustomSelectMenu {
   }
 
   /**
-   * Build a StringSelectMenuBuilder from the stored data
+   * Build a StringSelectMenuBuilder from the stored data, with placeholders in the placeholder,
+   * option labels and option descriptions resolved
    */
-  getSelectMenu(): StringSelectMenuBuilder {
+  getSelectMenu(context?: VariableContext): StringSelectMenuBuilder {
     const menu = new StringSelectMenuBuilder().setCustomId(this.data.id);
 
     if (this.data.placeholder) {
-      menu.setPlaceholder(this.data.placeholder);
+      menu.setPlaceholder(substituteFitted(this.data.placeholder, 150, context));
     }
 
     if (this.data.minValues !== undefined) {
@@ -33,10 +35,12 @@ export class CustomSelectMenu {
     // Add options
     if (this.data.options.length > 0) {
       const options = this.data.options.map((opt) => {
-        const option = new StringSelectMenuOptionBuilder().setLabel(opt.label).setValue(opt.value);
+        const option = new StringSelectMenuOptionBuilder()
+          .setLabel(substituteFitted(opt.label, 100, context))
+          .setValue(opt.value);
 
         if (opt.description) {
-          option.setDescription(opt.description);
+          option.setDescription(substituteFitted(opt.description, 100, context));
         }
 
         if (opt.emoji) {

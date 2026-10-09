@@ -462,7 +462,7 @@ export class ScenarioRunner {
     const interaction = this.context.interaction;
 
     if ("showModal" in interaction) {
-      await interaction.showModal(modal.getModal());
+      await interaction.showModal(modal.getModal(this.toVariableContext()));
       return { success: true };
     }
 
@@ -729,7 +729,7 @@ export class ScenarioRunner {
           if (smData) {
             const customSelect = new CustomSelectMenu(smData);
             const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-              customSelect.getSelectMenu(),
+              customSelect.getSelectMenu(this.toVariableContext()),
             );
             components.push(row);
           }
@@ -748,7 +748,7 @@ export class ScenarioRunner {
               currentRow = new ActionRowBuilder<MessageActionRowComponentBuilder>();
             }
 
-            currentRow.addComponents(customButton.getButton());
+            currentRow.addComponents(customButton.getButton(this.toVariableContext()));
           }
         }
 

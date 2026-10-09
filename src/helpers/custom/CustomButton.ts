@@ -1,5 +1,6 @@
 import { ButtonCustom } from "../../types/helpers";
 import { ButtonBuilder, ButtonStyle } from "discord.js";
+import { substituteFitted, substituteVariables, VariableContext } from "./substitute";
 
 const STYLE_MAP: Record<ButtonCustom["style"], ButtonStyle> = {
   PRIMARY: ButtonStyle.Primary,
@@ -17,11 +18,11 @@ export class CustomButton {
   }
 
   /**
-   * Build a ButtonBuilder from the stored data
+   * Build a ButtonBuilder from the stored data, with placeholders in the label and link resolved
    */
-  getButton(): ButtonBuilder {
+  getButton(context?: VariableContext): ButtonBuilder {
     const button = new ButtonBuilder()
-      .setLabel(this.data.label)
+      .setLabel(substituteFitted(this.data.label, 80, context))
       .setStyle(STYLE_MAP[this.data.style]);
 
     // Custom ID only for non-LINK buttons
@@ -31,7 +32,7 @@ export class CustomButton {
 
     // URL only for LINK buttons
     if (this.data.style === "LINK" && this.data.url) {
-      button.setURL(this.data.url);
+      button.setURL(context ? substituteVariables(this.data.url, context) : this.data.url);
     }
 
     if (this.data.emoji) {

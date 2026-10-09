@@ -98,3 +98,15 @@ export function substituteVariables(text: string, context?: VariableContext): st
 
   return result;
 }
+
+/**
+ * Substitute placeholders in a short Discord field (button label, option description, modal title...)
+ * and keep the result inside Discord's limit for it. Substitution can grow the text (a long display
+ * name) or empty it (an unresolved `{var.x}` is kept, but `{guild.icon}` can be blank), so the result
+ * is cut to `max` characters and falls back to the stored text when nothing is left.
+ */
+export function substituteFitted(text: string, max: number, context?: VariableContext): string {
+  if (!text || !context) return text;
+  const result = substituteVariables(text, context).trim();
+  return (result || text).slice(0, max);
+}
