@@ -45,6 +45,8 @@ export class ProfileCard {
         },
       );
 
+    const bio = this.data.displayOptions.bio || "This user has not set a biography yet.";
+
     const scene = createScene(736, 736);
 
     scene.load(
@@ -280,9 +282,11 @@ export class ProfileCard {
                 />
               </MorphLayer>
               <TextLayer
-                size={{ width: 310, height: 0 }}
-                text={this.data.displayOptions.bio || "This user has not set a biography yet."}
-                font={{ family: "WDXL Lubrifont", size: 28, weight: FontWeight.Regular }}
+                layout={{ width: 310, height: 380 }}
+                size={{ width: 310, height: 380 }}
+                multiline={{ enabled: true, spacing: 1.1 }}
+                text={bio}
+                font={{ family: "WDXL Lubrifont", size: bioFontSize(bio), weight: FontWeight.Regular }}
                 color={"#ffffff"}
                 align={"center"}
                 shadow={{ color: "#000000", blur: 4, offsetX: 0, offsetY: 0 }}
@@ -413,6 +417,20 @@ export class ProfileCard {
     return renderScene(scene);
   }
 }
+
+/**
+ * The biography wraps inside a 310px column that has about 340px of height. A long text would run
+ * out of the card at the regular size, so it shrinks until the estimated number of lines fits.
+ * (The average glyph of the font is about half its size wide.)
+ */
+const bioFontSize = (bio: string) => {
+  for (const size of [28, 24, 20]) {
+    const charsPerLine = Math.floor(310 / (size * 0.52));
+    const lines = Math.ceil(bio.length / charsPerLine);
+    if (lines * size * 1.1 <= 340) return size;
+  }
+  return 18;
+};
 
 const iconsPerRow = (pos: Array<[number, number]>, displayOptions: ProfileCardDisplayOptions) => {
   return pos.map((pos) => {
