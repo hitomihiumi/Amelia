@@ -6,6 +6,7 @@ import {
   TextInputStyle,
   TextInputBuilder,
 } from "discord.js";
+import { substituteFitted, VariableContext } from "./substitute";
 
 export class CustomModal {
   public data: ModalCustom;
@@ -14,19 +15,20 @@ export class CustomModal {
     this.data = data;
   }
 
-  getModal() {
+  /** Build the modal; placeholders in the title, labels and hints are resolved with `context`. */
+  getModal(context?: VariableContext) {
     return new ModalBuilder()
-      .setTitle(this.data.title)
+      .setTitle(substituteFitted(this.data.title, 45, context))
       .setCustomId(this.data.id)
       .setComponents(
         this.data.fields.map((field) => {
           let fl = new TextInputBuilder()
             .setCustomId(field.id)
-            .setLabel(field.name)
+            .setLabel(substituteFitted(field.name, 45, context))
             .setRequired(field.required)
             .setStyle(field.type === "short" ? TextInputStyle.Short : TextInputStyle.Paragraph);
 
-          if (field.placeholder) fl.setPlaceholder(field.placeholder);
+          if (field.placeholder) fl.setPlaceholder(substituteFitted(field.placeholder, 100, context));
           if (field.min) fl.setMinLength(field.min);
           if (field.max) fl.setMaxLength(field.max);
 
