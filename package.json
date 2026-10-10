@@ -34,7 +34,7 @@
     "@hitomihiumi/colors.ts": "^1.0.3",
     "@hitomihiumi/filewatcher": "^0.1.1",
     "@nmmty/adapter-node": "^1.0.0",
-    "@nmmty/lazycanvas": "^1.0.0",
+    "@nmmty/lazycanvas": "^1.0.1",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "axios": "^1.13.6",

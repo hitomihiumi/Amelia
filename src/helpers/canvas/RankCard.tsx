@@ -117,6 +117,10 @@ export class RankCard {
             <ImageLayer
               size={{ width: 180, height: 180, radius: { all: 90 } }}
               src={this.data.avatar}
+              placeholder={{
+                color: this.data.displayOptions.solid.third_component,
+                stroke: this.data.displayOptions.solid.second_component,
+              }}
             />
             <MorphLayer
               layout={{
