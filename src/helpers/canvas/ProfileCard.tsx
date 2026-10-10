@@ -1,6 +1,5 @@
 /** @jsx createElement */
 import {
-  Exporter,
   Filters,
   FontWeight,
   Gradient,
@@ -8,14 +7,13 @@ import {
   MorphLayer,
   Path2DLayer,
   TextLayer,
-  Div,
-  Scene,
+  Group,
   createElement,
 } from "@nmmty/lazycanvas";
 import {GetSchemaValueType, ProfileCardDisplayOptions} from "../../types/helpers";
-import { assetsMap, fontMap, iconsMap } from "../assetsMap";
+import { assetsMap, iconsMap } from "../assetsMap";
 import { formatTime, getNextLevelXP } from "../../handlers/functions";
-import { Path2D } from "@napi-rs/canvas";
+import { Path2D, createScene, renderScene } from "./scene";
 import {TranslationSchema} from "../../types/i18n/TranslationSchema";
 
 export class ProfileCard {
@@ -47,9 +45,9 @@ export class ProfileCard {
         },
       );
 
-    const scene = new Scene(736, 736);
+    const bio = this.data.displayOptions.bio || "This user has not set a biography yet.";
 
-    scene.lazyCanvas.manager.fonts.add(fontMap.wdxllubrifont);
+    const scene = createScene(736, 736);
 
     scene.load(
       <MorphLayer
@@ -64,7 +62,7 @@ export class ProfileCard {
         size={{ width: 736, height: 736, radius: { all: 30 } }}
         color={this.data.displayOptions.solid.bg_color}
       >
-        <Div
+        <Group
           layout={{
             position: "absolute",
             width: "100%",
@@ -97,9 +95,9 @@ export class ProfileCard {
             color={this.data.displayOptions.solid.second_component}
             globalComposite={"source-atop"}
           />
-        </Div>
+        </Group>
 
-        <Div
+        <Group
           layout={{
             flexDirection: "column",
             alignItems: "center",
@@ -110,7 +108,7 @@ export class ProfileCard {
             gap: 20,
           }}
         >
-          <Div
+          <Group
             layout={{
               flexDirection: "row",
               alignItems: "center",
@@ -121,7 +119,7 @@ export class ProfileCard {
               gap: 20,
             }}
           >
-            <Div
+            <Group
               layout={{
                 position: "relative",
                 width: 220,
@@ -140,8 +138,8 @@ export class ProfileCard {
                 stroke={{ width: 3 }}
                 color={this.data.displayOptions.solid.second_component}
               />
-            </Div>
-            <Div
+            </Group>
+            <Group
               layout={{
                 flexDirection: "column",
                 alignItems: "flex-start",
@@ -243,9 +241,9 @@ export class ProfileCard {
                   src={assetsMap.microphone}
                 />
               </MorphLayer>
-            </Div>
-          </Div>
-          <Div
+            </Group>
+          </Group>
+          <Group
             layout={{
               flexDirection: "row",
               alignItems: "center",
@@ -255,7 +253,7 @@ export class ProfileCard {
               gap: 10,
             }}
           >
-            <Div
+            <Group
               layout={{
                 flexDirection: "column",
                 alignItems: "center",
@@ -284,15 +282,17 @@ export class ProfileCard {
                 />
               </MorphLayer>
               <TextLayer
-                size={{ width: 310, height: 0 }}
-                text={this.data.displayOptions.bio || "This user has not set a biography yet."}
-                font={{ family: "WDXL Lubrifont", size: 28, weight: FontWeight.Regular }}
+                layout={{ width: 310, height: 380 }}
+                size={{ width: 310, height: 380 }}
+                multiline={{ enabled: true, spacing: 1.1 }}
+                text={bio}
+                font={{ family: "WDXL Lubrifont", size: bioFontSize(bio), weight: FontWeight.Regular }}
                 color={"#ffffff"}
                 align={"center"}
                 shadow={{ color: "#000000", blur: 4, offsetX: 0, offsetY: 0 }}
               />
-            </Div>
-            <Div
+            </Group>
+            <Group
               layout={{
                 flexDirection: "column",
                 alignItems: "center",
@@ -321,7 +321,7 @@ export class ProfileCard {
                   align={"center"}
                 />
               </MorphLayer>
-              <Div
+              <Group
                 layout={{
                   flexDirection: "row",
                   width: 200,
@@ -331,7 +331,7 @@ export class ProfileCard {
                   gap: this.data.displayOptions.icons_padding,
                 }}
               >
-                <Div
+                <Group
                   layout={{
                     flexDirection: "column",
                     position: "relative",
@@ -351,8 +351,8 @@ export class ProfileCard {
                     ],
                     this.data.displayOptions,
                   )}
-                </Div>
-                <Div
+                </Group>
+                <Group
                   layout={{
                     flexDirection: "column",
                     position: "relative",
@@ -372,8 +372,8 @@ export class ProfileCard {
                     ],
                     this.data.displayOptions,
                   )}
-                </Div>
-                <Div
+                </Group>
+                <Group
                   layout={{
                     flexDirection: "column",
                     position: "relative",
@@ -393,11 +393,11 @@ export class ProfileCard {
                     ],
                     this.data.displayOptions,
                   )}
-                </Div>
-              </Div>
-            </Div>
-          </Div>
-        </Div>
+                </Group>
+              </Group>
+            </Group>
+          </Group>
+        </Group>
 
         <MorphLayer
           layout={{
@@ -414,16 +414,30 @@ export class ProfileCard {
       </MorphLayer>,
     );
 
-    return (await new Exporter(scene).export("buffer")) as Buffer;
+    return renderScene(scene);
   }
 }
+
+/**
+ * The biography wraps inside a 310px column that has about 340px of height. A long text would run
+ * out of the card at the regular size, so it shrinks until the estimated number of lines fits.
+ * (The average glyph of the font is about half its size wide.)
+ */
+const bioFontSize = (bio: string) => {
+  for (const size of [28, 24, 20]) {
+    const charsPerLine = Math.floor(310 / (size * 0.52));
+    const lines = Math.ceil(bio.length / charsPerLine);
+    if (lines * size * 1.1 <= 340) return size;
+  }
+  return 18;
+};
 
 const iconsPerRow = (pos: Array<[number, number]>, displayOptions: ProfileCardDisplayOptions) => {
   return pos.map((pos) => {
     const icon = displayOptions.icons.find((i) => i.pos[0] === pos[0] && i.pos[1] === pos[1]);
     if (!icon || icon.name === "empty")
       return (
-        <Div
+        <Group
           layout={{
             position: "relative",
             width: 60,
@@ -440,7 +454,7 @@ const iconsPerRow = (pos: Array<[number, number]>, displayOptions: ProfileCardDi
             color={"#ffffff"}
             opacity={0.5}
           />
-        </Div>
+        </Group>
       );
     return (
       <ImageLayer

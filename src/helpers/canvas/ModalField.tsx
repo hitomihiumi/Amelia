@@ -1,16 +1,13 @@
 /** @jsx createElement */
 import {
   FontsList,
-  Div,
-  LazyCanvas,
-  Link,
+  Group,
   MorphLayer,
   TextLayer,
-  Exporter,
-  Scene,
   createElement,
 } from "@nmmty/lazycanvas";
 import { IModalField } from "../../types/helpers";
+import { createScene, renderScene } from "./scene";
 
 export class ModalField {
   public id: string;
@@ -32,7 +29,7 @@ export class ModalField {
   }
 
   multiline() {
-    const scene = new Scene(400, 150);
+    const scene = createScene(400, 150);
 
     scene.load(
       <MorphLayer
@@ -47,7 +44,7 @@ export class ModalField {
         size={{ width: "100%", height: "100%" }}
         color="#36393f"
       >
-        <Div
+        <Group
           layout={{
             flexDirection: "row",
             alignItems: "flex-start",
@@ -73,7 +70,7 @@ export class ModalField {
             baseline="bottom"
             color="#db4649"
           />
-        </Div>
+        </Group>
         <MorphLayer
           layout={{
             flexDirection: "column",
@@ -143,7 +140,7 @@ export class ModalField {
   }
 
   singleline() {
-    const scene = new Scene(400, 100);
+    const scene = createScene(400, 100);
 
     scene.load(
       <MorphLayer
@@ -158,7 +155,7 @@ export class ModalField {
         size={{ width: "100%", height: "100%" }}
         color="#36393f"
       >
-        <Div
+        <Group
           layout={{
             flexDirection: "row",
             alignItems: "flex-start",
@@ -185,7 +182,7 @@ export class ModalField {
             baseline="bottom"
             color="#db4649"
           />
-        </Div>
+        </Group>
         <MorphLayer
           layout={{
             flexDirection: "column",
@@ -245,6 +242,6 @@ export class ModalField {
   async render() {
     const scene = this.type === "long" ? this.multiline() : this.singleline();
 
-    return (await new Exporter(scene).export("buffer")) as Buffer;
+    return renderScene(scene);
   }
 }

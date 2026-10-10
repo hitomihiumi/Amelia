@@ -1,6 +1,5 @@
 /** @jsx createElement */
 import {
-  Exporter,
   Filters,
   FontWeight,
   ImageLayer,
@@ -8,13 +7,11 @@ import {
   Path2DLayer,
   PolygonLayer,
   TextLayer,
-  Scene,
   createElement,
-  Div,
+  Group,
 } from "@nmmty/lazycanvas";
 import { LevelCardDisplayOptions } from "../../types/helpers";
-import { fontMap } from "../assetsMap";
-import { Path2D } from "@napi-rs/canvas";
+import { Path2D, createScene, renderScene } from "./scene";
 
 export class LevelCard {
   data: LevelCardOptions;
@@ -24,9 +21,7 @@ export class LevelCard {
   }
 
   async render() {
-    const scene = new Scene(400, 120);
-
-    scene.lazyCanvas.manager.fonts.add(fontMap.wdxllubrifont);
+    const scene = createScene(400, 120);
 
     scene.load(
       <MorphLayer
@@ -42,7 +37,7 @@ export class LevelCard {
         color={this.data.displayOptions.solid.bg_color}
       >
         {/* Background patterns - absolute positioned */}
-        <Div layout={{ position: "absolute", width: "100%", height: "100%" }}>
+        <Group layout={{ position: "absolute", width: "100%", height: "100%" }}>
           <Path2DLayer
             path2D={
               new Path2D(
@@ -81,10 +76,10 @@ export class LevelCard {
             }}
             filter={Filters.blur(80)}
           />
-        </Div>
+        </Group>
 
         {/* Content Container */}
-        <Div
+        <Group
           layout={{
             flexDirection: "row",
             alignItems: "center",
@@ -96,9 +91,9 @@ export class LevelCard {
           }}
         >
           {/* Left Stats */}
-          <Div layout={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
+          <Group layout={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
             {/* Level */}
-            <Div
+            <Group
               layout={{
                 flexDirection: "row",
                 gap: 50,
@@ -106,7 +101,7 @@ export class LevelCard {
                 justifyContent: "center",
               }}
             >
-              <Div
+              <Group
                 layout={{ width: 80, height: 80, alignItems: "center", justifyContent: "center" }}
               >
                 <PolygonLayer
@@ -127,9 +122,9 @@ export class LevelCard {
                   baseline={"middle"}
                   shadow={{ color: "#000000", blur: 2 }}
                 />
-              </Div>
+              </Group>
 
-              <Div
+              <Group
                 layout={{
                   position: "absolute",
                 }}
@@ -167,10 +162,10 @@ export class LevelCard {
                   }}
                   color={this.data.displayOptions.solid.third_component}
                 />
-              </Div>
+              </Group>
 
               {/* Rank */}
-              <Div
+              <Group
                 layout={{
                   width: 80,
                   height: 80,
@@ -196,9 +191,9 @@ export class LevelCard {
                   baseline={"middle"}
                   shadow={{ color: "#000000", blur: 2 }}
                 />
-              </Div>
-            </Div>
-          </Div>
+              </Group>
+            </Group>
+          </Group>
 
           {/* UP Text */}
           <TextLayer
@@ -215,7 +210,7 @@ export class LevelCard {
           />
 
           {/* Right Avatar */}
-          <Div
+          <Group
             layout={{
               width: 82,
               height: 82,
@@ -235,8 +230,8 @@ export class LevelCard {
               size={{ width: 80, height: 80, radius: { all: 40 } }}
               src={this.data.avatar}
             />
-          </Div>
-        </Div>
+          </Group>
+        </Group>
 
         {/* Border Overlay */}
         <MorphLayer
@@ -250,7 +245,7 @@ export class LevelCard {
       </MorphLayer>,
     );
 
-    return (await new Exporter(scene).export("buffer")) as Buffer;
+    return renderScene(scene);
   }
 }
 

@@ -1,6 +1,5 @@
 /** @jsx createElement */
 import {
-  Exporter,
   Filters,
   FontWeight,
   Gradient,
@@ -8,14 +7,13 @@ import {
   MorphLayer,
   Path2DLayer,
   TextLayer,
-  Div,
-  Scene,
+  Group,
   createElement,
 } from "@nmmty/lazycanvas";
 import {GetSchemaValueType, RankCardDisplayOptions} from "../../types/helpers";
-import { assetsMap, fontMap } from "../assetsMap";
+import { assetsMap } from "../assetsMap";
 import { formatTime, getNextLevelXP } from "../../handlers/functions";
-import { Path2D } from "@napi-rs/canvas";
+import { Path2D, createScene, renderScene } from "./scene";
 import {TranslationSchema} from "../../types/i18n/TranslationSchema";
 
 export class RankCard {
@@ -53,9 +51,7 @@ export class RankCard {
       return path;
     };
 
-    const scene = new Scene(736, 260);
-
-    scene.lazyCanvas.manager.fonts.add(fontMap.wdxllubrifont);
+    const scene = createScene(736, 260);
 
     scene.load(
       <MorphLayer
@@ -74,7 +70,7 @@ export class RankCard {
         }}
         color={this.data.displayOptions.solid.bg_color}
       >
-        <Div
+        <Group
           layout={{
             position: "absolute",
             width: "100%",
@@ -98,9 +94,9 @@ export class RankCard {
             color={this.data.displayOptions.solid.third_component}
             filter={Filters.blur(80)}
           />
-        </Div>
+        </Group>
 
-        <Div
+        <Group
           layout={{
             flexDirection: "row",
             alignItems: "center",
@@ -111,7 +107,7 @@ export class RankCard {
             gap: 20,
           }}
         >
-          <Div
+          <Group
             layout={{
               position: "relative",
               width: 180,
@@ -132,8 +128,8 @@ export class RankCard {
                 width: 3,
               }}
             />
-          </Div>
-          <Div
+          </Group>
+          <Group
             layout={{
               flexDirection: "column",
               alignItems: "flex-start",
@@ -156,7 +152,7 @@ export class RankCard {
                 blur: 4,
               }}
             />
-            <Div
+            <Group
               layout={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -214,7 +210,7 @@ export class RankCard {
                   src={assetsMap.microphone}
                 />
               </MorphLayer>
-            </Div>
+            </Group>
             <MorphLayer
               layout={{
                 flexDirection: "row",
@@ -265,8 +261,8 @@ export class RankCard {
                 color={gradient}
               />
             </MorphLayer>
-          </Div>
-        </Div>
+          </Group>
+        </Group>
 
         <MorphLayer
           layout={{
@@ -285,7 +281,7 @@ export class RankCard {
       </MorphLayer>,
     );
 
-    return (await new Exporter(scene).export("buffer")) as Buffer;
+    return renderScene(scene);
   }
 }
 
