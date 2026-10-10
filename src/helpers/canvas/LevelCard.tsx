@@ -229,6 +229,10 @@ export class LevelCard {
               layout={{ width: 80, height: 80 }}
               size={{ width: 80, height: 80, radius: { all: 40 } }}
               src={this.data.avatar}
+              placeholder={{
+                color: this.data.displayOptions.solid.third_component,
+                stroke: this.data.displayOptions.solid.second_component,
+              }}
             />
           </Group>
         </Group>

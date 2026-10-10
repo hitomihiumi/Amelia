@@ -129,6 +129,10 @@ export class ProfileCard {
               <ImageLayer
                 size={{ width: 220, height: 220, radius: { all: 110 } }}
                 src={this.data.avatar}
+              placeholder={{
+                color: this.data.displayOptions.solid.third_component,
+                stroke: this.data.displayOptions.solid.second_component,
+              }}
               />
               <MorphLayer
                 layout={{
