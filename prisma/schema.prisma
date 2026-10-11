@@ -208,11 +208,30 @@ model BannerImage {
   width     Int
   height    Int
   data      Bytes
+  // "background" is cut to the size of the banner; "layer" is only scaled down to fit it
+  purpose   String   @default("layer")
   createdAt DateTime @default(now())
 
   guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
 
   @@index([guildId])
+}
+
+// The picture a member put behind one of their cards (rank, profile or level-up). It is cut to the
+// size of the card when it is uploaded. The card refers to it as `upload:<id>` in its `*Url`
+// column; the member's rows of every server may point at the same picture.
+model CardBackground {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String // "rank" | "profile" | "level_up"
+  mime      String
+  size      Int
+  width     Int
+  height    Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@index([userId, kind])
 }
 
 // User model
@@ -233,6 +252,7 @@ model User {
   profileMode         Boolean @default(false)
   profileSolid        Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#422242\",\"second_component\":\"#C30F45\",\"third_component\":\"#422242\"}")
   profileUrl          String?
+  profileDim          Int     @default(30)
   profileColor        String?
   profileIcons        Json    @default("[]")
   profileIconsPadding Int     @default(10)
@@ -241,10 +261,12 @@ model User {
   rankSolid Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#ffffff\",\"second_component\":\"#C30F45\",\"third_component\":\"#422242\"}")
   rankUrl   String?
   rankColor String?
+  rankDim   Int     @default(30)
 
   levelupMode  Boolean @default(false)
   levelupSolid Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#ffffff\",\"second_component\":\"#422242\",\"third_component\":\"#C30F45\"}")
   levelupUrl   String?
+  levelupDim   Int     @default(30)
 
   customBadges Json @default("[]")
 

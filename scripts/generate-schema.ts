@@ -768,6 +768,11 @@ const userSchemaMap: Record<string, SchemaField> = {
     prismaType: "String",
     optional: true,
   },
+  "custom.profile.dim": {
+    prismaField: "profileDim",
+    prismaType: "Int",
+    default: "30",
+  },
   "custom.profile.color": {
     prismaField: "profileColor",
     prismaType: "String",
@@ -801,6 +806,11 @@ const userSchemaMap: Record<string, SchemaField> = {
     prismaType: "String",
     optional: true,
   },
+  "custom.rank.dim": {
+    prismaField: "rankDim",
+    prismaType: "Int",
+    default: "30",
+  },
   "custom.rank.color": {
     prismaField: "rankColor",
     prismaType: "String",
@@ -823,6 +833,11 @@ const userSchemaMap: Record<string, SchemaField> = {
     prismaField: "levelupUrl",
     prismaType: "String",
     optional: true,
+  },
+  "custom.level_up.dim": {
+    prismaField: "levelupDim",
+    prismaType: "Int",
+    default: "30",
   },
 
   // Custom Badges

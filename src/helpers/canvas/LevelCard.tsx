@@ -11,6 +11,7 @@ import {
   Group,
 } from "@nmmty/lazycanvas";
 import { LevelCardDisplayOptions } from "../../types/helpers";
+import { cardBackgroundLayers } from "./cardBackground";
 import { Path2D, createScene, renderScene } from "./scene";
 
 export class LevelCard {
@@ -37,7 +38,10 @@ export class LevelCard {
         color={this.data.displayOptions.solid.bg_color}
       >
         {/* Background patterns - absolute positioned */}
-        <Group layout={{ position: "absolute", width: "100%", height: "100%" }}>
+        {this.data.background ? (
+          cardBackgroundLayers(this.data.background, this.data.displayOptions.dim ?? 30, 400, 120, 25)
+        ) : (
+          <Group layout={{ position: "absolute", width: "100%", height: "100%" }}>
           <Path2DLayer
             path2D={
               new Path2D(
@@ -77,6 +81,7 @@ export class LevelCard {
             filter={Filters.blur(80)}
           />
         </Group>
+        )}
 
         {/* Content Container */}
         <Group
@@ -259,4 +264,6 @@ type LevelCardOptions = {
     level: number;
   };
   displayOptions: LevelCardDisplayOptions;
+  /** The picture behind the card, see `loadCardBackground`. */
+  background?: Buffer | null;
 };

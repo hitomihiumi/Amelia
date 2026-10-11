@@ -9,7 +9,7 @@ export const BANNER_WIDTH = 960;
 export const BANNER_HEIGHT = 540;
 
 export const BANNER_LIMITS = {
-  items: 10,
+  items: 1,
   layers: 40,
   text: 300,
   name: 60,

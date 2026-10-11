@@ -18,7 +18,18 @@ Both are edited in the dashboard (`hitomihiumi/amelia-dashboard`); the bot reads
 The announcement now respects the switch. The migration turns it on for every server that has
 levels on, so nobody loses their announcements.
 
+## Card backgrounds
+
+A member can put a picture behind the rank, profile and level-up cards (dashboard: Profile >
+Appearance). The picture is cut to the size of the card when it is uploaded (736×260, 736×736,
+400×120) and stored in `CardBackground`. The member's `custom.<card>.url` is `upload:<id>`,
+`custom.<card>.mode` switches it on and `custom.<card>.dim` is how much it is darkened (0-100).
+`loadCardBackground` (`src/helpers/canvas/cardBackground.tsx`) reads it, only for its owner, and the
+cards draw it instead of the coloured blobs.
+
 ## Server banners
+
+A server keeps **one** banner (`utils.banners.items` holds a single entry).
 
 `utils.banners` (`banner*` columns of `Guild`) holds the banners of a server and the settings of the
 updater. A banner is plain data (`src/types/helpers/Banner.ts`): a 960×540 canvas with a background
@@ -62,4 +73,5 @@ A picture layer or a picture background points at either
 - a link, downloaded by the bot itself (`src/helpers/banner/images.ts`): `https` only, public
   addresses only, 8 MB at most; or
 - `upload:<id>`, a picture the server owner uploaded in the dashboard. It lives in the
-  `BannerImage` table and is only handed out to the server it belongs to.
+  `BannerImage` table and is only handed out to the server it belongs to. A background is cut to
+  the 960×540 of the banner when it is uploaded; a picture element is only scaled down to fit.

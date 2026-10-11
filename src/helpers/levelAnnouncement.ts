@@ -7,6 +7,7 @@ import {
   MessageCreateOptions,
 } from "discord.js";
 import { LevelCard } from "./canvas/LevelCard";
+import { loadCardBackground } from "./canvas/cardBackground";
 import { substituteVariables, VariableContext } from "./custom/substitute";
 import { t } from "../i18n/helpers";
 import { LevelMessageContent, Levels } from "../types/helpers";
@@ -131,6 +132,7 @@ export async function announceLevelUp(client: Client, data: LevelAnnouncement): 
       avatar: context.user!.avatar,
       data: { level },
       displayOptions: data.cardOptions,
+      background: await loadCardBackground(data.cardOptions, user.id, "level_up"),
     })
       .render()
       .catch(() => null);

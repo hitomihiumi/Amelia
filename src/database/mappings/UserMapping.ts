@@ -80,6 +80,9 @@ export const UserPathMap: PathMap = {
   "custom.profile.url": {
     field: "profileUrl",
   },
+  "custom.profile.dim": {
+    field: "profileDim",
+  },
   "custom.profile.color": {
     field: "profileColor",
   },
@@ -98,6 +101,9 @@ export const UserPathMap: PathMap = {
   "custom.rank.url": {
     field: "rankUrl",
   },
+  "custom.rank.dim": {
+    field: "rankDim",
+  },
   "custom.rank.color": {
     field: "rankColor",
   },
@@ -109,6 +115,9 @@ export const UserPathMap: PathMap = {
   },
   "custom.level_up.url": {
     field: "levelupUrl",
+  },
+  "custom.level_up.dim": {
+    field: "levelupDim",
   },
   "custom.badges": {
     field: "customBadges",
@@ -153,15 +162,15 @@ export const UserPathMap: PathMap = {
   },
   "custom.profile": {
     field: "",
-    children: ["bio", "color", "icons", "icons_padding", "mode", "solid", "url"],
+    children: ["bio", "color", "dim", "icons", "icons_padding", "mode", "solid", "url"],
   },
   "custom.rank": {
     field: "",
-    children: ["color", "mode", "solid", "url"],
+    children: ["color", "dim", "mode", "solid", "url"],
   },
   "custom.level_up": {
     field: "",
-    children: ["mode", "solid", "url"],
+    children: ["dim", "mode", "solid", "url"],
   },
   presets: {
     field: "",
@@ -198,16 +207,19 @@ export const UserFieldMap: Record<string, string> = {
   "custom.profile.mode": "profileMode",
   "custom.profile.solid": "profileSolid",
   "custom.profile.url": "profileUrl",
+  "custom.profile.dim": "profileDim",
   "custom.profile.color": "profileColor",
   "custom.profile.icons": "profileIcons",
   "custom.profile.icons_padding": "profileIconsPadding",
   "custom.rank.mode": "rankMode",
   "custom.rank.solid": "rankSolid",
   "custom.rank.url": "rankUrl",
+  "custom.rank.dim": "rankDim",
   "custom.rank.color": "rankColor",
   "custom.level_up.mode": "levelupMode",
   "custom.level_up.solid": "levelupSolid",
   "custom.level_up.url": "levelupUrl",
+  "custom.level_up.dim": "levelupDim",
   "custom.badges": "customBadges",
   "presets.jtc": "jtcPresets",
 };

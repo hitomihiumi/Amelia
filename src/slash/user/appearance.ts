@@ -19,6 +19,7 @@ import {
 import { defaultPermissions, Guild, User } from "../../helpers";
 import {t, tObject} from "../../i18n/helpers";
 import { isHexColor } from "../../handlers/functions";
+import { loadCardBackground } from "../../helpers/canvas/cardBackground";
 import { RankCard } from "../../helpers/canvas/RankCard";
 import { ProfileCard } from "../../helpers/canvas/ProfileCard";
 import { LevelCard } from "../../helpers/canvas/LevelCard";
@@ -459,6 +460,7 @@ async function imageUpdate(
           rank: 1,
         },
         displayOptions: displayOptions as RankCardDisplayOptions,
+        background: await loadCardBackground(displayOptions, user.id, "rank"),
       }, tObject(client, lang, "time_units"));
       attachment = new AttachmentBuilder(await rank.render(), { name: "rank.png" });
       break;
@@ -476,6 +478,7 @@ async function imageUpdate(
           rank: 1,
         },
         displayOptions: displayOptions as ProfileCardDisplayOptions,
+        background: await loadCardBackground(displayOptions, user.id, "profile"),
       }, tObject(client, lang, "time_units"));
       attachment = new AttachmentBuilder(await profile.render(), { name: "profile.png" });
       break;
@@ -486,6 +489,7 @@ async function imageUpdate(
           level: 999,
         },
         displayOptions: displayOptions as LevelCardDisplayOptions,
+        background: await loadCardBackground(displayOptions, user.id, "level_up"),
       });
       attachment = new AttachmentBuilder(await level.render(), { name: "level_up.png" });
       break;
@@ -556,6 +560,7 @@ const mostUsedQueries = {
     await user.set("custom.rank.mode", data.mode || false);
     await user.set("custom.rank.solid", data.solid || defaultDisplayOptions.rank.solid);
     await user.set("custom.rank.url", data.url || null);
+    await user.set("custom.rank.dim", data.dim ?? 30);
     await user.set("custom.rank.color", data.color || null);
     return;
   },
@@ -563,6 +568,7 @@ const mostUsedQueries = {
     await user.set("custom.profile.mode", data.mode || false);
     await user.set("custom.profile.solid", data.solid || defaultDisplayOptions.profile.solid);
     await user.set("custom.profile.url", data.url || null);
+    await user.set("custom.profile.dim", data.dim ?? 30);
     await user.set("custom.profile.color", data.color || null);
     await user.set("custom.profile.bio", data.bio || "");
     await user.set("custom.profile.icons", data.icons || []);
@@ -576,6 +582,7 @@ const mostUsedQueries = {
     await user.set("custom.level_up.mode", data.mode || false);
     await user.set("custom.level_up.solid", data.solid || defaultDisplayOptions.level_up.solid);
     await user.set("custom.level_up.url", data.url || null);
+    await user.set("custom.level_up.dim", data.dim ?? 30);
     return;
   },
 };

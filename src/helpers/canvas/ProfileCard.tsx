@@ -13,6 +13,7 @@ import {
 import {GetSchemaValueType, ProfileCardDisplayOptions} from "../../types/helpers";
 import { assetsMap, iconsMap } from "../assetsMap";
 import { formatTime, getNextLevelXP } from "../../handlers/functions";
+import { cardBackgroundLayers } from "./cardBackground";
 import { Path2D, createScene, renderScene } from "./scene";
 import {TranslationSchema} from "../../types/i18n/TranslationSchema";
 
@@ -62,7 +63,10 @@ export class ProfileCard {
         size={{ width: 736, height: 736, radius: { all: 30 } }}
         color={this.data.displayOptions.solid.bg_color}
       >
-        <Group
+        {this.data.background ? (
+          cardBackgroundLayers(this.data.background, this.data.displayOptions.dim ?? 30, 736, 736, 30)
+        ) : (
+          <Group
           layout={{
             position: "absolute",
             width: "100%",
@@ -96,6 +100,7 @@ export class ProfileCard {
             globalComposite={"source-atop"}
           />
         </Group>
+        )}
 
         <Group
           layout={{
@@ -487,4 +492,6 @@ type ProfileCardOptions = {
     rank: number;
   };
   displayOptions: ProfileCardDisplayOptions;
+  /** The picture behind the card, see `loadCardBackground`. */
+  background?: Buffer | null;
 };
