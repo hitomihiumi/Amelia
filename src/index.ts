@@ -144,6 +144,7 @@ client.holder = {
     "moderationScheduler",
     "statusHeartbeat",
     "guildStats",
+    "serverBanner",
   ]
     .filter(Boolean)
     .forEach((handler: any) => {

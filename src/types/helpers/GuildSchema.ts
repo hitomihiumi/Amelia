@@ -12,6 +12,7 @@ import { AutoModerationSettings, ModerationForm, WarnThreshold } from "./Moderat
 import { AuditSettings } from "./AuditSchema";
 import { AiSettings, PremiumSettings } from "./AiSchema";
 import type { LayoutCustom } from "./Layout";
+import type { BannerSettings } from "./Banner";
 
 export interface GuildSchema {
   id: string;
@@ -49,6 +50,7 @@ export interface GuildSchema {
       };
       games: FindTeamGame[];
     };
+    banners: BannerSettings;
     components: {
       modals: Array<ModalCustom>;
       embed: Array<EmbedCustom>;
@@ -195,6 +197,27 @@ interface FindTeamGame {
   };
 }
 
+/**
+ * What a level-up announcement looks like. It is stored as JSON and older servers have only some
+ * of the keys (or `{}`), so read it through `normalizeLevelMessage`.
+ */
+export interface LevelMessageContent {
+  /** Plain message text. Placeholders such as `{user.mention}` and `{level}` are filled in. */
+  text: string | null;
+  embed: {
+    title: string | null;
+    description: string | null;
+    color: string | null;
+    thumbnail: string | null;
+    image: string | null;
+    footer: string | null;
+  };
+  /** Attach the level-up picture (the card). */
+  card: boolean;
+  /** Post as a reply to the message that levelled the member up. */
+  reply: boolean;
+}
+
 export interface Levels {
   enabled: boolean;
   ignore_channels: string[];
@@ -205,16 +228,8 @@ export interface Levels {
   message: {
     enabled: boolean;
     channel: string | null;
-    content: {
-      text: string | null;
-      embed: {
-        title: string | null;
-        description: string | null;
-        color: string | null;
-        thumbnail: string | null;
-        footer: string | null;
-      };
-    };
+    content: LevelMessageContent;
+    /** Seconds until the announcement is deleted; 0 keeps it. */
     delete: number;
   };
 }

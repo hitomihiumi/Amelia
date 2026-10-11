@@ -48,6 +48,15 @@ model Guild {
   findTeamEmbed             Json    @default("{\"title\":null,\"description\":null,\"color\":null,\"thumbnail\":null,\"image\":null,\"footer\":null}")
   findTeamGames             Json    @default("[]")
 
+  // Server banners (a picture with live statistics, set as the server banner)
+  bannerEnabled         Boolean @default(false)
+  bannerInterval        Int     @default(30) // minutes between updates
+  bannerActivityWindow  Int     @default(60) // minutes the "most active member" is counted over
+  bannerActive          String? // id of the banner in bannerItems that is put on the server
+  bannerItems           Json    @default("[]")
+  bannerStatus          Json    @default("{}") // written by the bot: last update, last error
+  bannerRefreshRequest  String? // ISO time; the dashboard sets it, the bot updates the banner at once
+
   // Custom Components
   componentsModals      Json @default("[]")
   componentsEmbeds      Json @default("[]")

@@ -80,6 +80,27 @@ export const GuildPathMap: PathMap = {
   "utils.find_team.games": {
     field: "findTeamGames",
   },
+  "utils.banners.enabled": {
+    field: "bannerEnabled",
+  },
+  "utils.banners.interval": {
+    field: "bannerInterval",
+  },
+  "utils.banners.activity_window": {
+    field: "bannerActivityWindow",
+  },
+  "utils.banners.active": {
+    field: "bannerActive",
+  },
+  "utils.banners.items": {
+    field: "bannerItems",
+  },
+  "utils.banners.status": {
+    field: "bannerStatus",
+  },
+  "utils.banners.refresh_request": {
+    field: "bannerRefreshRequest",
+  },
   "utils.components.modals": {
     field: "componentsModals",
   },
@@ -329,7 +350,15 @@ export const GuildPathMap: PathMap = {
   },
   utils: {
     field: "",
-    children: ["components", "counter", "find_team", "giveaways", "join_to_create", "levels"],
+    children: [
+      "banners",
+      "components",
+      "counter",
+      "find_team",
+      "giveaways",
+      "join_to_create",
+      "levels",
+    ],
   },
   "utils.join_to_create": {
     field: "",
@@ -350,6 +379,18 @@ export const GuildPathMap: PathMap = {
   "utils.find_team": {
     field: "",
     children: ["channel", "embed", "enabled", "games", "select_placeholder", "send_channel"],
+  },
+  "utils.banners": {
+    field: "",
+    children: [
+      "active",
+      "activity_window",
+      "enabled",
+      "interval",
+      "items",
+      "refresh_request",
+      "status",
+    ],
   },
   "utils.components": {
     field: "",
@@ -515,6 +556,13 @@ export const GuildFieldMap: Record<string, string> = {
   "utils.find_team.select_placeholder": "findTeamSelectPlaceholder",
   "utils.find_team.embed": "findTeamEmbed",
   "utils.find_team.games": "findTeamGames",
+  "utils.banners.enabled": "bannerEnabled",
+  "utils.banners.interval": "bannerInterval",
+  "utils.banners.activity_window": "bannerActivityWindow",
+  "utils.banners.active": "bannerActive",
+  "utils.banners.items": "bannerItems",
+  "utils.banners.status": "bannerStatus",
+  "utils.banners.refresh_request": "bannerRefreshRequest",
   "utils.components.modals": "componentsModals",
   "utils.components.embed": "componentsEmbeds",
   "utils.components.buttons": "componentsButtons",

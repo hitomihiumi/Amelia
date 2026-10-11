@@ -153,6 +153,43 @@ const guildSchemaMap: Record<string, SchemaField> = {
     default: '"[]"',
   },
 
+  // Server banners
+  "utils.banners.enabled": {
+    prismaField: "bannerEnabled",
+    prismaType: "Boolean",
+    default: "false",
+  },
+  "utils.banners.interval": {
+    prismaField: "bannerInterval",
+    prismaType: "Int",
+    default: "30",
+  },
+  "utils.banners.activity_window": {
+    prismaField: "bannerActivityWindow",
+    prismaType: "Int",
+    default: "60",
+  },
+  "utils.banners.active": {
+    prismaField: "bannerActive",
+    prismaType: "String",
+    optional: true,
+  },
+  "utils.banners.items": {
+    prismaField: "bannerItems",
+    prismaType: "Json",
+    default: '"[]"',
+  },
+  "utils.banners.status": {
+    prismaField: "bannerStatus",
+    prismaType: "Json",
+    default: '"{}"',
+  },
+  "utils.banners.refresh_request": {
+    prismaField: "bannerRefreshRequest",
+    prismaType: "String",
+    optional: true,
+  },
+
   // Components - custom components stored as PostgreSQL JSON columns
   "utils.components.modals": {
     prismaField: "componentsModals",
@@ -460,22 +497,26 @@ const guildSchemaMap: Record<string, SchemaField> = {
   "moderation.auto_moderation.keywords": {
     prismaField: "autoModKeywords",
     prismaType: "Json",
-    default: '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"},\\"keywords\\":[],\\"regex\\":[],\\"allow\\":[]}"',
+    default:
+      '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"},\\"keywords\\":[],\\"regex\\":[],\\"allow\\":[]}"',
   },
   "moderation.auto_moderation.profanity": {
     prismaField: "autoModProfanity",
     prismaType: "Json",
-    default: '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"},\\"presets\\":[\\"profanity\\",\\"slurs\\"],\\"allow\\":[]}"',
+    default:
+      '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"},\\"presets\\":[\\"profanity\\",\\"slurs\\"],\\"allow\\":[]}"',
   },
   "moderation.auto_moderation.mention_spam": {
     prismaField: "autoModMentionSpam",
     prismaType: "Json",
-    default: '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"},\\"limit\\":5,\\"raid_protection\\":true}"',
+    default:
+      '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"},\\"limit\\":5,\\"raid_protection\\":true}"',
   },
   "moderation.auto_moderation.spam": {
     prismaField: "autoModSpam",
     prismaType: "Json",
-    default: '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"}}"',
+    default:
+      '"{\\"enabled\\":false,\\"ignore_channels\\":[],\\"ignore_roles\\":[],\\"delete_message\\":true,\\"block_message\\":null,\\"alert_channel\\":null,\\"moderation_immune\\":true,\\"punishment\\":{\\"type\\":\\"warn\\",\\"time\\":0,\\"reason\\":\\"Auto moderation\\"}}"',
   },
   // Ids of the Discord AutoMod rules the bot or the dashboard created, by kind
   "moderation.auto_moderation.rules": {
