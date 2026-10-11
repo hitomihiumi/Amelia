@@ -54,7 +54,10 @@ interface DisplayOptions {
     second_component: string;
     third_component: string;
   };
+  /** The picture behind the card: `upload:<id>` of a `CardBackground`, drawn while `mode` is on. */
   url: string | null;
+  /** How much the picture is darkened, 0-100. */
+  dim: number;
 }
 
 export const defaultDisplayOptions = {
@@ -67,6 +70,7 @@ export const defaultDisplayOptions = {
       third_component: "#422242",
     },
     url: null,
+    dim: 30,
   },
   profile: {
     icons_padding: 10,
@@ -78,6 +82,7 @@ export const defaultDisplayOptions = {
       third_component: "#422242",
     },
     url: null,
+    dim: 30,
   },
   balance: {
     mode: false,
@@ -88,6 +93,7 @@ export const defaultDisplayOptions = {
       third_component: "#422242",
     },
     url: null,
+    dim: 30,
   },
   level_up: {
     mode: false,
@@ -98,6 +104,7 @@ export const defaultDisplayOptions = {
       third_component: "#C30F45",
     },
     url: null,
+    dim: 30,
   },
 };
 

@@ -13,6 +13,7 @@ import {
 import {GetSchemaValueType, RankCardDisplayOptions} from "../../types/helpers";
 import { assetsMap } from "../assetsMap";
 import { formatTime, getNextLevelXP } from "../../handlers/functions";
+import { cardBackgroundLayers } from "./cardBackground";
 import { Path2D, createScene, renderScene } from "./scene";
 import {TranslationSchema} from "../../types/i18n/TranslationSchema";
 
@@ -70,7 +71,10 @@ export class RankCard {
         }}
         color={this.data.displayOptions.solid.bg_color}
       >
-        <Group
+        {this.data.background ? (
+          cardBackgroundLayers(this.data.background, this.data.displayOptions.dim ?? 30, 736, 260, 30)
+        ) : (
+          <Group
           layout={{
             position: "absolute",
             width: "100%",
@@ -95,6 +99,7 @@ export class RankCard {
             filter={Filters.blur(80)}
           />
         </Group>
+        )}
 
         <Group
           layout={{
@@ -302,4 +307,6 @@ type RankCardOptions = {
     rank: number;
   };
   displayOptions: RankCardDisplayOptions;
+  /** The picture behind the card, see `loadCardBackground`. */
+  background?: Buffer | null;
 };

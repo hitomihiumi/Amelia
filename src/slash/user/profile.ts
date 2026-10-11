@@ -3,6 +3,7 @@ import { AttachmentBuilder, PermissionsBitField } from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
 import {t, tObject} from "../../i18n/helpers";
 import { ProfileCard } from "../../helpers/canvas/ProfileCard";
+import { loadCardBackground } from "../../helpers/canvas/cardBackground";
 
 module.exports = {
   name: "profile",
@@ -51,6 +52,7 @@ module.exports = {
         rank: 1,
       },
       displayOptions,
+      background: await loadCardBackground(displayOptions, user.id, "profile"),
     }, tObject(client, await guild.get(`settings.language`), "time_units"));
 
     const buffer = await profile.render();

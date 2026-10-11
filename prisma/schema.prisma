@@ -48,6 +48,15 @@ model Guild {
   findTeamEmbed             Json    @default("{\"title\":null,\"description\":null,\"color\":null,\"thumbnail\":null,\"image\":null,\"footer\":null}")
   findTeamGames             Json    @default("[]")
 
+  // Server banners (a picture with live statistics, set as the server banner)
+  bannerEnabled         Boolean @default(false)
+  bannerInterval        Int     @default(30) // minutes between updates
+  bannerActivityWindow  Int     @default(60) // minutes the "most active member" is counted over
+  bannerActive          String? // id of the banner in bannerItems that is put on the server
+  bannerItems           Json    @default("[]")
+  bannerStatus          Json    @default("{}") // written by the bot: last update, last error
+  bannerRefreshRequest  String? // ISO time; the dashboard sets it, the bot updates the banner at once
+
   // Custom Components
   componentsModals      Json @default("[]")
   componentsEmbeds      Json @default("[]")
@@ -165,6 +174,7 @@ model Guild {
   submissions ModerationSubmission[]
   webhooks    GuildWebhook[]
   aiMemories  AiMemory[]
+  bannerImages BannerImage[]
 
   @@index([id])
 }
@@ -187,6 +197,43 @@ model AiMemory {
   @@index([guildId, userId])
 }
 
+// A picture a server owner uploaded in the dashboard for a banner. The banner refers to it as
+// `upload:<id>`; the dashboard serves it to the editor and the bot draws it onto the banner.
+model BannerImage {
+  id        String   @id @default(cuid())
+  guildId   String
+  name      String
+  mime      String
+  size      Int
+  width     Int
+  height    Int
+  data      Bytes
+  // "background" is cut to the size of the banner; "layer" is only scaled down to fit it
+  purpose   String   @default("layer")
+  createdAt DateTime @default(now())
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId])
+}
+
+// The picture a member put behind one of their cards (rank, profile or level-up). It is cut to the
+// size of the card when it is uploaded. The card refers to it as `upload:<id>` in its `*Url`
+// column; the member's rows of every server may point at the same picture.
+model CardBackground {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String // "rank" | "profile" | "level_up"
+  mime      String
+  size      Int
+  width     Int
+  height    Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@index([userId, kind])
+}
+
 // User model
 model User {
   id        String   @id @default(cuid())
@@ -205,6 +252,7 @@ model User {
   profileMode         Boolean @default(false)
   profileSolid        Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#422242\",\"second_component\":\"#C30F45\",\"third_component\":\"#422242\"}")
   profileUrl          String?
+  profileDim          Int     @default(30)
   profileColor        String?
   profileIcons        Json    @default("[]")
   profileIconsPadding Int     @default(10)
@@ -213,10 +261,12 @@ model User {
   rankSolid Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#ffffff\",\"second_component\":\"#C30F45\",\"third_component\":\"#422242\"}")
   rankUrl   String?
   rankColor String?
+  rankDim   Int     @default(30)
 
   levelupMode  Boolean @default(false)
   levelupSolid Json    @default("{\"bg_color\":\"#000000\",\"first_component\":\"#ffffff\",\"second_component\":\"#422242\",\"third_component\":\"#C30F45\"}")
   levelupUrl   String?
+  levelupDim   Int     @default(30)
 
   customBadges Json @default("[]")
 

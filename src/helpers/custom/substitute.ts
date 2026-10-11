@@ -4,6 +4,7 @@
  * Placeholders: `{user.id|name|displayName|mention|avatar}`, `{channel.id|name|mention}`,
  * `{guild.id|name|icon}`, `{input.N}` / `{input.N.label}` / `{input.N.value}`,
  * `{selected.value|label}`, `{var.<name>}`, `{date}`, `{time}`, `{timestamp}`.
+ * Level-up announcements add `{level}`, `{level.prev}`, `{xp.total}`, `{messages}`, `{reward.role}`.
  * Unknown or unresolved placeholders are left untouched.
  */
 
@@ -31,6 +32,15 @@ export interface VariableContext {
     label: string;
   };
   variables?: Record<string, string>;
+  /** Only set for level-up announcements. */
+  level?: {
+    level: number;
+    previous: number;
+    total_xp: number;
+    messages: number;
+    /** Mention of the role given for exactly this level, empty when there is none. */
+    reward_role: string;
+  };
 }
 
 function escapeRegExp(value: string): string {
@@ -83,6 +93,14 @@ export function substituteVariables(text: string, context?: VariableContext): st
   if (context.selected) {
     result = replaceToken(result, "selected.value", context.selected.value);
     result = replaceToken(result, "selected.label", context.selected.label);
+  }
+
+  if (context.level) {
+    result = replaceToken(result, "level", String(context.level.level));
+    result = replaceToken(result, "level.prev", String(context.level.previous));
+    result = replaceToken(result, "xp.total", String(context.level.total_xp));
+    result = replaceToken(result, "messages", String(context.level.messages));
+    result = replaceToken(result, "reward.role", context.level.reward_role);
   }
 
   if (context.variables) {

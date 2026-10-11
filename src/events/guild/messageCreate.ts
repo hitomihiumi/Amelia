@@ -1,5 +1,5 @@
 import { Command, Levels } from "../../types/helpers";
-import { Client, ChannelType, Message, AttachmentBuilder } from "discord.js";
+import { Client, ChannelType, Message } from "discord.js";
 import { Guild } from "../../helpers";
 import {
   onCoolDown,
@@ -9,7 +9,7 @@ import {
   awardLevelRole,
 } from "../../handlers/functions";
 import { t } from "../../i18n/helpers";
-import { LevelCard } from "../../helpers/canvas/LevelCard";
+import { announceLevelUp } from "../../helpers/levelAnnouncement";
 import { handleAiMessage } from "../../helpers/ai";
 
 module.exports = async (client: Client, message: Message) => {
@@ -49,29 +49,15 @@ module.exports = async (client: Client, message: Message) => {
 
         awardLevelRole(message.member, levelS, await member.get("level.level"));
 
-        const card = new LevelCard({
-          avatar: message.author.displayAvatarURL({ size: 512, extension: "png" }),
-          data: {
-            level: await member.get("level.level"),
-          },
-          displayOptions: await member.get("custom.level_up"),
-        });
-
-        const buffer = await card.render();
-        if (!buffer) return;
-
-        const attachment = new AttachmentBuilder(buffer, { name: "levelup.png" });
-
-        return message
-          .reply({
-            content: t(client, lang, "events.message_create.level_up", message.member),
-            files: [attachment],
-          })
-          .then((msg) => {
-            setTimeout(async () => {
-              if (msg.deletable) await msg.delete();
-            }, 10000);
-          });
+        await announceLevelUp(client, {
+          message,
+          levels: levelS,
+          lang,
+          level: await member.get("level.level"),
+          totalXp: await member.get("level.total_xp"),
+          messageCount: await member.get("level.message_count"),
+          cardOptions: await member.get("custom.level_up"),
+        }).catch((error) => console.error("[Levels] Failed to announce a level-up:".red, error));
       }
     }
 
