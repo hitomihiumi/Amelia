@@ -18,7 +18,7 @@ import {
   ServerBanner,
 } from "../../types/helpers";
 import { createScene, renderScene } from "../canvas/scene";
-import { fetchBannerImage } from "./images";
+import { loadBannerImage } from "./images";
 import { fillBannerText, metricValue } from "./placeholders";
 
 /**
@@ -66,6 +66,7 @@ async function backgroundNodes(
   background: BannerBackground,
   stats: BannerStats,
   timezone: string,
+  guildId: string,
 ): Promise<Node[]> {
   if (background.type === "gradient") {
     const line = gradientLine(background.angle);
@@ -77,7 +78,7 @@ async function backgroundNodes(
   }
 
   if (background.type === "image") {
-    const src = await fetchBannerImage(fillBannerText(background.src, stats, timezone));
+    const src = await loadBannerImage(fillBannerText(background.src, stats, timezone), guildId);
     const nodes: Node[] = [<MorphLayer layout={full} size={fullSize} color={background.color} />];
     if (src) {
       // A blurred picture fades at its edges, so it is drawn a little larger than the banner.
@@ -118,6 +119,7 @@ async function layerNodes(
   layer: BannerLayer,
   stats: BannerStats,
   timezone: string,
+  guildId: string,
 ): Promise<Node[]> {
   const opacity = layer.opacity / 100;
 
@@ -186,7 +188,7 @@ async function layerNodes(
             ? (stats.top?.avatar ?? "")
             : stats.guild_icon
           : fillBannerText(layer.src, stats, timezone);
-      const picture = link ? await fetchBannerImage(link) : null;
+      const picture = link ? await loadBannerImage(link, guildId) : null;
       const radius = radiusOf(layer.radius, layer);
       const size = {
         width: Math.round(layer.width),
@@ -258,13 +260,17 @@ async function layerNodes(
 }
 
 /** Renders the banner to a PNG. */
-export async function renderBanner(banner: ServerBanner, stats: BannerStats): Promise<Buffer> {
+export async function renderBanner(
+  banner: ServerBanner,
+  stats: BannerStats,
+  guildId: string,
+): Promise<Buffer> {
   const scene = createScene(BANNER_WIDTH, BANNER_HEIGHT);
 
-  const nodes: Node[] = await backgroundNodes(banner.background, stats, banner.timezone);
+  const nodes: Node[] = await backgroundNodes(banner.background, stats, banner.timezone, guildId);
   for (const layer of banner.layers) {
     if (!layer.visible) continue;
-    nodes.push(...(await layerNodes(layer, stats, banner.timezone)));
+    nodes.push(...(await layerNodes(layer, stats, banner.timezone, guildId)));
   }
 
   scene.load(

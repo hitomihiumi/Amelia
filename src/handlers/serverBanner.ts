@@ -69,7 +69,7 @@ async function applyBanner(
 
   let picture: Buffer;
   try {
-    picture = await renderBanner(banner, stats);
+    picture = await renderBanner(banner, stats, guild.id);
   } catch (error) {
     throw new BannerError("render", error instanceof Error ? error.message : "Render failed");
   }

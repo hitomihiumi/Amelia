@@ -1,5 +1,6 @@
 import dns from "node:dns/promises";
 import net from "node:net";
+import { prisma } from "../../database";
 
 /** Pictures bigger than this are refused: a banner is a 960×540 image, not a photo album. */
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -101,5 +102,32 @@ export async function fetchBannerImage(link: string): Promise<Buffer | null> {
 
   if (cache.size >= CACHE_SIZE) cache.delete(cache.keys().next().value as string);
   cache.set(link, { at: Date.now(), data });
+  return data;
+}
+
+/** A picture uploaded in the dashboard is written in a banner as `upload:<id>`. */
+const UPLOAD = /^upload:([A-Za-z0-9_-]{10,40})$/;
+
+const uploads = new Map<string, { at: number; data: Buffer | null }>();
+
+/**
+ * The picture a banner points at: an upload of this server (read from the database) or a link
+ * (downloaded, see `fetchBannerImage`). A picture of another server is never handed out.
+ */
+export async function loadBannerImage(link: string, guildId: string): Promise<Buffer | null> {
+  const upload = UPLOAD.exec(link.trim());
+  if (!upload) return fetchBannerImage(link);
+
+  const key = `${guildId}:${upload[1]}`;
+  const hit = uploads.get(key);
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.data;
+
+  const row = await prisma.bannerImage
+    .findFirst({ where: { id: upload[1], guildId }, select: { data: true } })
+    .catch(() => null);
+  const data = row ? Buffer.from(row.data) : null;
+
+  if (uploads.size >= CACHE_SIZE) uploads.delete(uploads.keys().next().value as string);
+  uploads.set(key, { at: Date.now(), data });
   return data;
 }

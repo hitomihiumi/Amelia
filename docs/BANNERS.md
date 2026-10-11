@@ -57,5 +57,9 @@ The most active member is the one who wrote the most over the last 60 or 120 min
 
 ### Pictures
 
-Links to pictures are downloaded by the bot itself (`src/helpers/banner/images.ts`): `https` only,
-public addresses only, 8 MB at most.
+A picture layer or a picture background points at either
+
+- a link, downloaded by the bot itself (`src/helpers/banner/images.ts`): `https` only, public
+  addresses only, 8 MB at most; or
+- `upload:<id>`, a picture the server owner uploaded in the dashboard. It lives in the
+  `BannerImage` table and is only handed out to the server it belongs to.
