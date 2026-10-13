@@ -8,8 +8,69 @@ import {
 } from "discord.js";
 import { Guild } from "../helpers";
 import { ScenarioRunner } from "../helpers";
+import { ScenarioRunOptions, ScenarioRunResult } from "../helpers/custom/ScenarioRunner";
+import { findContinuation } from "../helpers/custom/scenarioFlow";
 import { ScenarioCustom } from "../types/helpers";
 import { t } from "../i18n/helpers";
+
+type ScenarioInteraction = ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction;
+
+/**
+ * Make sure the interaction is answered. Discord shows its generic "Something went wrong" when a
+ * scenario ends without a reply (a roles-only scenario, a step that failed on its own...).
+ */
+async function ensureAnswered(interaction: ScenarioInteraction, failure?: string): Promise<void> {
+  if (interaction.replied || interaction.deferred) return;
+
+  try {
+    if (failure) {
+      await interaction.reply({
+        content: `❌ ${failure}`,
+        flags: MessageFlagsBitField.Flags.Ephemeral,
+      });
+    } else if (
+      interaction.isButton() ||
+      interaction.isStringSelectMenu() ||
+      (interaction.isModalSubmit() && interaction.isFromMessage())
+    ) {
+      await interaction.deferUpdate();
+    } else {
+      // A modal opened from a command has no message to update: answer and take the answer back
+      await interaction.deferReply({ flags: MessageFlagsBitField.Flags.Ephemeral });
+      await interaction.deleteReply();
+    }
+  } catch (error) {
+    console.warn("[ScenarioHandler] Could not acknowledge the interaction:", error);
+  }
+}
+
+/** Run a scenario and always leave the interaction answered, whatever the outcome. */
+async function runScenario(
+  client: Client,
+  interaction: ScenarioInteraction,
+  scenario: ScenarioCustom,
+  guild: Guild,
+  options?: ScenarioRunOptions,
+): Promise<void> {
+  let result: ScenarioRunResult;
+  try {
+    result = await ScenarioRunner.run(client, interaction, scenario, guild, options);
+  } catch (error: any) {
+    console.error(
+      `[ScenarioHandler] Scenario "${scenario.name}" (${scenario.id}) crashed on "${interaction.customId}":`,
+      error,
+    );
+    result = { success: false, error: "Something went wrong while running this scenario" };
+  }
+
+  if (!result.success && result.error) {
+    console.warn(
+      `[ScenarioHandler] Scenario "${scenario.name}" (${scenario.id}) stopped on "${interaction.customId}": ${result.error}`,
+    );
+  }
+
+  await ensureAnswered(interaction, result.success ? result.softError : result.error);
+}
 
 /**
  * Handle scenario interactions
@@ -53,6 +114,26 @@ export async function handleScenarioInteraction(
       triggerType = "modal_submit";
     }
 
+    const typedInteraction = interaction as ScenarioInteraction;
+
+    // An answer to a step that showed this component (the modal of a Show Modal step, a button or
+    // select menu of a message step) continues that scenario from the step it is wired to
+    const hasContinuations = scenarios?.some((s) => s.steps?.some((st) => st.onInteraction));
+    const continuation = hasContinuations
+      ? findContinuation(scenarios, interaction.customId, {
+          buttons: await guild.get("utils.components.buttons"),
+          selectMenus: await guild.get("utils.components.selectMenus"),
+          layouts: await guild.get("utils.components.layouts"),
+        })
+      : undefined;
+
+    if (continuation) {
+      await runScenario(client, typedInteraction, continuation.scenario, guild, {
+        startStepId: continuation.targetStepId,
+      });
+      return true;
+    }
+
     // Find matching scenario
     const matchingScenario = scenarios?.find(
       (s) =>
@@ -62,24 +143,7 @@ export async function handleScenarioInteraction(
     );
 
     if (matchingScenario) {
-      // Execute the scenario
-      const result = await ScenarioRunner.run(
-        client,
-        interaction as ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction,
-        matchingScenario,
-        guild,
-      );
-
-      if (!result.success && result.error) {
-        // If the interaction hasn't been responded to, send error message
-        if (!interaction.replied && !interaction.deferred) {
-          await interaction.reply({
-            content: `❌ ${result.error}`,
-            flags: MessageFlagsBitField.Flags.Ephemeral,
-          });
-        }
-      }
-
+      await runScenario(client, typedInteraction, matchingScenario, guild);
       return true;
     }
 

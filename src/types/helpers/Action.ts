@@ -156,6 +156,13 @@ export interface ScenarioStep {
   onSuccess?: string; // Next step ID on success
   onFailure?: string; // Next step ID on failure (if conditions fail)
   stopOnFailure?: boolean; // Stop scenario if this step fails
+  /**
+   * What happens once the user answers this step. Keyed by the id of the modal (`show_modal`) or
+   * of a button / select menu the step puts on a message; the value is the step to continue with.
+   * The continuation runs on the NEW interaction (the modal submit, the click, the selection), so
+   * a scenario no longer needs a second scenario triggered by that component.
+   */
+  onInteraction?: Record<string, string>;
 }
 
 export interface ScenarioCustom {
