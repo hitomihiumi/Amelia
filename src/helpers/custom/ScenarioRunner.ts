@@ -33,6 +33,7 @@ import { t } from "../../i18n/helpers";
 import { CustomModal } from "./CustomModal";
 import { CustomButton } from "./CustomButton";
 import { CustomSelectMenu } from "./CustomSelectMenu";
+import { continuationTargets } from "./scenarioFlow";
 
 interface ExecutionContext {
   client: Client;
@@ -72,6 +73,26 @@ type LayoutResolution =
   | { status: "ok"; payload: LayoutPayload }
   | { status: "error"; error: string };
 
+/**
+ * `success: false` + `error` is a run that was stopped (a restriction, a step with
+ * `stopOnFailure`, ...). `softError` is the first failure of a step that did not stop the run:
+ * the run went on, but the user may be left with an unanswered interaction and should be told.
+ */
+export interface ScenarioRunResult {
+  success: boolean;
+  error?: string;
+  softError?: string;
+}
+
+export interface ScenarioRunOptions {
+  /**
+   * Continue an earlier run at this step instead of starting from the entry step: the interaction
+   * is the answer (modal submit, click, selection) to a step that showed a component. Cooldown
+   * and use limits were already charged by the run that showed it, so they are skipped.
+   */
+  startStepId?: string;
+}
+
 interface CooldownEntry {
   userId: string;
   scenarioId: string;
@@ -85,6 +106,7 @@ const cooldownMap = new Map<string, CooldownEntry>();
 export class ScenarioRunner {
   private scenario: ScenarioCustom;
   private context: ExecutionContext;
+  private softError?: string;
 
   constructor(scenario: ScenarioCustom, context: ExecutionContext) {
     this.scenario = scenario;
@@ -113,7 +135,10 @@ export class ScenarioRunner {
     interaction: ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction,
     scenario: ScenarioCustom,
     guildWrapper: Guild,
-  ): Promise<{ success: boolean; error?: string }> {
+    options: ScenarioRunOptions = {},
+  ): Promise<ScenarioRunResult> {
+    const isContinuation = options.startStepId !== undefined;
+
     // Check if scenario is enabled
     if (!scenario.enabled) {
       return { success: false, error: "Scenario is disabled" };
@@ -148,7 +173,7 @@ export class ScenarioRunner {
     const cooldownKey = `${interaction.user.id}:${scenario.id}`;
     const cooldownEntry = cooldownMap.get(cooldownKey);
 
-    if (cooldownEntry && scenario.cooldown) {
+    if (!isContinuation && cooldownEntry && scenario.cooldown) {
       const timePassed = (Date.now() - cooldownEntry.timestamp) / 1000;
       if (timePassed < scenario.cooldown) {
         const remaining = Math.ceil(scenario.cooldown - timePassed);
@@ -160,7 +185,7 @@ export class ScenarioRunner {
     }
 
     // Check execution limit
-    if (scenario.maxExecutionsPerUser && scenario.executionPeriod) {
+    if (!isContinuation && scenario.maxExecutionsPerUser && scenario.executionPeriod) {
       if (cooldownEntry) {
         const periodPassed = (Date.now() - cooldownEntry.timestamp) / 1000;
         if (periodPassed < scenario.executionPeriod) {
@@ -205,9 +230,8 @@ export class ScenarioRunner {
     // Add input/selected context based on interaction type
     if (interaction.isModalSubmit()) {
       context.input = [];
-      const modal = await guildWrapper
-        .get(`utils.components.modals`)
-        .then((modals) => (modals as ModalCustom[]).find((m) => m.id === interaction.customId));
+      const modals = ((await guildWrapper.get(`utils.components.modals`)) as ModalCustom[]) ?? [];
+      const modal = modals.find((m) => m.id === interaction.customId);
       if (!modal) {
         return { success: false, error: "Modal configuration not found" };
       }
@@ -216,41 +240,63 @@ export class ScenarioRunner {
       fieldsArray.forEach((field) => {
         context.input!.push({
           value: (field as any).value || "",
-          label: modal.fields.filter((m) => m.id === (field as any).customId)[0].name || "", // customId contains the field identifier
+          // customId contains the field identifier; a field deleted since the modal was shown has no label
+          label: modal.fields.find((m) => m.id === (field as any).customId)?.name || "",
         });
       });
     } else if (interaction.isStringSelectMenu()) {
+      const value = interaction.values[0];
+      const menus =
+        ((await guildWrapper.get(`utils.components.selectMenus`)) as SelectMenuCustom[]) ?? [];
+      const option = menus
+        .find((m) => m.id === interaction.customId)
+        ?.options.find((o) => o.value === value);
       context.selected = {
-        value: interaction.values[0],
-        label: interaction.values[0], // Label not directly available, using value
+        value,
+        label: option?.label ?? value,
       };
     }
 
     const runner = new ScenarioRunner(scenario, context);
-    const result = await runner.execute();
+    const result = await runner.execute(options.startStepId);
 
-    // Update cooldown
-    cooldownMap.set(cooldownKey, {
-      userId: interaction.user.id,
-      scenarioId: scenario.id,
-      timestamp: Date.now(),
-      executionCount: (cooldownEntry?.executionCount || 0) + 1,
-    });
+    // Update cooldown (a continuation belongs to the run that is already counted)
+    if (!isContinuation) {
+      cooldownMap.set(cooldownKey, {
+        userId: interaction.user.id,
+        scenarioId: scenario.id,
+        timestamp: Date.now(),
+        executionCount: (cooldownEntry?.executionCount || 0) + 1,
+      });
+    }
 
     return result;
   }
 
   /**
-   * Execute the scenario steps
+   * Execute the scenario steps, from the entry step or, for the answer to a modal / button /
+   * select menu a step showed, from `startStepId`.
    */
-  private async execute(): Promise<{ success: boolean; error?: string }> {
+  private async execute(startStepId?: string): Promise<ScenarioRunResult> {
     if (this.scenario.steps.length === 0) {
       return { success: false, error: "Scenario has no steps" };
     }
 
     // Sort steps by order
     const sortedSteps = [...this.scenario.steps].sort((a, b) => a.order - b.order);
-    let currentStep: ScenarioStep | undefined = sortedSteps[0];
+    // Steps wired to an answer only ever run as that answer, never as the entry step. A scenario
+    // that wires answers is drawn link by link: it has no "next step in order" to fall through
+    // to, or the end of one chain would run into the steps of another.
+    const answerSteps = continuationTargets(this.scenario);
+    const explicitLinksOnly = answerSteps.size > 0;
+
+    let currentStep: ScenarioStep | undefined = startStepId
+      ? this.scenario.steps.find((s) => s.id === startStepId)
+      : (sortedSteps.find((s) => !answerSteps.has(s.id)) ?? sortedSteps[0]);
+
+    if (!currentStep) {
+      return { success: false, error: "Scenario step not found" };
+    }
 
     while (currentStep) {
       // Check execution limit
@@ -287,9 +333,14 @@ export class ScenarioRunner {
         // Execute action
         const actionResult = await this.executeAction(currentStep.action);
         if (!actionResult.success) {
+          const reason = actionResult.error ?? "unknown error";
+          console.warn(
+            `[ScenarioRunner] Scenario "${this.scenario.name}" (${this.scenario.id}), step "${currentStep.name ?? currentStep.id}" (${currentStep.action.type}) failed: ${reason}`,
+          );
           if (currentStep.stopOnFailure) {
             return actionResult;
           }
+          this.softError ??= reason;
         }
         nextStepId = currentStep.onSuccess;
       } else {
@@ -302,6 +353,8 @@ export class ScenarioRunner {
       // Find next step
       if (nextStepId) {
         currentStep = this.scenario.steps.find((s) => s.id === nextStepId);
+      } else if (explicitLinksOnly) {
+        currentStep = undefined;
       } else {
         // Move to next step in order
         const currentIndex = sortedSteps.indexOf(currentStep);
@@ -309,7 +362,7 @@ export class ScenarioRunner {
       }
     }
 
-    return { success: true };
+    return this.softError ? { success: true, softError: this.softError } : { success: true };
   }
 
   /**
@@ -461,12 +514,17 @@ export class ScenarioRunner {
     const modal = new CustomModal(modalData);
     const interaction = this.context.interaction;
 
-    if ("showModal" in interaction) {
-      await interaction.showModal(modal.getModal(this.toVariableContext()));
-      return { success: true };
+    // Discord answers a modal submit with a message or an acknowledgement, never with another modal
+    if (interaction.isModalSubmit()) {
+      return {
+        success: false,
+        error:
+          "A modal cannot be opened in response to a modal submit. Show it from a button or select menu instead.",
+      };
     }
 
-    return { success: false, error: "Cannot show modal for this interaction type" };
+    await interaction.showModal(modal.getModal(this.toVariableContext()));
+    return { success: true };
   }
 
   private async actionSendMessage(
