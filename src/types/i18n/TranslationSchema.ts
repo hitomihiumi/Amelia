@@ -313,6 +313,22 @@ export interface TranslationSchema {
         fail: string;
       };
     };
+    slots: {
+      messages: {
+        disabled: string;
+        title: string;
+        description: string;
+        bets_name: string;
+        bets_value: string;
+        cooldown_name: string;
+        cooldown_value: string;
+        warning_title: string;
+        warning: string;
+        open_button: string;
+        no_dashboard: string;
+      };
+    };
+
 
     bank: {
       messages: {
@@ -784,6 +800,33 @@ export interface TranslationSchema {
             };
           };
         };
+        slots: {
+          title: string;
+          description: string;
+          fields: {
+            status: {
+              name: string;
+              enabled: string;
+              disabled: string;
+            };
+            min_bet: {
+              name: string;
+              value: string;
+            };
+            max_bet: {
+              name: string;
+              value: string;
+            };
+            cooldown: {
+              name: string;
+              value: string;
+            };
+            warning: {
+              name: string;
+              value: string;
+            };
+          };
+        };
       };
       buttons: {
         back: string;
@@ -844,6 +887,10 @@ export interface TranslationSchema {
               description: string;
             };
             rob: {
+              label: string;
+              description: string;
+            };
+            slots: {
               label: string;
               description: string;
             };
@@ -959,11 +1006,27 @@ export interface TranslationSchema {
             placeholder: string;
           };
         };
+        slots: {
+          title: string;
+          min_bet: {
+            label: string;
+            placeholder: string;
+          };
+          max_bet: {
+            label: string;
+            placeholder: string;
+          };
+          cooldown: {
+            label: string;
+            placeholder: string;
+          };
+        };
       };
       messages: {
         invalid_emoji: string;
         invalid_number: string;
         invalid_type: string;
+        slots_invalid: string;
         invalid_date: string;
         role_added: string;
         role_removed: string;

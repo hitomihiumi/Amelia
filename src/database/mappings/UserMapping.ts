@@ -53,6 +53,9 @@ export const UserPathMap: PathMap = {
   "economy.timeout.rob": {
     field: "robTimeout",
   },
+  "economy.timeout.slots": {
+    field: "slotsTimeout",
+  },
   games: {
     field: "games",
   },
@@ -150,7 +153,7 @@ export const UserPathMap: PathMap = {
   },
   "economy.timeout": {
     field: "",
-    children: ["daily", "rob", "timely", "weekly", "work"],
+    children: ["daily", "rob", "slots", "timely", "weekly", "work"],
   },
   custom: {
     field: "",
@@ -198,6 +201,7 @@ export const UserFieldMap: Record<string, string> = {
   "economy.timeout.daily": "dailyTimeout",
   "economy.timeout.weekly": "weeklyTimeout",
   "economy.timeout.rob": "robTimeout",
+  "economy.timeout.slots": "slotsTimeout",
   games: "games",
   "custom.balance.number": "balanceNumber",
   "custom.balance.mode": "balanceMode",

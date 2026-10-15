@@ -111,6 +111,14 @@ export interface GuildSchema {
           fail_chance: number;
         };
       };
+      /** Slot machine on the website, virtual currency only. */
+      slots: {
+        enabled: boolean;
+        min_bet: number;
+        max_bet: number;
+        /** Seconds between two spins of the same member. */
+        cooldown: number;
+      };
     };
   };
   moderation: {

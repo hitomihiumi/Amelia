@@ -300,6 +300,21 @@ export const en: TranslationSchema = {
         fail: "🚔 You got caught trying to rob {0} and paid a fine of {1}!",
       },
     },
+    slots: {
+      messages: {
+        disabled: "❌ The slot machine is currently disabled on this server.",
+        title: "🎰 Slot machine",
+        description: "The slot machine lives on the website. Spin the reels with the server's virtual currency.",
+        bets_name: "Bet limits",
+        bets_value: "{0} – {1}",
+        cooldown_name: "Pause between spins",
+        cooldown_value: "{0} seconds",
+        warning_title: "⚠️ Please read",
+        warning: "This is a game with **virtual** server currency only. It is **not** gambling with real money: nothing can be bought, deposited or withdrawn. It does not encourage gambling in any way. Casinos and betting with real money are harmful and can ruin lives. If gambling is a problem for you or someone you know, please seek professional help.",
+        open_button: "Open the slot machine",
+        no_dashboard: "ℹ️ The website address is not configured. Ask the bot owner to set `DASHBOARD_URL`.",
+      },
+    },
     bank: {
       messages: {
         invalid_amount: "❌ Please enter a valid amount.",
@@ -773,6 +788,33 @@ export const en: TranslationSchema = {
             },
           },
         },
+        slots: {
+          title: "Slot Machine Settings",
+          description: "Configure the slot machine on the website. It only ever uses the server's virtual currency.",
+          fields: {
+            status: {
+              name: "Status",
+              enabled: "✅ Enabled",
+              disabled: "❌ Disabled",
+            },
+            min_bet: {
+              name: "Minimum bet",
+              value: "{0}",
+            },
+            max_bet: {
+              name: "Maximum bet",
+              value: "{0}",
+            },
+            cooldown: {
+              name: "Pause between spins",
+              value: "{0} seconds",
+            },
+            warning: {
+              name: "⚠️ Important",
+              value: "A game of chance with **virtual** currency only. The bot and the website remind players everywhere that it is not real gambling. Never trade the server currency for real money or real prizes: casinos on real money are harmful.",
+            },
+          },
+        },
       },
       buttons: {
         back: "← Back",
@@ -835,6 +877,10 @@ export const en: TranslationSchema = {
             rob: {
               label: "Rob",
               description: "Configure rob command",
+            },
+            slots: {
+              label: "Slot machine",
+              description: "Configure the slot machine on the website",
             },
           },
         },
@@ -948,11 +994,27 @@ export const en: TranslationSchema = {
             placeholder: "Enter fail chance percentage (0-100)",
           },
         },
+        slots: {
+          title: "Slot Machine Settings",
+          min_bet: {
+            label: "Minimum bet",
+            placeholder: "Enter the minimum bet",
+          },
+          max_bet: {
+            label: "Maximum bet",
+            placeholder: "Enter the maximum bet",
+          },
+          cooldown: {
+            label: "Pause between spins (seconds)",
+            placeholder: "Enter the pause in seconds",
+          },
+        },
       },
       messages: {
         invalid_emoji: "Invalid emoji. Please enter a valid emoji.",
         invalid_number: "Invalid number. Please enter a valid number.",
         invalid_type: "Invalid type. Please enter 'percentage' or 'fixed'.",
+        slots_invalid: "Invalid values. The minimum bet must be at least 1, the maximum bet must not be lower than the minimum and not above {0}, and the pause must be between 1 and {1} seconds.",
         invalid_date: "Invalid date format. Please use YYYY-MM-DD HH:MM format.",
         role_added: "Role {0} has been added to the shop for **{1}**!",
         role_removed: "Role has been removed from the shop.",

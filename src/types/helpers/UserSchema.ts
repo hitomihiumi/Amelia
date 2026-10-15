@@ -22,6 +22,7 @@ export interface UserSchema {
       daily: number;
       weekly: number;
       rob: number;
+      slots: number;
     };
   };
   custom: {

@@ -332,6 +332,26 @@ const guildSchemaMap: Record<string, SchemaField> = {
     prismaType: "Json",
     default: '"{\\"min\\":100,\\"max\\":500,\\"type\\":\\"fixed\\"}"',
   },
+  "economy.income.slots.enabled": {
+    prismaField: "slotsEnabled",
+    prismaType: "Boolean",
+    default: "false",
+  },
+  "economy.income.slots.min_bet": {
+    prismaField: "slotsMinBet",
+    prismaType: "Int",
+    default: "10",
+  },
+  "economy.income.slots.max_bet": {
+    prismaField: "slotsMaxBet",
+    prismaType: "Int",
+    default: "1000",
+  },
+  "economy.income.slots.cooldown": {
+    prismaField: "slotsCooldown",
+    prismaType: "Int",
+    default: "5",
+  },
   "economy.income.rob.punishment": {
     prismaField: "robPunishment",
     prismaType: "Json",
@@ -708,6 +728,11 @@ const userSchemaMap: Record<string, SchemaField> = {
   },
   "economy.timeout.weekly": {
     prismaField: "weeklyTimeout",
+    prismaType: "DateTime",
+    optional: true,
+  },
+  "economy.timeout.slots": {
+    prismaField: "slotsTimeout",
     prismaType: "DateTime",
     optional: true,
   },
