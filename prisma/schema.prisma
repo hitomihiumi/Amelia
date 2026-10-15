@@ -292,6 +292,12 @@ model User {
   weeklyTimeout DateTime?
   robTimeout    DateTime?
   slotsTimeout  DateTime?
+  // Free spins won on the slot machine and still to play: what is left, the bet on one line, how many
+  // lines are played and what the round has paid so far.
+  slotsFreeSpins Int @default(0)
+  slotsFreeBet   Int @default(0)
+  slotsFreeLines Int @default(1)
+  slotsFreeWon   Int @default(0)
 
   // Game state (moved back from the MongoDB cache)
   games Json @default("{}")
