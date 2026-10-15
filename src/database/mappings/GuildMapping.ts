@@ -185,6 +185,18 @@ export const GuildPathMap: PathMap = {
   "economy.income.rob.punishment": {
     field: "robPunishment",
   },
+  "economy.income.slots.enabled": {
+    field: "slotsEnabled",
+  },
+  "economy.income.slots.min_bet": {
+    field: "slotsMinBet",
+  },
+  "economy.income.slots.max_bet": {
+    field: "slotsMaxBet",
+  },
+  "economy.income.slots.cooldown": {
+    field: "slotsCooldown",
+  },
   "moderation.moderation_roles": {
     field: "moderationRoles",
   },
@@ -410,7 +422,7 @@ export const GuildPathMap: PathMap = {
   },
   "economy.income": {
     field: "",
-    children: ["bump", "daily", "level_up", "rob", "timely", "weekly", "work"],
+    children: ["bump", "daily", "level_up", "rob", "slots", "timely", "weekly", "work"],
   },
   "economy.income.work": {
     field: "",
@@ -439,6 +451,10 @@ export const GuildPathMap: PathMap = {
   "economy.income.rob": {
     field: "",
     children: ["cooldown", "enabled", "income", "punishment"],
+  },
+  "economy.income.slots": {
+    field: "",
+    children: ["cooldown", "enabled", "max_bet", "min_bet"],
   },
   moderation: {
     field: "",
@@ -591,6 +607,10 @@ export const GuildFieldMap: Record<string, string> = {
   "economy.income.rob.cooldown": "robCooldown",
   "economy.income.rob.income": "robIncome",
   "economy.income.rob.punishment": "robPunishment",
+  "economy.income.slots.enabled": "slotsEnabled",
+  "economy.income.slots.min_bet": "slotsMinBet",
+  "economy.income.slots.max_bet": "slotsMaxBet",
+  "economy.income.slots.cooldown": "slotsCooldown",
   "moderation.moderation_roles": "moderationRoles",
   "moderation.log_channel": "modLogChannel",
   "moderation.dm_notify": "modDmNotify",

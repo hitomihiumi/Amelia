@@ -76,6 +76,7 @@ const TIMEOUT_PATHS = new Set([
   "economy.timeout.daily",
   "economy.timeout.weekly",
   "economy.timeout.rob",
+  "economy.timeout.slots",
 ]);
 
 /**

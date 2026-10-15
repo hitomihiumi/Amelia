@@ -23,7 +23,11 @@ import { GuildSchema } from "../../types/helpers";
 import { GuildEmoji } from "discord.js";
 
 type EconomySettings = GuildSchema["economy"];
-type IncomeType = "work" | "timely" | "daily" | "weekly" | "level_up" | "bump" | "rob";
+type IncomeType = "work" | "timely" | "daily" | "weekly" | "level_up" | "bump" | "rob" | "slots";
+
+// Bounds shared with the dashboard form and the website's spin action.
+const SLOTS_MAX_BET = 100_000;
+const SLOTS_MAX_COOLDOWN = 3600;
 type ViewType =
   | "main"
   | "currency"
@@ -90,7 +94,9 @@ module.exports = {
         if (i.customId === "NI_economy:back") {
           // Navigate back based on current view
           if (
-            ["work", "timely", "daily", "weekly", "level_up", "bump", "rob"].includes(currentView)
+            ["work", "timely", "daily", "weekly", "level_up", "bump", "rob", "slots"].includes(
+              currentView,
+            )
           ) {
             currentView = "income";
           } else if (currentView === "shop_manage") {
@@ -342,6 +348,10 @@ module.exports = {
               settings.income.rob.enabled = !settings.income.rob.enabled;
               await mostUsedQueries.setIncomeEnabled(guild, "rob", settings.income.rob.enabled);
               break;
+            case "slots":
+              settings.income.slots.enabled = !settings.income.slots.enabled;
+              await mostUsedQueries.setIncomeEnabled(guild, "slots", settings.income.slots.enabled);
+              break;
           }
 
           const components = buildComponents(
@@ -581,6 +591,111 @@ module.exports = {
 
               settings.income.rob.cooldown = cooldown;
               await guild.set("economy.income.rob.cooldown", cooldown);
+
+              const components = buildComponents(
+                client,
+                lang,
+                settings,
+                currentView,
+                selectedRoleId,
+              );
+              embed = buildEmbed(
+                client,
+                lang,
+                settings,
+                currentView,
+                selectedRoleId,
+                interaction.guild,
+                emojiPage,
+                EMOJIS_PER_PAGE,
+              );
+
+              await int.reply({
+                content: t(client, lang, "commands.economy.messages.settings_updated"),
+                flags: MessageFlagsBitField.Flags.Ephemeral,
+              });
+              await interaction.editReply({ embeds: [embed], components });
+            })
+            .catch(() => {});
+        } else if (i.customId === "NI_economy:edit_slots") {
+          const numberInput = (
+            id: string,
+            labelKey: "min_bet" | "max_bet" | "cooldown",
+            value: number,
+          ) =>
+            new LabelBuilder()
+              .setLabel(t(client, lang, `commands.economy.modals.slots.${labelKey}.label`))
+              .setTextInputComponent(
+                new TextInputBuilder()
+                  .setRequired(true)
+                  .setMinLength(1)
+                  .setMaxLength(10)
+                  .setStyle(TextInputStyle.Short)
+                  .setCustomId(id)
+                  .setPlaceholder(
+                    t(client, lang, `commands.economy.modals.slots.${labelKey}.placeholder`),
+                  )
+                  .setValue(value.toString()),
+              );
+
+          const modal = new ModalBuilder()
+            .setTitle(t(client, lang, "commands.economy.modals.slots.title"))
+            .setCustomId("NI_economy:slots_modal")
+            .setLabelComponents(
+              numberInput("NI_economy:slots_min", "min_bet", settings.income.slots.min_bet),
+              numberInput("NI_economy:slots_max", "max_bet", settings.income.slots.max_bet),
+              numberInput("NI_economy:slots_cooldown", "cooldown", settings.income.slots.cooldown),
+            );
+
+          await i.showModal(modal);
+
+          await i
+            .awaitModalSubmit({
+              time: 5 * 60 * 1000,
+              filter: (int: any) =>
+                int.user.id === interaction.user.id && int.customId === "NI_economy:slots_modal",
+            })
+            .then(async (int) => {
+              const minBet = Number(int.fields.getTextInputValue("NI_economy:slots_min").trim());
+              const maxBet = Number(int.fields.getTextInputValue("NI_economy:slots_max").trim());
+              const cooldown = Number(
+                int.fields.getTextInputValue("NI_economy:slots_cooldown").trim(),
+              );
+
+              if (![minBet, maxBet, cooldown].every(Number.isInteger)) {
+                await int.reply({
+                  content: t(client, lang, "commands.economy.messages.invalid_number"),
+                  flags: MessageFlagsBitField.Flags.Ephemeral,
+                });
+                return;
+              }
+
+              if (
+                minBet < 1 ||
+                maxBet < minBet ||
+                maxBet > SLOTS_MAX_BET ||
+                cooldown < 1 ||
+                cooldown > SLOTS_MAX_COOLDOWN
+              ) {
+                await int.reply({
+                  content: t(
+                    client,
+                    lang,
+                    "commands.economy.messages.slots_invalid",
+                    SLOTS_MAX_BET.toString(),
+                    SLOTS_MAX_COOLDOWN.toString(),
+                  ),
+                  flags: MessageFlagsBitField.Flags.Ephemeral,
+                });
+                return;
+              }
+
+              settings.income.slots.min_bet = minBet;
+              settings.income.slots.max_bet = maxBet;
+              settings.income.slots.cooldown = cooldown;
+              await guild.set("economy.income.slots.min_bet", minBet);
+              await guild.set("economy.income.slots.max_bet", maxBet);
+              await guild.set("economy.income.slots.cooldown", cooldown);
 
               const components = buildComponents(
                 client,
@@ -1616,6 +1731,53 @@ function buildEmbed(
           inline: true,
         },
       );
+  } else if (view === "slots") {
+    embed
+      .setTitle(t(client, lang, "commands.economy.embeds.slots.title"))
+      .setDescription(t(client, lang, "commands.economy.embeds.slots.description"))
+      .addFields(
+        {
+          name: t(client, lang, "commands.economy.embeds.slots.fields.status.name"),
+          value: settings.income.slots.enabled
+            ? t(client, lang, "commands.economy.embeds.slots.fields.status.enabled")
+            : t(client, lang, "commands.economy.embeds.slots.fields.status.disabled"),
+          inline: true,
+        },
+        {
+          name: t(client, lang, "commands.economy.embeds.slots.fields.min_bet.name"),
+          value: t(
+            client,
+            lang,
+            "commands.economy.embeds.slots.fields.min_bet.value",
+            settings.income.slots.min_bet.toString(),
+          ),
+          inline: true,
+        },
+        {
+          name: t(client, lang, "commands.economy.embeds.slots.fields.max_bet.name"),
+          value: t(
+            client,
+            lang,
+            "commands.economy.embeds.slots.fields.max_bet.value",
+            settings.income.slots.max_bet.toString(),
+          ),
+          inline: true,
+        },
+        {
+          name: t(client, lang, "commands.economy.embeds.slots.fields.cooldown.name"),
+          value: t(
+            client,
+            lang,
+            "commands.economy.embeds.slots.fields.cooldown.value",
+            settings.income.slots.cooldown.toString(),
+          ),
+          inline: true,
+        },
+        {
+          name: t(client, lang, "commands.economy.embeds.slots.fields.warning.name"),
+          value: t(client, lang, "commands.economy.embeds.slots.fields.warning.value"),
+        },
+      );
   }
 
   return embed;
@@ -1836,6 +1998,12 @@ function buildComponents(
               t(client, lang, "commands.economy.select_menus.income.options.rob.description"),
             )
             .setValue("rob"),
+          new StringSelectMenuOptionBuilder()
+            .setLabel(t(client, lang, "commands.economy.select_menus.income.options.slots.label"))
+            .setDescription(
+              t(client, lang, "commands.economy.select_menus.income.options.slots.description"),
+            )
+            .setValue("slots"),
         ),
     );
     const buttonRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
@@ -1922,6 +2090,26 @@ function buildComponents(
         .setStyle(ButtonStyle.Secondary),
     );
     components.push(buttonRow1, buttonRow2);
+  } else if (view === "slots") {
+    const buttonRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+      new ButtonBuilder()
+        .setCustomId("NI_economy:toggle_slots")
+        .setLabel(
+          settings.income.slots.enabled
+            ? t(client, lang, "commands.economy.buttons.disable")
+            : t(client, lang, "commands.economy.buttons.enable"),
+        )
+        .setStyle(settings.income.slots.enabled ? ButtonStyle.Danger : ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId("NI_economy:edit_slots")
+        .setLabel(t(client, lang, "commands.economy.buttons.edit"))
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId("NI_economy:back")
+        .setLabel(t(client, lang, "commands.economy.buttons.back"))
+        .setStyle(ButtonStyle.Secondary),
+    );
+    components.push(buttonRow);
   }
 
   return components;

@@ -93,6 +93,12 @@ model Guild {
   robIncome      Json    @default("{\"min\":100,\"max\":500,\"type\":\"fixed\"}")
   robPunishment  Json    @default("{\"min\":10,\"max\":50,\"type\":\"fixed\",\"fail_chance\":25}")
 
+  // Slot machine on the website. Virtual currency only, see the in-game warnings.
+  slotsEnabled  Boolean @default(false)
+  slotsMinBet   Int     @default(10)
+  slotsMaxBet   Int     @default(1000)
+  slotsCooldown Int     @default(5)
+
   // Moderation settings
   moderationRoles   String[] @default([])
   modLogChannel     String?
@@ -285,6 +291,7 @@ model User {
   dailyTimeout  DateTime?
   weeklyTimeout DateTime?
   robTimeout    DateTime?
+  slotsTimeout  DateTime?
 
   // Game state (moved back from the MongoDB cache)
   games Json @default("{}")
