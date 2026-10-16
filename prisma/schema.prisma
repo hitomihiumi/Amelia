@@ -297,6 +297,7 @@ model User {
   slotsFreeSpins Int @default(0)
   slotsFreeBet   Int @default(0)
   slotsFreeLines Int @default(1)
+  slotsFreeReels Int @default(3)
   slotsFreeWon   Int @default(0)
 
   // Game state (moved back from the MongoDB cache)
