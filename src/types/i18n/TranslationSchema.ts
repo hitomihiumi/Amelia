@@ -2265,6 +2265,7 @@ export interface TranslationSchema {
         long_term: string;
         images: string;
         code: string;
+        actions: string;
       };
       memory_count: string;
       enabled: string;
@@ -2325,6 +2326,36 @@ export interface TranslationSchema {
       forget_one: string;
       forget_all: string;
       forgot_all: string;
+    };
+    actions: {
+      title: string;
+      hint: string;
+      apply: string;
+      cancel: string;
+      more: string;
+      limit: string;
+      slowmode: string;
+      off: string;
+      fallback_text: string;
+      not_yours: string;
+      no_permission: string;
+      expired: string;
+      switched_off: string;
+      outcome: {
+        applied: string;
+        partial: string;
+        failed: string;
+        cancelled: string;
+        expired: string;
+      };
+      kinds: {
+        embed: string;
+        button: string;
+        select_menu: string;
+        modal: string;
+        scenario: string;
+        layout: string;
+      };
     };
   };
 

@@ -8,6 +8,7 @@ import {
 import { Guild } from "../helpers";
 import {
   AUTOMOD_KINDS,
+  AutoModSyncResult,
   AutoModTransport,
   ModerationService,
   autoModDriver,
@@ -146,6 +147,31 @@ export async function reconcileAutoModeration(client: Client, discordGuild: Disc
   } catch (error) {
     console.warn(`[automod] ${discordGuild.id}: reconcile failed`, error);
   }
+}
+
+/**
+ * Make the rules in Discord match the stored settings, after the settings were changed inside the
+ * bot (the dashboard does the same over REST when it saves). Returns what Discord refused or
+ * shortened, or null when the settings could not be read.
+ */
+export async function applyAutoModeration(
+  client: Client,
+  discordGuild: DiscordGuild,
+): Promise<AutoModSyncResult | null> {
+  const guild = new Guild(client, discordGuild);
+  const settings = (await guild.get("moderation.auto_moderation")) as AutoModerationSettings;
+  if (!settings) return null;
+
+  const moderationRoles = ((await guild.get("moderation.moderation_roles")) ?? []) as string[];
+  const result = await syncAutoModeration({
+    transport: autoModTransport(client, discordGuild.id),
+    settings,
+    moderationRoles,
+    mode: "apply",
+  });
+
+  if (!result.listError) await guild.set("moderation.auto_moderation.rules", result.rules);
+  return result;
 }
 
 /** Turn a rule off in the settings (the invite and link rules keep their flag in its own column). */

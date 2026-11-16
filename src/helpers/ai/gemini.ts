@@ -1,5 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { AI_API_BASE, AI_MAX_OUTPUT_TOKENS, AI_REQUEST_TIMEOUT_MS, type AiModel } from "./config";
+import { parseJson } from "./json";
+import type { ToolCall, ToolDeclaration } from "./tools/types";
 
 /** An image sent along with a turn, base64 encoded as the API wants it. */
 export interface AiImage {
@@ -17,12 +19,37 @@ export interface AiTurn {
   extra?: string;
 }
 
+/**
+ * One round of tool use that already happened in this request: what the model asked for and what
+ * the tools answered. It is sent back so the model can go on from there.
+ */
+export interface ToolExchange {
+  /** The model's turn exactly as the API returned it (calls, thoughts and their signatures). */
+  modelContent: unknown;
+  responses: { call: ToolCall; response: Record<string, unknown> }[];
+}
+
+export interface GenerateOptions {
+  maxOutputTokens?: number;
+  temperature?: number;
+  /** Functions the model may call instead of answering. */
+  tools?: ToolDeclaration[];
+  /** Earlier rounds of this request, oldest first. */
+  exchanges?: ToolExchange[];
+}
+
 export interface GenerateResult {
   text: string;
   /** Tokens the request used, prompt and answer together. */
   totalTokens: number;
   /** The model could not take the images, so it answered without seeing them. */
   imagesDropped: boolean;
+  /** Functions the model wants run before it answers. Empty when the text is the answer. */
+  calls: ToolCall[];
+  /** The model's turn as the API returned it, to send back with the results of the calls. */
+  modelContent: unknown;
+  /** Tools were asked for, but this model does not take them: it answered without. */
+  toolsDropped: boolean;
 }
 
 export type GeminiFailure =
@@ -49,7 +76,14 @@ const quirks = {
   noSystemInstruction: new Set<string>(),
   /** The model rejected pictures; they are left out and the question says so. */
   noImages: new Set<string>(),
+  /** The model rejected function declarations; it only chats. */
+  noTools: new Set<string>(),
 };
+
+/** Whether a model is known to refuse tools, so the prompt does not promise them. */
+export function modelTakesTools(model: AiModel): boolean {
+  return !quirks.noTools.has(model.id);
+}
 
 /** Added to the question when the pictures had to be left out, so the answer does not pretend. */
 const IMAGES_DROPPED_NOTE =
@@ -81,36 +115,51 @@ function buildBody(
   system: string,
   turns: AiTurn[],
   useThinking: boolean,
-  maxOutputTokens: number,
+  options: GenerateOptions,
 ) {
   const useSystem = !quirks.noSystemInstruction.has(model.id);
   const dropImages = quirks.noImages.has(model.id);
   const normalized = normalizeTurns(turns);
   const hadImages = normalized.some((turn) => turn.images?.length);
 
-  const contents = normalized.map((turn, index) => {
-    const note =
-      dropImages && hadImages && index === normalized.length - 1 ? IMAGES_DROPPED_NOTE : "";
-    return {
-      role: turn.role,
-      parts: [
-        { text: turn.text + (turn.extra ? `\n\n${turn.extra}` : "") + note },
-        ...(dropImages
-          ? []
-          : (turn.images ?? []).map((image) => ({
-              inlineData: { mimeType: image.mimeType, data: image.data },
-            }))),
-      ] as Record<string, unknown>[],
-    };
-  });
+  const contents: { role: string; parts: Record<string, unknown>[] }[] = normalized.map(
+    (turn, index) => {
+      const note =
+        dropImages && hadImages && index === normalized.length - 1 ? IMAGES_DROPPED_NOTE : "";
+      return {
+        role: turn.role,
+        parts: [
+          { text: turn.text + (turn.extra ? `\n\n${turn.extra}` : "") + note },
+          ...(dropImages
+            ? []
+            : (turn.images ?? []).map((image) => ({
+                inlineData: { mimeType: image.mimeType, data: image.data },
+              }))),
+        ] as Record<string, unknown>[],
+      };
+    },
+  );
 
   if (!useSystem && contents.length > 0) {
     contents[0].parts[0].text = `${system}\n\n---\n\n${String(contents[0].parts[0].text)}`;
   }
 
+  const useTools = Boolean(options.tools?.length) && !quirks.noTools.has(model.id);
+  if (useTools) {
+    for (const exchange of options.exchanges ?? []) {
+      contents.push(exchange.modelContent as (typeof contents)[number]);
+      contents.push({
+        role: "user",
+        parts: exchange.responses.map(({ call, response }) => ({
+          functionResponse: { name: call.name, response, ...(call.id ? { id: call.id } : {}) },
+        })),
+      });
+    }
+  }
+
   const generationConfig: Record<string, unknown> = {
-    maxOutputTokens,
-    temperature: 0.9,
+    maxOutputTokens: options.maxOutputTokens ?? AI_MAX_OUTPUT_TOKENS,
+    temperature: options.temperature ?? 0.9,
     topP: 0.95,
   };
   // Chat wants quick answers, so the reasoning phase is switched off where the model allows it.
@@ -120,6 +169,7 @@ function buildBody(
     ...(useSystem ? { systemInstruction: { parts: [{ text: system }] } } : {}),
     contents,
     generationConfig,
+    ...(useTools ? { tools: [{ functionDeclarations: options.tools }] } : {}),
   };
 }
 
@@ -150,42 +200,65 @@ export async function generate(
   model: AiModel,
   system: string,
   turns: AiTurn[],
-  options: { maxOutputTokens?: number } = {},
+  options: GenerateOptions = {},
 ): Promise<GenerateResult> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new GeminiError({ kind: "fatal", status: null, message: "No API key" });
 
-  // A few retries, one for each thing a model may reject: thinking, a system instruction, images.
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const body = buildBody(
-      model,
-      system,
-      turns,
-      !quirks.noThinking.has(model.id),
-      options.maxOutputTokens ?? AI_MAX_OUTPUT_TOKENS,
-    );
+  const wantsTools = Boolean(options.tools?.length);
+
+  // A few retries, one for each thing a model may reject: thinking, a system instruction, images, tools.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const body = buildBody(model, system, turns, !quirks.noThinking.has(model.id), options);
 
     try {
       const { data } = await axios.post(`${AI_API_BASE}/models/${model.id}:generateContent`, body, {
         headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
         timeout: AI_REQUEST_TIMEOUT_MS,
+        // Ids in the arguments of a call must survive as written, see `parseJson`.
+        transformResponse: (raw) => {
+          if (typeof raw !== "string") return raw;
+          try {
+            return parseJson(raw);
+          } catch {
+            return raw;
+          }
+        },
       });
 
       const candidate = data?.candidates?.[0];
+      const parts: any[] = candidate?.content?.parts ?? [];
       // Parts marked as thoughts are the model's reasoning, not part of the answer.
       const text = String(
-        (candidate?.content?.parts ?? [])
+        parts
           .filter((part: any) => !part?.thought && typeof part?.text === "string")
           .map((part: any) => part.text)
           .join(""),
       ).trim();
 
-      if (!text) throw new GeminiError({ kind: "blocked" });
+      const toolsDropped = wantsTools && quirks.noTools.has(model.id);
+      const calls: ToolCall[] = toolsDropped
+        ? []
+        : parts
+            .filter((part: any) => typeof part?.functionCall?.name === "string")
+            .map((part: any) => ({
+              name: part.functionCall.name,
+              args:
+                part.functionCall.args && typeof part.functionCall.args === "object"
+                  ? part.functionCall.args
+                  : {},
+              ...(part.functionCall.id ? { id: String(part.functionCall.id) } : {}),
+            }));
+
+      if (!text && calls.length === 0) throw new GeminiError({ kind: "blocked" });
 
       return {
         text,
         totalTokens: Number(data?.usageMetadata?.totalTokenCount ?? 0),
         imagesDropped: quirks.noImages.has(model.id) && turns.some((turn) => turn.images?.length),
+        calls,
+        modelContent: { role: "model", parts },
+        toolsDropped,
       };
     } catch (error) {
       if (error instanceof GeminiError) throw error;
@@ -208,6 +281,15 @@ export async function generate(
           !quirks.noSystemInstruction.has(model.id)
         ) {
           quirks.noSystemInstruction.add(model.id);
+          continue;
+        }
+        if (wantsTools && /function|tool/i.test(message) && !quirks.noTools.has(model.id)) {
+          // Either this model has no function calling or it refuses our declarations. The bot
+          // goes on as a plain chat, and the log says why the tools are gone.
+          console.warn(
+            `[AI] ${model.id} does not accept tools, continuing without: ${message}`.yellow,
+          );
+          quirks.noTools.add(model.id);
           continue;
         }
         if (

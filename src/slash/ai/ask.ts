@@ -1,14 +1,22 @@
 import { SlashCommand } from "../../types/helpers";
-import { ChatInputCommandInteraction, Client, MessageFlagsBitField } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  Client,
+  MessageFlagsBitField,
+  PermissionFlagsBits,
+} from "discord.js";
 import { defaultPermissions, Guild } from "../../helpers";
 import { t } from "../../i18n/helpers";
 import {
+  answerText,
   chat,
+  createToolRuntime,
   describeFailure,
   hasAiAccess,
   isAiConfigured,
   loadAiSettings,
   markAiReply,
+  planAttachment,
   prepareAttachments,
   splitReply,
   usableAttachments,
@@ -87,7 +95,24 @@ module.exports = {
 
     await interaction.deferReply();
 
-    const member = interaction.guild.members.cache.get(interaction.user.id);
+    const member =
+      interaction.guild.members.cache.get(interaction.user.id) ??
+      (await interaction.guild.members.fetch(interaction.user.id).catch(() => null));
+
+    // As in chat: an administrator may ask for changes, which then wait for their confirmation.
+    const tools =
+      member &&
+      settings.options.actions &&
+      member.permissions.has(PermissionFlagsBits.Administrator)
+        ? createToolRuntime({
+            client,
+            discordGuild: interaction.guild,
+            guild,
+            member,
+            channelId: channel.id,
+            lang,
+          })
+        : null;
     const text = interaction.options.getString("message", true);
 
     // A picture or a file given to the command; the server may have either switched off.
@@ -115,6 +140,7 @@ module.exports = {
       ...prepared,
       lang,
       settings,
+      tools,
     });
 
     if (!result.ok) {
@@ -123,15 +149,26 @@ module.exports = {
       return interaction.followUp({ content: notice, flags: MessageFlagsBitField.Flags.Ephemeral });
     }
 
-    const [first, ...rest] = splitReply(result.text).slice(0, prepared.files.length > 0 ? 4 : 2);
+    const chunks = splitReply(answerText(client, lang, result.text, result.plan)).slice(
+      0,
+      prepared.files.length > 0 ? 4 : 2,
+    );
     const options = { allowedMentions: { parse: [] as never[] } };
+    const confirmation = await planAttachment(client, lang, result.plan, {
+      guildId: interaction.guild.id,
+      userId: interaction.user.id,
+      channelId: channel.id,
+    });
 
-    const sent = await interaction.editReply({ content: first, ...options });
-    await markAiReply(sent.id);
-
-    for (const chunk of rest) {
-      const followUp = await interaction.followUp({ content: chunk, ...options });
-      await markAiReply(followUp.id);
+    for (const [index, chunk] of chunks.entries()) {
+      const payload = {
+        content: chunk,
+        ...options,
+        ...(index === chunks.length - 1 && confirmation ? confirmation : {}),
+      };
+      const sent =
+        index === 0 ? await interaction.editReply(payload) : await interaction.followUp(payload);
+      await markAiReply(sent.id);
     }
   },
 } as SlashCommand;

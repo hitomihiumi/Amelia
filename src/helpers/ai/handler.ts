@@ -15,6 +15,7 @@ import { prepareAttachments, usableAttachments } from "./attachments";
 import type { AttachmentInfo } from "./images";
 import { shouldNotify } from "./limiter";
 import { clip, isAiReply, markAiReply } from "./memory";
+import { createToolRuntime, mentionNotes, type Plan, planMessage, storePlan } from "./tools";
 
 /** At most this many messages for one answer; the rest is cut. A review of code gets more room. */
 const MAX_REPLY_MESSAGES = 2;
@@ -102,6 +103,31 @@ function attachmentsOf(message: Message): AttachmentInfo[] {
   }));
 }
 
+/**
+ * The confirmation that goes under an answer with a plan: an embed with what will change and the
+ * two buttons. Returns nothing when the plan could not be kept, and then nothing was promised.
+ */
+export async function planAttachment(
+  client: Client,
+  lang: string,
+  plan: Plan | null,
+  owner: { guildId: string; userId: string; channelId: string },
+) {
+  if (!plan) return null;
+  try {
+    const stored = await storePlan(plan, owner);
+    return planMessage(client, lang, plan, stored, owner.userId);
+  } catch (error) {
+    console.error("[AI] Could not keep a plan:".red, error);
+    return null;
+  }
+}
+
+/** The words of an answer; a plan the model sent without a word gets a line of its own. */
+export function answerText(client: Client, lang: string, text: string, plan: Plan | null): string {
+  return sanitizeReply(text) || (plan ? t(client, lang, "ai.actions.fallback_text") : "");
+}
+
 async function react(message: Message, emoji: string) {
   await message.react(emoji).catch(() => null);
 }
@@ -163,6 +189,24 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
 
   const lang = (await guild.get("settings.language")) as string;
 
+  // An administrator may ask for changes; for everyone else the AI stays a chat. The check is
+  // made here, on the member who wrote the message, and again when a plan is confirmed.
+  const canAct =
+    settings.options.actions && message.member.permissions.has(PermissionFlagsBits.Administrator);
+  const tools = canAct
+    ? createToolRuntime(
+        {
+          client,
+          discordGuild: message.guild,
+          guild,
+          member: message.member,
+          channelId: channel.id,
+          lang,
+        },
+        mentionNotes(message, client.user.id),
+      )
+    : null;
+
   // The model can take a while: keep the typing indicator alive until it answers.
   const sendTyping = () => channel.sendTyping().catch(() => null);
   void sendTyping();
@@ -192,6 +236,7 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
       ...prepared,
       lang,
       settings,
+      tools,
     });
   } finally {
     clearInterval(typing);
@@ -213,25 +258,32 @@ export async function handleAiMessage(client: Client, message: Message, guild: G
     return true;
   }
 
-  const chunks = splitReply(sanitizeReply(result.text)).slice(
+  const chunks = splitReply(answerText(client, lang, result.text, result.plan)).slice(
     0,
     hadFiles ? MAX_REPLY_MESSAGES_CODE : MAX_REPLY_MESSAGES,
   );
   const options = { allowedMentions: { parse: [], repliedUser: false } } as const;
+  // What the AI prepared goes under the last part of the answer, with the buttons to confirm it.
+  const confirmation = await planAttachment(client, lang, result.plan, {
+    guildId: message.guild.id,
+    userId: message.author.id,
+    channelId: channel.id,
+  });
 
-  const send = (content: string): Promise<Message | null> =>
-    channel.send({ content, ...options }).catch(() => null);
+  const send = (content: string, extra: object): Promise<Message | null> =>
+    channel.send({ content, ...options, ...extra }).catch(() => null);
 
-  const sendFirst = async (content: string): Promise<Message | null> => {
+  const sendFirst = async (content: string, extra: object): Promise<Message | null> => {
     try {
-      return await message.reply({ content, ...options, failIfNotExists: false });
+      return await message.reply({ content, ...options, ...extra, failIfNotExists: false });
     } catch {
-      return send(content);
+      return send(content, extra);
     }
   };
 
   for (const [index, chunk] of chunks.entries()) {
-    const sent = index === 0 ? await sendFirst(chunk) : await send(chunk);
+    const extra = index === chunks.length - 1 && confirmation ? confirmation : {};
+    const sent = index === 0 ? await sendFirst(chunk, extra) : await send(chunk, extra);
     if (sent) await markAiReply(sent.id);
   }
 

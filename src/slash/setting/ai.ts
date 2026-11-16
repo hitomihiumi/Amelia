@@ -50,6 +50,7 @@ const OPTION_KEYS = [
   "long_term",
   "images",
   "code",
+  "actions",
 ] as const satisfies (keyof AiOptions)[];
 
 function channelList(client: Client, lang: string, ids: string[]): string {
@@ -166,6 +167,10 @@ function buildComponents(client: Client, lang: string, settings: AiSettings, gui
       .setCustomId("NI_ai:limits")
       .setStyle(ButtonStyle.Secondary)
       .setLabel(t(client, lang, "ai.setting.buttons.limits")),
+    new ButtonBuilder()
+      .setCustomId("NI_ai:memory_clear")
+      .setStyle(ButtonStyle.Danger)
+      .setLabel(t(client, lang, "ai.setting.buttons.memory_clear")),
   );
 
   const model = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
@@ -196,7 +201,7 @@ function buildComponents(client: Client, lang: string, settings: AiSettings, gui
     return new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(menu);
   };
 
-  // What the AI may do besides answering: one switch for each, and a way to wipe the notes.
+  // What the AI may do besides answering: one switch for each (a row holds five buttons).
   const options = new ActionRowBuilder<ButtonBuilder>().addComponents(
     ...OPTION_KEYS.map((key) =>
       new ButtonBuilder()
@@ -204,10 +209,6 @@ function buildComponents(client: Client, lang: string, settings: AiSettings, gui
         .setStyle(settings.options[key] ? ButtonStyle.Success : ButtonStyle.Secondary)
         .setLabel(t(client, lang, `ai.setting.options.${key}`)),
     ),
-    new ButtonBuilder()
-      .setCustomId("NI_ai:memory_clear")
-      .setStyle(ButtonStyle.Danger)
-      .setLabel(t(client, lang, "ai.setting.buttons.memory_clear")),
   );
 
   return [

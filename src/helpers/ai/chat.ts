@@ -1,7 +1,20 @@
 import { type AiSettings, clampLimits } from "../../types/helpers";
-import { AI_MAX_OUTPUT_TOKENS_CODE, modelOrder, type AiModel } from "./config";
+import {
+  AI_MAX_OUTPUT_TOKENS_CODE,
+  AI_MAX_OUTPUT_TOKENS_TOOLS,
+  AI_MAX_TOOL_ROUNDS,
+  modelOrder,
+  type AiModel,
+} from "./config";
 import { type CodeFile, formatCodeFiles } from "./files";
-import { GeminiError, generate, type AiImage } from "./gemini";
+import {
+  GeminiError,
+  generate,
+  modelTakesTools,
+  type AiImage,
+  type GenerateOptions,
+  type ToolExchange,
+} from "./gemini";
 import { sanitizeReply } from "./format";
 import { getAiConfig, hasAiAccess } from "./globalConfig";
 import { forgetFact, recall, rememberFact, type Recalled } from "./longTerm";
@@ -17,6 +30,7 @@ import {
 } from "./limiter";
 import { loadMemory, type MemoryTurn, remember, userTurn } from "./memory";
 import { buildSystemPrompt, languageName } from "./persona";
+import type { Plan, ToolRuntime } from "./tools/types";
 
 export interface AiChatRequest {
   guildId: string;
@@ -44,15 +58,23 @@ export interface AiChatRequest {
   /** Language code of the server. */
   lang: string;
   settings: Pick<AiSettings, "model" | "persona" | "limits" | "options">;
+  /**
+   * Tools to act on the server with. Only given when the member is an administrator; the caller
+   * is the one who knows. Left out, the AI only chats.
+   */
+  tools?: ToolRuntime | null;
 }
 
 export type AiChatResult =
   | {
       ok: true;
+      /** The answer. It can be empty when there is a plan to show instead. */
       text: string;
       model: AiModel;
       /** Notes about the member that were stored or updated by this answer. */
       remembered: number;
+      /** Changes the AI prepared with its tools. They wait for the administrator to confirm them. */
+      plan: Plan | null;
     }
   /** The AI chat is a premium feature and the server has no active premium. */
   | { ok: false; reason: "premium" }
@@ -138,6 +160,19 @@ async function applyNotes(
   return changed;
 }
 
+/** Calls of one answer that are run; a model that sends more is told to send the rest later. */
+const MAX_CALLS_PER_ROUND = 8;
+
+/**
+ * What the channel remembers of an answer. A plan is part of it, so "make it 10 instead" a
+ * minute later still has something to refer to.
+ */
+function memoryOf(text: string, plan: Plan | null): string {
+  if (!plan) return text;
+  const lines = plan.steps.flatMap((step) => step.lines).slice(0, 12);
+  return `${text}\n[queued for the administrator's confirmation, not applied yet: ${lines.join("; ")}]`.trim();
+}
+
 /**
  * One AI exchange, start to finish: limits, model choice with fallback, the call
  * and the conversation memory. Both the message handler and `/ai ask` go through it.
@@ -175,52 +210,142 @@ export async function chat(request: AiChatRequest): Promise<AiChatResult> {
 
     const images = imagesOn ? (request.images ?? []) : [];
     const files = codeOn ? (request.files ?? []) : [];
-    const system = buildSystemPrompt({
-      guildName: request.guildName,
-      channelName: request.channelName,
-      languageName: languageName(request.lang),
-      serverPersona: settings.persona,
-      longTermMemory: longTerm,
-      recalled,
-      speakerName: request.userName,
-      hasImages: images.length > 0,
-      hasFiles: files.length > 0,
-    });
+    const runtime = request.tools ?? null;
+
+    // The prompt promises tools only when the request really carries them.
+    const promptFor = (canAct: boolean) =>
+      buildSystemPrompt({
+        guildName: request.guildName,
+        channelName: request.channelName,
+        languageName: languageName(request.lang),
+        serverPersona: settings.persona,
+        longTermMemory: longTerm,
+        recalled,
+        speakerName: request.userName,
+        hasImages: images.length > 0,
+        hasFiles: files.length > 0,
+        canAct,
+      });
     const userMessage = turnFor({ ...request, images, files });
-    // The files travel with this message only: they are not part of what the channel remembers.
-    const turns = [...recent, { ...userMessage, images, extra: formatCodeFiles(files) }];
-    const generateOptions = files.length > 0 ? { maxOutputTokens: AI_MAX_OUTPUT_TOKENS_CODE } : {};
+    // The files and the ids behind mentions travel with this message only: they are not part of
+    // what the channel remembers.
+    const turnsFor = (canAct: boolean) => [
+      ...recent,
+      {
+        ...userMessage,
+        images,
+        extra: [formatCodeFiles(files), canAct ? runtime?.notes : null]
+          .filter(Boolean)
+          .join("\n\n"),
+      },
+    ];
+    const baseOptions: GenerateOptions =
+      files.length > 0 ? { maxOutputTokens: AI_MAX_OUTPUT_TOKENS_CODE } : {};
+    const toolOptions: GenerateOptions = {
+      maxOutputTokens: Math.max(AI_MAX_OUTPUT_TOKENS_TOOLS, baseOptions.maxOutputTokens ?? 0),
+      // Calls have to be exact; the chat around them can stay lively.
+      temperature: 0.6,
+    };
 
     let failure: "quota" | "unavailable" = "quota";
     let reachedModel = false;
 
     for (const model of modelOrder(settings.model)) {
-      const slot = await takeModelSlot(model.key);
+      let slot = await takeModelSlot(model.key);
       if (!slot) continue;
 
-      try {
-        const result = await generate(model, system, turns, generateOptions);
-        // The markers are taken out of every answer, whether or not this server keeps notes.
-        const markers = extractMarkers(result.text);
-        const text = sanitizeReply(markers.text);
-        reachedModel = true;
+      // Every model starts with a clean plan: what an earlier one queued is not carried over.
+      let session = runtime && modelTakesTools(model) ? runtime.start() : null;
+      const exchanges: ToolExchange[] = [];
+      let answer = "";
+      // The model could not finish (no quota left for another round): show what it queued so far.
+      let cutShort = false;
 
-        await recordTokens(model.key, result.totalTokens);
-        if (!text) return { ok: false, reason: "blocked" };
+      try {
+        for (let round = 1; ; round++) {
+          const result = await generate(
+            model,
+            promptFor(session !== null),
+            turnsFor(session !== null),
+            session ? { ...toolOptions, tools: session.declarations, exchanges } : baseOptions,
+          );
+          reachedModel = true;
+          await recordTokens(model.key, result.totalTokens);
+
+          if (session && result.toolsDropped) {
+            // The model turned out not to take tools, and answered a prompt that promised them.
+            // Ask again as plain chat, so it does not claim to have prepared anything.
+            session = null;
+            exchanges.length = 0;
+            slot = await takeModelSlot(model.key);
+            if (!slot) {
+              cutShort = true;
+              break;
+            }
+            continue;
+          }
+
+          answer = result.text;
+          if (!session || result.calls.length === 0) break;
+
+          const responses: ToolExchange["responses"] = [];
+          for (const [index, call] of result.calls.entries()) {
+            responses.push({
+              call,
+              response:
+                index < MAX_CALLS_PER_ROUND
+                  ? await session.execute(call)
+                  : { error: "too many calls at once, send the rest in the next step" },
+            });
+          }
+          exchanges.push({ modelContent: result.modelContent, responses });
+
+          if (round >= AI_MAX_TOOL_ROUNDS) {
+            cutShort = true;
+            break;
+          }
+          // Every round is a request of its own against the quota of the key.
+          slot = await takeModelSlot(model.key);
+          if (!slot) {
+            cutShort = true;
+            break;
+          }
+        }
+
+        const plan = session ? await session.plan() : null;
+        // The markers are taken out of every answer, whether or not this server keeps notes.
+        const markers = extractMarkers(answer);
+        const text = sanitizeReply(markers.text);
+
+        if (!text && !plan) {
+          if (!cutShort) return { ok: false, reason: "blocked" };
+          // This model ran out of quota or rounds with nothing to show: the next one may manage.
+          failure = "quota";
+          continue;
+        }
 
         const remembered = longTerm
           ? await applyNotes(guildId, userId, markers.remember, markers.forget)
           : 0;
-        if (shortTerm) await remember(channelId, userMessage, text);
-        return { ok: true, text, model, remembered };
+        if (shortTerm) await remember(channelId, userMessage, memoryOf(text, plan));
+        return { ok: true, text, model, remembered, plan };
       } catch (error) {
         if (!(error instanceof GeminiError)) {
           console.error("[AI] Unexpected error:".red, error);
-          await slot.refund();
+          await slot?.refund();
           return { ok: false, reason: "error" };
         }
 
         const { failure: cause } = error;
+
+        // A later round failed, but the earlier ones already queued something worth showing.
+        const plan = session && exchanges.length > 0 ? await session.plan() : null;
+        if (plan && cause.kind !== "fatal") {
+          if (cause.kind === "quota") await coolDownModel(model.key, cause.retryAfter);
+          if (shortTerm) await remember(channelId, userMessage, memoryOf("", plan));
+          return { ok: true, text: "", model, remembered: 0, plan };
+        }
+
         if (cause.kind === "quota") {
           // The key's real limit is lower than the bot's own ceiling: stop using the model for a while.
           await coolDownModel(model.key, cause.retryAfter);

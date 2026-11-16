@@ -73,4 +73,11 @@ export const AI_MAX_INPUT_CHARS = 1500;
 export const AI_MAX_OUTPUT_TOKENS = envInt("AI_MAX_OUTPUT_TOKENS", 700);
 /** A review of attached code needs more room than chat does. */
 export const AI_MAX_OUTPUT_TOKENS_CODE = envInt("AI_MAX_OUTPUT_TOKENS_CODE", 1800);
+/** Calling a tool takes room too: a whole embed or scenario travels as the arguments of a call. */
+export const AI_MAX_OUTPUT_TOKENS_TOOLS = envInt("AI_MAX_OUTPUT_TOKENS_TOOLS", 2000);
+/**
+ * Requests to a model one message of an administrator may take when it uses tools: every round of
+ * calls is a request of its own against the per-minute quota of the key.
+ */
+export const AI_MAX_TOOL_ROUNDS = envInt("AI_MAX_TOOL_ROUNDS", 6);
 export const AI_REQUEST_TIMEOUT_MS = envInt("AI_REQUEST_TIMEOUT_MS", 45000);

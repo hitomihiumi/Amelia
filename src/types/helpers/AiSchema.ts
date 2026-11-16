@@ -37,6 +37,11 @@ export interface AiOptions {
   images: boolean;
   /** Read code and text files attached to messages, to explain or review them. */
   code: boolean;
+  /**
+   * Let a server administrator ask the bot in chat to change settings, moderate and manage custom
+   * components. Nothing is applied before that administrator confirms it with a button.
+   */
+  actions: boolean;
 }
 
 export const DEFAULT_AI_OPTIONS: AiOptions = {
@@ -44,6 +49,7 @@ export const DEFAULT_AI_OPTIONS: AiOptions = {
   long_term: true,
   images: true,
   code: true,
+  actions: true,
 };
 
 /** Read stored options, with anything missing or not a boolean taken from the defaults. */
@@ -56,6 +62,7 @@ export function normalizeAiOptions(raw: unknown): AiOptions {
     long_term: pick("long_term"),
     images: pick("images"),
     code: pick("code"),
+    actions: pick("actions"),
   };
 }
 

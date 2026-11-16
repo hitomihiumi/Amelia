@@ -49,6 +49,8 @@ out personally.
 | `AI_MAX_FILE_BYTES` | `204800` | Largest single code file, in bytes. |
 | `AI_MAX_CODE_CHARS` | `30000` | Characters of code sent per message, all files together. |
 | `AI_MAX_OUTPUT_TOKENS_CODE` | `1800` | Longest answer when files are attached, in tokens. |
+| `AI_MAX_OUTPUT_TOKENS_TOOLS` | `2000` | Room for an answer when the AI may act for an administrator (a whole embed or scenario travels inside a call). |
+| `AI_MAX_TOOL_ROUNDS` | `6` | Requests to a model one message of an administrator may take while it uses tools. |
 | `AI_MAX_IMAGES` | `3` | Pictures looked at per message. |
 | `AI_MAX_IMAGE_BYTES` | `4194304` | Largest single picture, in bytes. |
 | `AI_REQUEST_TIMEOUT_MS` | `45000` | How long to wait for the API. |
@@ -68,9 +70,11 @@ lives in the admin panel (below), the environment variables are only the startin
 - `/ai ask` works everywhere the AI is not ignored.
 
 A mention that starts with a prefix command (`@Amelia somecommand`) still runs the command; text
-that is not a command goes to the AI. Channels in the *ignored* list never get an answer. The AI
-only **chats**: it has no tools and cannot moderate, change settings or ping anyone (answers are
-sent with mentions switched off and `@everyone`/`@here` are defused).
+that is not a command goes to the AI. Channels in the *ignored* list never get an answer. For
+everyone but a server administrator the AI only **chats**: it has no tools and cannot moderate or
+change settings. It never pings anyone (answers are sent with mentions switched off and
+`@everyone`/`@here` are defused). What it can do for an administrator is described under
+[Actions](#actions-for-administrators).
 
 ## Personality
 
@@ -228,11 +232,75 @@ to, and `/ai ask` has a `file` option. A file without a word is answered when it
   Google's Gemini API with the message, like everything else the bot is asked about, so do not enable it
   for private code.
 
+## Actions for administrators
+
+A member with the **Administrator** permission can ask the bot, in plain words, to do things on the
+server: "turn levels on and announce them in #levels", "mute Troll for two hours for spam", "make an
+embed with the rules and a button, and post it in #rules". The switch is *Admin actions* in
+`/setting ai` and in the dashboard, on by default.
+
+**Nothing happens until the administrator confirms it.** The AI only prepares a plan. The plan is
+shown under its answer as an embed (what was → what will be) with **Apply** and **Cancel**:
+
+- Only the administrator who asked can press the buttons, and they must still be an administrator
+  (and the switch still on, premium still active) when they do.
+- A plan waits 15 minutes and runs once.
+- Everything is checked twice: when the plan is made and again when it is applied, since the server
+  may have changed in between. A step that fails does not stop the others; the embed then shows what
+  worked and what did not.
+- Members without the permission get the plain chat: the model is not even given the tools.
+
+That confirmation is also the protection against text that tries to steer the bot (a pasted message, a
+file, a memory note): whatever the model was talked into, the administrator sees the exact change
+before it is made.
+
+### What it can do
+
+| | |
+| --- | --- |
+| **Settings** | Everything `/setting …` and the dashboard configure: prefix and language, the AI chat itself, levels and level roles, the level-up announcement, economy (currency sign, work, timely, daily, weekly, bump, rob, slots), the role shop, private voice rooms, moderator roles, moderation log, warn escalation, every auto moderation rule (they are synced to Discord's AutoMod when applied), report and appeal forms, the audit log and its events, the find-a-team panel, the banner's schedule, and which roles may use which command. |
+| **Moderation** | `warn`, `mute`, `kick`, `ban`, `unmute`, `unban`, `unwarn`, `note`, `purge`, `slowmode`. They go through the same service as `/mod`: a numbered case, the log, the DM, warn escalation. The administrator is the moderator of the case and their place in the role hierarchy is what counts. |
+| **Custom components** | Create, change and delete embeds, buttons, select menus, modals and scenarios, and post a message made of them (or a layout) to a channel. The checks are the ones the dashboard's builder runs. |
+
+Left out on purpose: premium, the case counters, the ids of the AutoMod rules. Still done in the
+dashboard or with the commands: drawing a banner, building a Components V2 layout, the list of games of
+the find-a-team panel and posting that panel, the default permission of a command.
+
+### How it works
+
+The Gemini API's function calling: the model answers with calls instead of text, the bot runs them
+and sends the results back, until the model writes its answer.
+
+| Tool | |
+| --- | --- |
+| `settings_get` | The keys of one section, what each accepts and its current value. |
+| `settings_set` | Queue changes: `set`, or `add` / `remove` for lists and maps. Channels and roles may be names. |
+| `find` | Look up channels, roles, members and command names. |
+| `moderate` | Queue a moderation action. |
+| `components_list`, `component_get` | What exists, and the JSON format of a kind. |
+| `component_save`, `component_delete` | Queue creating, changing or deleting a component. |
+| `message_send` | Queue posting a message made of components. |
+
+Reading tools answer at once; everything that changes something only adds a step to the plan.
+A component queued in a turn already has its id, so the same turn can use it (a scenario triggered by
+a button that does not exist yet, then a message with that button).
+
+- **Quota.** Every round of calls is a request of its own against the per-minute quota of the model,
+  and carries the tool descriptions (about 2,400 tokens with the prompt). A typical request ("change
+  these settings") takes three: read the section, queue the changes, answer. It counts as **one**
+  message against the limits of the member and the server. If the quota runs out half way, what was
+  queued so far is still shown.
+- **A model without function calling.** If the API refuses the tools for a model, the bot remembers it
+  until the restart, says so in the log and answers as a plain chat, without pretending.
+- **The settings the AI knows** are listed in `src/helpers/ai/tools/settings.ts`: path, allowed values,
+  rules that span several settings. A setting that is not in that list cannot be touched, so a new
+  setting has to be added there to become available.
+
 ## Commands
 
 | Command | Who | |
 | --- | --- | --- |
-| `/setting ai` | Administrators | Turn the chat on or off, model, chat and ignored channels, personality, limits, memory, picture and code file switches, forget all notes. |
+| `/setting ai` | Administrators | Turn the chat on or off, model, chat and ignored channels, personality, limits, memory, picture, code file and admin action switches, forget all notes. |
 | `/ai ask <message> [image] [file]` | Everyone | Talk to the bot with a command, optionally with a picture or a code file. |
 | `/ai memory` | Everyone | See what the bot remembers about you, delete one note or all. |
 | `/ai usage` | Everyone | Own usage of the limits. |
@@ -254,4 +322,11 @@ to, and `/ai ask` has a `file` option. A file without a word is answered when it
 | `src/helpers/ai/images.ts` | Picking and downloading pictures. |
 | `src/helpers/ai/files.ts` | Code files: recognising, downloading, redacting secrets, numbering lines. |
 | `src/helpers/ai/attachments.ts` | Sorts the attachments of a message into pictures and files. |
+| `src/helpers/ai/tools/session.ts` | The tools an administrator's message gives the model. |
+| `src/helpers/ai/tools/settings.ts` | Every setting the AI may read and change, and the rules for them. |
+| `src/helpers/ai/tools/spec.ts` | Checking values: names to ids, ranges, lists, nested objects. |
+| `src/helpers/ai/tools/components.ts` | Custom components: checks, saving, sending. |
+| `src/helpers/ai/tools/moderation.ts` | Moderation actions. |
+| `src/helpers/ai/tools/plan.ts` | The plan: kept in Redis, shown with buttons, applied. |
+| `src/components/buttons/ai_plan.ts` | The Apply and Cancel buttons. |
 | `src/types/helpers/AiSchema.ts` | Settings type, mirrored in the dashboard (`src/lib/db/types/Ai.ts`). |
